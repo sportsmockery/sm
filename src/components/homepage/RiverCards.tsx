@@ -1,11 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import {
-  MessageCircle, Share, Activity,
+  MessageCircle, Share, Eye,
   TrendingUp, Play, Clock, Check, X, ChevronRight,
   BarChart3, Users
 } from "lucide-react"
@@ -83,14 +83,14 @@ function CardLabel({ label, isBreaking = false }: { label: string; isBreaking?: 
   )
 }
 
-// Shared engagement row — reactions + comment + share
+// Shared engagement row — reactions + play + comment + views + share
 // Reactions use real data from props. When no DB-backed reaction data exists yet,
 // counts will be 0 — this is intentional (no fake numbers).
 function EngagementRow({ stats, articleUrl }: { stats: { comments: number; retweets: number; likes: number; views: string }; articleUrl?: string }) {
   const [reactions, setReactions] = useState<Record<string, boolean>>({})
-  const [counts, setCounts] = useState({ smart: stats.likes, hot: stats.retweets, bad: stats.comments })
+  const [counts, setCounts] = useState({ smart: stats.likes, hot: stats.retweets })
 
-  const toggle = (key: "smart" | "hot" | "bad") => {
+  const toggle = (key: "smart" | "hot") => {
     setReactions(prev => ({ ...prev, [key]: !prev[key] }))
     setCounts(prev => ({ ...prev, [key]: prev[key] + (reactions[key] ? -1 : 1) }))
   }
@@ -107,8 +107,9 @@ function EngagementRow({ stats, articleUrl }: { stats: { comments: number; retwe
   const reactionButtons = [
     { key: "smart" as const, emoji: "\uD83D\uDC4D", label: "Smart Take", count: counts.smart },
     { key: "hot" as const, emoji: "\uD83D\uDD25", label: "Hot", count: counts.hot },
-    { key: "bad" as const, emoji: "\uD83D\uDC4E", label: "Bad Take", count: counts.bad },
   ]
+
+  const listenUrl = articleUrl ? `${articleUrl}${articleUrl.includes('?') ? '&' : '?'}listen=true` : null
 
   return (
     <div className="mt-5 flex items-center justify-between" style={{ color: 'var(--hp-muted-foreground)' }}>
@@ -124,15 +125,18 @@ function EngagementRow({ stats, articleUrl }: { stats: { comments: number; retwe
             <span style={{ fontSize: 12, fontWeight: reactions[key] ? 600 : 400 }}>{count}</span>
           </button>
         ))}
-        {stats.views && stats.views !== '0' && (
-          <span className="flex items-center gap-1" style={{ fontSize: 12 }}>
-            <Activity className="h-3.5 w-3.5" />
-            {stats.views}
-          </span>
+        {listenUrl && (
+          <Link
+            href={listenUrl}
+            className="group flex items-center gap-1 rounded-full px-2.5 py-1.5 transition-all hp-tap-target hover:bg-[rgba(0,0,0,0.04)] dark:hover:bg-[rgba(255,255,255,0.04)] hover:text-[#00D4FF]"
+            aria-label="Play article"
+          >
+            <Play className="h-3.5 w-3.5" style={{ color: 'inherit' }} />
+          </Link>
         )}
       </div>
 
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-2">
         {articleUrl ? (
           <Link href={articleUrl} className="group flex items-center gap-1 transition-colors hover:text-[#00D4FF] hp-tap-target" aria-label="Comments">
             <div className="rounded-full p-2 group-hover:bg-[#00D4FF]/10 transition-colors">
@@ -146,6 +150,14 @@ function EngagementRow({ stats, articleUrl }: { stats: { comments: number; retwe
               <MessageCircle className="h-4 w-4" />
             </div>
             <span style={{ fontSize: 12 }}>{stats.comments}</span>
+          </span>
+        )}
+        {stats.views && stats.views !== '0' && (
+          <span className="flex items-center gap-1 hp-tap-target" style={{ fontSize: 12 }}>
+            <div className="rounded-full p-2">
+              <Eye className="h-4 w-4" />
+            </div>
+            {stats.views}
           </span>
         )}
         <button onClick={handleShare} className="rounded-full p-2 transition-colors hover:bg-[#00D4FF]/10 hover:text-[#00D4FF] hp-tap-target" aria-label="Share">
@@ -674,9 +686,41 @@ interface ScoutSummaryCardProps extends BaseCardProps {
 export function ScoutSummaryCard({ summary, bullets, topic, team, teamColor, timestamp, slug, categorySlug }: ScoutSummaryCardProps) {
   const teamHex = teamColor
   const router = useRouter()
-  const [expanded, setExpanded] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
 
   const articleHref = slug && categorySlug ? `/${categorySlug}/${slug}` : null
+
+  const handleScoutPlay = () => {
+    if (!bullets || bullets.length === 0) return
+
+    // Build query with bullets as repeated b= params
+    const params = new URLSearchParams()
+    bullets.forEach((b) => {
+      params.append('b', b)
+    })
+
+    const url = `/api/audio/scout-insight?${params.toString()}`
+
+    // Stop any existing playback
+    if (audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current.src = ''
+    }
+
+    const audio = new Audio(url)
+    audioRef.current = audio
+    setIsPlaying(true)
+    audio.onended = () => {
+      setIsPlaying(false)
+    }
+    audio.onerror = () => {
+      setIsPlaying(false)
+    }
+    audio.play().catch(() => {
+      setIsPlaying(false)
+    })
+  }
 
   return (
     <article className="hp-feed-card hp-card-enter">
@@ -690,20 +734,34 @@ export function ScoutSummaryCard({ summary, bullets, topic, team, teamColor, tim
       </div>
 
       <p className="mb-2" style={{ fontSize: 12, fontWeight: 500, color: 'var(--hp-muted-foreground)' }}>Summary: {topic}</p>
-      <p style={{
-        fontSize: 17,
-        lineHeight: 1.5,
-        fontWeight: 500,
-        color: 'var(--hp-foreground)',
-        ...(!expanded ? {
+      <p
+        style={{
+          fontSize: 17,
+          lineHeight: 1.5,
+          fontWeight: 500,
+          color: 'var(--hp-foreground)',
           overflow: 'hidden',
           display: '-webkit-box',
           WebkitLineClamp: 4,
           WebkitBoxOrient: 'vertical' as const,
-        } : {}),
-      }}>{summary}</p>
+        }}
+      >
+        {summary}
+        {articleHref && (
+          <>
+            {' '}
+            <Link
+              href={articleHref}
+              className="hp-tap-target transition-colors hover:opacity-80"
+              style={{ fontSize: 13, fontWeight: 500, color: '#0891b2', textDecoration: 'none', whiteSpace: 'nowrap' }}
+            >
+              Read article
+            </Link>
+          </>
+        )}
+      </p>
 
-      {expanded && (
+      {bullets.length > 0 && (
         <div className="mt-4 rounded-2xl p-4" style={{ background: 'var(--hp-muted)', border: '1px solid var(--hp-border)' }}>
           <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--hp-muted-foreground)' }}>Key Insights</span>
           <ul className="mt-2.5 space-y-2">
@@ -717,45 +775,30 @@ export function ScoutSummaryCard({ summary, bullets, topic, team, teamColor, tim
         </div>
       )}
 
-      {!expanded && bullets.length > 0 && (
-        <div className="mt-4 rounded-2xl p-4" style={{ background: 'var(--hp-muted)', border: '1px solid var(--hp-border)' }}>
-          <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--hp-muted-foreground)' }}>Key Insights</span>
-          <ul className="mt-2.5 space-y-2">
-            {bullets.slice(0, 2).map((bullet, i) => (
-              <li key={i} className="flex items-start gap-2.5" style={{ fontSize: 14, color: 'var(--hp-foreground)', opacity: 0.8 }}>
-                <span className="mt-1.5 h-1.5 w-1.5 rounded-full flex-shrink-0" style={{ background: '#06b6d4' }} />
-                {bullet}
-              </li>
-            ))}
-            {bullets.length > 2 && (
-              <li style={{ fontSize: 13, color: 'var(--hp-muted-foreground)', paddingLeft: 14 }}>
-                +{bullets.length - 2} more insight{bullets.length - 2 > 1 ? 's' : ''}
-              </li>
-            )}
-          </ul>
-        </div>
-      )}
-
-      <div className="mt-4 flex gap-4">
+      <div className="mt-4 flex gap-4 items-center flex-wrap">
         <button onClick={() => router.push(`/scout-ai?q=${encodeURIComponent(`${topic} ${team}`)}`)} className="flex items-center gap-1.5 rounded-xl px-4 py-2.5 transition-colors hp-tap-target hover:opacity-80" style={{ fontSize: 14, fontWeight: 600, background: 'rgba(6,182,212,0.1)', color: '#0891b2' }}>
           <Image src="/downloads/scout-v2.png" alt="Scout" width={16} height={16} className="h-4 w-4 rounded-full object-contain" /> Ask Scout
         </button>
         <button
-          onClick={() => setExpanded(!expanded)}
-          className="hp-tap-target transition-colors hover:opacity-80"
-          style={{ fontSize: 14, fontWeight: 500, color: 'var(--hp-muted-foreground)' }}
+          type="button"
+          onClick={handleScoutPlay}
+          className="hp-tap-target flex items-center justify-center rounded-full transition-transform hover:scale-105"
+          style={{
+            width: 30,
+            height: 30,
+            backgroundColor: 'rgba(148,163,184,0.12)', // lighter gray
+            color: '#0B0F14',
+          }}
+          aria-label="Play Scout Insight"
         >
-          {expanded ? 'Show less' : 'View full analysis'}
+          {isPlaying ? (
+            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M7 5h4v14H7zM13 5h4v14h-4z" />
+            </svg>
+          ) : (
+            <Play className="h-3.5 w-3.5" style={{ color: 'currentColor' }} />
+          )}
         </button>
-        {expanded && articleHref && (
-          <Link
-            href={articleHref}
-            className="hp-tap-target transition-colors hover:opacity-80"
-            style={{ fontSize: 14, fontWeight: 500, color: '#0891b2', textDecoration: 'none' }}
-          >
-            Read article
-          </Link>
-        )}
       </div>
     </article>
   )

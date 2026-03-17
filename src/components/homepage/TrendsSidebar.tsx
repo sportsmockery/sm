@@ -8,7 +8,7 @@ import FeedTeamSidebar from "@/components/homepage/FeedTeamSidebar"
 import { useAuth } from "@/contexts/AuthContext"
 
 const EDGE_TOOLS: { icon: React.ComponentType<{ className?: string }>; label: string; desc?: string; href: string; liveOnly?: boolean }[] = [
-  { icon: Tv, label: 'Game Center', href: '/live', liveOnly: true },
+  { icon: Tv, label: 'Game Center', desc: 'Live play-by-play with the numbers behind it.', href: '/live', liveOnly: true },
   { icon: ClipboardPen, label: 'War Room', desc: 'Play GM — simulate trades, run mock drafts, and compete against other SM users.', href: '/gm' },
   { icon: MessageSquare, label: 'Fan Chat', desc: 'Skip the comments and argue it out live.', href: '/fan-chat' },
   { icon: BarChart3, label: 'Team Stats', desc: 'The numbers that explain the wins… and the excuses.', href: '/chicago-bears' },
@@ -41,62 +41,71 @@ export default function TrendsSidebar({ selectedTeam }: TrendsSidebarProps) {
   return (
     <aside className="sticky top-0 pl-6 hidden h-screen w-[350px] flex-col gap-4 pt-4 pb-3 lg:flex overflow-y-auto">
       {/* Profile / Login */}
-      {isAuthenticated && user ? (
-        <div className="flex items-center gap-3 px-3 py-2 relative">
-          <Link href="/profile" className="flex items-center gap-3 flex-1 min-w-0" style={{ textDecoration: 'none' }}>
-            {user.avatar ? (
-              <Image src={user.avatar} alt={user.name || ''} width={36} height={36} className="rounded-full object-cover shrink-0" style={{ width: 36, height: 36 }} />
-            ) : (
-              <div className="shrink-0 flex items-center justify-center rounded-full" style={{ width: 36, height: 36, backgroundColor: 'var(--hp-muted)', color: 'var(--hp-foreground)', fontSize: 14, fontWeight: 600 }}>
-                {(user.name || user.email)?.[0]?.toUpperCase()}
-              </div>
-            )}
-            <div className="min-w-0">
-              <p className="truncate" style={{ fontSize: 14, fontWeight: 600, color: 'var(--hp-foreground)', margin: 0, lineHeight: 1.2 }}>{user.name || user.email?.split('@')[0]}</p>
-              <p className="truncate" style={{ fontSize: 12, color: 'var(--hp-muted-foreground)', margin: 0 }}>{user.email}</p>
-            </div>
-          </Link>
-          <button
-            onClick={() => setShowProfileMenu(!showProfileMenu)}
-            className="shrink-0 flex items-center justify-center rounded-full transition-colors hover:bg-[var(--hp-muted)]"
-            style={{ width: 32, height: 32 }}
-          >
-            <MoreHorizontal className="w-5 h-5" style={{ color: 'var(--hp-muted-foreground)' }} />
-          </button>
-          {showProfileMenu && (
-            <>
-              <div className="fixed inset-0 z-40" onClick={() => setShowProfileMenu(false)} />
-              <div className="absolute right-3 top-full z-50 w-44 rounded-xl shadow-xl overflow-hidden" style={{ backgroundColor: 'var(--hp-card)', border: '1px solid var(--hp-border)' }}>
-                <div className="p-1.5">
-                  <Link href="/profile" className="block px-3 py-2 rounded-lg text-[13px] font-medium transition-colors hover:bg-[var(--hp-muted)]" style={{ color: 'var(--hp-foreground)', textDecoration: 'none' }} onClick={() => setShowProfileMenu(false)}>
-                    Profile
-                  </Link>
-                  <Link href="/profile?tab=settings" className="block px-3 py-2 rounded-lg text-[13px] font-medium transition-colors hover:bg-[var(--hp-muted)]" style={{ color: 'var(--hp-foreground)', textDecoration: 'none' }} onClick={() => setShowProfileMenu(false)}>
-                    Settings
-                  </Link>
-                  <Link href="/profile?tab=favorites" className="block px-3 py-2 rounded-lg text-[13px] font-medium transition-colors hover:bg-[var(--hp-muted)]" style={{ color: 'var(--hp-foreground)', textDecoration: 'none' }} onClick={() => setShowProfileMenu(false)}>
-                    Favorites
-                  </Link>
+      <div className="hp-sidebar-card px-3 py-3">
+        {isAuthenticated && user ? (
+          <div className="flex items-center gap-3 relative">
+            <Link href="/profile" className="flex items-center gap-3 flex-1 min-w-0" style={{ textDecoration: 'none' }}>
+              {user.avatar ? (
+                <Image src={user.avatar} alt={user.name || ''} width={40} height={40} className="rounded-full object-cover shrink-0" style={{ width: 40, height: 40 }} />
+              ) : (
+                <div className="shrink-0 flex items-center justify-center rounded-full" style={{ width: 40, height: 40, backgroundColor: 'var(--hp-muted)', color: 'var(--hp-foreground)', fontSize: 14, fontWeight: 600 }}>
+                  {(user.name || user.email)?.[0]?.toUpperCase()}
                 </div>
+              )}
+              <div className="min-w-0">
+                <p className="truncate" style={{ fontSize: 14, fontWeight: 600, color: 'var(--hp-foreground)', margin: 0, lineHeight: 1.2 }}>{user.name || user.email?.split('@')[0]}</p>
+                <p className="truncate" style={{ fontSize: 12, color: 'var(--hp-muted-foreground)', margin: 0 }}>{user.email}</p>
               </div>
-            </>
-          )}
-        </div>
-      ) : (
-        <Link
-          href="/login"
-          className="hp-sidebar-card flex items-center gap-3 px-3 py-2.5 group transition-all"
-          style={{ textDecoration: 'none' }}
-        >
-          <div className="flex items-center justify-center rounded-full shrink-0" style={{ width: 36, height: 36, backgroundColor: '#0B0F14' }}>
-            <LogIn className="w-4 h-4" style={{ color: '#FAFAFB' }} />
+            </Link>
+            <button
+              onClick={() => setShowProfileMenu(!showProfileMenu)}
+              className="shrink-0 flex items-center justify-center rounded-full transition-colors hover:bg-[var(--hp-muted)]"
+              style={{ width: 32, height: 32 }}
+            >
+              <MoreHorizontal className="w-5 h-5" style={{ color: 'var(--hp-muted-foreground)' }} />
+            </button>
+            {showProfileMenu && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowProfileMenu(false)} />
+                <div className="absolute right-0 top-full z-50 mt-2 w-44 rounded-xl shadow-xl overflow-hidden" style={{ backgroundColor: 'var(--hp-card)', border: '1px solid var(--hp-border)' }}>
+                  <div className="p-1.5">
+                    <Link href="/profile" className="block px-3 py-2 rounded-lg text-[13px] font-medium transition-colors hover:bg-[var(--hp-muted)]" style={{ color: 'var(--hp-foreground)', textDecoration: 'none' }} onClick={() => setShowProfileMenu(false)}>
+                      Profile
+                    </Link>
+                    <Link href="/profile?tab=settings" className="block px-3 py-2 rounded-lg text-[13px] font-medium transition-colors hover:bg-[var(--hp-muted)]" style={{ color: 'var(--hp-foreground)', textDecoration: 'none' }} onClick={() => setShowProfileMenu(false)}>
+                      Settings
+                    </Link>
+                    <Link href="/profile?tab=favorites" className="block px-3 py-2 rounded-lg text-[13px] font-medium transition-colors hover:bg-[var(--hp-muted)]" style={{ color: 'var(--hp-foreground)', textDecoration: 'none' }} onClick={() => setShowProfileMenu(false)}>
+                      Favorites
+                    </Link>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
-          <div>
-            <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--hp-foreground)', margin: 0 }}>Sign in</p>
-            <p style={{ fontSize: 12, color: 'var(--hp-muted-foreground)', margin: 0 }}>Save favorites & join discussions</p>
+        ) : (
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--hp-foreground)', margin: 0 }}>Welcome to SM Edge</p>
+              <p style={{ fontSize: 12, color: 'var(--hp-muted-foreground)', margin: '2px 0 0' }}>Log in to save favorites and personalize your feed.</p>
+            </div>
+            <Link
+              href="/login"
+              className="inline-flex items-center justify-center rounded-full px-4 py-1.5 text-[13px] font-medium"
+              style={{
+                backgroundColor: "#BC0000",
+                color: "#FAFAFB",
+                border: "1px solid transparent",
+                textDecoration: "none",
+                whiteSpace: "nowrap",
+              }}
+            >
+              <LogIn className="w-3.5 h-3.5 mr-1" />
+              Login
+            </Link>
           </div>
-        </Link>
-      )}
+        )}
+      </div>
 
       {/* Ask Scout - Quick Access */}
       <Link href="/scout-ai" className="hp-sidebar-card w-full px-3 py-2.5 flex items-center gap-3 group transition-all" style={{ textDecoration: 'none' }}>
@@ -137,7 +146,7 @@ export default function TrendsSidebar({ selectedTeam }: TrendsSidebarProps) {
                 color: 'var(--hp-foreground)',
                 textDecoration: 'none',
                 transition: 'background 0.15s',
-                ...(item.label === 'Game Center' ? { border: '1px solid #00D4FF', borderRadius: 12, margin: '4px 8px' } : {}),
+                ...(item.label === 'Game Center' ? { border: '1px solid #00D4FF', borderRadius: 12, margin: '4px 0' } : {}),
               }}
               onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hp-muted)' }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}

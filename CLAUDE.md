@@ -514,6 +514,15 @@ const STANDARD_POLL_INTERVAL = 60_000 // No live games
 - **`/api/live-games/[gameId]`:**
   - Exposes `game_start_time` as the ISO-like value used for polling/logic; callers that need a human-readable time should format via `toCentralTimeString` or reuse `game_time_display` from the list endpoint.
 
+**Game Day hero behavior:**
+
+- **Never show completed games in the hero.**
+  - `/api/hero-games` must always exclude games whose status is any terminal state: `final`, `completed`, `post`, `postponed`, `canceled`, etc.
+  - The Game Day hero on the homepage should only ever feature:
+    - Games that are **upcoming within ~1 hour**, or
+    - Games that are **currently live/in-progress**.
+  - Once a game leaves the live window (final/over), it must be removed from the hero rotation entirely and the homepage should fall back to the next hero mode by priority.
+
 ### Game Times — All Sports (CRITICAL)
 
 **Always use `game_time_display`** (varchar) for showing game times. Format: `"3:05 PM CT"`, `"7:00 PM CT"`, etc. Already populated on every game with a time. All times are Central Time (Chicago), always.

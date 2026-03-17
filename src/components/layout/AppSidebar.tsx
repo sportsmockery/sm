@@ -248,7 +248,10 @@ export default function AppSidebar() {
                   fontWeight: 500,
                   color: 'var(--sm-text)',
                   borderBottom: idx !== arr.length - 1 ? '1px solid var(--sm-border)' : 'none',
-                  ...(tool.id === 'game-center' ? { border: '1px solid #00D4FF', borderRadius: 12, margin: 4, padding: '8px 10px' } : {}),
+                  // Subtle highlight for Game Center without shifting icon alignment
+                  ...(tool.id === 'game-center'
+                    ? { background: 'rgba(0, 212, 255, 0.04)' }
+                    : {}),
                 }}
               >
                 <div
