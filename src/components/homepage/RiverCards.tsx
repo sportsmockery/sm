@@ -9,6 +9,7 @@ import {
   TrendingUp, Play, Clock, Check, X, ChevronRight,
   BarChart3, Users
 } from "lucide-react"
+import { homepageTeams } from "@/lib/homepage-team-data"
 import {
   AreaChart,
   Area,
@@ -17,6 +18,7 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts"
+import PiLogo from "@/assets/PI-Logo-c04e6913-525e-46c7-ab7b-10522464bc42.png"
 
 // ============================================
 // SHARED TYPES & UTILITIES
@@ -59,14 +61,43 @@ export function TrendingContextLine({ context }: { context: string }) {
   )
 }
 
-// Team tag component
+// Team tag component — now renders team logo instead of pill
 function TeamTag({ team, teamHex }: { team: string; teamHex: string }) {
+  const meta = homepageTeams.find((t) => t.name.toLowerCase() === team.toLowerCase())
+  const logoSrc = meta?.logo
+
+  if (!logoSrc) {
+    // Fallback: simple initial pill
+    return (
+      <span
+        className="inline-flex items-center justify-center rounded-full"
+        style={{
+          width: 28,
+          height: 28,
+          fontSize: 13,
+          fontWeight: 700,
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em',
+          backgroundColor: teamHex,
+          color: '#FAFAFB',
+        }}
+      >
+        {team.charAt(0)}
+      </span>
+    )
+  }
+
   return (
-    <span
-      className="inline-flex items-center px-2 py-0.5 text-white shadow-sm"
-      style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', borderRadius: 6, backgroundColor: teamHex }}
-    >
-      {team}
+    <span className="inline-flex items-center justify-center">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={logoSrc}
+        alt={`${team} logo`}
+        width={26}
+        height={26}
+        style={{ width: 26, height: 26, objectFit: 'contain' }}
+        crossOrigin="anonymous"
+      />
     </span>
   )
 }
@@ -681,13 +712,23 @@ interface ScoutSummaryCardProps extends BaseCardProps {
   topic: string
   slug?: string
   categorySlug?: string
+  stats?: { views: string }
 }
 
-export function ScoutSummaryCard({ summary, bullets, topic, team, teamColor, timestamp, slug, categorySlug }: ScoutSummaryCardProps) {
+export function ScoutSummaryCard({ summary, bullets, topic, team, teamColor, timestamp, slug, categorySlug, stats }: ScoutSummaryCardProps) {
   const teamHex = teamColor
   const router = useRouter()
   const [isPlaying, setIsPlaying] = useState(false)
   const audioRef = useRef<HTMLAudioElement | null>(null)
+
+  const normalizedTeam = team.toLowerCase()
+  const edgeColor =
+    normalizedTeam.includes('bear') ? '#C83803' :        // Bears
+    normalizedTeam.includes('white sox') || normalizedTeam.includes('whitesox') ? '#000000' : // White Sox
+    normalizedTeam.includes('cub') ? '#0E3386' :         // Cubs
+    normalizedTeam.includes('bull') ? '#CE1141' :        // Bulls
+    normalizedTeam.includes('blackhawk') ? '#00833E' :   // Blackhawks
+    '#BC0000'
 
   const articleHref = slug && categorySlug ? `/${categorySlug}/${slug}` : null
 
@@ -723,23 +764,58 @@ export function ScoutSummaryCard({ summary, bullets, topic, team, teamColor, tim
   }
 
   return (
-    <article className="hp-feed-card hp-card-enter">
+    <article className="hp-feed-card hp-card-enter" style={{ borderLeft: `3px solid ${edgeColor}` }}>
       <div className="flex items-center justify-between gap-3 mb-4">
-        <div className="flex items-center gap-3">
-          <CardLabel label="SCOUT AI" />
-          <ScoutInsightBadge />
+        <div className="flex items-center gap-2.5">
+          <img
+            src="/downloads/scout-v2.png"
+            alt="Scout"
+            className="h-6 w-6 rounded-full object-contain"
+          />
+          <span
+            style={{
+              fontSize: 14,
+              fontWeight: 700,
+              letterSpacing: "-0.01em",
+              color: "var(--hp-foreground)",
+            }}
+          >
+            Scout AI Insight
+          </span>
+          <span
+            className="inline-flex items-center rounded-full px-2 py-0.5"
+            style={{
+              fontSize: 10,
+              fontWeight: 600,
+              letterSpacing: "0.03em",
+              backgroundColor: "rgba(0,0,0,0.06)",
+              color: "#3a3a3a",
+              textTransform: "uppercase",
+            }}
+          >
+            Report
+          </span>
           <span style={{ fontSize: 11, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
         </div>
         <TeamTag team={team} teamHex={teamHex} />
       </div>
 
-      <p className="mb-2" style={{ fontSize: 12, fontWeight: 500, color: 'var(--hp-muted-foreground)' }}>Summary: {topic}</p>
       <p
+        className="mb-2"
         style={{
           fontSize: 17,
-          lineHeight: 1.5,
           fontWeight: 500,
           color: 'var(--hp-foreground)',
+        }}
+      >
+        {topic}
+      </p>
+      <p
+        style={{
+          fontSize: 12,
+          lineHeight: 1.5,
+          fontWeight: 500,
+          color: 'var(--hp-muted-foreground)',
           overflow: 'hidden',
           display: '-webkit-box',
           WebkitLineClamp: 4,
@@ -753,7 +829,7 @@ export function ScoutSummaryCard({ summary, bullets, topic, team, teamColor, tim
             <Link
               href={articleHref}
               className="hp-tap-target transition-colors hover:opacity-80"
-              style={{ fontSize: 13, fontWeight: 500, color: '#0891b2', textDecoration: 'none', whiteSpace: 'nowrap' }}
+              style={{ fontSize: 13, fontWeight: 500, color: '#BC0000', textDecoration: 'none', whiteSpace: 'nowrap' }}
             >
               Read article
             </Link>
@@ -775,8 +851,18 @@ export function ScoutSummaryCard({ summary, bullets, topic, team, teamColor, tim
         </div>
       )}
 
-      <div className="mt-4 flex gap-4 items-center flex-wrap">
-        <button onClick={() => router.push(`/scout-ai?q=${encodeURIComponent(`${topic} ${team}`)}`)} className="flex items-center gap-1.5 rounded-xl px-4 py-2.5 transition-colors hp-tap-target hover:opacity-80" style={{ fontSize: 14, fontWeight: 600, background: 'rgba(6,182,212,0.1)', color: '#0891b2' }}>
+      <div className="mt-4 flex gap-4 items-center justify-between flex-wrap">
+        <div className="flex gap-3 items-center flex-wrap">
+          <button
+          onClick={() => router.push(`/scout-ai?q=${encodeURIComponent(`${topic} ${team}`)}`)}
+          className="flex items-center gap-1.5 rounded-xl px-4 py-2.5 transition-colors hp-tap-target hover:opacity-90"
+          style={{
+            fontSize: 14,
+            fontWeight: 600,
+            background: '#BC0000',
+            color: '#FAFAFB',
+          }}
+        >
           <Image src="/downloads/scout-v2.png" alt="Scout" width={16} height={16} className="h-4 w-4 rounded-full object-contain" /> Ask Scout
         </button>
         <button
@@ -784,10 +870,10 @@ export function ScoutSummaryCard({ summary, bullets, topic, team, teamColor, tim
           onClick={handleScoutPlay}
           className="hp-tap-target flex items-center justify-center rounded-full transition-transform hover:scale-105"
           style={{
-            width: 30,
-            height: 30,
-            backgroundColor: 'rgba(148,163,184,0.12)', // lighter gray
-            color: '#0B0F14',
+            width: 22,
+            height: 22,
+            backgroundColor: '#BC0000',
+            color: '#FAFAFB',
           }}
           aria-label="Play Scout Insight"
         >
@@ -799,6 +885,13 @@ export function ScoutSummaryCard({ summary, bullets, topic, team, teamColor, tim
             <Play className="h-3.5 w-3.5" style={{ color: 'currentColor' }} />
           )}
         </button>
+        </div>
+        {stats?.views && stats.views !== '0' && (
+          <div className="flex items-center gap-1 ml-auto" style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }}>
+            <Eye className="h-3.5 w-3.5" />
+            <span>{stats.views}</span>
+          </div>
+        )}
       </div>
     </article>
   )
@@ -845,7 +938,12 @@ export function TrendingArticleCard({ headline, summary, trendMetric, team, team
       )}
       <p className="mt-3 line-clamp-3" style={{ fontSize: 15, lineHeight: 1.65, color: 'var(--hp-foreground)', opacity: 0.7 }}>{summary}</p>
 
-      <EngagementRow stats={stats} articleUrl={articleUrl} />
+      {stats.views && stats.views !== '0' && (
+        <div className="mt-4 flex items-center justify-end gap-1" style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }}>
+          <Eye className="h-3.5 w-3.5" />
+          <span>{stats.views}</span>
+        </div>
+      )}
     </article>
   )
 }
@@ -943,6 +1041,25 @@ const BRIEFING_BULLETS = [
 
 export function ScoutBriefingCard() {
   const router = useRouter()
+  const [isPlaying, setIsPlaying] = useState(false)
+  const briefingAudioRef = useRef<HTMLAudioElement | null>(null)
+
+  const handleBriefingPlay = () => {
+    const url = '/api/audio/scout-briefing?voice=scout'
+
+    // Stop any existing Scout briefing playback
+    if (briefingAudioRef.current) {
+      briefingAudioRef.current.pause()
+      briefingAudioRef.current.src = ''
+    }
+
+    const audio = new Audio(url)
+    briefingAudioRef.current = audio
+    setIsPlaying(true)
+    audio.onended = () => setIsPlaying(false)
+    audio.onerror = () => setIsPlaying(false)
+    audio.play().catch(() => setIsPlaying(false))
+  }
 
   return (
     <article className="hp-feed-card hp-card-enter" style={{ borderLeft: "3px solid #00D4FF" }}>
@@ -962,7 +1079,7 @@ export function ScoutBriefingCard() {
         >
           Scout Briefing
         </span>
-        <ScoutInsightBadge />
+        <span style={{ fontSize: 11, color: 'var(--hp-muted-foreground)' }}>23h</span>
       </div>
 
       <ul className="space-y-2">
@@ -981,18 +1098,40 @@ export function ScoutBriefingCard() {
         ))}
       </ul>
 
-      <button
-        onClick={() => router.push("/scout-ai")}
-        className="mt-4 flex items-center gap-1.5 rounded-xl px-4 py-2.5 transition-colors hp-tap-target hover:opacity-80"
-        style={{
-          fontSize: 14,
-          fontWeight: 600,
-          background: "rgba(0, 212, 255, 0.1)",
-          color: "#0891b2",
-        }}
-      >
-        <Image src="/downloads/scout-v2.png" alt="Scout" width={16} height={16} className="h-4 w-4 rounded-full object-contain" /> Ask Scout for details
-      </button>
+      <div className="mt-4 flex gap-4 items-center flex-wrap">
+        <button
+          onClick={() => router.push("/scout-ai")}
+          className="flex items-center gap-1.5 rounded-xl px-4 py-2.5 transition-colors hp-tap-target hover:opacity-80"
+          style={{
+            fontSize: 14,
+            fontWeight: 600,
+            background: "rgba(0, 212, 255, 0.1)",
+            color: "#0891b2",
+          }}
+        >
+          <Image src="/downloads/scout-v2.png" alt="Scout" width={16} height={16} className="h-4 w-4 rounded-full object-contain" /> Ask Scout
+        </button>
+        <button
+          type="button"
+          onClick={handleBriefingPlay}
+          className="hp-tap-target flex items-center justify-center rounded-full transition-transform hover:scale-105"
+          style={{
+            width: 22,
+            height: 22,
+            backgroundColor: 'rgba(0,212,255,0.12)',
+            color: '#00D4FF',
+          }}
+          aria-label="Play Scout Briefing"
+        >
+          {isPlaying ? (
+            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M7 5h4v14H7zM13 5h4v14h-4z" />
+            </svg>
+          ) : (
+            <Play className="h-3.5 w-3.5" style={{ color: 'currentColor' }} />
+          )}
+        </button>
+      </div>
     </article>
   )
 }
@@ -1073,7 +1212,20 @@ export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team,
           <CardLabel label="VIDEO" />
           <span style={{ fontSize: 11, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
         </div>
-        <TeamTag team={team} teamHex={teamHex} />
+        {/* Team logo on the right; Pinwheels & Ivy uses its own logo */}
+        {source && source.toLowerCase().includes('pinwheels') ? (
+          <div className="flex items-center justify-center">
+            <Image
+              src={PiLogo}
+              alt="Pinwheels & Ivy"
+              width={28}
+              height={28}
+              className="object-contain"
+            />
+          </div>
+        ) : (
+          <TeamTag team={team} teamHex={teamHex} />
+        )}
       </div>
 
       {articleUrl ? (
