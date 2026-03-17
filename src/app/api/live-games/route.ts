@@ -85,24 +85,26 @@ export async function GET(request: NextRequest) {
     }
 
     for (const game of allGames) {
-      if (game.status === 'upcoming' && game.game_start_time && !game.game_start_time.includes('T')) {
-        // game_start_time is just a date — look up actual time from games_master
+      if (game.status === 'upcoming') {
+        // Enrich with game_time_display from games_master (CT formatted)
         const masterTable = MASTER_TABLES[game.chicago_team]
         if (masterTable && datalabAdmin) {
+          // Extract date portion from game_start_time (could be "2026-03-17", "2026-03-17 15:05:00+00", etc.)
+          const dateOnly = String(game.game_start_time || '').slice(0, 10)
+          if (!dateOnly || dateOnly.length < 10) continue
           try {
             const { data: masterRow } = await datalabAdmin
               .from(masterTable)
               .select('game_time, game_time_display')
-              .eq('game_date', game.game_start_time)
+              .eq('game_date', dateOnly)
               .limit(1)
               .single()
             if (masterRow?.game_time_display) {
-              // Use pre-formatted CT display string
               game.game_time_display = masterRow.game_time_display
             }
             if (masterRow?.game_time) {
-              // Also set proper ISO for countdown timers
-              game.game_start_time = `${game.game_start_time}T${masterRow.game_time}-06:00`
+              // Set proper CT ISO for countdown timers
+              game.game_start_time = `${dateOnly}T${masterRow.game_time}-06:00`
             }
           } catch { /* skip enrichment on error */ }
         }
