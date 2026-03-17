@@ -62,9 +62,15 @@ export async function POST(
       updated_at: new Date().toISOString(),
     }
 
-    // Story Universe fields
+    // Story Universe / Force Hero fields
     if (body.force_hero_featured !== undefined) {
       updateData.force_hero_featured = body.force_hero_featured
+      // Track when hero override was activated (24h display cap)
+      if (body.force_hero_featured) {
+        updateData.hero_override_at = new Date().toISOString()
+      } else if (!body.is_story_universe) {
+        updateData.hero_override_at = null
+      }
     }
     if (body.is_story_universe !== undefined) {
       updateData.is_story_universe = body.is_story_universe
@@ -72,6 +78,12 @@ export async function POST(
       updateData.story_universe_related_ids = body.is_story_universe
         ? (body.story_universe_related_ids || [])
         : []
+      // Track when hero override was activated (24h display cap)
+      if (body.is_story_universe) {
+        updateData.hero_override_at = new Date().toISOString()
+      } else if (!body.force_hero_featured) {
+        updateData.hero_override_at = null
+      }
     }
 
     // Only update social_caption if provided

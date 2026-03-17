@@ -160,28 +160,36 @@ async function fetchFeaturedStory(): Promise<{
   if (!supabaseAdmin) return null
 
   try {
-    // Max 48 hours old — never hero-takeover a stale article
-    const cutoff = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString()
+    // Absolute cutoff: 48h from published_at — never hero-takeover a stale article
+    const publishCutoff = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString()
+    // Hero override display cap: 24h from when flagged
+    const overrideCutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
 
     // Get highest-viewed recent published article within 48h window
     const { data: posts } = await supabaseAdmin
       .from("sm_posts")
       .select(
-        "id, title, slug, excerpt, featured_image, views, published_at, importance_score, category:sm_categories!category_id(slug, name)"
+        "id, title, slug, excerpt, featured_image, views, published_at, importance_score, hero_override_at, category:sm_categories!category_id(slug, name)"
       )
       .eq("status", "published")
       .not("featured_image", "is", null)
-      .gte("published_at", cutoff)
+      .gte("published_at", publishCutoff)
       .order("views", { ascending: false })
       .limit(5)
 
     if (!posts || posts.length === 0) return null
 
     // Find the best candidate: views >= threshold, or editor-boosted (importance >= 90)
+    // Hero override must also be within 24h of being flagged
     const candidate = posts.find((p) => {
       const views = p.views ?? 0
       const importance = p.importance_score ?? 0
-      return views >= TRENDING_VIEW_THRESHOLD || importance >= 90
+      const isForceHero = importance >= 90
+      // If force-hero, check 24h display cap from hero_override_at
+      if (isForceHero && p.hero_override_at) {
+        if (p.hero_override_at < overrideCutoff) return false
+      }
+      return views >= TRENDING_VIEW_THRESHOLD || isForceHero
     })
 
     if (!candidate) return null
@@ -271,8 +279,16 @@ async function fetchLiveGames(): Promise<GameContext[] | null> {
       const game = liveGames?.[0]
       if (!game) continue
 
-      // Only show upcoming or in-progress games — skip final/post/completed
+      // Determine game status
       const gameStatus = (game.status || "").toLowerCase()
+
+      // Explicitly live/in-progress — always show
+      const isLive =
+        gameStatus === "in_progress" ||
+        gameStatus === "in progress" ||
+        gameStatus === "live"
+
+      // Skip ended/canceled games
       if (
         gameStatus === "final" ||
         gameStatus === "post" ||
@@ -283,14 +299,14 @@ async function fetchLiveGames(): Promise<GameContext[] | null> {
         continue
       }
 
-      // For upcoming games, only show if starting within 1 hour
-      if (gameStatus === "upcoming" || gameStatus === "pre" || gameStatus === "scheduled") {
-        if (game.game_date) {
-          const startTime = new Date(game.game_date).getTime()
-          const now = Date.now()
-          const msUntilStart = startTime - now
-          if (msUntilStart > 60 * 60 * 1000) continue // More than 1 hour away — skip
-        }
+      // For ALL non-live games, only show if starting within 60 minutes
+      if (!isLive) {
+        if (!game.game_date) continue // No start time known — skip
+        const startTime = new Date(game.game_date).getTime()
+        const now = Date.now()
+        const msUntilStart = startTime - now
+        if (msUntilStart > 60 * 60 * 1000) continue // More than 1 hour away — skip
+        if (msUntilStart < -4 * 60 * 60 * 1000) continue // Started 4+ hours ago with no live status — stale
       }
 
       // Build matchup from live table data
@@ -300,7 +316,7 @@ async function fetchLiveGames(): Promise<GameContext[] | null> {
 
       // Determine kickoff label based on game status
       let kickoffLabel: string
-      if (gameStatus === "in_progress" || gameStatus === "in progress" || gameStatus === "live") {
+      if (isLive) {
         // Use ESPN's status detail for accurate period labels (e.g. "Bottom 2nd", "3:12 - 1st Quarter")
         const statusDetail = game.raw_payload?.status?.type?.detail
         if (statusDetail) {
@@ -538,21 +554,30 @@ async function fetchStoryUniverse(): Promise<StoryUniverseContext | null> {
   if (!supabaseAdmin) return null
 
   try {
-    // Find the most recent published post with is_story_universe = true
+    // Absolute cutoff: 48h from published_at
+    const publishCutoff = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString()
+    // Hero override display cap: 24h from when flagged
+    const overrideCutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+
+    // Find the most recent published post with is_story_universe = true within time limits
     const { data: mainPosts } = await supabaseAdmin
       .from("sm_posts")
       .select(
-        "id, title, slug, excerpt, featured_image, views, published_at, is_story_universe, story_universe_related_ids, category:sm_categories!category_id(slug, name)"
+        "id, title, slug, excerpt, featured_image, views, published_at, is_story_universe, story_universe_related_ids, hero_override_at, category:sm_categories!category_id(slug, name)"
       )
       .eq("status", "published")
       .eq("is_story_universe", true)
       .not("featured_image", "is", null)
+      .gte("published_at", publishCutoff)
       .order("published_at", { ascending: false })
       .limit(1)
 
     if (!mainPosts || mainPosts.length === 0) return null
 
     const main = mainPosts[0]
+
+    // Check 24h display cap from hero_override_at
+    if (main.hero_override_at && main.hero_override_at < overrideCutoff) return null
     const relatedIds = main.story_universe_related_ids
 
     if (!relatedIds || relatedIds.length !== 2) return null

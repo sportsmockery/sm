@@ -1713,7 +1713,7 @@ export default function StudioPostEditor({
           debounceMs={1500}
           minContentLength={300}
           showIndicator={true}
-          indicatorPosition="bottom-right"
+          indicatorPosition="bottom-left"
           onChartInsert={(chartId, shortcode, updatedContent) => {
             setFormData(prev => ({ ...prev, content: updatedContent }))
           }}

@@ -41,10 +41,11 @@ Modes are evaluated top-to-bottom. The first qualifying mode wins.
 **When it shows:** An article from `sm_posts` meets ALL of these:
 - `status = 'published'`
 - Has a `featured_image`
-- Published within the last **48 hours**
+- Published within the last **48 hours** (absolute cutoff from `published_at`)
+- `hero_override_at` within the last **24 hours** (if force-hero, display cap from when flagged)
 - `views >= 2,500` **OR** `importance_score >= 90` (editor override)
 
-**Data source:** `hero-data.ts → fetchFeaturedStory()` queries `sm_posts` ordered by views DESC, limited to 5 candidates within the 48h window. First match that meets threshold wins.
+**Data source:** `hero-data.ts → fetchFeaturedStory()` queries `sm_posts` ordered by views DESC, limited to 5 candidates within the 48h publish window. Force-hero articles must also have `hero_override_at` within 24h.
 
 **What the user sees:**
 - Article's featured image as full-width hero background with dark overlay
@@ -53,7 +54,13 @@ Modes are evaluated top-to-bottom. The first qualifying mode wins.
 - Optional team tag and publish freshness ("2h ago")
 - Red "Read Now" CTA button linking to the article
 
-**Editor override:** Set `importance_score >= 90` on any article to force it into trending hero mode regardless of view count. This maps to `forceHeroFeatured: true` in the props.
+**Editor override:** Set `importance_score >= 90` on any article to force it into trending hero mode regardless of view count. This maps to `forceHeroFeatured: true` in the props. The `hero_override_at` timestamp is auto-set when the flag is toggled on.
+
+**Time limits:**
+- **24h display cap:** Hero override expires 24 hours after `hero_override_at` (when the flag was set)
+- **48h publish cap:** Article must be published within the last 48 hours regardless
+
+**Visit cap (logged-in users):** After a logged-in user sees the same hero takeover article **2 times**, it is suppressed for that user. If both trending and story universe qualify, they alternate across visits.
 
 **Feed dedup:** The hero article ID is passed to `MainFeed` which suppresses it from the first 3 feed positions to avoid repetition.
 

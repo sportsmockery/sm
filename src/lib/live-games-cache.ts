@@ -149,11 +149,24 @@ export interface LivePlay {
   player_ids: string[]
   score_home: number
   score_away: number
-  // Sport-specific
+  scoring_play?: boolean
+  score_value?: number
+  // NFL
   down?: number
   distance?: number
   yard_line?: number
+  drive_id?: string
+  is_turnover?: boolean
   possession?: string
+  // NHL
+  strength?: string // PP/SH/EV
+  // MLB
+  at_bat_id?: string
+  outs?: number
+  pitch_count?: number
+  // NBA
+  shooting_play?: boolean
+  points_attempted?: number
 }
 
 export interface LiveTeamStats {

@@ -78,6 +78,23 @@ export interface Play {
   team_id: string | null
   score_home: number
   score_away: number
+  scoring_play?: boolean
+  score_value?: number
+  // NFL
+  down?: number
+  distance?: number
+  yard_line?: number
+  drive_id?: string
+  is_turnover?: boolean
+  // NHL
+  strength?: string // PP/SH/EV
+  // MLB
+  at_bat_id?: string
+  outs?: number
+  pitch_count?: number
+  // NBA
+  shooting_play?: boolean
+  points_attempted?: number
 }
 
 export interface TeamData {
@@ -170,18 +187,36 @@ export function useLiveGameData(gameId: string | undefined) {
         // This prevents the list from disappearing when the API returns partial data
         const existingPlays = prev.play_by_play || []
         const newPlays = data.play_by_play || []
-        const existingIds = new Set(existingPlays.map(p => p.play_id))
-        const merged = [...existingPlays]
-        for (const play of newPlays) {
-          if (!existingIds.has(play.play_id)) {
+
+        // Guard: if API returned zero plays but we already have plays, keep existing
+        if (newPlays.length === 0 && existingPlays.length > 0) {
+          data.play_by_play = existingPlays
+        } else {
+          const existingById = new Map(existingPlays.map(p => [p.play_id, p]))
+          const merged: Play[] = []
+          const seen = new Set<string>()
+
+          // First, include all new plays (updating existing ones in-place)
+          for (const play of newPlays) {
             merged.push(play)
-          } else {
-            // Update existing play data (score changes, etc.)
-            const idx = merged.findIndex(p => p.play_id === play.play_id)
-            if (idx >= 0) merged[idx] = play
+            seen.add(play.play_id)
           }
+
+          // Then, append any existing plays that weren't in the new response
+          // (keeps plays that the API may have dropped from a partial refresh)
+          for (const play of existingPlays) {
+            if (!seen.has(play.play_id)) {
+              merged.push(play)
+            }
+          }
+
+          data.play_by_play = merged
         }
-        data.play_by_play = merged
+
+        // Guard: if API returned zero players but we already have players, keep existing
+        if ((data.players || []).length === 0 && (prev.players || []).length > 0) {
+          data.players = prev.players
+        }
       }
 
       // Compare without volatile fields (cache_age, timestamp) to avoid unnecessary re-renders
