@@ -20,14 +20,22 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const team = searchParams.get('team')
 
-    // Try DataLab REST API first
+    // Prefer Supabase (shared DB) first
+    const supabaseResult = await fetchFromSupabase(team)
+
+    // If Supabase returned any games, or we successfully hit the DB, use that
+    if (supabaseResult?.games && supabaseResult.games.length > 0) {
+      return NextResponse.json(supabaseResult)
+    }
+
+    // Fallback: DataLab REST API
     const datalabGames = await fetchFromDatalabApi(team)
     if (datalabGames) {
       return NextResponse.json(datalabGames)
     }
 
-    // Fallback: direct Supabase queries
-    return NextResponse.json(await fetchFromSupabase(team))
+    // If DataLab is also unavailable, still return the Supabase payload (likely empty)
+    return NextResponse.json(supabaseResult ?? { games: [], count: 0 })
   } catch (error) {
     console.error('[API /api/live-games] Error:', error)
     return NextResponse.json({
