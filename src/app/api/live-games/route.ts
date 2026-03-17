@@ -92,12 +92,16 @@ export async function GET(request: NextRequest) {
           try {
             const { data: masterRow } = await datalabAdmin
               .from(masterTable)
-              .select('game_time')
+              .select('game_time, game_time_display')
               .eq('game_date', game.game_start_time)
               .limit(1)
               .single()
+            if (masterRow?.game_time_display) {
+              // Use pre-formatted CT display string
+              game.game_time_display = masterRow.game_time_display
+            }
             if (masterRow?.game_time) {
-              // Combine date + time as CT ISO string
+              // Also set proper ISO for countdown timers
               game.game_start_time = `${game.game_start_time}T${masterRow.game_time}-06:00`
             }
           } catch { /* skip enrichment on error */ }

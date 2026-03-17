@@ -13,6 +13,7 @@ interface LiveGame {
   sport: 'nfl' | 'nba' | 'nhl' | 'mlb';
   status: string;
   game_start_time?: string;
+  game_time_display?: string;
   home_team_abbr: string;
   away_team_abbr: string;
   home_score: number;
@@ -240,7 +241,7 @@ export default function LiveStrip() {
               {getChicagoAbbr(game)} vs {getOpponentAbbr(game)}
             </span>
             <span className="live-strip-status">
-              {game.game_start_time ? formatGameTime(game.game_start_time) : 'TBD'}
+              {game.game_time_display || (game.game_start_time ? formatGameTime(game.game_start_time) : 'TBD')}
             </span>
           </Link>
         ))}
@@ -259,7 +260,7 @@ export default function LiveStrip() {
               {getChicagoAbbr(game)} vs {getOpponentAbbr(game)}
             </span>
             <span className="live-strip-status">
-              {game.game_start_time ? formatGameTime(game.game_start_time) : 'TBD'}
+              {game.game_time_display || (game.game_start_time ? formatGameTime(game.game_start_time) : 'TBD')}
             </span>
           </Link>
         ))}
