@@ -59,7 +59,7 @@ function timeAgo(dateStr: string): string {
 interface CapSummary {
   total_cap: number
   total_committed: number
-  cap_space: number
+  true_cap_space: number
   dead_money: number
   top_51_cap: number
   updated_at: string
@@ -75,12 +75,45 @@ interface ContractRow {
   dead_cap: number | null
   contract_years: number | null
   free_agent_year: number | null
+  contract_type: string | null
+}
+
+interface CapObligation {
+  obligation_type: string
+  player_name: string
+  amount: number
+  years_remaining: number | null
+  notes: string | null
+}
+
+const CONTRACT_TYPE_COLORS: Record<string, { bg: string; text: string }> = {
+  'Rookie': { bg: 'rgba(0,212,255,0.15)', text: '#00D4FF' },
+  'Veteran': { bg: 'rgba(214,176,94,0.15)', text: '#D6B05E' },
+  'Extension': { bg: 'rgba(34,197,94,0.15)', text: '#16a34a' },
+  'Franchise Tag': { bg: 'rgba(188,0,0,0.15)', text: '#BC0000' },
+  'Transition Tag': { bg: 'rgba(249,115,22,0.15)', text: '#f97316' },
+  'Practice Squad': { bg: 'rgba(107,114,128,0.15)', text: '#6b7280' },
+  'Minimum Salary': { bg: 'rgba(107,114,128,0.15)', text: '#6b7280' },
+}
+
+function ContractBadge({ type }: { type: string | null }) {
+  if (!type) return null
+  const colors = CONTRACT_TYPE_COLORS[type] || { bg: 'rgba(107,114,128,0.12)', text: 'var(--sm-text-dim)' }
+  return (
+    <span style={{
+      display: 'inline-block', fontSize: '10px', fontWeight: 600, padding: '2px 6px',
+      borderRadius: '4px', backgroundColor: colors.bg, color: colors.text,
+      whiteSpace: 'nowrap', letterSpacing: '0.02em',
+    }}>
+      {type}
+    </span>
+  )
 }
 
 export default async function BearsCapTrackerPage() {
   const team = CHICAGO_TEAMS.bears
 
-  const [separatedRecord, nextGame, capResult, contractsResult, headshotsResult] = await Promise.all([
+  const [separatedRecord, nextGame, capResult, contractsResult, headshotsResult, obligationsResult] = await Promise.all([
     getBearsSeparatedRecord(2025),
     fetchNextGame('bears'),
     datalabAdmin
@@ -90,12 +123,18 @@ export default async function BearsCapTrackerPage() {
       .single(),
     datalabAdmin
       .from('bears_contracts')
-      .select('player_id, player_name, position, age, cap_hit, base_salary, dead_cap, contract_years, free_agent_year')
+      .select('player_id, player_name, position, age, cap_hit, base_salary, dead_cap, contract_years, free_agent_year, contract_type')
       .eq('season', 2026)
       .order('cap_hit', { ascending: false }),
     datalabAdmin
       .from('bears_players')
       .select('espn_id, headshot_url'),
+    datalabAdmin
+      .from('cap_obligations')
+      .select('obligation_type, player_name, amount, years_remaining, notes')
+      .eq('team_key', 'bears')
+      .eq('season', 2026)
+      .order('amount', { ascending: false }),
   ])
 
   const record = {
@@ -111,6 +150,7 @@ export default async function BearsCapTrackerPage() {
 
   const cap: CapSummary | null = capResult.data
   const rows: ContractRow[] = (contractsResult.data || []) as ContractRow[]
+  const obligations: CapObligation[] = (obligationsResult.data || []) as CapObligation[]
 
   // Build headshot map: ESPN ID -> headshot URL
   const headshotMap = new Map<string, string>()
@@ -120,7 +160,15 @@ export default async function BearsCapTrackerPage() {
     }
   }
 
-  const isOverCap = cap ? cap.cap_space < 0 : false
+  // Group obligations by type
+  const obligationsByType = obligations.reduce((acc, o) => {
+    const type = o.obligation_type || 'Other'
+    if (!acc[type]) acc[type] = []
+    acc[type].push(o)
+    return acc
+  }, {} as Record<string, CapObligation[]>)
+
+  const isOverCap = cap ? cap.true_cap_space < 0 : false
   const topFive = rows.slice(0, 5)
   const maxHit = topFive[0]?.cap_hit || 1
   const usedPct = cap ? (cap.total_committed / cap.total_cap) * 100 : 0
@@ -189,7 +237,7 @@ export default async function BearsCapTrackerPage() {
             <CapCard label="Salary Cap" value={formatMoney(cap!.total_cap)} />
             <CapCard
               label="Cap Space"
-              value={formatMoney(cap!.cap_space)}
+              value={formatMoney(cap!.true_cap_space)}
               subtitle={isOverCap ? 'OVER CAP' : 'AVAILABLE'}
               color={isOverCap ? 'var(--sm-error, #BC0000)' : 'var(--sm-success, #00D4FF)'}
             />
@@ -455,7 +503,7 @@ export default async function BearsCapTrackerPage() {
               <div
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: '2fr 0.5fr 0.5fr 1fr 1fr 1fr 0.7fr 0.7fr',
+                  gridTemplateColumns: '2fr 0.5fr 0.5fr 1fr 1fr 1fr 0.8fr 0.7fr 0.7fr',
                   padding: '12px 16px',
                   backgroundColor: 'var(--sm-surface)',
                   borderBottom: '1px solid var(--sm-border)',
@@ -473,6 +521,7 @@ export default async function BearsCapTrackerPage() {
                 <div style={{ textAlign: 'right' }}>Cap Hit</div>
                 <div style={{ textAlign: 'right' }}>Base Salary</div>
                 <div style={{ textAlign: 'right' }}>Dead Cap</div>
+                <div style={{ textAlign: 'center' }}>Type</div>
                 <div style={{ textAlign: 'center' }}>Years</div>
                 <div style={{ textAlign: 'center' }}>FA Year</div>
               </div>
@@ -483,7 +532,7 @@ export default async function BearsCapTrackerPage() {
                   key={row.player_id}
                   style={{
                     display: 'grid',
-                    gridTemplateColumns: '2fr 0.5fr 0.5fr 1fr 1fr 1fr 0.7fr 0.7fr',
+                    gridTemplateColumns: '2fr 0.5fr 0.5fr 1fr 1fr 1fr 0.8fr 0.7fr 0.7fr',
                     padding: '10px 16px',
                     borderBottom: idx < rows.length - 1 ? '1px solid var(--sm-border)' : 'none',
                     alignItems: 'center',
@@ -525,6 +574,10 @@ export default async function BearsCapTrackerPage() {
                   {/* Dead Cap */}
                   <div style={{ textAlign: 'right', color: 'var(--sm-text-muted)' }}>
                     {formatMoney(row.dead_cap)}
+                  </div>
+                  {/* Contract Type */}
+                  <div style={{ textAlign: 'center' }}>
+                    <ContractBadge type={row.contract_type} />
                   </div>
                   {/* Years Left */}
                   <div style={{ textAlign: 'center', color: 'var(--sm-text-muted)' }}>
@@ -586,6 +639,42 @@ export default async function BearsCapTrackerPage() {
           </section>
         )}
 
+        {/* Cap Obligations */}
+        {Object.keys(obligationsByType).length > 0 && (
+          <section style={{ marginBottom: '32px' }}>
+            <h2 style={{ color: 'var(--sm-text)', fontSize: '22px', fontWeight: 700, letterSpacing: '-0.5px', paddingBottom: '8px', borderBottom: '3px solid var(--sm-red)', margin: '0 0 20px 0' }}>
+              Cap Obligations
+            </h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {Object.entries(obligationsByType).map(([type, items]) => {
+                const total = items.reduce((s, o) => s + (o.amount || 0), 0)
+                return (
+                  <details key={type} className="glass-card glass-card-sm glass-card-static" style={{ padding: '0' }} open>
+                    <summary style={{ padding: '14px 16px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '14px', fontWeight: 600, color: 'var(--sm-text)' }}>
+                      <span>{type}</span>
+                      <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--sm-text-muted)' }}>{formatMoney(total)} ({items.length})</span>
+                    </summary>
+                    <div style={{ borderTop: '1px solid var(--sm-border)' }}>
+                      {items.map((o, i) => (
+                        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px', borderBottom: i < items.length - 1 ? '1px solid var(--sm-border)' : 'none', fontSize: '13px' }}>
+                          <div>
+                            <span style={{ fontWeight: 500, color: 'var(--sm-text)' }}>{o.player_name}</span>
+                            {o.notes && <span style={{ marginLeft: '8px', fontSize: '11px', color: 'var(--sm-text-dim)' }}>{o.notes}</span>}
+                          </div>
+                          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                            {o.years_remaining != null && <span style={{ fontSize: '12px', color: 'var(--sm-text-dim)' }}>{o.years_remaining} yr</span>}
+                            <span style={{ fontWeight: 700, color: 'var(--sm-text)' }}>{formatMoney(o.amount)}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </details>
+                )
+              })}
+            </div>
+          </section>
+        )}
+
         {/* Ask Scout CTA */}
         <div
           className="glass-card glass-card-static"
@@ -595,7 +684,7 @@ export default async function BearsCapTrackerPage() {
             <Image src="/downloads/scout-v2.png" alt="Scout AI" width={28} height={28} />
             <h3
               style={{
-               
+
                 color: 'var(--sm-text)',
                 fontWeight: 700,
                 fontSize: '18px',

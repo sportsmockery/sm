@@ -94,10 +94,12 @@ export default function TeamHeader({ team, rightSlot }: TeamHeaderProps) {
             {team.league === 'NFL'
               ? 'Chicago • NFC North'
               : team.league === 'NBA'
-              ? 'Chicago • Central Division'
+              ? 'Chicago • Eastern Conference'
               : team.league === 'NHL'
               ? 'Chicago • Central Division'
-              : 'Chicago • American League'}
+              : team.name.toLowerCase().includes('cubs')
+              ? 'Chicago • NL Central'
+              : 'Chicago • AL Central'}
           </p>
         </div>
       </div>
