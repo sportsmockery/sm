@@ -53,15 +53,6 @@ const publicPaths = [
   '/gm',         // GM Trade Simulator (handles own auth)
 ]
 
-// Paths that should never trigger the first-time visitor redirect
-const SKIP_VISITOR_REDIRECT = [
-  '/login',
-  '/signup',
-  '/forgot-password',
-  '/reset-password',
-  '/api/auth/callback',
-]
-
 function createSupabaseMiddlewareClient(request: NextRequest) {
   let response = NextResponse.next({ request: { headers: request.headers } })
 
@@ -94,19 +85,13 @@ export async function middleware(request: NextRequest) {
 
   const isStaticAsset = pathname.startsWith('/_next') || pathname.startsWith('/static') || pathname.includes('.')
   const isApiPath = pathname.startsWith('/api')
-  const isHomePath = pathname === '/home' || pathname.startsWith('/home/')
 
   // 1. Allow static assets and API routes immediately
   if (isStaticAsset || isApiPath) {
     return NextResponse.next()
   }
 
-  // 2. Allow /home/* marketing pages through (no auth check needed)
-  if (isHomePath) {
-    return NextResponse.next()
-  }
-
-  // 3. Allow public routes and content pages (articles, team pages, etc.)
+  // 2. Allow public routes and content pages (articles, team pages, etc.)
   const isPublicRoute = publicRoutes.includes(pathname)
   const isPublicPath = publicPaths.some((path) => pathname.startsWith(path))
 
@@ -114,38 +99,14 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // 4. Allow article URLs — any /{category}/{slug} pattern (2+ path segments)
+  // 3. Allow article URLs — any /{category}/{slug} pattern (2+ path segments)
   //    These are content pages that should always be accessible for SEO and sharing
   const segments = pathname.split('/').filter(Boolean)
   if (segments.length >= 2 && !pathname.startsWith('/admin') && !pathname.startsWith('/gm') && !pathname.startsWith('/studio')) {
     return NextResponse.next()
   }
 
-  // 5. First-time visitor redirect — only for "app" pages (e.g., /gm, /scout-ai, /fan-chat)
-  const hasVisited = request.cookies.get('sm_visited')?.value
-  const isAuthPage = SKIP_VISITOR_REDIRECT.includes(pathname)
-
-  if (!hasVisited && !isAuthPage && pathname !== '/') {
-    const response = NextResponse.redirect(new URL('/home', request.url))
-
-    response.cookies.set('sm_visited', 'true', {
-      maxAge: 60 * 60 * 24 * 10, // 10 days
-      path: '/',
-      sameSite: 'lax',
-    })
-
-    if (pathname.startsWith('/') && !pathname.startsWith('//')) {
-      response.cookies.set('sm_intended_destination', pathname, {
-        maxAge: 60 * 60 * 24, // 24 hours
-        path: '/',
-        sameSite: 'lax',
-      })
-    }
-
-    return response
-  }
-
-  // 6. Admin route protection — require authentication
+  // 4. Admin route protection — require authentication
   if (pathname.startsWith('/admin')) {
     const { supabase, response } = createSupabaseMiddlewareClient(request)
     const { data: { user } } = await supabase.auth.getUser()
