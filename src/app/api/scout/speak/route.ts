@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY
-const SCOUT_VOICE_ID = process.env.ELEVENLABS_VOICE_ID || 'cjVigY5qzO86Huf0OWal' // Finn - Scout's voice
+const SCOUT_VOICE_ID = process.env.ELEVENLABS_VOICE_ID || 'vBKc2FfBKJfcZNyEt1n6' // Scout's voice
 
 export async function POST(request: NextRequest) {
   if (!ELEVENLABS_API_KEY) {
