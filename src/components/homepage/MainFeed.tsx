@@ -286,9 +286,12 @@ export default function MainFeed({ activeTab, setActiveTab, selectedTeam, heroAr
             timestamp={featuredItem.timestamp}
             slug={featuredItem.data.slug as string | undefined}
             categorySlug={featuredItem.data.categorySlug as string | undefined}
-            viewsLabel={
-              (featuredItem.data.stats as { views?: string } | undefined)?.views
-            }
+            stats={featuredItem.data.stats as {
+              comments: number
+              retweets: number
+              likes: number
+              views: string
+            }}
           />
         ) : !loading && (
           <TopIntelligenceCard
