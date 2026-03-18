@@ -226,8 +226,8 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
             position: 'fixed',
             bottom: 40,
             right: 126,
-            width: 380,
-            maxHeight: '50vh',
+            width: 400,
+            maxHeight: '70vh',
             borderRadius: '16px 16px 0 16px',
             backgroundColor: 'var(--sm-card)',
             border: '1px solid var(--sm-border)',
@@ -366,31 +366,26 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
               onClick={handleSpeak}
               disabled={loading || !data?.commentary}
               style={{
-                fontSize: 12,
-                fontWeight: 600,
-                color: isSpeaking ? '#BC0000' : 'var(--sm-text-muted)',
-                background: isSpeaking ? 'rgba(188,0,0,0.1)' : 'var(--sm-surface)',
-                border: `1px solid ${isSpeaking ? 'rgba(188,0,0,0.2)' : 'var(--sm-border)'}`,
-                borderRadius: 8,
-                padding: '6px 14px',
-                cursor: loading || !data?.commentary ? 'not-allowed' : 'pointer',
+                width: 32,
+                height: 32,
+                borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
-                gap: 5,
-                lineHeight: 1,
-                opacity: loading || !data?.commentary ? 0.5 : 1,
+                justifyContent: 'center',
+                cursor: loading || !data?.commentary ? 'not-allowed' : 'pointer',
+                opacity: loading || !data?.commentary ? 0.4 : 1,
+                backgroundColor: isSpeaking ? 'rgba(188,0,0,0.1)' : 'var(--sm-surface)',
+                border: `1px solid ${isSpeaking ? 'rgba(188,0,0,0.2)' : 'var(--sm-border)'}`,
+                color: isSpeaking ? '#BC0000' : 'var(--sm-text-muted)',
+                padding: 0,
+                flexShrink: 0,
               }}
+              aria-label={isSpeaking ? 'Stop' : 'Play'}
             >
               {isSpeaking ? (
-                <>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></svg>
-                  Stop
-                </>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></svg>
               ) : (
-                <>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" /><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07" /></svg>
-                  Listen
-                </>
+                <svg width="14" height="16" viewBox="0 0 20 24" fill="none"><path d="M2 1L18 12L2 23V1Z" fill="currentColor" /></svg>
               )}
             </button>
           </div>
