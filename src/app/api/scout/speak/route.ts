@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY
-const ELEVENLABS_VOICE_ID = process.env.ELEVENLABS_VOICE_ID
+const SCOUT_VOICE_ID = process.env.ELEVENLABS_VOICE_ID || 'cjVigY5qzO86Huf0OWal' // Finn - Scout's voice
 
 export async function POST(request: NextRequest) {
-  if (!ELEVENLABS_API_KEY || !ELEVENLABS_VOICE_ID) {
+  if (!ELEVENLABS_API_KEY) {
     return NextResponse.json({ error: 'TTS not configured' }, { status: 503 })
   }
 
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     const truncated = text.slice(0, 5000)
 
     const res = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${ELEVENLABS_VOICE_ID}`,
+      `https://api.elevenlabs.io/v1/text-to-speech/${SCOUT_VOICE_ID}`,
       {
         method: 'POST',
         headers: {
