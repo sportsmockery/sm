@@ -3,11 +3,7 @@
 import { useHomepage } from './hooks/useHomepage'
 import { useLiveOverlay } from './hooks/useLiveOverlay'
 import { HeroSection } from './components/HeroSection'
-import { PulseRow } from './components/PulseRow'
-import { SpotlightModules } from './components/SpotlightModules'
-import { TeamGrid } from './components/TeamGrid'
 import { ContentFeed } from './components/ContentFeed'
-import { FanInteraction } from './components/FanInteraction'
 import { TodayDebate } from './components/TodayDebate'
 
 export function DashContent() {
@@ -29,58 +25,58 @@ export function DashContent() {
   }
 
   return (
-    <div className="max-w-[1300px] mx-auto px-4 py-6 space-y-8">
-      {/* Cache freshness */}
-      <div className="flex justify-end">
-        <span className="text-[13px] text-gray-400 dark:text-[#666666]">
+    <div className="max-w-[600px] mx-auto px-4 py-3">
+      {/* Hero module — the scroll-stopper */}
+      <HeroSection data={data} liveOverlay={liveOverlay.data} />
+
+      {/* Debate (below hero, in feed flow) */}
+      {data.pulse_row.todays_debate && (
+        <div className="mt-6" id="debate">
+          <TodayDebate debate={data.pulse_row.todays_debate} />
+        </div>
+      )}
+
+      {/* Content feed */}
+      <div className="mt-6">
+        <ContentFeed items={data.feed} />
+      </div>
+
+      {/* Updated timestamp */}
+      <div className="mt-8 mb-4 text-center">
+        <span className="text-[13px] text-gray-400 dark:text-[#555555]">
           Updated {formatCacheAge(data.cache_age_ms)} ago
         </span>
       </div>
-
-      {/* Hero */}
-      <HeroSection hero={data.hero} liveOverlay={liveOverlay.data} />
-
-      {/* Pulse Row */}
-      <PulseRow cityPulse={data.hero.city_pulse} pulseRow={data.pulse_row} teamGrid={data.team_grid} />
-
-      {/* Today's Debate (if available) */}
-      {data.pulse_row.todays_debate && (
-        <TodayDebate debate={data.pulse_row.todays_debate} />
-      )}
-
-      {/* Spotlight */}
-      <SpotlightModules spotlight={data.spotlight} />
-
-      {/* Team Grid */}
-      <div>
-        <h2 className="text-lg font-bold text-[#0B0F14] dark:text-[#FAFAFB] mb-4">Teams</h2>
-        <TeamGrid teams={data.team_grid} injuries={data.injuries} feed={data.feed} />
-      </div>
-
-      {/* Content Feed */}
-      <ContentFeed items={data.feed} />
-
-      {/* Fan Interaction */}
-      <FanInteraction fanZone={data.fan_zone} />
     </div>
   )
 }
 
 function DashSkeleton() {
   return (
-    <div className="max-w-[1300px] mx-auto px-4 py-6 space-y-8 animate-pulse">
-      {/* Hero skeleton */}
-      <div className="h-[280px] rounded-2xl bg-gray-100 dark:bg-[#111111]" />
-      {/* Pulse row skeleton */}
-      <div className="grid grid-cols-4 gap-4">
+    <div className="max-w-[600px] mx-auto px-4 py-3 space-y-3 animate-pulse">
+      {/* Headline */}
+      <div className="h-10 w-3/4 rounded-lg bg-gray-100 dark:bg-[#111111] mt-4" />
+      <div className="h-5 w-1/2 rounded bg-gray-100 dark:bg-[#111111]" />
+      {/* Pulse */}
+      <div className="h-20 rounded-2xl bg-gray-100 dark:bg-[#111111]" />
+      {/* Team strip */}
+      <div className="flex gap-2.5">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="h-[100px] rounded-xl bg-gray-100 dark:bg-[#111111]" />
+          <div key={i} className="h-16 w-[160px] flex-shrink-0 rounded-2xl bg-gray-100 dark:bg-[#111111]" />
         ))}
       </div>
-      {/* Team grid skeleton */}
-      <div className="grid grid-cols-3 gap-4">
-        {[...Array(5)].map((_, i) => (
-          <div key={i} className="h-[120px] rounded-xl bg-gray-100 dark:bg-[#111111]" />
+      {/* Featured insight */}
+      <div className="h-24 rounded-2xl bg-gray-100 dark:bg-[#111111]" />
+      {/* What changed */}
+      <div className="flex gap-2">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="h-10 w-[140px] flex-shrink-0 rounded-xl bg-gray-100 dark:bg-[#111111]" />
+        ))}
+      </div>
+      {/* CTA */}
+      <div className="flex gap-2">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="flex-1 h-11 rounded-xl bg-gray-100 dark:bg-[#111111]" />
         ))}
       </div>
     </div>

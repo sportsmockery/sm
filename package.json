@@ -23,6 +23,7 @@
     "@ai-sdk/anthropic": "^3.0.58",
     "@ai-sdk/openai": "^3.0.41",
     "@anthropic-ai/sdk": "^0.71.2",
+    "@fingerprintjs/fingerprintjs": "^5.1.0",
     "@mediapipe/tasks-vision": "^0.10.32",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
