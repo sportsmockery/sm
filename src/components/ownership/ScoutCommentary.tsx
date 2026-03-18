@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import Image from 'next/image'
 
 interface ScoutCommentaryProps {
-  teamSlug?: string // omit for all-teams overview
+  teamSlug?: string
 }
 
 interface CommentaryData {
@@ -31,7 +31,6 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
   const textRef = useRef<HTMLDivElement>(null)
 
   const fetchCommentary = useCallback(async (angle: number) => {
-    // Check cache first
     const cacheKey = getCacheKey(teamSlug, angle)
     const cached = sessionStorage.getItem(cacheKey)
     if (cached) {
@@ -64,22 +63,16 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
         team: json.team || teamSlug,
       }
 
-      // Cache it
       sessionStorage.setItem(cacheKey, JSON.stringify(result))
-
       setData(result)
       setCurrentAngle(angle)
       animateText(result.commentary)
     } catch (err) {
       console.error('Scout commentary fetch failed:', err)
       setLoading(false)
-      setData({
-        commentary: 'Scout is warming up — commentary is loading. Hit "Another Take" to try again, or check back shortly.',
-        angle,
-        angle_name: '',
-        team: teamSlug,
-      })
-      setDisplayedText('Scout is warming up — commentary is loading. Hit "Another Take" to try again, or check back shortly.')
+      const fallback = 'Scout is warming up — commentary is loading. Hit "Another Take" to try again, or check back shortly.'
+      setData({ commentary: fallback, angle, angle_name: '', team: teamSlug })
+      setDisplayedText(fallback)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [teamSlug])
@@ -90,8 +83,8 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
     setDisplayedText('')
 
     let charIndex = 0
-    const charsPerFrame = 3 // fast talking speed
-    const intervalMs = 16 // ~60fps
+    const charsPerFrame = 3
+    const intervalMs = 16
 
     const tick = () => {
       charIndex += charsPerFrame
@@ -104,12 +97,11 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
       animFrameRef.current = window.setTimeout(tick, intervalMs)
     }
 
-    // Clear any existing animation
     if (animFrameRef.current) clearTimeout(animFrameRef.current)
     animFrameRef.current = window.setTimeout(tick, 300)
   }, [])
 
-  // Auto-open on page load (runs once)
+  // Auto-open on page load
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsOpen(true)
@@ -119,14 +111,12 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (animFrameRef.current) clearTimeout(animFrameRef.current)
     }
   }, [])
 
-  // Auto-scroll as text appears
   useEffect(() => {
     if (textRef.current && isTalking) {
       textRef.current.scrollTop = textRef.current.scrollHeight
@@ -160,7 +150,6 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
     setIsTalking(false)
   }
 
-  // Skip to end
   const handleSkip = () => {
     if (animFrameRef.current) clearTimeout(animFrameRef.current)
     if (data) {
@@ -173,27 +162,25 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
 
   return (
     <>
-      {/* Scout Icon — fixed bottom right, hidden when bubble is open */}
-      {!isOpen && (
+      {/* Scout icon — always visible, 96px, fixed bottom right */}
       <button
         onClick={handleToggle}
         style={{
           position: 'fixed',
-          bottom: 24,
-          right: 24,
-          width: 68,
-          height: 68,
+          bottom: 20,
+          right: 20,
+          width: 96,
+          height: 96,
           borderRadius: '50%',
-          border: '2px solid rgba(0,212,255,0.3)',
+          border: '3px solid rgba(0,212,255,0.3)',
           backgroundColor: 'var(--sm-card)',
           cursor: 'pointer',
-          zIndex: 9998,
+          zIndex: 9999,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           padding: 0,
-          boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
-          transition: 'transform 0.2s, box-shadow 0.2s',
+          boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
           animation: isTalking ? 'scout-bob 0.6s ease-in-out infinite' : 'none',
         }}
         aria-label="Scout Commentary"
@@ -201,34 +188,30 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
         <Image
           src="/downloads/scout-v2.png"
           alt="Scout AI"
-          width={48}
-          height={48}
+          width={72}
+          height={72}
           style={{
             borderRadius: '50%',
             objectFit: 'contain',
-            animation: isTalking ? 'scout-talk 0.3s ease-in-out infinite alternate' : 'none',
+            animation: isTalking ? 'scout-talk 0.4s ease-in-out infinite alternate' : 'none',
           }}
         />
       </button>
-      )}
 
-      {/* Comment Bubble */}
+      {/* Speech bubble — appears to the left of Scout's mouth */}
       {isOpen && (
         <div
           style={{
             position: 'fixed',
-            bottom: 102,
-            right: 24,
-            left: 24,
-            maxWidth: 900,
-            marginLeft: 'auto',
-            marginRight: 'auto',
-            maxHeight: '40vh',
-            borderRadius: 16,
+            bottom: 40,
+            right: 126,
+            width: 380,
+            maxHeight: '50vh',
+            borderRadius: '16px 16px 0 16px',
             backgroundColor: 'var(--sm-card)',
             border: '1px solid var(--sm-border)',
             boxShadow: '0 8px 40px rgba(0,0,0,0.15)',
-            zIndex: 9997,
+            zIndex: 9998,
             display: 'flex',
             flexDirection: 'column',
             overflow: 'hidden',
@@ -240,12 +223,11 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '12px 16px',
+            padding: '10px 14px',
             borderBottom: '1px solid var(--sm-border)',
             flexShrink: 0,
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Image src="/downloads/scout-v2.png" alt="Scout" width={24} height={24} style={{ borderRadius: '50%' }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--sm-text)' }}>Scout</span>
               {data?.angle_name && (
                 <span style={{
@@ -261,7 +243,7 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
                 </span>
               )}
               {isTalking && (
-                <span style={{ fontSize: 11, color: 'rgba(0,212,255,0.7)' }}>speaking...</span>
+                <span style={{ fontSize: 11, color: '#00D4FF', fontWeight: 500 }}>speaking...</span>
               )}
             </div>
             <button
@@ -288,14 +270,14 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
             style={{
               flex: 1,
               overflowY: 'auto',
-              padding: '16px',
+              padding: '14px',
               fontSize: 13,
               color: 'var(--sm-text)',
               lineHeight: 1.65,
             }}
           >
             {loading ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'rgba(0,212,255,0.7)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#00D4FF' }}>
                 <span>Scout is reviewing the grades</span>
                 <span className="scout-typing-dots">
                   <span>.</span><span>.</span><span>.</span>
@@ -303,7 +285,7 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
               </div>
             ) : paragraphs.length > 0 ? (
               paragraphs.map((p, i) => (
-                <p key={i} style={{ margin: i < paragraphs.length - 1 ? '0 0 12px' : 0 }}>
+                <p key={i} style={{ margin: i < paragraphs.length - 1 ? '0 0 10px' : 0 }}>
                   {p}
                 </p>
               ))
@@ -312,7 +294,7 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
 
           {/* Footer */}
           <div style={{
-            padding: '10px 16px',
+            padding: '8px 14px',
             borderTop: '1px solid var(--sm-border)',
             display: 'flex',
             alignItems: 'center',
@@ -353,7 +335,6 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
                 alignItems: 'center',
                 gap: 5,
                 lineHeight: 1,
-                transition: 'opacity 0.2s',
                 opacity: loading ? 0.5 : 1,
               }}
             >
@@ -361,6 +342,18 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
               Another Take
             </button>
           </div>
+
+          {/* Speech bubble tail pointing to Scout */}
+          <div style={{
+            position: 'absolute',
+            bottom: 12,
+            right: -8,
+            width: 0,
+            height: 0,
+            borderLeft: '8px solid var(--sm-card)',
+            borderTop: '6px solid transparent',
+            borderBottom: '6px solid transparent',
+          }} />
         </div>
       )}
 
@@ -368,11 +361,12 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
       <style>{`
         @keyframes scout-bob {
           0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-3px); }
+          50% { transform: translateY(-4px); }
         }
         @keyframes scout-talk {
-          0% { transform: scale(1); }
-          100% { transform: scale(1.05); }
+          0% { transform: scale(1) rotate(0deg); }
+          50% { transform: scale(1.06) rotate(1deg); }
+          100% { transform: scale(1) rotate(-1deg); }
         }
         .scout-typing-dots span {
           animation: scout-dot-blink 1.4s infinite;
@@ -387,12 +381,12 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
         }
         @media (max-width: 640px) {
           .scout-commentary-bubble {
-            bottom: 0 !important;
-            right: 0 !important;
-            left: 0 !important;
-            max-width: 100% !important;
-            border-radius: 16px 16px 0 0 !important;
-            max-height: 50vh !important;
+            right: 12px !important;
+            left: 12px !important;
+            width: auto !important;
+            bottom: 126px !important;
+            border-radius: 16px !important;
+            max-height: 45vh !important;
           }
         }
       `}</style>
