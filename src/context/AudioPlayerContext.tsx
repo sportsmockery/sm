@@ -73,7 +73,7 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
     };
   }, []);
 
-  // Wire up timeupdate and ended events
+  // Wire up timeupdate, ended, and error events
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -91,6 +91,7 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
         if (prev.queue.length > 0) {
           const [next, ...rest] = prev.queue;
           audio.src = next.url;
+          audio.load();
           audio.play().catch(() => {});
           return { ...prev, isPlaying: true, currentArticle: next, currentTime: 0, duration: 0, queue: rest };
         }
@@ -102,22 +103,24 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
       setState(prev => ({ ...prev, duration: audio.duration || 0 }));
     };
 
+    const onError = () => {
+      setState(prev => ({ ...prev, isPlaying: false, currentArticle: null, currentTime: 0, duration: 0 }));
+    };
+
     audio.addEventListener('timeupdate', onTimeUpdate);
     audio.addEventListener('ended', onEnded);
     audio.addEventListener('loadedmetadata', onLoadedMetadata);
+    audio.addEventListener('error', onError);
     return () => {
       audio.removeEventListener('timeupdate', onTimeUpdate);
       audio.removeEventListener('ended', onEnded);
       audio.removeEventListener('loadedmetadata', onLoadedMetadata);
+      audio.removeEventListener('error', onError);
     };
   }, []);
 
   const play = useCallback((article: AudioArticle, voice?: string) => {
     const audio = audioRef.current;
-    if (audio) {
-      audio.src = article.url;
-      audio.play().catch(() => {});
-    }
     setState(prev => ({
       ...prev,
       isPlaying: true,
@@ -126,6 +129,15 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
       duration: 0,
       voice: (voice as AudioState['voice']) ?? prev.voice,
     }));
+    if (audio) {
+      audio.src = article.url;
+      audio.load();
+      // If play() fails (e.g. autoplay restrictions or slow load), we still keep
+      // currentArticle set so the mini player can appear; users can retry.
+      audio.play().catch(() => {
+        setState(prev => ({ ...prev, isPlaying: false }));
+      });
+    }
   }, []);
 
   const pause = useCallback(() => {
