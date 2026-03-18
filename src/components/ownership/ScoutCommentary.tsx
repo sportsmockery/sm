@@ -27,7 +27,6 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
   const [displayedText, setDisplayedText] = useState('')
   const [isTalking, setIsTalking] = useState(false)
   const [currentAngle, setCurrentAngle] = useState(0)
-  const [autoOpened, setAutoOpened] = useState(false)
   const animFrameRef = useRef<number | null>(null)
   const textRef = useRef<HTMLDivElement>(null)
 
@@ -103,17 +102,15 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
     animFrameRef.current = window.setTimeout(tick, 300)
   }, [])
 
-  // Auto-open on page load
+  // Auto-open on page load (runs once)
   useEffect(() => {
-    if (!autoOpened) {
-      setAutoOpened(true)
-      const timer = setTimeout(() => {
-        setIsOpen(true)
-        fetchCommentary(0)
-      }, 1500)
-      return () => clearTimeout(timer)
-    }
-  }, [autoOpened, fetchCommentary])
+    const timer = setTimeout(() => {
+      setIsOpen(true)
+      fetchCommentary(0)
+    }, 1500)
+    return () => clearTimeout(timer)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Cleanup on unmount
   useEffect(() => {
@@ -169,7 +166,8 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
 
   return (
     <>
-      {/* Scout Icon — fixed bottom right */}
+      {/* Scout Icon — fixed bottom right, hidden when bubble is open */}
+      {!isOpen && (
       <button
         onClick={handleToggle}
         style={{
@@ -205,6 +203,7 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
           }}
         />
       </button>
+      )}
 
       {/* Comment Bubble */}
       {isOpen && (
