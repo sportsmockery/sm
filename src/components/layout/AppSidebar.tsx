@@ -10,11 +10,8 @@ import { ArrowRightLeft, ClipboardPen, MessageSquare, BarChart3, Video, Volume2,
 
 function ReportCardIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="4" y="2" width="16" height="20" rx="2" />
-      <text x="10" y="11" fill="currentColor" stroke="none" fontSize="8" fontWeight="700" fontFamily="sans-serif">A+</text>
-      <line x1="8" y1="15" x2="16" y2="15" />
-      <line x1="8" y1="18" x2="14" y2="18" />
+    <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <text x="12" y="17" fill="currentColor" fontSize="16" fontWeight="800" fontFamily="sans-serif" textAnchor="middle">A+</text>
     </svg>
   )
 }
