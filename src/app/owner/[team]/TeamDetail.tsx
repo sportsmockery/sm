@@ -166,45 +166,34 @@ export default function TeamDetail({ grade, history }: { grade: OwnershipGrade; 
               background: 'var(--sm-card)',
             }}>
               <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5, color: 'var(--sm-text-muted)', marginBottom: 6 }}>GM / President</div>
-              <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--sm-text)', lineHeight: 1.2 }}>{tenure.gm}</div>
-              <div style={{ fontSize: 12, color: 'var(--sm-text-dim)', marginTop: 4 }}>Since {tenure.gmSince} ({currentYear - Number(tenure.gmSince)} years)</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--sm-text)', lineHeight: 1.2 }}>{tenure.gm}</div>
+                <span style={{ fontSize: 12, color: 'var(--sm-text-dim)' }}>Since {tenure.gmSince}</span>
+              </div>
+              {tenure.gmRecords && tenure.gmRecords.length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 10 }}>
+                  {tenure.gmRecords.map(rec => {
+                    const [year, record] = rec.split(': ')
+                    return (
+                      <span key={year} style={{
+                        fontSize: 11,
+                        fontWeight: 600,
+                        padding: '3px 8px',
+                        borderRadius: 6,
+                        backgroundColor: 'var(--sm-surface)',
+                        border: '1px solid var(--sm-border)',
+                        color: 'var(--sm-text)',
+                        lineHeight: 1,
+                        whiteSpace: 'nowrap',
+                      }}>
+                        <span style={{ color: 'var(--sm-text-dim)' }}>{year}:</span> {record?.replace('*', '')}{record?.includes('*') ? <span style={{ color: 'var(--sm-text-dim)' }}> *</span> : null}
+                      </span>
+                    )
+                  })}
+                </div>
+              )}
             </div>
           )}
-        </div>
-      )}
-
-      {/* GM-Era Records */}
-      {tenure?.gmRecords && tenure.gmRecords.length > 0 && (
-        <div style={{ marginBottom: 32 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--sm-text)', marginBottom: 12 }}>
-            Record Under {tenure.gm}
-          </h2>
-          <div style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: 8,
-          }}>
-            {tenure.gmRecords.map(rec => {
-              const [year, record] = rec.split(': ')
-              const isInProgress = record?.includes('*')
-              return (
-                <div key={year} style={{
-                  padding: '8px 14px',
-                  borderRadius: 10,
-                  border: '1px solid var(--sm-border)',
-                  background: 'var(--sm-card)',
-                  textAlign: 'center',
-                  minWidth: 80,
-                }}>
-                  <div style={{ fontSize: 11, color: 'var(--sm-text-muted)', fontWeight: 600, marginBottom: 2 }}>{year}</div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--sm-text)', lineHeight: 1 }}>
-                    {record?.replace('*', '')}
-                  </div>
-                  {isInProgress && <div style={{ fontSize: 10, color: 'var(--sm-text-dim)', marginTop: 2 }}>In Progress</div>}
-                </div>
-              )
-            })}
-          </div>
         </div>
       )}
 
@@ -256,18 +245,23 @@ export default function TeamDetail({ grade, history }: { grade: OwnershipGrade; 
         <GradeTimeline history={history} />
       </div>
 
-      {/* Signings & Transactions Log */}
+      {/* Signings & Transactions Timeline */}
       {history.filter(h => h.notes).length > 0 && (
         <div style={{ marginBottom: 32 }}>
           <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--sm-text)', marginBottom: 16 }}>
             Key Moves & Transactions
           </h2>
-          <div style={{
-            borderRadius: 12,
-            border: '1px solid var(--sm-border)',
-            background: 'var(--sm-card)',
-            overflow: 'hidden',
-          }}>
+          <div style={{ position: 'relative', paddingLeft: 28 }}>
+            {/* Vertical line */}
+            <div style={{
+              position: 'absolute',
+              left: 7,
+              top: 8,
+              bottom: 8,
+              width: 2,
+              backgroundColor: 'var(--sm-border)',
+            }} />
+
             {[...history].filter(h => h.notes).reverse().map((h, i, arr) => {
               const overallNum = Number(h.overall_grade)
               const prevIdx = i < arr.length - 1 ? i + 1 : null
@@ -279,54 +273,51 @@ export default function TeamDetail({ grade, history }: { grade: OwnershipGrade; 
                 <div
                   key={h.recorded_at}
                   style={{
-                    display: 'flex',
-                    gap: 14,
-                    padding: '14px 16px',
-                    borderBottom: i < arr.length - 1 ? '1px solid var(--sm-border)' : 'none',
-                    alignItems: 'flex-start',
+                    position: 'relative',
+                    paddingBottom: i < arr.length - 1 ? 20 : 0,
                   }}
                 >
+                  {/* Dot on the line */}
+                  <div style={{
+                    position: 'absolute',
+                    left: -24,
+                    top: 4,
+                    width: 12,
+                    height: 12,
+                    borderRadius: '50%',
+                    backgroundColor: gradeColor,
+                    border: '2px solid var(--sm-card, #0B0F14)',
+                    zIndex: 1,
+                  }} />
+
                   {/* Quarter label */}
                   <div style={{
-                    flexShrink: 0,
-                    width: 64,
-                    fontSize: 12,
+                    fontSize: 11,
                     fontWeight: 700,
                     color: 'var(--sm-text-muted)',
-                    paddingTop: 1,
+                    marginBottom: 3,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
                   }}>
                     {h.season_label || new Date(h.recorded_at).toLocaleDateString('en-US', { month: 'short', year: '2-digit' })}
-                  </div>
-
-                  {/* Dot + line */}
-                  <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 4 }}>
-                    <div style={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: '50%',
-                      backgroundColor: gradeColor,
-                      flexShrink: 0,
-                    }} />
-                  </div>
-
-                  {/* Content */}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 13, color: 'var(--sm-text)', lineHeight: 1.5 }}>
-                      {h.notes}
-                    </div>
-                    <div style={{ display: 'flex', gap: 10, marginTop: 4, fontSize: 12 }}>
-                      <span style={{ color: gradeColor, fontWeight: 700 }}>
-                        {overallNum.toFixed(1)}
+                    <span style={{ color: gradeColor, fontWeight: 700, fontSize: 12 }}>
+                      {overallNum.toFixed(1)}
+                    </span>
+                    {delta !== null && delta !== 0 && (
+                      <span style={{
+                        fontSize: 11,
+                        fontWeight: 600,
+                        color: delta > 0 ? '#00d084' : '#ef4444',
+                      }}>
+                        {delta > 0 ? '+' : ''}{delta.toFixed(1)}
                       </span>
-                      {delta !== null && delta !== 0 && (
-                        <span style={{
-                          color: delta > 0 ? '#00d084' : '#ef4444',
-                          fontWeight: 600,
-                        }}>
-                          {delta > 0 ? '+' : ''}{delta.toFixed(1)}
-                        </span>
-                      )}
-                    </div>
+                    )}
+                  </div>
+
+                  {/* Event text */}
+                  <div style={{ fontSize: 13, color: 'var(--sm-text)', lineHeight: 1.5 }}>
+                    {h.notes}
                   </div>
                 </div>
               )
