@@ -25,7 +25,7 @@ export default function MobileTeamDrawer({ team, onClose }: Props) {
   return (
     <div
       className="fixed inset-0 z-[100] flex flex-col lg:hidden"
-      style={{ backgroundColor: 'rgba(11,15,20,0.95)' }}
+      style={{ backgroundColor: 'rgba(11,15,20,0.5)' }}
     >
       {/* Backdrop tap to close */}
       <div className="absolute inset-0" onClick={onClose} />
@@ -33,13 +33,13 @@ export default function MobileTeamDrawer({ team, onClose }: Props) {
       {/* Drawer content */}
       <div
         className="relative mt-12 flex-1 overflow-y-auto rounded-t-2xl animate-slide-up"
-        style={{ backgroundColor: '#0B0F14' }}
+        style={{ backgroundColor: '#FAFAFB' }}
       >
         {/* Handle bar */}
         <div className="flex justify-center pt-3 pb-1">
           <div
             className="w-10 h-1 rounded-full"
-            style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}
+            style={{ backgroundColor: 'rgba(11,15,20,0.15)' }}
           />
         </div>
 

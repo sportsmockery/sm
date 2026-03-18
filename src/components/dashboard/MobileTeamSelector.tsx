@@ -20,8 +20,8 @@ export default function MobileTeamSelector({ teams, selectedTeam, onSelectTeam }
             onClick={() => onSelectTeam(team.team_key)}
             className="flex-shrink-0 rounded-xl px-3 py-2.5 border transition-all"
             style={{
-              backgroundColor: isSelected ? 'rgba(0,212,255,0.06)' : 'rgba(255,255,255,0.02)',
-              borderColor: isSelected ? team.color_primary : 'rgba(255,255,255,0.06)',
+              backgroundColor: isSelected ? 'rgba(0,212,255,0.06)' : 'rgba(11,15,20,0.02)',
+              borderColor: isSelected ? team.color_primary : 'rgba(11,15,20,0.08)',
               minWidth: 120,
             }}
           >
@@ -30,12 +30,12 @@ export default function MobileTeamSelector({ teams, selectedTeam, onSelectTeam }
                 className="w-2.5 h-2.5 rounded-sm"
                 style={{ backgroundColor: team.color_primary }}
               />
-              <span className="text-xs font-medium" style={{ color: '#FAFAFB' }}>
+              <span className="text-xs font-medium" style={{ color: '#0B0F14' }}>
                 {team.team_name.replace('Chicago ', '')}
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-xs tabular-nums" style={{ color: 'rgba(250,250,251,0.5)' }}>
+              <span className="text-xs tabular-nums" style={{ color: 'rgba(11,15,20,0.5)' }}>
                 {team.record.record_display}
               </span>
               <span

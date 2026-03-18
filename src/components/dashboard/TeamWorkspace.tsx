@@ -11,7 +11,7 @@ interface Props {
 type Tab = 'overview' | 'performance' | 'health' | 'players' | 'intelligence'
 
 function TrendArrow({ direction }: { direction: TrendDirection }) {
-  const color = direction === 'up' ? '#00D4FF' : direction === 'down' ? '#BC0000' : 'rgba(250,250,251,0.3)'
+  const color = direction === 'up' ? '#00D4FF' : direction === 'down' ? '#BC0000' : 'rgba(11,15,20,0.3)'
   const symbol = direction === 'up' ? '\u25b2' : direction === 'down' ? '\u25bc' : '\u25b6'
   return <span style={{ color, fontSize: 10 }}>{symbol}</span>
 }
@@ -25,7 +25,7 @@ function MetricBar({ label, value, max = 100, color }: { label: string; value: n
         <span className="text-xs" style={{ color: 'rgba(11,15,20,0.5)' }}>{label}</span>
         <span className="text-xs font-medium tabular-nums" style={{ color: barColor }}>{value}</span>
       </div>
-      <div className="h-1.5 rounded-full" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}>
+      <div className="h-1.5 rounded-full" style={{ backgroundColor: 'rgba(11,15,20,0.08)' }}>
         <div
           className="h-full rounded-full transition-all duration-500"
           style={{ width: `${pct}%`, backgroundColor: barColor }}
@@ -64,14 +64,14 @@ export default function TeamWorkspace({ team, onClose }: Props) {
     <div
       className="rounded-xl border overflow-hidden"
       style={{
-        backgroundColor: 'rgba(255,255,255,0.02)',
-        borderColor: 'rgba(255,255,255,0.06)',
+        backgroundColor: 'rgba(11,15,20,0.02)',
+        borderColor: 'rgba(11,15,20,0.08)',
       }}
     >
       {/* Header */}
       <div
         className="flex items-center justify-between px-4 py-3 border-b"
-        style={{ borderColor: 'rgba(255,255,255,0.06)' }}
+        style={{ borderColor: 'rgba(11,15,20,0.08)' }}
       >
         <div className="flex items-center gap-3">
           <div
@@ -102,7 +102,7 @@ export default function TeamWorkspace({ team, onClose }: Props) {
       {/* Tabs */}
       <div
         className="flex gap-0 border-b overflow-x-auto"
-        style={{ borderColor: 'rgba(255,255,255,0.06)' }}
+        style={{ borderColor: 'rgba(11,15,20,0.08)' }}
       >
         {tabs.map((tab) => (
           <button
@@ -110,7 +110,7 @@ export default function TeamWorkspace({ team, onClose }: Props) {
             onClick={() => setActiveTab(tab.key)}
             className="px-4 py-2 text-xs font-medium transition-colors whitespace-nowrap"
             style={{
-              color: activeTab === tab.key ? '#00D4FF' : 'rgba(250,250,251,0.4)',
+              color: activeTab === tab.key ? '#00D4FF' : 'rgba(11,15,20,0.4)',
               borderBottom: activeTab === tab.key ? '2px solid #00D4FF' : '2px solid transparent',
               backgroundColor: activeTab === tab.key ? 'rgba(0,212,255,0.04)' : 'transparent',
             }}
@@ -136,11 +136,11 @@ export default function TeamWorkspace({ team, onClose }: Props) {
 
             {/* Quick Stats */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="rounded-lg p-3" style={{ backgroundColor: 'rgba(255,255,255,0.03)' }}>
+              <div className="rounded-lg p-3" style={{ backgroundColor: 'rgba(11,15,20,0.03)' }}>
                 <span className="text-xs block" style={{ color: 'rgba(11,15,20,0.4)' }}>Record</span>
                 <span className="text-lg font-bold" style={{ color: '#0B0F14' }}>{team.record.record_display}</span>
               </div>
-              <div className="rounded-lg p-3" style={{ backgroundColor: 'rgba(255,255,255,0.03)' }}>
+              <div className="rounded-lg p-3" style={{ backgroundColor: 'rgba(11,15,20,0.03)' }}>
                 <span className="text-xs block" style={{ color: 'rgba(11,15,20,0.4)' }}>Streak</span>
                 <span className="text-lg font-bold" style={{
                   color: team.recent.streak.type === 'W' ? '#00D4FF' : '#BC0000'
@@ -148,11 +148,11 @@ export default function TeamWorkspace({ team, onClose }: Props) {
                   {team.recent.streak.display}
                 </span>
               </div>
-              <div className="rounded-lg p-3" style={{ backgroundColor: 'rgba(255,255,255,0.03)' }}>
+              <div className="rounded-lg p-3" style={{ backgroundColor: 'rgba(11,15,20,0.03)' }}>
                 <span className="text-xs block" style={{ color: 'rgba(11,15,20,0.4)' }}>Last 10</span>
                 <span className="text-lg font-bold" style={{ color: '#0B0F14' }}>{team.recent.last_10}</span>
               </div>
-              <div className="rounded-lg p-3" style={{ backgroundColor: 'rgba(255,255,255,0.03)' }}>
+              <div className="rounded-lg p-3" style={{ backgroundColor: 'rgba(11,15,20,0.03)' }}>
                 <span className="text-xs block" style={{ color: 'rgba(11,15,20,0.4)' }}>Remaining</span>
                 <span className="text-lg font-bold" style={{ color: '#0B0F14' }}>{team.record.games_remaining}</span>
               </div>
@@ -162,7 +162,7 @@ export default function TeamWorkspace({ team, onClose }: Props) {
             {team.status.next_game ? (
               <div
                 className="rounded-lg p-3 border"
-                style={{ backgroundColor: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.04)' }}
+                style={{ backgroundColor: 'rgba(11,15,20,0.02)', borderColor: 'rgba(11,15,20,0.06)' }}
               >
                 <span className="text-xs uppercase tracking-wider block mb-1" style={{ color: 'rgba(11,15,20,0.35)' }}>
                   Next Game
@@ -184,7 +184,7 @@ export default function TeamWorkspace({ team, onClose }: Props) {
             ) : (
               <div
                 className="rounded-lg p-3 border"
-                style={{ backgroundColor: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.04)' }}
+                style={{ backgroundColor: 'rgba(11,15,20,0.02)', borderColor: 'rgba(11,15,20,0.06)' }}
               >
                 <span className="text-xs uppercase tracking-wider block mb-1" style={{ color: 'rgba(11,15,20,0.35)' }}>
                   Next Game
@@ -206,13 +206,13 @@ export default function TeamWorkspace({ team, onClose }: Props) {
                 <TrendArrow direction={team.performance.offense.trend} />
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-lg p-3" style={{ backgroundColor: 'rgba(255,255,255,0.03)' }}>
+                <div className="rounded-lg p-3" style={{ backgroundColor: 'rgba(11,15,20,0.03)' }}>
                   <span className="text-xs block" style={{ color: 'rgba(11,15,20,0.4)' }}>Rating</span>
                   <span className="text-lg font-bold" style={{ color: '#0B0F14' }}>
                     {team.performance.offense.rating_display}
                   </span>
                 </div>
-                <div className="rounded-lg p-3" style={{ backgroundColor: 'rgba(255,255,255,0.03)' }}>
+                <div className="rounded-lg p-3" style={{ backgroundColor: 'rgba(11,15,20,0.03)' }}>
                   <span className="text-xs block" style={{ color: 'rgba(11,15,20,0.4)' }}>Rank</span>
                   <span className="text-lg font-bold" style={{ color: '#0B0F14' }}>
                     {team.performance.offense.rank_display}
@@ -235,13 +235,13 @@ export default function TeamWorkspace({ team, onClose }: Props) {
                 <TrendArrow direction={team.performance.defense.trend} />
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-lg p-3" style={{ backgroundColor: 'rgba(255,255,255,0.03)' }}>
+                <div className="rounded-lg p-3" style={{ backgroundColor: 'rgba(11,15,20,0.03)' }}>
                   <span className="text-xs block" style={{ color: 'rgba(11,15,20,0.4)' }}>Rating</span>
                   <span className="text-lg font-bold" style={{ color: '#0B0F14' }}>
                     {team.performance.defense.rating_display}
                   </span>
                 </div>
-                <div className="rounded-lg p-3" style={{ backgroundColor: 'rgba(255,255,255,0.03)' }}>
+                <div className="rounded-lg p-3" style={{ backgroundColor: 'rgba(11,15,20,0.03)' }}>
                   <span className="text-xs block" style={{ color: 'rgba(11,15,20,0.4)' }}>Rank</span>
                   <span className="text-lg font-bold" style={{ color: '#0B0F14' }}>
                     {team.performance.defense.rank_display}
@@ -319,7 +319,7 @@ export default function TeamWorkspace({ team, onClose }: Props) {
                   <div
                     key={p.player_id}
                     className="flex items-center justify-between py-2 border-b"
-                    style={{ borderColor: 'rgba(255,255,255,0.04)' }}
+                    style={{ borderColor: 'rgba(11,15,20,0.06)' }}
                   >
                     <div>
                       <span className="text-sm font-medium" style={{ color: '#0B0F14' }}>{p.name}</span>
@@ -346,7 +346,7 @@ export default function TeamWorkspace({ team, onClose }: Props) {
                   <div
                     key={p.player_id}
                     className="flex items-center justify-between py-2 border-b"
-                    style={{ borderColor: 'rgba(255,255,255,0.04)' }}
+                    style={{ borderColor: 'rgba(11,15,20,0.06)' }}
                   >
                     <div>
                       <span className="text-sm font-medium" style={{ color: '#0B0F14' }}>{p.name}</span>
