@@ -35,15 +35,17 @@ function InjuryStatusBadge({ status }: { status: string }) {
 }
 
 export default function TrendsPanel({ trends }: Props) {
-  const [activeTab, setActiveTab] = useState<TrendTab>('risers')
-
   const tabs: { key: TrendTab; label: string; count: number }[] = [
+    { key: 'injuries', label: 'Injuries', count: trends.injuries.length },
+    { key: 'volatility', label: 'Volatility', count: trends.volatility.length },
     { key: 'risers', label: 'Risers', count: trends.risers.length },
     { key: 'fallers', label: 'Fallers', count: trends.fallers.length },
     { key: 'streaks', label: 'Streaks', count: trends.streaks.length },
-    { key: 'injuries', label: 'Injuries', count: trends.injuries.length },
-    { key: 'volatility', label: 'Volatility', count: trends.volatility.length },
   ]
+
+  // Default to first tab that has data
+  const firstWithData = tabs.find(t => t.count > 0)?.key || 'injuries'
+  const [activeTab, setActiveTab] = useState<TrendTab>(firstWithData)
 
   return (
     <div
