@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import OwnershipCard from '@/components/ownership/OwnershipCard'
 import LeagueCompareTable from '@/components/ownership/LeagueCompareTable'
 
@@ -21,6 +22,8 @@ interface OwnershipGrade {
 }
 
 export default function OwnershipHub({ grades }: { grades: OwnershipGrade[] }) {
+  const [showMethodology, setShowMethodology] = useState(false)
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -68,9 +71,32 @@ export default function OwnershipHub({ grades }: { grades: OwnershipGrade[] }) {
 
       {/* League Comparison Table */}
       <div style={{ marginBottom: 40 }}>
-        <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--sm-text)', marginBottom: 16 }}>
-          League Comparison
-        </h2>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--sm-text)', margin: 0 }}>
+            League Comparison
+          </h2>
+          <button
+            onClick={() => setShowMethodology(true)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 5,
+              fontSize: 12,
+              fontWeight: 600,
+              color: 'var(--sm-text-muted)',
+              backgroundColor: 'var(--sm-surface)',
+              border: '1px solid var(--sm-border)',
+              borderRadius: 20,
+              padding: '5px 12px',
+              cursor: 'pointer',
+              transition: 'opacity 0.2s',
+              lineHeight: 1,
+            }}
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" /></svg>
+            How We Grade
+          </button>
+        </div>
         <LeagueCompareTable grades={grades} />
       </div>
 
@@ -90,23 +116,115 @@ export default function OwnershipHub({ grades }: { grades: OwnershipGrade[] }) {
         </div>
       </div>
 
-      {/* Methodology note */}
-      <div style={{
-        padding: 20,
-        borderRadius: 12,
-        border: '1px solid var(--sm-border)',
-        background: 'var(--sm-card)',
-      }}>
-        <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--sm-text)', margin: '0 0 8px' }}>
-          How We Grade
-        </h3>
-        <div style={{ fontSize: 13, color: 'var(--sm-text-dim)', lineHeight: 1.6 }}>
-          <p style={{ margin: '0 0 8px' }}><strong>Spending (0-10):</strong> How much does ownership invest relative to market size? Measures payroll rank vs. expected rank for a top-3 market.</p>
-          <p style={{ margin: '0 0 8px' }}><strong>Results (0-10):</strong> Are they winning? Win percentage percentile plus payroll efficiency (wins per dollar).</p>
-          <p style={{ margin: '0 0 8px' }}><strong>Fan Sentiment (0-10):</strong> AI-aggregated fan sentiment from Reddit, Twitter/X, and local media. Updated quarterly.</p>
-          <p style={{ margin: 0 }}><strong>Loyalty Tax (0-10, lower is better):</strong> Broken promises, failed rebuilds, and superstar departures. The cost of being a loyal fan.</p>
+      {/* How We Grade Modal */}
+      {showMethodology && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 24,
+          }}
+          onClick={() => setShowMethodology(false)}
+        >
+          {/* Backdrop */}
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            backgroundColor: 'rgba(0,0,0,0.6)',
+            backdropFilter: 'blur(4px)',
+          }} />
+
+          {/* Modal */}
+          <div
+            style={{
+              position: 'relative',
+              maxWidth: 480,
+              width: '100%',
+              borderRadius: 16,
+              border: '1px solid var(--sm-border)',
+              background: 'var(--sm-card)',
+              padding: '28px 24px',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Close button */}
+            <button
+              onClick={() => setShowMethodology(false)}
+              style={{
+                position: 'absolute',
+                top: 12,
+                right: 12,
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                color: 'var(--sm-text-muted)',
+                padding: 4,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+              aria-label="Close"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
+            </button>
+
+            <h3 style={{ fontSize: 18, fontWeight: 700, color: 'var(--sm-text)', margin: '0 0 16px' }}>
+              How We Grade
+            </h3>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24, borderRadius: 6, backgroundColor: 'rgba(0,212,255,0.15)', fontSize: 12 }}>$</span>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--sm-text)' }}>Spending (0-10)</span>
+                </div>
+                <p style={{ fontSize: 13, color: 'var(--sm-text-dim)', margin: 0, lineHeight: 1.5, paddingLeft: 32 }}>
+                  How much does ownership invest relative to market size? Measures payroll rank vs. expected rank for a top-3 market.
+                </p>
+              </div>
+
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24, borderRadius: 6, backgroundColor: 'rgba(96,165,250,0.15)', color: '#60a5fa', fontSize: 13, fontWeight: 700 }}>W</span>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--sm-text)' }}>Results (0-10)</span>
+                </div>
+                <p style={{ fontSize: 13, color: 'var(--sm-text-dim)', margin: 0, lineHeight: 1.5, paddingLeft: 32 }}>
+                  Are they winning? Win percentage percentile plus payroll efficiency (wins per dollar).
+                </p>
+              </div>
+
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24, borderRadius: 6, backgroundColor: 'rgba(250,204,21,0.15)', color: '#facc15', fontSize: 13, fontWeight: 700 }}>S</span>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--sm-text)' }}>Fan Sentiment (0-10)</span>
+                </div>
+                <p style={{ fontSize: 13, color: 'var(--sm-text-dim)', margin: 0, lineHeight: 1.5, paddingLeft: 32 }}>
+                  AI-aggregated fan sentiment from Reddit, Twitter/X, and local media. Updated quarterly.
+                </p>
+              </div>
+
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24, borderRadius: 6, backgroundColor: 'rgba(239,68,68,0.15)', color: '#ef4444', fontSize: 13, fontWeight: 700 }}>L</span>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--sm-text)' }}>Loyalty Tax (0-10)</span>
+                </div>
+                <p style={{ fontSize: 13, color: 'var(--sm-text-dim)', margin: 0, lineHeight: 1.5, paddingLeft: 32 }}>
+                  Broken promises, failed rebuilds, and superstar departures. Lower is better — the cost of being a loyal fan.
+                </p>
+              </div>
+            </div>
+
+            <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid var(--sm-border)', fontSize: 12, color: 'var(--sm-text-dim)', lineHeight: 1.5 }}>
+              Overall = (Spend + Results + Sentiment + (10 - Loyalty Tax)) / 4
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }
