@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation"
 import {
   MessageCircle, Share, Eye,
   TrendingUp, Play, Clock, Check, X, ChevronRight,
-  BarChart3, Users
+  BarChart3, Users, Activity
 } from "lucide-react"
 import { useAudioPlayer } from "@/context/AudioPlayerContext"
 import { homepageTeams } from "@/lib/homepage-team-data"
