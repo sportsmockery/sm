@@ -15,6 +15,8 @@ interface CommentaryData {
 }
 
 const DATALAB_URL = 'https://datalab.sportsmockery.com'
+const TOTAL_ANGLES = 3
+const CACHE_POOL_SIZE = 10 // pre-fetch this many responses
 
 function getCacheKey(teamSlug: string | undefined, angle: number) {
   return `scout_owner_${teamSlug || 'all'}_${angle}`
@@ -28,26 +30,22 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
   const [isTalking, setIsTalking] = useState(false)
   const [currentAngle, setCurrentAngle] = useState(0)
   const [playing, setPlaying] = useState(false)
+  const [audioLoading, setAudioLoading] = useState(false)
+  const [audioProgress, setAudioProgress] = useState(0)
+  const [audioDuration, setAudioDuration] = useState(0)
   const animFrameRef = useRef<number | null>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const textRef = useRef<HTMLDivElement>(null)
+  const fetchingAudioRef = useRef(false) // guard against double-clicks
+  const poolIndexRef = useRef(0) // track which pool response to show next
 
-  const fetchCommentary = useCallback(async (angle: number) => {
+  // Fetch a single commentary response
+  const fetchSingle = useCallback(async (angle: number): Promise<CommentaryData | null> => {
     const cacheKey = getCacheKey(teamSlug, angle)
     const cached = sessionStorage.getItem(cacheKey)
     if (cached) {
-      try {
-        const parsed = JSON.parse(cached) as CommentaryData
-        setData(parsed)
-        setCurrentAngle(angle)
-        animateText(parsed.commentary)
-        return
-      } catch { /* cache miss */ }
+      try { return JSON.parse(cached) as CommentaryData } catch { /* miss */ }
     }
-
-    setLoading(true)
-    setDisplayedText('')
-    setData(null)
 
     try {
       const params = new URLSearchParams()
@@ -55,29 +53,109 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
       params.set('angle', String(angle))
 
       const res = await fetch(`${DATALAB_URL}/api/scout/owner-commentary?${params}`)
-      if (!res.ok) throw new Error('Failed to fetch')
+      if (!res.ok) throw new Error('Failed')
 
       const json = await res.json()
       const result: CommentaryData = {
         commentary: json.commentary || json.data?.commentary || '',
-        angle: json.angle ?? angle,
-        angle_name: json.angle_name || json.data?.angle_name || '',
+        angle: json.angle?.index ?? json.angle ?? angle,
+        angle_name: json.angle?.label || json.angle_name || json.data?.angle_name || '',
         team: json.team || teamSlug,
       }
-
       sessionStorage.setItem(cacheKey, JSON.stringify(result))
-      setData(result)
-      setCurrentAngle(angle)
-      animateText(result.commentary)
-    } catch (err) {
-      console.error('Scout commentary fetch failed:', err)
+      return result
+    } catch {
+      return null
+    }
+  }, [teamSlug])
+
+  // Pre-cache pool of responses in background
+  const prefetchPool = useCallback(async () => {
+    for (let i = 0; i < CACHE_POOL_SIZE; i++) {
+      const angle = i % TOTAL_ANGLES
+      const cacheKey = getCacheKey(teamSlug, angle) + `_pool_${i}`
+      if (sessionStorage.getItem(cacheKey)) continue
+      try {
+        const params = new URLSearchParams()
+        if (teamSlug) params.set('team', teamSlug)
+        params.set('angle', String(angle))
+        const res = await fetch(`${DATALAB_URL}/api/scout/owner-commentary?${params}`)
+        if (res.ok) {
+          const json = await res.json()
+          sessionStorage.setItem(cacheKey, JSON.stringify({
+            commentary: json.commentary || json.data?.commentary || '',
+            angle: json.angle?.index ?? json.angle ?? angle,
+            angle_name: json.angle?.label || json.angle_name || '',
+            team: json.team || teamSlug,
+          }))
+        }
+      } catch { /* silent */ }
+    }
+  }, [teamSlug])
+
+  // Get next pooled response
+  const getPooledResponse = useCallback((angle: number): CommentaryData | null => {
+    // Try pool first (round-robin)
+    for (let attempt = 0; attempt < CACHE_POOL_SIZE; attempt++) {
+      const idx = (poolIndexRef.current + attempt) % CACHE_POOL_SIZE
+      const poolAngle = idx % TOTAL_ANGLES
+      if (poolAngle !== angle) continue
+      const cacheKey = getCacheKey(teamSlug, poolAngle) + `_pool_${idx}`
+      const cached = sessionStorage.getItem(cacheKey)
+      if (cached) {
+        poolIndexRef.current = idx + 1
+        try { return JSON.parse(cached) } catch { /* miss */ }
+      }
+    }
+    return null
+  }, [teamSlug])
+
+  // Show a commentary response with animation
+  const showCommentary = useCallback((result: CommentaryData, angle: number) => {
+    setData(result)
+    setCurrentAngle(angle)
+    setLoading(false)
+    animateText(result.commentary)
+  }, [])
+
+  // Fetch and display commentary
+  const fetchCommentary = useCallback(async (angle: number) => {
+    // Try direct cache
+    const cacheKey = getCacheKey(teamSlug, angle)
+    const cached = sessionStorage.getItem(cacheKey)
+    if (cached) {
+      try {
+        showCommentary(JSON.parse(cached), angle)
+        return
+      } catch { /* miss */ }
+    }
+
+    // Try pool
+    const pooled = getPooledResponse(angle)
+    if (pooled) {
+      showCommentary(pooled, angle)
+      return
+    }
+
+    // Fetch fresh
+    setLoading(true)
+    setDisplayedText('')
+    setData(null)
+
+    const result = await fetchSingle(angle)
+    if (result) {
+      showCommentary(result, angle)
+    } else {
       setLoading(false)
-      const fallback = 'Scout is warming up — commentary is loading. Hit "Another Take" to try again, or check back shortly.'
-      setData({ commentary: fallback, angle, angle_name: '', team: teamSlug })
-      setDisplayedText(fallback)
+      const fallback: CommentaryData = {
+        commentary: 'Scout is warming up — commentary is loading. Hit "Another Take" to try again, or check back shortly.',
+        angle, angle_name: '', team: teamSlug,
+      }
+      setData(fallback)
+      setDisplayedText(fallback.commentary)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [teamSlug])
+  }, [teamSlug, fetchSingle, getPooledResponse, showCommentary])
 
   const animateText = useCallback((fullText: string) => {
     setLoading(false)
@@ -103,33 +181,61 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
     animFrameRef.current = window.setTimeout(tick, 300)
   }, [])
 
-  // Auto-open on page load
+  // Auto-open + pre-cache pool on mount
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsOpen(true)
       fetchCommentary(0)
+      // Pre-cache pool in background after initial load
+      setTimeout(() => prefetchPool(), 3000)
     }, 1500)
     return () => clearTimeout(timer)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // Cleanup
   useEffect(() => {
     return () => {
       if (animFrameRef.current) clearTimeout(animFrameRef.current)
+      if (audioRef.current) { audioRef.current.pause(); audioRef.current = null }
     }
   }, [])
 
+  // Auto-scroll
   useEffect(() => {
     if (textRef.current && isTalking) {
       textRef.current.scrollTop = textRef.current.scrollHeight
     }
   }, [displayedText, isTalking])
 
-  const handleAnotherTake = () => {
-    const nextAngle = (currentAngle + 1) % 3
-    if (animFrameRef.current) clearTimeout(animFrameRef.current)
-    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null }
+  // Audio time update handler
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio) return
+    const onTime = () => {
+      setAudioProgress(audio.currentTime)
+      setAudioDuration(audio.duration || 0)
+    }
+    audio.addEventListener('timeupdate', onTime)
+    return () => audio.removeEventListener('timeupdate', onTime)
+  }, [playing])
+
+  const stopAudio = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current.removeEventListener('ended', () => {})
+      audioRef.current = null
+    }
     setPlaying(false)
+    setAudioProgress(0)
+    setAudioDuration(0)
+    fetchingAudioRef.current = false
+  }, [])
+
+  const handleAnotherTake = () => {
+    const nextAngle = (currentAngle + 1) % TOTAL_ANGLES
+    if (animFrameRef.current) clearTimeout(animFrameRef.current)
+    stopAudio()
     setDisplayedText('')
     setIsTalking(false)
     fetchCommentary(nextAngle)
@@ -142,42 +248,47 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
       setIsTalking(false)
     } else {
       setIsOpen(true)
-      if (!data && !loading) {
-        fetchCommentary(currentAngle)
-      }
+      if (!data && !loading) fetchCommentary(currentAngle)
     }
   }
 
   const handleClose = () => {
     setIsOpen(false)
     if (animFrameRef.current) clearTimeout(animFrameRef.current)
-    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null }
-    setPlaying(false)
+    stopAudio()
     setIsTalking(false)
   }
 
   const handleSkip = () => {
     if (animFrameRef.current) clearTimeout(animFrameRef.current)
-    if (data) {
-      setDisplayedText(data.commentary)
-      setIsTalking(false)
-    }
+    if (data) { setDisplayedText(data.commentary); setIsTalking(false) }
   }
 
   const handlePlayVoice = async () => {
     if (!data?.commentary) return
 
+    // Toggle off if playing
     if (playing && audioRef.current) {
       audioRef.current.pause()
       setPlaying(false)
       return
     }
 
-    // Check cache
-    const cacheKey = `scout-audio-${teamSlug || 'all'}-${currentAngle}`
-    let audioUrl = sessionStorage.getItem(cacheKey)
+    // Guard against double-clicks
+    if (fetchingAudioRef.current) return
+    fetchingAudioRef.current = true
+
+    // Stop any existing audio first
+    if (audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current = null
+    }
+
+    const audioCacheKey = `scout-audio-${teamSlug || 'all'}-${currentAngle}`
+    let audioUrl = sessionStorage.getItem(audioCacheKey)
 
     if (!audioUrl) {
+      setAudioLoading(true)
       try {
         const res = await fetch('/api/scout/speak', {
           method: 'POST',
@@ -187,25 +298,45 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
         if (!res.ok) throw new Error('TTS failed')
         const blob = await res.blob()
         audioUrl = URL.createObjectURL(blob)
-        sessionStorage.setItem(cacheKey, audioUrl)
+        sessionStorage.setItem(audioCacheKey, audioUrl)
       } catch (err) {
         console.error('Scout TTS failed:', err)
+        setAudioLoading(false)
+        fetchingAudioRef.current = false
         return
       }
+      setAudioLoading(false)
     }
 
     const audio = new Audio(audioUrl)
     audioRef.current = audio
-    audio.onended = () => setPlaying(false)
-    audio.play()
+    audio.onended = () => { setPlaying(false); setAudioProgress(0) }
+    audio.onerror = () => { setPlaying(false); fetchingAudioRef.current = false }
+    await audio.play()
     setPlaying(true)
+    fetchingAudioRef.current = false
+  }
+
+  const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!audioRef.current || !audioDuration) return
+    const rect = e.currentTarget.getBoundingClientRect()
+    const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width))
+    audioRef.current.currentTime = pct * audioDuration
+    setAudioProgress(pct * audioDuration)
+  }
+
+  const formatTime = (s: number) => {
+    const m = Math.floor(s / 60)
+    const sec = Math.floor(s % 60)
+    return `${m}:${sec < 10 ? '0' : ''}${sec}`
   }
 
   const paragraphs = displayedText.split('\n\n').filter(Boolean)
+  const progressPct = audioDuration > 0 ? (audioProgress / audioDuration) * 100 : 0
 
   return (
     <>
-      {/* Scout icon — always visible, 96px, fixed bottom right */}
+      {/* Scout icon — always visible, 96px */}
       <button
         onClick={handleToggle}
         style={{
@@ -224,7 +355,7 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
           justifyContent: 'center',
           padding: 0,
           boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
-          animation: isTalking ? 'scout-bob 0.6s ease-in-out infinite' : 'none',
+          animation: (isTalking || playing) ? 'scout-bob 0.6s ease-in-out infinite' : 'none',
         }}
         aria-label="Scout Commentary"
       >
@@ -236,12 +367,12 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
           style={{
             borderRadius: '50%',
             objectFit: 'contain',
-            animation: isTalking ? 'scout-talk 0.4s ease-in-out infinite alternate' : 'none',
+            animation: (isTalking || playing) ? 'scout-talk 0.4s ease-in-out infinite alternate' : 'none',
           }}
         />
       </button>
 
-      {/* Speech bubble — appears to the left of Scout's mouth */}
+      {/* Speech bubble */}
       {isOpen && (
         <div
           style={{
@@ -263,170 +394,101 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
         >
           {/* Header */}
           <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '10px 14px',
-            borderBottom: '1px solid var(--sm-border)',
-            flexShrink: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '10px 14px', borderBottom: '1px solid var(--sm-border)', flexShrink: 0,
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <span style={{ fontSize: 20, fontWeight: 800, color: 'var(--sm-text)' }}>Scout</span>
               {data?.angle_name && (
-                <span style={{
-                  fontSize: 10,
-                  fontWeight: 600,
-                  padding: '2px 7px',
-                  borderRadius: 4,
-                  backgroundColor: 'rgba(0,212,255,0.12)',
-                  color: '#00D4FF',
-                  lineHeight: 1,
-                }}>
+                <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 4, backgroundColor: 'rgba(0,212,255,0.12)', color: '#00D4FF', lineHeight: 1 }}>
                   {data.angle_name}
                 </span>
               )}
-              {isTalking && (
-                <span style={{ fontSize: 11, color: '#00D4FF', fontWeight: 500 }}>speaking...</span>
-              )}
+              {isTalking && <span style={{ fontSize: 11, color: '#00D4FF', fontWeight: 500 }}>speaking...</span>}
             </div>
-            <button
-              onClick={handleClose}
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                color: 'var(--sm-text-muted)',
-                padding: 4,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-              aria-label="Close"
-            >
+            <button onClick={handleClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--sm-text-muted)', padding: 4, display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label="Close">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
             </button>
           </div>
 
           {/* Body */}
-          <div
-            ref={textRef}
-            style={{
-              flex: 1,
-              overflowY: 'auto',
-              padding: '14px',
-              fontSize: 13,
-              color: 'var(--sm-text)',
-              lineHeight: 1.65,
-            }}
-          >
+          <div ref={textRef} style={{ flex: 1, overflowY: 'auto', padding: '14px', fontSize: 13, color: 'var(--sm-text)', lineHeight: 1.65 }}>
             {loading ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#00D4FF' }}>
                 <span>Scout is reviewing the grades</span>
-                <span className="scout-typing-dots">
-                  <span>.</span><span>.</span><span>.</span>
-                </span>
+                <span className="scout-typing-dots"><span>.</span><span>.</span><span>.</span></span>
               </div>
             ) : paragraphs.length > 0 ? (
               paragraphs.map((p, i) => (
-                <p key={i} style={{ margin: i < paragraphs.length - 1 ? '0 0 10px' : 0 }}>
-                  {p}
-                </p>
+                <p key={i} style={{ margin: i < paragraphs.length - 1 ? '0 0 10px' : 0 }}>{p}</p>
               ))
             ) : null}
           </div>
 
+          {/* Embedded Audio Player */}
+          {(playing || audioLoading || audioProgress > 0) && (
+            <div style={{ padding: '8px 14px', borderTop: '1px solid var(--sm-border)', flexShrink: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                {/* Play/Pause */}
+                <button
+                  onClick={handlePlayVoice}
+                  style={{ width: 28, height: 28, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)', color: playing ? '#BC0000' : 'var(--sm-text-muted)', cursor: 'pointer', padding: 0, flexShrink: 0 }}
+                >
+                  {playing ? (
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></svg>
+                  ) : (
+                    <svg width="12" height="14" viewBox="0 0 20 24" fill="none"><path d="M2 1L18 12L2 23V1Z" fill="currentColor" /></svg>
+                  )}
+                </button>
+                {/* Progress bar */}
+                <div onClick={handleSeek} style={{ flex: 1, height: 4, borderRadius: 2, backgroundColor: 'var(--sm-border)', cursor: 'pointer', position: 'relative' }}>
+                  <div style={{ height: '100%', width: `${progressPct}%`, borderRadius: 2, backgroundColor: '#00D4FF', transition: 'width 0.1s linear' }} />
+                </div>
+                {/* Time */}
+                {audioDuration > 0 && (
+                  <span style={{ fontSize: 10, color: 'var(--sm-text-dim)', flexShrink: 0, fontVariantNumeric: 'tabular-nums' }}>
+                    {formatTime(audioProgress)} / {formatTime(audioDuration)}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Footer */}
-          <div style={{
-            padding: '8px 14px',
-            borderTop: '1px solid var(--sm-border)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexShrink: 0,
-          }}>
-            {isTalking ? (
-              <button
-                onClick={handleSkip}
-                style={{
-                  fontSize: 12,
-                  fontWeight: 500,
-                  color: 'var(--sm-text-muted)',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  padding: '4px 0',
-                }}
-              >
-                Skip to end
-              </button>
-            ) : (
-              <div />
-            )}
-            <button
-              onClick={handleAnotherTake}
-              disabled={loading}
-              style={{
-                fontSize: 12,
-                fontWeight: 600,
-                color: '#00D4FF',
-                background: 'rgba(0,212,255,0.1)',
-                border: '1px solid rgba(0,212,255,0.2)',
-                borderRadius: 8,
-                padding: '6px 14px',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 5,
-                lineHeight: 1,
-                opacity: loading ? 0.5 : 1,
-              }}
-            >
+          <div style={{ padding: '8px 14px', borderTop: '1px solid var(--sm-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {isTalking && (
+                <button onClick={handleSkip} style={{ fontSize: 12, fontWeight: 500, color: 'var(--sm-text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0' }}>
+                  Skip to end
+                </button>
+              )}
+              {/* Play button when audio player not yet shown */}
+              {!playing && !audioLoading && audioProgress === 0 && data?.commentary && !loading && (
+                <button
+                  onClick={handlePlayVoice}
+                  disabled={audioLoading}
+                  style={{ width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)', color: 'var(--sm-text-muted)', padding: 0, flexShrink: 0, opacity: audioLoading ? 0.4 : 1 }}
+                  aria-label="Play"
+                >
+                  {audioLoading ? (
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="scout-spin"><circle cx="12" cy="12" r="10" strokeDasharray="50" strokeDashoffset="15" /></svg>
+                  ) : (
+                    <svg width="14" height="16" viewBox="0 0 20 24" fill="none"><path d="M2 1L18 12L2 23V1Z" fill="currentColor" /></svg>
+                  )}
+                </button>
+              )}
+            </div>
+            <button onClick={handleAnotherTake} disabled={loading} style={{ fontSize: 12, fontWeight: 600, color: '#00D4FF', background: 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.2)', borderRadius: 8, padding: '6px 14px', cursor: loading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: 5, lineHeight: 1, opacity: loading ? 0.5 : 1 }}>
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 4v6h6M23 20v-6h-6" /><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15" /></svg>
               Another Take
             </button>
-            <button
-              onClick={handlePlayVoice}
-              disabled={loading || !data?.commentary}
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: loading || !data?.commentary ? 'not-allowed' : 'pointer',
-                opacity: loading || !data?.commentary ? 0.4 : 1,
-                backgroundColor: playing ? 'rgba(188,0,0,0.1)' : 'var(--sm-surface)',
-                border: `1px solid ${playing ? 'rgba(188,0,0,0.2)' : 'var(--sm-border)'}`,
-                color: playing ? '#BC0000' : 'var(--sm-text-muted)',
-                padding: 0,
-                flexShrink: 0,
-              }}
-              aria-label={playing ? 'Pause' : 'Play'}
-            >
-              {playing ? (
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></svg>
-              ) : (
-                <svg width="14" height="16" viewBox="0 0 20 24" fill="none"><path d="M2 1L18 12L2 23V1Z" fill="currentColor" /></svg>
-              )}
-            </button>
           </div>
 
-          {/* Speech bubble tail pointing to Scout */}
-          <div style={{
-            position: 'absolute',
-            bottom: 12,
-            right: -8,
-            width: 0,
-            height: 0,
-            borderLeft: '8px solid var(--sm-card)',
-            borderTop: '6px solid transparent',
-            borderBottom: '6px solid transparent',
-          }} />
+          {/* Tail */}
+          <div style={{ position: 'absolute', bottom: 12, right: -8, width: 0, height: 0, borderLeft: '8px solid var(--sm-card)', borderTop: '6px solid transparent', borderBottom: '6px solid transparent' }} />
         </div>
       )}
 
-      {/* Animations */}
       <style>{`
         @keyframes scout-bob {
           0%, 100% { transform: translateY(0); }
@@ -447,6 +509,12 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
           0%, 20% { opacity: 0; }
           50% { opacity: 1; }
           100% { opacity: 0; }
+        }
+        .scout-spin {
+          animation: scout-spinner 1s linear infinite;
+        }
+        @keyframes scout-spinner {
+          100% { transform: rotate(360deg); }
         }
         @media (max-width: 640px) {
           .scout-commentary-bubble {
