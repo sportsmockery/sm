@@ -153,7 +153,19 @@ function CardLabel({ label, isBreaking = false }: { label: string; isBreaking?: 
 // Reactions use real data from props. When no DB-backed reaction data exists yet,
 // counts will be 0 — this is intentional (no fake numbers).
 // listenButtonStyle: "circle" = REPORT cards only — light gray circle, icon only; plays from feed via global audio.
-function EngagementRow({ stats, articleUrl, listenButtonStyle = "pill", slug, headline }: { stats: { comments: number; retweets: number; likes: number; views: string }; articleUrl?: string; listenButtonStyle?: "pill" | "circle"; slug?: string; headline?: string }) {
+export function EngagementRow({
+  stats,
+  articleUrl,
+  listenButtonStyle = "pill",
+  slug,
+  headline,
+}: {
+  stats: { comments: number; retweets: number; likes: number; views: string }
+  articleUrl?: string
+  listenButtonStyle?: "pill" | "circle"
+  slug?: string
+  headline?: string
+}) {
   const [reactions, setReactions] = useState<Record<string, boolean>>({})
   const [counts, setCounts] = useState({ smart: stats.likes, hot: stats.retweets })
   const audio = useAudioPlayer()

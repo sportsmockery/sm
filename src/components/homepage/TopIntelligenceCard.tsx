@@ -1,10 +1,11 @@
 "use client"
 
-import { ChevronRight, Eye, MessageCircle, Share } from "lucide-react"
+import { ChevronRight } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { homepageTeams } from "@/lib/homepage-team-data"
 import { useAudioPlayer } from "@/context/AudioPlayerContext"
+import { EngagementRow } from "@/components/homepage/RiverCards"
 
 /** Team accent for top story card left border (matches feed card team colors). */
 function getTopStoryTeamAccent(team: string): string | undefined {
@@ -26,7 +27,7 @@ interface TopIntelligenceCardProps {
   timestamp: string
   slug?: string
   categorySlug?: string
-  viewsLabel?: string
+  stats?: { comments: number; retweets: number; likes: number; views: string }
 }
 
 export default function TopIntelligenceCard({
@@ -38,7 +39,7 @@ export default function TopIntelligenceCard({
   timestamp,
   slug,
   categorySlug,
-  viewsLabel,
+  stats,
 }: TopIntelligenceCardProps) {
   const router = useRouter()
   const audio = useAudioPlayer()
@@ -151,98 +152,16 @@ export default function TopIntelligenceCard({
           )}
         </p>
 
-        {/* Engagement row — reactions + play on left, comments/views/share on right */}
-        <div className="mt-4 flex items-center justify-between" style={{ color: 'var(--hp-muted-foreground)' }}>
-          <div className="flex items-center gap-3">
-            {/* Thumbs up with count */}
-            <button
-              type="button"
-              className="group flex items-center gap-1 rounded-full px-2.5 py-1.5 transition-all hp-tap-target hover:bg-[rgba(0,0,0,0.04)] dark:hover:bg-[rgba(255,255,255,0.04)]"
-              aria-label="Smart Take"
-            >
-              <span style={{ fontSize: 14 }}>👍</span>
-              <span style={{ fontSize: 12, fontWeight: 500 }}>—</span>
-            </button>
-            {/* Fire with count */}
-            <button
-              type="button"
-              className="group flex items-center gap-1 rounded-full px-2.5 py-1.5 transition-all hp-tap-target hover:bg-[rgba(0,0,0,0.04)] dark:hover:bg-[rgba(255,255,255,0.04)]"
-              aria-label="Hot"
-            >
-              <span style={{ fontSize: 14 }}>🔥</span>
-              <span style={{ fontSize: 12, fontWeight: 500 }}>—</span>
-            </button>
-
-            {/* Gray listen button — same as REPORT cards, now in left group */}
-            {articleUrl && slug && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  if (isThisArticlePlaying) audio.pause()
-                  else audio.play({ title: headline, slug, url: `/api/audio/${encodeURIComponent(slug)}?voice=will` })
-                }}
-                className="group flex items-center justify-center rounded-full transition-transform hp-tap-target hover:scale-105"
-                style={{ width: 38, height: 38, backgroundColor: '#d1d5db', border: '1px solid rgba(11,15,20,0.12)' }}
-                aria-label={isThisArticlePlaying ? 'Pause' : 'Listen to article'}
-              >
-                {isThisArticlePlaying ? (
-                  <svg className="w-4 h-4 flex-shrink-0" fill="#FAFAFB" viewBox="0 0 24 24" aria-hidden>
-                    <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-                  </svg>
-                ) : (
-                  <svg className="w-4 h-4 ml-0.5 flex-shrink-0" fill="#FAFAFB" viewBox="0 0 24 24" aria-hidden>
-                    <path d="M8 5v14l11-7L8 5z" />
-                  </svg>
-                )}
-              </button>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2">
-            {/* Comments bubble – icon + count, like REPORT cards */}
-            <span className="group flex items-center gap-1 hp-tap-target" aria-label="Comments">
-              <div className="rounded-full p-2">
-                <MessageCircle className="h-4 w-4" />
-              </div>
-              <span style={{ fontSize: 12 }}>—</span>
-            </span>
-
-            {/* Views – eye icon only, like REPORT cards */}
-            <span className="flex items-center gap-1 hp-tap-target" style={{ fontSize: 12 }} title="Views">
-              <div className="rounded-full p-2">
-                <Eye className="h-4 w-4" />
-              </div>
-              {viewsLabel && viewsLabel !== '0' ? viewsLabel : '0'}
-            </span>
-
-            {/* Share */}
-            <button
-              type="button"
-              onClick={async () => {
-                const url = articleUrl ? `${window.location.origin}${articleUrl}` : window.location.href
-                if (navigator.share) {
-                  try {
-                    await navigator.share({ url })
-                  } catch {
-                    // user cancelled
-                  }
-                } else {
-                  try {
-                    await navigator.clipboard.writeText(url)
-                  } catch {
-                    // clipboard not available
-                  }
-                }
-              }}
-              className="rounded-full p-2 transition-colors hover:bg-[#00D4FF]/10 hover:text-[#00D4FF] hp-tap-target"
-              aria-label="Share"
-            >
-              <Share className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
+        {/* Engagement row — EXACT match to REPORT cards via shared EngagementRow */}
+        {stats && (
+          <EngagementRow
+            stats={stats}
+            articleUrl={articleUrl}
+            listenButtonStyle="circle"
+            slug={slug}
+            headline={headline}
+          />
+        )}
       </div>
     </article>
   )
