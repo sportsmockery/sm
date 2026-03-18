@@ -138,7 +138,7 @@ export default function OwnershipCard({ grade, showLink = true }: { grade: Owner
       {/* Link to detail */}
       {showLink && (
         <Link
-          href={`/Owner/${grade.team_slug}`}
+          href={`/owner/${grade.team_slug}`}
           style={{
             display: 'block',
             marginTop: 16,

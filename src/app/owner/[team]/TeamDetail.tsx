@@ -60,7 +60,7 @@ export default function TeamDetail({ grade, history }: { grade: OwnershipGrade; 
     }}>
       {/* Breadcrumb */}
       <Link
-        href="/Owner"
+        href="/owner"
         style={{
           display: 'inline-flex',
           alignItems: 'center',

@@ -108,7 +108,7 @@ export default function LeagueCompareTable({ grades }: { grades: GradeRow[] }) {
                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
               >
                 <td style={{ padding: '10px 12px' }}>
-                  <Link href={`/Owner/${g.team_slug}`} style={{ textDecoration: 'none', color: 'var(--sm-text)', fontWeight: 600, fontSize: 13 }}>
+                  <Link href={`/owner/${g.team_slug}`} style={{ textDecoration: 'none', color: 'var(--sm-text)', fontWeight: 600, fontSize: 13 }}>
                     {TEAM_NAMES[g.team_slug] || g.team_slug}
                   </Link>
                   <div style={{ fontSize: 11, color: 'var(--sm-text-muted)' }}>{g.league}</div>

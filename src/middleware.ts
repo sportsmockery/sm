@@ -51,7 +51,7 @@ const publicPaths = [
   '/api/audio',  // Audio TTS API
   '/api/cron',   // Vercel cron jobs
   '/gm',         // GM Trade Simulator (handles own auth)
-  '/Owner',      // Ownership report cards
+  '/owner',      // Ownership report cards
   '/home',       // Marketing pages
   '/fan-showcase', // Fan showcase
 ]
