@@ -194,18 +194,8 @@ export function EngagementRow({
 
   return (
     <div className="mt-5 flex items-center justify-between" style={{ color: 'var(--hp-muted-foreground)' }}>
+      {/* Left: Play button */}
       <div className="flex items-center gap-3">
-        {reactionButtons.map(({ key, emoji, label, count }) => (
-          <button
-            key={key}
-            onClick={() => toggle(key)}
-            className={`group flex items-center gap-1 rounded-full px-2.5 py-1.5 transition-all hp-tap-target ${reactions[key] ? 'bg-[rgba(0,0,0,0.06)] dark:bg-[rgba(255,255,255,0.08)]' : 'hover:bg-[rgba(0,0,0,0.04)] dark:hover:bg-[rgba(255,255,255,0.04)]'}`}
-            aria-label={label}
-          >
-            <span style={{ fontSize: 14 }}>{emoji}</span>
-            <span style={{ fontSize: 12, fontWeight: reactions[key] ? 600 : 400 }}>{count}</span>
-          </button>
-        ))}
         {listenUrl && listenButtonStyle === "circle" && slug && headline && (
           <button
             type="button"
@@ -224,17 +214,15 @@ export function EngagementRow({
               }
             }}
             className="group flex items-center justify-center rounded-full transition-transform hp-tap-target hover:scale-105"
-            style={{ width: 38, height: 38, backgroundColor: '#d1d5db', border: '1px solid rgba(11,15,20,0.12)' }}
+            style={{ width: 30, height: 30, backgroundColor: '#d1d5db' }}
             aria-label={isThisArticlePlaying ? 'Pause' : 'Listen to article'}
           >
             {isThisArticlePlaying ? (
-              <svg className="w-4 h-4 flex-shrink-0" fill="#FAFAFB" viewBox="0 0 24 24" aria-hidden>
-                <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+              <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="#FAFAFB" aria-hidden="true">
+                <path d="M7 5h4v14H7zM13 5h4v14h-4z" />
               </svg>
             ) : (
-              <svg className="w-4 h-4 ml-0.5 flex-shrink-0" fill="#FAFAFB" viewBox="0 0 24 24" aria-hidden>
-                <path d="M8 5v14l11-7L8 5z" />
-              </svg>
+              <Play className="h-3.5 w-3.5" strokeWidth={2.5} style={{ color: '#FAFAFB' }} />
             )}
           </button>
         )}
@@ -250,7 +238,19 @@ export function EngagementRow({
         )}
       </div>
 
+      {/* Right: Reactions + Comments + Views + Share */}
       <div className="flex items-center gap-2">
+        {reactionButtons.map(({ key, emoji, label, count }) => (
+          <button
+            key={key}
+            onClick={() => toggle(key)}
+            className={`group flex items-center gap-1 rounded-full px-2.5 py-1.5 transition-all hp-tap-target ${reactions[key] ? 'bg-[rgba(0,0,0,0.06)] dark:bg-[rgba(255,255,255,0.08)]' : 'hover:bg-[rgba(0,0,0,0.04)] dark:hover:bg-[rgba(255,255,255,0.04)]'}`}
+            aria-label={label}
+          >
+            <span style={{ fontSize: 14 }}>{emoji}</span>
+            <span style={{ fontSize: 12, fontWeight: reactions[key] ? 600 : 400 }}>{count}</span>
+          </button>
+        ))}
         {articleUrl ? (
           <Link href={articleUrl} className="group flex items-center gap-1 transition-colors hover:text-[#00D4FF] hp-tap-target" aria-label="Comments">
             <div className="rounded-full p-2 group-hover:bg-[#00D4FF]/10 transition-colors">
@@ -995,8 +995,8 @@ export function ScoutSummaryCard({ summary, bullets, topic, team, teamColor, tim
           onClick={handleScoutPlay}
           className="hp-tap-target flex items-center justify-center rounded-full transition-transform hover:scale-105"
           style={{
-            width: 22,
-            height: 22,
+            width: 30,
+            height: 30,
             backgroundColor: '#BC0000',
             color: '#FAFAFB',
           }}
@@ -1237,8 +1237,8 @@ export function ScoutBriefingCard() {
           onClick={handleBriefingPlay}
           className="hp-tap-target flex items-center justify-center rounded-full transition-transform hover:scale-105"
           style={{
-            width: 22,
-            height: 22,
+            width: 30,
+            height: 30,
             backgroundColor: 'rgba(0,212,255,0.12)',
             color: '#00D4FF',
           }}
