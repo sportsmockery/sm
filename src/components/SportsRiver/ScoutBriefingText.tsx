@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 
-const BRIEFING_PROMPT = `Summarize the biggest Chicago sports news from the last 24 hours for a fan. Use Markdown: ## for section headings (e.g. ## Bears), bullet lists (-) for key points, numbered lists when order matters. Keep your entire response between 500 and 700 characters. Cover Bears, Bulls, Blackhawks, Cubs, and White Sox if there is news; otherwise a brief league-wide or team outlook.`;
+const BRIEFING_PROMPT = `Summarize the biggest Chicago sports news from the last 24 hours for a fan. Use Markdown: ## for section headings (e.g. ## Bears), bullet lists (-) for key points, numbered lists when order matters. Keep your entire response between 500 and 700 characters. Cover Bears, Bulls, Blackhawks, Cubs, and White Sox if there is news; otherwise a brief league-wide or team outlook. Do NOT include any URLs, links, or citations.`;
 
 const FALLBACK_BRIEFING = `## Bears\nOffseason focus remains on supporting Caleb Williams and the offense; OTA dates and minicamp are ahead.\n\n## Bulls\nFront office and fans are weighing roster direction as the offseason approaches.\n\n## Blackhawks\nConnor Bedard and the young core continue to draw attention; schedule highlights and matchup talk.\n\n## Cubs\nPitching depth and deadline moves are in the rumor mill.\n\n## White Sox\nRebuild timeline and farm system progress stay in the conversation.`;
 

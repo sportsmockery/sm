@@ -18,11 +18,30 @@ const VOICE_IDS: Record<string, string> = {
 // ElevenLabs model - eleven_turbo_v2_5 is fast and high quality
 const ELEVENLABS_MODEL = "eleven_turbo_v2_5";
 
+// Strip URLs from text so TTS doesn't read them letter-by-letter
+function stripUrls(text: string): string {
+  // Remove markdown-style links [text](url) → keep just the text
+  text = text.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+  // Remove raw URLs (http/https)
+  text = text.replace(/https?:\/\/[^\s),]+/gi, '');
+  // Remove www. URLs without protocol
+  text = text.replace(/www\.[^\s),]+/gi, '');
+  // Remove citation markers like [1], [2] etc.
+  text = text.replace(/\[\d+\]/g, '');
+  // Clean up leftover artifacts (double spaces, orphaned parens)
+  text = text.replace(/\(\s*\)/g, '');
+  text = text.replace(/\s+/g, ' ');
+  return text.trim();
+}
+
 // Strip HTML tags and clean text for TTS
 function stripHtmlForTTS(html: string): string {
   // Remove script and style tags completely
   let text = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
   text = text.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+
+  // Remove anchor tags but keep the link text
+  text = text.replace(/<a[^>]*>([\s\S]*?)<\/a>/gi, '$1');
 
   // Replace common block elements with newlines for natural pauses
   text = text.replace(/<\/(p|div|h[1-6]|li|br)>/gi, '. ');
@@ -38,6 +57,9 @@ function stripHtmlForTTS(html: string): string {
   text = text.replace(/&gt;/g, '>');
   text = text.replace(/&quot;/g, '"');
   text = text.replace(/&#39;/g, "'");
+
+  // Strip any URLs that were in the text
+  text = stripUrls(text);
 
   // Clean up whitespace
   text = text.replace(/\s+/g, ' ');
@@ -104,11 +126,12 @@ export async function GET(
       const greeting = greetings[seed % greetings.length];
       const closer = closers[seed % closers.length];
 
-      const insightsText = bullets.join('. ') + (bullets.length ? '.' : '');
+      const cleanBullets = bullets.map(b => stripUrls(b));
+      const insightsText = cleanBullets.join('. ') + (cleanBullets.length ? '.' : '');
       plainText = `${greeting} ${insightsText} ${closer}`;
     } else if (slug === 'scout-briefing') {
       // Special case: fetch live Scout briefing from edge/scout API
-      const briefingPrompt = `Summarize the biggest Chicago sports news from the last 24 hours for a fan. Keep it conversational like a 15-year-old Chicago sports fan would talk. Cover Bears, Bulls, Blackhawks, Cubs, and White Sox if there is news. Keep it under 2000 characters. No markdown formatting.`;
+      const briefingPrompt = `Summarize the biggest Chicago sports news from the last 24 hours for a fan. Keep it conversational like a 15-year-old Chicago sports fan would talk. Cover Bears, Bulls, Blackhawks, Cubs, and White Sox if there is news. Keep it under 2000 characters. No markdown formatting. Do NOT include any URLs, links, citations, or source references — this will be read aloud.`;
       const baseUrl = req.nextUrl.origin;
       const briefingRes = await fetch(`${baseUrl}/api/edge/scout`, {
         method: 'POST',
@@ -125,7 +148,7 @@ export async function GET(
       }
       // Force Scout voice for briefing
       voiceId = VOICE_IDS.scout;
-      plainText = `Here's your Scout Report. ${briefingText}`;
+      plainText = `Here's your Scout Report. ${stripUrls(briefingText)}`;
     } else {
       // Standard article: fetch from database
       const { data: post, error } = await supabaseAdmin

@@ -912,7 +912,7 @@ export default function AdvancedPostEditor({
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                query: `You are Scout AI for SportsMockery. Read this article and provide a brief, sharp analytical insight (2-3 sentences max) as if you're a seasoned sports analyst giving your take. Be opinionated and specific. Article title: "${formData.title}". Article content: ${articleText.slice(0, 3000)}`,
+                query: `You are Scout AI for SportsMockery. Read this article and provide a brief, sharp analytical insight (2-3 sentences max) as if you're a seasoned sports analyst giving your take. Be opinionated and specific. Do NOT include any URLs, links, or citations — this insight will be read aloud. Article title: "${formData.title}". Article content: ${articleText.slice(0, 3000)}`,
               }),
             })
             if (scoutResponse.ok) {
