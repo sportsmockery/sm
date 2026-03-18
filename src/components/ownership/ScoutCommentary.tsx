@@ -73,6 +73,13 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
     } catch (err) {
       console.error('Scout commentary fetch failed:', err)
       setLoading(false)
+      setData({
+        commentary: 'Scout is warming up — commentary is loading. Hit "Another Take" to try again, or check back shortly.',
+        angle,
+        angle_name: '',
+        team: teamSlug,
+      })
+      setDisplayedText('Scout is warming up — commentary is loading. Hit "Another Take" to try again, or check back shortly.')
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [teamSlug])
