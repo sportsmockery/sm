@@ -216,7 +216,11 @@ export default function TeamHubLayout({
                     transition: 'color 0.2s',
                   }}
                 >
-                  {tab.label}
+                  {isActive && isEdgeTab ? (
+                    <span className="text-shimmer-cyan">{tab.label}</span>
+                  ) : (
+                    tab.label
+                  )}
                   {isActive && (
                     <span
                       style={{
@@ -226,7 +230,7 @@ export default function TeamHubLayout({
                         right: 0,
                         height: '2px',
                         borderRadius: '2px',
-                        background: 'var(--sm-red)',
+                        background: '#bc0000',
                       }}
                     />
                   )}

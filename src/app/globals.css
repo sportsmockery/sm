@@ -1357,6 +1357,38 @@ main {
   background-size: 200% 100%;
 }
 
+/* ========== TEAM SUBNAV — ACTIVE EDGE SHIMMER ========== */
+@keyframes shimmer-cyan-text {
+  to {
+    background-position: 200% center;
+  }
+}
+
+.text-shimmer-cyan {
+  background: linear-gradient(
+    90deg,
+    #00D4FF 0%,
+    #E6FFFF 40%,
+    #E6FFFF 60%,
+    #00D4FF 100%
+  );
+  background-size: 200% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: shimmer-cyan-text 3s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .text-shimmer-cyan {
+    animation: none;
+    color: #00D4FF;
+    background: none;
+    -webkit-background-clip: initial;
+    background-clip: initial;
+  }
+}
+
 /* ========== TABULAR NUMERICS ========== */
 .sm-table td, .sm-table th, [class*="stat"], [class*="score"], [class*="record"], .tabular-nums {
   font-variant-numeric: tabular-nums;
