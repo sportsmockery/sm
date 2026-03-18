@@ -9,7 +9,7 @@ interface Props {
 }
 
 function TrendArrow({ direction, size = 12 }: { direction: TrendDirection; size?: number }) {
-  const color = direction === 'up' ? '#00D4FF' : direction === 'down' ? '#BC0000' : 'rgba(250,250,251,0.3)'
+  const color = direction === 'up' ? '#00D4FF' : direction === 'down' ? '#BC0000' : 'rgba(11,15,20,0.3)'
   if (direction === 'flat') {
     return <span style={{ color, fontSize: size }}>&#8594;</span>
   }
@@ -54,7 +54,7 @@ function MomentumBar({ score }: { score: number }) {
   const color = score >= 60 ? '#00D4FF' : score >= 40 ? '#D6B05E' : '#BC0000'
   return (
     <div className="flex items-center gap-1.5">
-      <div className="w-12 h-1.5 rounded-full" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}>
+      <div className="w-12 h-1.5 rounded-full" style={{ backgroundColor: 'rgba(11,15,20,0.08)' }}>
         <div
           className="h-full rounded-full transition-all duration-500"
           style={{ width: `${score}%`, backgroundColor: color }}
@@ -74,10 +74,10 @@ function PhaseLabel({ phase, isLive }: { phase: string; isLive: boolean }) {
     )
   }
   const labels: Record<string, { text: string; color: string }> = {
-    regular_season: { text: 'REG', color: 'rgba(250,250,251,0.5)' },
+    regular_season: { text: 'REG', color: 'rgba(11,15,20,0.5)' },
     preseason: { text: 'PRE', color: 'rgba(214,176,94,0.7)' },
     playoffs: { text: 'POST', color: '#00D4FF' },
-    offseason: { text: 'OFF', color: 'rgba(250,250,251,0.25)' },
+    offseason: { text: 'OFF', color: 'rgba(11,15,20,0.25)' },
   }
   const l = labels[phase] || labels.offseason
   return <span className="text-xs" style={{ color: l.color }}>{l.text}</span>
@@ -102,7 +102,7 @@ export default function TeamStatusMatrix({ teams, selectedTeam, onSelectTeam }: 
         <thead>
           <tr
             className="text-xs uppercase tracking-wider border-b"
-            style={{ color: 'rgba(250,250,251,0.35)', borderColor: 'rgba(255,255,255,0.06)' }}
+            style={{ color: 'rgba(11,15,20,0.35)', borderColor: 'rgba(11,15,20,0.08)' }}
           >
             <th className="py-2 px-3 font-medium">Team</th>
             <th className="py-2 px-3 font-medium">Record</th>
@@ -127,12 +127,12 @@ export default function TeamStatusMatrix({ teams, selectedTeam, onSelectTeam }: 
                 onClick={() => onSelectTeam(team.team_key)}
                 className="cursor-pointer transition-colors border-b"
                 style={{
-                  borderColor: 'rgba(255,255,255,0.04)',
+                  borderColor: 'rgba(11,15,20,0.06)',
                   backgroundColor: isSelected ? 'rgba(0,212,255,0.06)' : 'transparent',
                   borderLeft: isSelected ? `3px solid ${team.color_primary}` : '3px solid transparent',
                 }}
                 onMouseEnter={(e) => {
-                  if (!isSelected) e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.03)'
+                  if (!isSelected) e.currentTarget.style.backgroundColor = 'rgba(11,15,20,0.03)'
                 }}
                 onMouseLeave={(e) => {
                   if (!isSelected) e.currentTarget.style.backgroundColor = 'transparent'
@@ -146,10 +146,10 @@ export default function TeamStatusMatrix({ teams, selectedTeam, onSelectTeam }: 
                       style={{ backgroundColor: team.color_primary }}
                     />
                     <div>
-                      <span className="text-sm font-medium block" style={{ color: '#FAFAFB' }}>
+                      <span className="text-sm font-medium block" style={{ color: '#0B0F14' }}>
                         {team.team_name.replace('Chicago ', '')}
                       </span>
-                      <span className="text-xs" style={{ color: 'rgba(250,250,251,0.35)' }}>
+                      <span className="text-xs" style={{ color: 'rgba(11,15,20,0.35)' }}>
                         {team.sport}
                       </span>
                     </div>
@@ -158,17 +158,17 @@ export default function TeamStatusMatrix({ teams, selectedTeam, onSelectTeam }: 
 
                 {/* Record */}
                 <td className="py-2.5 px-3">
-                  <span className="text-sm font-medium tabular-nums" style={{ color: '#FAFAFB' }}>
+                  <span className="text-sm font-medium tabular-nums" style={{ color: '#0B0F14' }}>
                     {team.record.record_display}
                   </span>
-                  <span className="text-xs block tabular-nums" style={{ color: 'rgba(250,250,251,0.4)' }}>
+                  <span className="text-xs block tabular-nums" style={{ color: 'rgba(11,15,20,0.4)' }}>
                     {(team.record.win_pct * 100).toFixed(1)}%
                   </span>
                 </td>
 
                 {/* Last 10 */}
                 <td className="py-2.5 px-3">
-                  <span className="text-sm tabular-nums" style={{ color: 'rgba(250,250,251,0.7)' }}>
+                  <span className="text-sm tabular-nums" style={{ color: 'rgba(11,15,20,0.7)' }}>
                     {team.recent.last_10}
                   </span>
                 </td>
@@ -187,22 +187,22 @@ export default function TeamStatusMatrix({ teams, selectedTeam, onSelectTeam }: 
                 <td className="py-2.5 px-3">
                   {team.status.next_game ? (
                     <div className="max-w-[140px]">
-                      <span className="text-xs block truncate" style={{ color: 'rgba(250,250,251,0.7)' }}>
+                      <span className="text-xs block truncate" style={{ color: 'rgba(11,15,20,0.7)' }}>
                         {team.status.next_game.home ? 'vs' : '@'} {team.status.next_game.opponent}
                       </span>
-                      <span className="text-xs block" style={{ color: 'rgba(250,250,251,0.35)' }}>
+                      <span className="text-xs block" style={{ color: 'rgba(11,15,20,0.35)' }}>
                         {team.status.next_game.datetime_display}
                       </span>
                     </div>
                   ) : (
-                    <span className="text-xs" style={{ color: 'rgba(250,250,251,0.25)' }}>—</span>
+                    <span className="text-xs" style={{ color: 'rgba(11,15,20,0.25)' }}>—</span>
                   )}
                 </td>
 
                 {/* Offense */}
                 <td className="py-2.5 px-3">
                   <div className="flex items-center gap-1">
-                    <span className="text-sm tabular-nums" style={{ color: 'rgba(250,250,251,0.7)' }}>
+                    <span className="text-sm tabular-nums" style={{ color: 'rgba(11,15,20,0.7)' }}>
                       {team.performance.offense.rank_display}
                     </span>
                     <TrendArrow direction={team.performance.offense.trend} />
@@ -212,7 +212,7 @@ export default function TeamStatusMatrix({ teams, selectedTeam, onSelectTeam }: 
                 {/* Defense */}
                 <td className="py-2.5 px-3">
                   <div className="flex items-center gap-1">
-                    <span className="text-sm tabular-nums" style={{ color: 'rgba(250,250,251,0.7)' }}>
+                    <span className="text-sm tabular-nums" style={{ color: 'rgba(11,15,20,0.7)' }}>
                       {team.performance.defense.rank_display}
                     </span>
                     <TrendArrow direction={team.performance.defense.trend} />
@@ -223,7 +223,7 @@ export default function TeamStatusMatrix({ teams, selectedTeam, onSelectTeam }: 
                 <td className="py-2.5 px-3">
                   <div className="flex items-center gap-1.5">
                     <HealthBadge tier={team.health.availability_tier} />
-                    <span className="text-xs" style={{ color: 'rgba(250,250,251,0.5)' }}>
+                    <span className="text-xs" style={{ color: 'rgba(11,15,20,0.5)' }}>
                       {team.health.availability_label}
                     </span>
                   </div>

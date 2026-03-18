@@ -13,18 +13,18 @@ function MoodGauge({ score, label, emoji, direction }: { score: number; label: s
     <div className="flex flex-col gap-1.5">
       <div className="flex items-center gap-2">
         <span className="text-lg">{emoji}</span>
-        <span className="text-sm font-medium" style={{ color: '#FAFAFB' }}>{label}</span>
-        <span className="text-xs" style={{ color: 'rgba(250,250,251,0.4)' }}>
+        <span className="text-sm font-medium" style={{ color: '#0B0F14' }}>{label}</span>
+        <span className="text-xs" style={{ color: 'rgba(11,15,20,0.4)' }}>
           {direction === 'up' ? '\u2191' : direction === 'down' ? '\u2193' : '\u2192'}
         </span>
       </div>
-      <div className="h-1.5 rounded-full w-full" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}>
+      <div className="h-1.5 rounded-full w-full" style={{ backgroundColor: 'rgba(11,15,20,0.08)' }}>
         <div
           className="h-full rounded-full transition-all duration-700"
           style={{ width: `${score}%`, backgroundColor: barColor }}
         />
       </div>
-      <span className="text-xs" style={{ color: 'rgba(250,250,251,0.4)' }}>{score}/100</span>
+      <span className="text-xs" style={{ color: 'rgba(11,15,20,0.4)' }}>{score}/100</span>
     </div>
   )
 }
@@ -32,9 +32,9 @@ function MoodGauge({ score, label, emoji, direction }: { score: number; label: s
 function StatBlock({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
     <div className="flex flex-col gap-0.5">
-      <span className="text-xs uppercase tracking-wider" style={{ color: 'rgba(250,250,251,0.35)' }}>{label}</span>
-      <span className="text-lg font-bold" style={{ color: '#FAFAFB' }}>{value}</span>
-      {sub && <span className="text-xs" style={{ color: 'rgba(250,250,251,0.5)' }}>{sub}</span>}
+      <span className="text-xs uppercase tracking-wider" style={{ color: 'rgba(11,15,20,0.35)' }}>{label}</span>
+      <span className="text-lg font-bold" style={{ color: '#0B0F14' }}>{value}</span>
+      {sub && <span className="text-xs" style={{ color: 'rgba(11,15,20,0.5)' }}>{sub}</span>}
     </div>
   )
 }
@@ -53,12 +53,12 @@ export default function CityOverviewPanel({ city, teams }: Props) {
     <div
       className="rounded-xl p-4 border"
       style={{
-        backgroundColor: 'rgba(255,255,255,0.03)',
-        borderColor: 'rgba(255,255,255,0.06)',
+        backgroundColor: 'rgba(11,15,20,0.03)',
+        borderColor: 'rgba(11,15,20,0.08)',
       }}
     >
       {/* Summary */}
-      <p className="text-sm mb-4 leading-relaxed" style={{ color: 'rgba(250,250,251,0.7)' }}>
+      <p className="text-sm mb-4 leading-relaxed" style={{ color: 'rgba(11,15,20,0.7)' }}>
         {city.summary}
       </p>
 
@@ -84,14 +84,14 @@ export default function CityOverviewPanel({ city, teams }: Props) {
         <StatBlock label="Above .500" value={city.teams_above_500} sub={`of ${city.teams_active}`} />
 
         <div className="flex flex-col gap-0.5">
-          <span className="text-xs uppercase tracking-wider" style={{ color: 'rgba(250,250,251,0.35)' }}>Hottest</span>
+          <span className="text-xs uppercase tracking-wider" style={{ color: 'rgba(11,15,20,0.35)' }}>Hottest</span>
           <span className="text-sm font-bold" style={{ color: getTeamColor(city.hottest_team, teams) }}>
             {getTeamName(city.hottest_team, teams)}
           </span>
         </div>
 
         <div className="flex flex-col gap-0.5">
-          <span className="text-xs uppercase tracking-wider" style={{ color: 'rgba(250,250,251,0.35)' }}>Coldest</span>
+          <span className="text-xs uppercase tracking-wider" style={{ color: 'rgba(11,15,20,0.35)' }}>Coldest</span>
           <span className="text-sm font-bold" style={{ color: getTeamColor(city.coldest_team, teams) }}>
             {getTeamName(city.coldest_team, teams)}
           </span>
@@ -99,8 +99,8 @@ export default function CityOverviewPanel({ city, teams }: Props) {
 
         {/* Next Event */}
         <div className="flex flex-col gap-0.5">
-          <span className="text-xs uppercase tracking-wider" style={{ color: 'rgba(250,250,251,0.35)' }}>Next Up</span>
-          <span className="text-sm font-medium" style={{ color: '#FAFAFB' }}>
+          <span className="text-xs uppercase tracking-wider" style={{ color: 'rgba(11,15,20,0.35)' }}>Next Up</span>
+          <span className="text-sm font-medium" style={{ color: '#0B0F14' }}>
             {city.next_event.team_name} {city.next_event.home ? 'vs' : '@'} {city.next_event.opponent}
           </span>
           <span className="text-xs" style={{ color: '#00D4FF' }}>

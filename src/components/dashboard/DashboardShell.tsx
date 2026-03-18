@@ -34,7 +34,7 @@ export default function DashboardShell() {
     return (
       <div
         className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: '#0B0F14' }}
+        style={{ backgroundColor: '#FAFAFB' }}
       >
         <div className="flex flex-col items-center gap-3">
           <svg
@@ -46,7 +46,7 @@ export default function DashboardShell() {
             <path d="M3 22v-6h6" />
             <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
           </svg>
-          <span className="text-sm" style={{ color: 'rgba(250,250,251,0.5)' }}>
+          <span className="text-sm" style={{ color: 'rgba(11,15,20,0.5)' }}>
             Loading intelligence...
           </span>
         </div>
@@ -59,13 +59,13 @@ export default function DashboardShell() {
     return (
       <div
         className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: '#0B0F14' }}
+        style={{ backgroundColor: '#FAFAFB' }}
       >
         <div className="flex flex-col items-center gap-3 text-center px-4">
           <span className="text-sm font-medium" style={{ color: '#BC0000' }}>
             Failed to load dashboard
           </span>
-          <span className="text-xs" style={{ color: 'rgba(250,250,251,0.4)' }}>
+          <span className="text-xs" style={{ color: 'rgba(11,15,20,0.4)' }}>
             {error}
           </span>
           <button
@@ -83,7 +83,7 @@ export default function DashboardShell() {
   if (!data) return null
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#0B0F14' }}>
+    <div className="min-h-screen" style={{ backgroundColor: '#FAFAFB' }}>
       {/* Global Control Bar */}
       <GlobalControlBar
         meta={data.meta}
@@ -111,19 +111,19 @@ export default function DashboardShell() {
         <div
           className="rounded-xl border overflow-hidden"
           style={{
-            backgroundColor: 'rgba(255,255,255,0.02)',
-            borderColor: 'rgba(255,255,255,0.06)',
+            backgroundColor: 'rgba(11,15,20,0.02)',
+            borderColor: 'rgba(11,15,20,0.08)',
           }}
         >
-          <div className="px-4 py-2.5 border-b flex items-center justify-between" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
-            <span className="text-xs font-bold uppercase tracking-wider" style={{ color: 'rgba(250,250,251,0.5)' }}>
+          <div className="px-4 py-2.5 border-b flex items-center justify-between" style={{ borderColor: 'rgba(11,15,20,0.08)' }}>
+            <span className="text-xs font-bold uppercase tracking-wider" style={{ color: 'rgba(11,15,20,0.5)' }}>
               Team Status Matrix
             </span>
             {selectedTeamKey && (
               <button
                 onClick={() => setSelectedTeamKey(null)}
                 className="text-xs px-2 py-0.5 rounded"
-                style={{ color: 'rgba(250,250,251,0.4)', backgroundColor: 'rgba(255,255,255,0.04)' }}
+                style={{ color: 'rgba(11,15,20,0.4)', backgroundColor: 'rgba(11,15,20,0.04)' }}
               >
                 Clear Selection
               </button>
@@ -156,11 +156,11 @@ export default function DashboardShell() {
         </div>
 
         {/* Data Freshness Footer */}
-        <div className="flex flex-wrap gap-4 py-3 border-t" style={{ borderColor: 'rgba(255,255,255,0.04)' }}>
+        <div className="flex flex-wrap gap-4 py-3 border-t" style={{ borderColor: 'rgba(11,15,20,0.06)' }}>
           {Object.entries(data.meta.data_freshness).map(([key, timestamp]) => {
             const ago = Math.round((Date.now() - new Date(timestamp).getTime()) / 60000)
             return (
-              <span key={key} className="text-xs" style={{ color: 'rgba(250,250,251,0.25)' }}>
+              <span key={key} className="text-xs" style={{ color: 'rgba(11,15,20,0.25)' }}>
                 {key}: {ago < 1 ? '<1m' : `${ago}m`} ago
               </span>
             )

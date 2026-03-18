@@ -14,12 +14,12 @@ export default function GlobalControlBar({ meta, lastFetched, onRefresh, loading
     <div
       className="sticky top-0 z-50 flex items-center justify-between px-4 py-2.5 backdrop-blur-md border-b"
       style={{
-        backgroundColor: 'rgba(11,15,20,0.92)',
-        borderColor: 'rgba(255,255,255,0.08)',
+        backgroundColor: 'rgba(250,250,251,0.92)',
+        borderColor: 'rgba(11,15,20,0.10)',
       }}
     >
       <div className="flex items-center gap-3">
-        <h1 className="text-sm font-bold tracking-wide" style={{ color: '#FAFAFB' }}>
+        <h1 className="text-sm font-bold tracking-wide" style={{ color: '#0B0F14' }}>
           CHICAGO SPORTS INTELLIGENCE
         </h1>
         {meta?.live_mode && (
@@ -35,12 +35,12 @@ export default function GlobalControlBar({ meta, lastFetched, onRefresh, loading
 
       <div className="flex items-center gap-4">
         {meta && (
-          <span className="text-xs hidden sm:block" style={{ color: 'rgba(250,250,251,0.4)' }}>
+          <span className="text-xs hidden sm:block" style={{ color: 'rgba(11,15,20,0.4)' }}>
             v{meta.version} &middot; schema {meta.schema_version}
           </span>
         )}
         {lastFetched && (
-          <span className="text-xs" style={{ color: 'rgba(250,250,251,0.5)' }}>
+          <span className="text-xs" style={{ color: 'rgba(11,15,20,0.5)' }}>
             {lastFetched.toLocaleTimeString('en-US', {
               hour: 'numeric',
               minute: '2-digit',
@@ -58,7 +58,7 @@ export default function GlobalControlBar({ meta, lastFetched, onRefresh, loading
           onClick={onRefresh}
           disabled={loading}
           className="p-1.5 rounded transition-colors"
-          style={{ color: loading ? 'rgba(250,250,251,0.3)' : '#00D4FF' }}
+          style={{ color: loading ? 'rgba(11,15,20,0.3)' : '#00D4FF' }}
           title="Refresh data"
         >
           <svg

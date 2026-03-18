@@ -22,7 +22,7 @@ function MetricBar({ label, value, max = 100, color }: { label: string; value: n
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-center justify-between">
-        <span className="text-xs" style={{ color: 'rgba(250,250,251,0.5)' }}>{label}</span>
+        <span className="text-xs" style={{ color: 'rgba(11,15,20,0.5)' }}>{label}</span>
         <span className="text-xs font-medium tabular-nums" style={{ color: barColor }}>{value}</span>
       </div>
       <div className="h-1.5 rounded-full" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}>
@@ -79,10 +79,10 @@ export default function TeamWorkspace({ team, onClose }: Props) {
             style={{ backgroundColor: team.color_primary }}
           />
           <div>
-            <span className="text-sm font-bold" style={{ color: '#FAFAFB' }}>
+            <span className="text-sm font-bold" style={{ color: '#0B0F14' }}>
               {team.team_name}
             </span>
-            <span className="text-xs ml-2" style={{ color: 'rgba(250,250,251,0.4)' }}>
+            <span className="text-xs ml-2" style={{ color: 'rgba(11,15,20,0.4)' }}>
               {team.sport} &middot; {team.season}
             </span>
           </div>
@@ -91,7 +91,7 @@ export default function TeamWorkspace({ team, onClose }: Props) {
         <button
           onClick={onClose}
           className="p-1 rounded transition-colors"
-          style={{ color: 'rgba(250,250,251,0.4)' }}
+          style={{ color: 'rgba(11,15,20,0.4)' }}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M18 6L6 18M6 6l12 12" />
@@ -126,10 +126,10 @@ export default function TeamWorkspace({ team, onClose }: Props) {
           <div className="space-y-4">
             {/* Insight */}
             <div>
-              <h3 className="text-sm font-bold mb-1" style={{ color: '#FAFAFB' }}>
+              <h3 className="text-sm font-bold mb-1" style={{ color: '#0B0F14' }}>
                 {team.insight.headline}
               </h3>
-              <p className="text-xs leading-relaxed" style={{ color: 'rgba(250,250,251,0.6)' }}>
+              <p className="text-xs leading-relaxed" style={{ color: 'rgba(11,15,20,0.6)' }}>
                 {team.insight.summary}
               </p>
             </div>
@@ -137,11 +137,11 @@ export default function TeamWorkspace({ team, onClose }: Props) {
             {/* Quick Stats */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div className="rounded-lg p-3" style={{ backgroundColor: 'rgba(255,255,255,0.03)' }}>
-                <span className="text-xs block" style={{ color: 'rgba(250,250,251,0.4)' }}>Record</span>
-                <span className="text-lg font-bold" style={{ color: '#FAFAFB' }}>{team.record.record_display}</span>
+                <span className="text-xs block" style={{ color: 'rgba(11,15,20,0.4)' }}>Record</span>
+                <span className="text-lg font-bold" style={{ color: '#0B0F14' }}>{team.record.record_display}</span>
               </div>
               <div className="rounded-lg p-3" style={{ backgroundColor: 'rgba(255,255,255,0.03)' }}>
-                <span className="text-xs block" style={{ color: 'rgba(250,250,251,0.4)' }}>Streak</span>
+                <span className="text-xs block" style={{ color: 'rgba(11,15,20,0.4)' }}>Streak</span>
                 <span className="text-lg font-bold" style={{
                   color: team.recent.streak.type === 'W' ? '#00D4FF' : '#BC0000'
                 }}>
@@ -149,12 +149,12 @@ export default function TeamWorkspace({ team, onClose }: Props) {
                 </span>
               </div>
               <div className="rounded-lg p-3" style={{ backgroundColor: 'rgba(255,255,255,0.03)' }}>
-                <span className="text-xs block" style={{ color: 'rgba(250,250,251,0.4)' }}>Last 10</span>
-                <span className="text-lg font-bold" style={{ color: '#FAFAFB' }}>{team.recent.last_10}</span>
+                <span className="text-xs block" style={{ color: 'rgba(11,15,20,0.4)' }}>Last 10</span>
+                <span className="text-lg font-bold" style={{ color: '#0B0F14' }}>{team.recent.last_10}</span>
               </div>
               <div className="rounded-lg p-3" style={{ backgroundColor: 'rgba(255,255,255,0.03)' }}>
-                <span className="text-xs block" style={{ color: 'rgba(250,250,251,0.4)' }}>Remaining</span>
-                <span className="text-lg font-bold" style={{ color: '#FAFAFB' }}>{team.record.games_remaining}</span>
+                <span className="text-xs block" style={{ color: 'rgba(11,15,20,0.4)' }}>Remaining</span>
+                <span className="text-lg font-bold" style={{ color: '#0B0F14' }}>{team.record.games_remaining}</span>
               </div>
             </div>
 
@@ -164,18 +164,18 @@ export default function TeamWorkspace({ team, onClose }: Props) {
                 className="rounded-lg p-3 border"
                 style={{ backgroundColor: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.04)' }}
               >
-                <span className="text-xs uppercase tracking-wider block mb-1" style={{ color: 'rgba(250,250,251,0.35)' }}>
+                <span className="text-xs uppercase tracking-wider block mb-1" style={{ color: 'rgba(11,15,20,0.35)' }}>
                   Next Game
                 </span>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium" style={{ color: '#FAFAFB' }}>
+                  <span className="text-sm font-medium" style={{ color: '#0B0F14' }}>
                     {team.status.next_game.home ? 'vs' : '@'} {team.status.next_game.opponent}
                   </span>
                   <div className="text-right">
                     <span className="text-xs block" style={{ color: '#00D4FF' }}>
                       {team.status.next_game.datetime_display}
                     </span>
-                    <span className="text-xs" style={{ color: 'rgba(250,250,251,0.35)' }}>
+                    <span className="text-xs" style={{ color: 'rgba(11,15,20,0.35)' }}>
                       {team.status.next_game.venue} &middot; {team.status.next_game.importance_label}
                     </span>
                   </div>
@@ -186,10 +186,10 @@ export default function TeamWorkspace({ team, onClose }: Props) {
                 className="rounded-lg p-3 border"
                 style={{ backgroundColor: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.04)' }}
               >
-                <span className="text-xs uppercase tracking-wider block mb-1" style={{ color: 'rgba(250,250,251,0.35)' }}>
+                <span className="text-xs uppercase tracking-wider block mb-1" style={{ color: 'rgba(11,15,20,0.35)' }}>
                   Next Game
                 </span>
-                <span className="text-sm" style={{ color: 'rgba(250,250,251,0.4)' }}>No games scheduled</span>
+                <span className="text-sm" style={{ color: 'rgba(11,15,20,0.4)' }}>No games scheduled</span>
               </div>
             )}
           </div>
@@ -200,27 +200,27 @@ export default function TeamWorkspace({ team, onClose }: Props) {
             {/* Offense */}
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-xs font-bold uppercase tracking-wider" style={{ color: 'rgba(250,250,251,0.5)' }}>
+                <span className="text-xs font-bold uppercase tracking-wider" style={{ color: 'rgba(11,15,20,0.5)' }}>
                   Offense
                 </span>
                 <TrendArrow direction={team.performance.offense.trend} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-lg p-3" style={{ backgroundColor: 'rgba(255,255,255,0.03)' }}>
-                  <span className="text-xs block" style={{ color: 'rgba(250,250,251,0.4)' }}>Rating</span>
-                  <span className="text-lg font-bold" style={{ color: '#FAFAFB' }}>
+                  <span className="text-xs block" style={{ color: 'rgba(11,15,20,0.4)' }}>Rating</span>
+                  <span className="text-lg font-bold" style={{ color: '#0B0F14' }}>
                     {team.performance.offense.rating_display}
                   </span>
                 </div>
                 <div className="rounded-lg p-3" style={{ backgroundColor: 'rgba(255,255,255,0.03)' }}>
-                  <span className="text-xs block" style={{ color: 'rgba(250,250,251,0.4)' }}>Rank</span>
-                  <span className="text-lg font-bold" style={{ color: '#FAFAFB' }}>
+                  <span className="text-xs block" style={{ color: 'rgba(11,15,20,0.4)' }}>Rank</span>
+                  <span className="text-lg font-bold" style={{ color: '#0B0F14' }}>
                     {team.performance.offense.rank_display}
                   </span>
                 </div>
               </div>
               <div className="mt-2">
-                <span className="text-xs" style={{ color: 'rgba(250,250,251,0.4)' }}>
+                <span className="text-xs" style={{ color: 'rgba(11,15,20,0.4)' }}>
                   {team.units.offense.label}: {team.units.offense.key_contributors.join(', ')}
                 </span>
               </div>
@@ -229,27 +229,27 @@ export default function TeamWorkspace({ team, onClose }: Props) {
             {/* Defense */}
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-xs font-bold uppercase tracking-wider" style={{ color: 'rgba(250,250,251,0.5)' }}>
+                <span className="text-xs font-bold uppercase tracking-wider" style={{ color: 'rgba(11,15,20,0.5)' }}>
                   Defense
                 </span>
                 <TrendArrow direction={team.performance.defense.trend} />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-lg p-3" style={{ backgroundColor: 'rgba(255,255,255,0.03)' }}>
-                  <span className="text-xs block" style={{ color: 'rgba(250,250,251,0.4)' }}>Rating</span>
-                  <span className="text-lg font-bold" style={{ color: '#FAFAFB' }}>
+                  <span className="text-xs block" style={{ color: 'rgba(11,15,20,0.4)' }}>Rating</span>
+                  <span className="text-lg font-bold" style={{ color: '#0B0F14' }}>
                     {team.performance.defense.rating_display}
                   </span>
                 </div>
                 <div className="rounded-lg p-3" style={{ backgroundColor: 'rgba(255,255,255,0.03)' }}>
-                  <span className="text-xs block" style={{ color: 'rgba(250,250,251,0.4)' }}>Rank</span>
-                  <span className="text-lg font-bold" style={{ color: '#FAFAFB' }}>
+                  <span className="text-xs block" style={{ color: 'rgba(11,15,20,0.4)' }}>Rank</span>
+                  <span className="text-lg font-bold" style={{ color: '#0B0F14' }}>
                     {team.performance.defense.rank_display}
                   </span>
                 </div>
               </div>
               <div className="mt-2">
-                <span className="text-xs" style={{ color: 'rgba(250,250,251,0.4)' }}>
+                <span className="text-xs" style={{ color: 'rgba(11,15,20,0.4)' }}>
                   {team.units.defense.label}: {team.units.defense.key_contributors.join(', ')}
                 </span>
               </div>
@@ -260,7 +260,7 @@ export default function TeamWorkspace({ team, onClose }: Props) {
         {activeTab === 'health' && (
           <div className="space-y-4">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-sm font-medium" style={{ color: '#FAFAFB' }}>
+              <span className="text-sm font-medium" style={{ color: '#0B0F14' }}>
                 {team.health.availability_label}
               </span>
               <span
@@ -284,7 +284,7 @@ export default function TeamWorkspace({ team, onClose }: Props) {
                   Out
                 </span>
                 {team.health.key_players_out.map((p) => (
-                  <span key={p} className="text-sm block" style={{ color: '#FAFAFB' }}>{p}</span>
+                  <span key={p} className="text-sm block" style={{ color: '#0B0F14' }}>{p}</span>
                 ))}
               </div>
             )}
@@ -295,13 +295,13 @@ export default function TeamWorkspace({ team, onClose }: Props) {
                   Questionable
                 </span>
                 {team.health.key_players_questionable.map((p) => (
-                  <span key={p} className="text-sm block" style={{ color: '#FAFAFB' }}>{p}</span>
+                  <span key={p} className="text-sm block" style={{ color: '#0B0F14' }}>{p}</span>
                 ))}
               </div>
             )}
 
             {team.health.injuries_total === 0 && (
-              <span className="text-sm" style={{ color: 'rgba(250,250,251,0.5)' }}>
+              <span className="text-sm" style={{ color: 'rgba(11,15,20,0.5)' }}>
                 No injuries reported
               </span>
             )}
@@ -322,13 +322,13 @@ export default function TeamWorkspace({ team, onClose }: Props) {
                     style={{ borderColor: 'rgba(255,255,255,0.04)' }}
                   >
                     <div>
-                      <span className="text-sm font-medium" style={{ color: '#FAFAFB' }}>{p.name}</span>
-                      <span className="text-xs ml-2" style={{ color: 'rgba(250,250,251,0.4)' }}>{p.position}</span>
+                      <span className="text-sm font-medium" style={{ color: '#0B0F14' }}>{p.name}</span>
+                      <span className="text-xs ml-2" style={{ color: 'rgba(11,15,20,0.4)' }}>{p.position}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-xs" style={{ color: '#00D4FF' }}>{p.stat_line}</span>
                       <TrendArrow direction={p.trend} />
-                      <span className="text-xs tabular-nums w-6 text-right" style={{ color: 'rgba(250,250,251,0.5)' }}>
+                      <span className="text-xs tabular-nums w-6 text-right" style={{ color: 'rgba(11,15,20,0.5)' }}>
                         {p.performance_score}
                       </span>
                     </div>
@@ -349,16 +349,16 @@ export default function TeamWorkspace({ team, onClose }: Props) {
                     style={{ borderColor: 'rgba(255,255,255,0.04)' }}
                   >
                     <div>
-                      <span className="text-sm font-medium" style={{ color: '#FAFAFB' }}>{p.name}</span>
-                      <span className="text-xs ml-2" style={{ color: 'rgba(250,250,251,0.4)' }}>{p.position}</span>
+                      <span className="text-sm font-medium" style={{ color: '#0B0F14' }}>{p.name}</span>
+                      <span className="text-xs ml-2" style={{ color: 'rgba(11,15,20,0.4)' }}>{p.position}</span>
                       {p.note && (
                         <span className="text-xs block" style={{ color: '#D6B05E' }}>{p.note}</span>
                       )}
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs" style={{ color: 'rgba(250,250,251,0.5)' }}>{p.stat_line}</span>
+                      <span className="text-xs" style={{ color: 'rgba(11,15,20,0.5)' }}>{p.stat_line}</span>
                       <TrendArrow direction={p.trend} />
-                      <span className="text-xs tabular-nums w-6 text-right" style={{ color: 'rgba(250,250,251,0.5)' }}>
+                      <span className="text-xs tabular-nums w-6 text-right" style={{ color: 'rgba(11,15,20,0.5)' }}>
                         {p.performance_score}
                       </span>
                     </div>

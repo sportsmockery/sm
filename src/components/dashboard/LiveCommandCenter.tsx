@@ -10,7 +10,7 @@ function EventImpactDot({ impact }: { impact: string }) {
   const colors: Record<string, string> = {
     high: '#BC0000',
     medium: '#D6B05E',
-    low: 'rgba(250,250,251,0.3)',
+    low: 'rgba(11,15,20,0.3)',
   }
   return (
     <span
@@ -47,17 +47,17 @@ export default function LiveCommandCenter({ live }: Props) {
             key={game.game_id}
             className="rounded-lg border p-4"
             style={{
-              backgroundColor: 'rgba(255,255,255,0.02)',
-              borderColor: 'rgba(255,255,255,0.06)',
+              backgroundColor: 'rgba(11,15,20,0.02)',
+              borderColor: 'rgba(11,15,20,0.08)',
             }}
           >
             {/* Scoreboard */}
             <div className="flex items-center justify-between mb-3">
               <div className="flex-1">
-                <span className="text-sm font-medium" style={{ color: '#FAFAFB' }}>
+                <span className="text-sm font-medium" style={{ color: '#0B0F14' }}>
                   {game.team_name}
                 </span>
-                <span className="text-2xl font-bold ml-3 tabular-nums" style={{ color: '#FAFAFB' }}>
+                <span className="text-2xl font-bold ml-3 tabular-nums" style={{ color: '#0B0F14' }}>
                   {game.score.team}
                 </span>
               </div>
@@ -65,15 +65,15 @@ export default function LiveCommandCenter({ live }: Props) {
                 <span className="text-xs font-medium" style={{ color: '#BC0000' }}>
                   {game.state.segment_label}
                 </span>
-                <span className="text-sm font-bold tabular-nums" style={{ color: '#FAFAFB' }}>
+                <span className="text-sm font-bold tabular-nums" style={{ color: '#0B0F14' }}>
                   {game.state.time_remaining}
                 </span>
               </div>
               <div className="flex-1 text-right">
-                <span className="text-2xl font-bold mr-3 tabular-nums" style={{ color: 'rgba(250,250,251,0.6)' }}>
+                <span className="text-2xl font-bold mr-3 tabular-nums" style={{ color: 'rgba(11,15,20,0.6)' }}>
                   {game.score.opponent}
                 </span>
-                <span className="text-sm font-medium" style={{ color: 'rgba(250,250,251,0.6)' }}>
+                <span className="text-sm font-medium" style={{ color: 'rgba(11,15,20,0.6)' }}>
                   {game.opponent}
                 </span>
               </div>
@@ -82,15 +82,15 @@ export default function LiveCommandCenter({ live }: Props) {
             {/* Momentum */}
             <div
               className="rounded-lg px-3 py-2 mb-3"
-              style={{ backgroundColor: 'rgba(255,255,255,0.03)' }}
+              style={{ backgroundColor: 'rgba(11,15,20,0.03)' }}
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs" style={{ color: 'rgba(250,250,251,0.5)' }}>Momentum</span>
+                <span className="text-xs" style={{ color: 'rgba(11,15,20,0.5)' }}>Momentum</span>
                 <span className="text-xs font-medium" style={{ color: '#00D4FF' }}>
                   {game.momentum.swing_event}
                 </span>
               </div>
-              <div className="h-1 rounded-full mt-1.5" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}>
+              <div className="h-1 rounded-full mt-1.5" style={{ backgroundColor: 'rgba(11,15,20,0.08)' }}>
                 <div
                   className="h-full rounded-full transition-all duration-700"
                   style={{
@@ -107,12 +107,12 @@ export default function LiveCommandCenter({ live }: Props) {
             <div className="grid grid-cols-2 gap-3">
               {/* Performers */}
               <div>
-                <span className="text-xs uppercase tracking-wider block mb-1.5" style={{ color: 'rgba(250,250,251,0.35)' }}>
+                <span className="text-xs uppercase tracking-wider block mb-1.5" style={{ color: 'rgba(11,15,20,0.35)' }}>
                   Top Performers
                 </span>
                 {game.top_performers.map((p) => (
                   <div key={p.player_id} className="flex items-center gap-2 mb-1">
-                    <span className="text-xs font-medium" style={{ color: '#FAFAFB' }}>{p.name}</span>
+                    <span className="text-xs font-medium" style={{ color: '#0B0F14' }}>{p.name}</span>
                     <span className="text-xs" style={{ color: '#00D4FF' }}>{p.stat_line}</span>
                   </div>
                 ))}
@@ -120,14 +120,14 @@ export default function LiveCommandCenter({ live }: Props) {
 
               {/* Key Events */}
               <div>
-                <span className="text-xs uppercase tracking-wider block mb-1.5" style={{ color: 'rgba(250,250,251,0.35)' }}>
+                <span className="text-xs uppercase tracking-wider block mb-1.5" style={{ color: 'rgba(11,15,20,0.35)' }}>
                   Key Events
                 </span>
                 {game.key_events.slice(0, 4).map((evt) => (
                   <div key={evt.event_id} className="flex items-start gap-1.5 mb-1">
                     <EventImpactDot impact={evt.impact} />
-                    <span className="text-xs leading-tight" style={{ color: 'rgba(250,250,251,0.6)' }}>
-                      <span style={{ color: 'rgba(250,250,251,0.35)' }}>{evt.time}</span>{' '}
+                    <span className="text-xs leading-tight" style={{ color: 'rgba(11,15,20,0.6)' }}>
+                      <span style={{ color: 'rgba(11,15,20,0.35)' }}>{evt.time}</span>{' '}
                       {evt.description}
                     </span>
                   </div>
