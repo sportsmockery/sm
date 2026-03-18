@@ -1,4 +1,3 @@
-import { datalabAdmin } from '@/lib/supabase-datalab'
 import { notFound } from 'next/navigation'
 import TeamDetail from './TeamDetail'
 
@@ -13,6 +12,8 @@ const TEAM_NAMES: Record<string, string> = {
   whitesox: 'Chicago White Sox',
 }
 
+const DATALAB_URL = process.env.DATALAB_API_URL || 'https://datalab.sportsmockery.com'
+
 export async function generateStaticParams() {
   return VALID_TEAMS.map(team => ({ team }))
 }
@@ -21,7 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ team: str
   const { team } = await params
   const name = TEAM_NAMES[team] || team
   return {
-    title: `${name} Owner Report Card`,
+    title: `${name} Owner Report Card | Sports Mockery`,
     description: `Data-backed ownership grade for the ${name} — Spending, Results, Fan Sentiment, and Loyalty Tax.`,
   }
 }
@@ -33,37 +34,33 @@ export default async function TeamOwnerPage({ params }: { params: Promise<{ team
     notFound()
   }
 
-  const [gradeResult, historyResult, voteResult] = await Promise.all([
-    datalabAdmin
-      .from('ownership_grades')
-      .select('*')
-      .eq('team_slug', team)
-      .eq('is_current', true)
-      .single(),
-    datalabAdmin
-      .from('ownership_grade_history')
-      .select('*')
-      .eq('team_slug', team)
-      .order('recorded_at', { ascending: true }),
-    datalabAdmin
-      .from('ownership_vote_counts')
-      .select('*')
-      .eq('team_slug', team),
-  ])
+  let grade: any = null
+  let history: any[] = []
 
-  if (gradeResult.error || !gradeResult.data) {
+  try {
+    const res = await fetch(`${DATALAB_URL}/api/ownership-scores/grades/${team}`, {
+      next: { revalidate: 3600 },
+    })
+    if (res.ok) {
+      const json = await res.json()
+      grade = json.grade || json.data || json
+      history = json.history || []
+    }
+  } catch (err) {
+    console.error(`Failed to fetch ownership grade for ${team}:`, err)
+  }
+
+  if (!grade) {
     notFound()
   }
 
-  const grade = gradeResult.data
-  const votes = voteResult.data?.find((v: any) => v.grade_id === grade.id)
-
+  // Ensure vote counts exist
   const gradeWithVotes = {
     ...grade,
-    agree_count: votes?.agree_count || 0,
-    disagree_count: votes?.disagree_count || 0,
-    total_votes: votes?.total_votes || 0,
+    agree_count: grade.agree_count || 0,
+    disagree_count: grade.disagree_count || 0,
+    total_votes: grade.total_votes || 0,
   }
 
-  return <TeamDetail grade={gradeWithVotes} history={historyResult.data || []} />
+  return <TeamDetail grade={gradeWithVotes} history={history} />
 }
