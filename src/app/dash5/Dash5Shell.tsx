@@ -299,6 +299,24 @@ export default function Dash5Shell() {
               )}
             </GlassCard>
           ))}
+
+          {/* Fill empty grid slots with placeholder glass cards */}
+          {filteredTeams.length < 3 && filteredTeams.length > 0 && (
+            Array.from({ length: 3 - (filteredTeams.length % 3 || 3) }).map((_, i) => (
+              <GlassCard key={`filler-${i}`} className="hidden xl:block">
+                <div className="flex flex-col items-center justify-center py-8 gap-3">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(11,15,20,0.03)' }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(11,15,20,0.15)" strokeWidth="1.5">
+                      <path d="M12 5v14M5 12h14" strokeLinecap="round" />
+                    </svg>
+                  </div>
+                  <span className="text-[11px]" style={{ color: 'rgba(11,15,20,0.2)' }}>
+                    {i === 0 ? 'Select more teams or drill down' : 'Additional intelligence'}
+                  </span>
+                </div>
+              </GlassCard>
+            ))
+          )}
         </div>
 
         {/* ── TRENDS + LEADERS ROW ────────────────────── */}
