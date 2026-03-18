@@ -95,6 +95,20 @@ export function HomepageHero(props: HomepageHeroProps) {
 
     // Visit cap only applies to logged-in users on takeover modes
     if (!isLoggedIn) return baseMode
+
+    // Game Day visit cap: logged-in users only, only while game is still upcoming
+    if (baseMode === "gameday" && props.gameContexts && props.gameContexts[0]) {
+      const game = props.gameContexts[0]
+      const isLiveGame = game.kickoffLabel?.startsWith("LIVE")
+      const gameId = game.gameId
+
+      // Only cap pre-game hero takeovers; once live, keep Game Day in rotation
+      if (!isLiveGame && gameId && hasExceededGameDayCap(gameId, 1)) {
+        return resolveHeroModeSkippingGameDay(props)
+      }
+      return baseMode
+    }
+
     if (baseMode !== "trending" && baseMode !== "story-universe") return baseMode
 
     // Check if both takeover modes qualify
@@ -140,21 +154,7 @@ export function HomepageHero(props: HomepageHeroProps) {
       return resolveHeroModeSkippingTakeovers(props)
     }
 
-    let resolved: HeroModeName = baseMode
-
-    // Game Day visit cap: logged-in users only, only while game is still upcoming
-    if (isLoggedIn && resolved === "gameday" && props.gameContexts && props.gameContexts[0]) {
-      const game = props.gameContexts[0]
-      const isLiveGame = game.kickoffLabel?.startsWith("LIVE")
-      const gameId = game.gameId
-
-      // Only cap pre-game hero takeovers; once live, keep Game Day in rotation
-      if (!isLiveGame && gameId && hasExceededGameDayCap(gameId, 1)) {
-        resolved = resolveHeroModeSkippingGameDay(props)
-      }
-    }
-
-    return resolved
+    return baseMode
   }, [props, isLoggedIn])
 
   // Record the view for takeover modes (logged-in users only)
