@@ -165,6 +165,7 @@ export function EdgeHero({
                   alt="Scout"
                   width={40}
                   height={40}
+                  priority
                   className="h-10 w-10 rounded-full object-contain"
                 />
               )}
