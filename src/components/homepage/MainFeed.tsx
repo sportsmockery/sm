@@ -286,6 +286,9 @@ export default function MainFeed({ activeTab, setActiveTab, selectedTeam, heroAr
             timestamp={featuredItem.timestamp}
             slug={featuredItem.data.slug as string | undefined}
             categorySlug={featuredItem.data.categorySlug as string | undefined}
+            viewsLabel={
+              (featuredItem.data.stats as { views?: string } | undefined)?.views
+            }
           />
         ) : !loading && (
           <TopIntelligenceCard
@@ -295,6 +298,7 @@ export default function MainFeed({ activeTab, setActiveTab, selectedTeam, heroAr
             team="Chicago Sports"
             teamColor="#0B0F14"
             timestamp=""
+            viewsLabel={undefined}
           />
         )}
       </div>

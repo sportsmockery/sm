@@ -1,6 +1,6 @@
 # SportsMockery - Claude Project Knowledge Base
 
-> **Last Updated:** March 11, 2026
+> **Last Updated:** March 17, 2026
 > **Purpose:** This file contains everything Claude needs to know to work on this project.
 
 ---
@@ -58,6 +58,21 @@ SM Edge uses a **strict five-color palette**. No additional accent colors should
 - **DO NOT** use `#000000` — use `#0B0F14` instead
 - **DO NOT** use `#FFFFFF` — use `#FAFAFB` instead
 - **NEVER introduce:** orange, emerald, violet, purple, alternate blues. All UI must follow this palette.
+
+### Feed card & top story — team accent (left border and insight box)
+
+When a team logo appears on the top right of an editorial/top story card, the **left edge of the card** and the **left edge of the Insight block** (when present) use that team’s accent color. These are the only team-specific accent hex values used in the feed:
+
+| Team        | Hex       | Usage                                      |
+|-------------|-----------|--------------------------------------------|
+| **Bears**   | `#C83803` | Card left border, insight box left border |
+| **Cubs**    | `#0E3386` | Card left border, insight box left border |
+| **Bulls**   | `#CE1141` | Card left border, insight box left border |
+| **Blackhawks** | `#00833E` | Card left border, insight box left border |
+| **White Sox**  | `#FFFFFF` | Card left border, insight box left border  |
+
+- **EditorialCard:** `getTeamAccentColor(team)` in `RiverCards.tsx` drives both the article left border and the insight block `borderLeft`.
+- **TopIntelligenceCard:** `getTopStoryTeamAccent(team)` drives the top story card left border.
 
 ### Typography — Space Grotesk (ALWAYS FOLLOW)
 

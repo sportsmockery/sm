@@ -9,6 +9,7 @@ import {
   TrendingUp, Play, Clock, Check, X, ChevronRight,
   BarChart3, Users
 } from "lucide-react"
+import { useAudioPlayer } from "@/context/AudioPlayerContext"
 import { homepageTeams } from "@/lib/homepage-team-data"
 import {
   AreaChart,
@@ -22,6 +23,8 @@ import {
 const PI_LOGO_SRC = "/youtubelogos/pi-logo.png"
 /** Pinwheels & Ivy logo for top left of PI cards (pinwheel + "Pinwheels and Ivy" text). */
 const PI_LOGO_LEFT_SRC = "/downloads/pinwheels-ivy-logo.png"
+/** Untold Chicago logo for video cards from Untold Chicago. */
+const UNTOLD_LOGO_SRC = "/downloads/untold-logo.png"
 
 function isPinwheelsAndIvy(source: string | undefined): boolean {
   if (!source || typeof source !== 'string') return false
@@ -34,6 +37,11 @@ function isPinwheelsAndIvy(source: string | undefined): boolean {
     n.includes('p&i') ||
     (n.includes('cubs') && n.includes('white sox'))
   )
+}
+
+function isUntoldChicago(source: string | undefined): boolean {
+  if (!source || typeof source !== 'string') return false
+  return source.toLowerCase().replace(/\s+/g, ' ').trim().includes('untold')
 }
 
 // ============================================
@@ -118,6 +126,17 @@ function TeamTag({ team, teamHex }: { team: string; teamHex: string }) {
   )
 }
 
+/** Team accent color for feed card left border and insight box (matches team logo on top right). */
+function getTeamAccentColor(team: string): string | undefined {
+  const n = team.toLowerCase().replace(/\s+/g, ' ').trim()
+  if (n.includes('bears')) return '#C83803'   // Bears orange
+  if (n.includes('cubs')) return '#0E3386'    // Cubs blue
+  if (n.includes('bulls')) return '#CE1141'   // Bulls red
+  if (n.includes('blackhawks')) return '#00833E' // Blackhawks green
+  if (n.includes('white sox') || n.includes('whitesox') || n.includes('white-sox')) return '#FFFFFF' // White Sox white
+  return undefined
+}
+
 // Editorial label component
 function CardLabel({ label, isBreaking = false }: { label: string; isBreaking?: boolean }) {
   return (
@@ -133,9 +152,11 @@ function CardLabel({ label, isBreaking = false }: { label: string; isBreaking?: 
 // Shared engagement row — reactions + play + comment + views + share
 // Reactions use real data from props. When no DB-backed reaction data exists yet,
 // counts will be 0 — this is intentional (no fake numbers).
-function EngagementRow({ stats, articleUrl }: { stats: { comments: number; retweets: number; likes: number; views: string }; articleUrl?: string }) {
+// listenButtonStyle: "circle" = REPORT cards only — light gray circle, icon only; plays from feed via global audio.
+function EngagementRow({ stats, articleUrl, listenButtonStyle = "pill", slug, headline }: { stats: { comments: number; retweets: number; likes: number; views: string }; articleUrl?: string; listenButtonStyle?: "pill" | "circle"; slug?: string; headline?: string }) {
   const [reactions, setReactions] = useState<Record<string, boolean>>({})
   const [counts, setCounts] = useState({ smart: stats.likes, hot: stats.retweets })
+  const audio = useAudioPlayer()
 
   const toggle = (key: "smart" | "hot") => {
     setReactions(prev => ({ ...prev, [key]: !prev[key] }))
@@ -157,6 +178,7 @@ function EngagementRow({ stats, articleUrl }: { stats: { comments: number; retwe
   ]
 
   const listenUrl = articleUrl ? `${articleUrl}${articleUrl.includes('?') ? '&' : '?'}listen=true#article-audio` : null
+  const isThisArticlePlaying = listenButtonStyle === "circle" && slug && audio.currentArticle?.slug === slug && audio.isPlaying
 
   return (
     <div className="mt-5 flex items-center justify-between" style={{ color: 'var(--hp-muted-foreground)' }}>
@@ -172,7 +194,29 @@ function EngagementRow({ stats, articleUrl }: { stats: { comments: number; retwe
             <span style={{ fontSize: 12, fontWeight: reactions[key] ? 600 : 400 }}>{count}</span>
           </button>
         ))}
-        {listenUrl && (
+        {listenUrl && listenButtonStyle === "circle" && slug && headline && (
+          <button
+            type="button"
+            onClick={() => {
+              if (isThisArticlePlaying) audio.pause()
+              else audio.play({ title: headline, slug, url: `/api/audio/${encodeURIComponent(slug)}?voice=will` })
+            }}
+            className="group flex items-center justify-center rounded-full transition-transform hp-tap-target hover:scale-105"
+            style={{ width: 38, height: 38, backgroundColor: '#d1d5db', border: '1px solid rgba(11,15,20,0.12)' }}
+            aria-label={isThisArticlePlaying ? 'Pause' : 'Listen to article'}
+          >
+            {isThisArticlePlaying ? (
+              <svg className="w-4 h-4 flex-shrink-0" fill="#FAFAFB" viewBox="0 0 24 24" aria-hidden>
+                <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+              </svg>
+            ) : (
+              <svg className="w-4 h-4 ml-0.5 flex-shrink-0" fill="#FAFAFB" viewBox="0 0 24 24" aria-hidden>
+                <path d="M8 5v14l11-7L8 5z" />
+              </svg>
+            )}
+          </button>
+        )}
+        {listenUrl && listenButtonStyle === "pill" && (
           <Link
             href={listenUrl}
             className="group flex items-center gap-1.5 rounded-full px-2.5 py-1.5 transition-all hp-tap-target hover:bg-[rgba(0,0,0,0.04)] dark:hover:bg-[rgba(255,255,255,0.04)] hover:text-[#00D4FF]"
@@ -257,11 +301,43 @@ export function EditorialCard({
   const yesPercentage = Math.round((yesVotes / totalVotes) * 100)
   const noPercentage = Math.round((noVotes / totalVotes) * 100)
 
+  const cardAccentColor = getTeamAccentColor(team)
+
   return (
-    <article className="hp-feed-card hp-card-enter group relative">
+    <article
+      className="hp-feed-card hp-card-enter group relative"
+      style={cardAccentColor ? { borderLeft: `3px solid ${cardAccentColor}` } : undefined}
+    >
       <div className="flex items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-3">
-          <CardLabel label={breakingIndicator || "NEWS"} isBreaking={breakingIndicator === "BREAKING"} />
+          {breakingIndicator === "REPORT" ? (
+            <>
+              {/* Sports Mockery wordmark — top left */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/downloads/sm-logo-wordmark.png"
+                alt="Sports Mockery"
+                width={160}
+                height={32}
+                style={{ height: 32, width: 'auto', objectFit: 'contain' }}
+              />
+              <span
+                className="inline-flex items-center rounded-full px-2 py-0.5"
+                style={{
+                  fontSize: 10,
+                  fontWeight: 600,
+                  letterSpacing: "0.03em",
+                  backgroundColor: "rgba(0,0,0,0.06)",
+                  color: "#3a3a3a",
+                  textTransform: "uppercase",
+                }}
+              >
+                Report
+              </span>
+            </>
+          ) : (
+            <CardLabel label={breakingIndicator || "NEWS"} isBreaking={breakingIndicator === "BREAKING"} />
+          )}
           <span style={{ fontSize: 11, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
         </div>
         <TeamTag team={team} teamHex={teamHex} />
@@ -313,7 +389,7 @@ export function EditorialCard({
       <p className="mt-3 line-clamp-3" style={{ fontSize: 15, lineHeight: 1.65, color: 'var(--hp-foreground)', opacity: 0.7 }}>{summary}</p>
 
       {insight && (
-        <div className="mt-5 rounded-2xl p-4" style={{ background: 'var(--hp-muted)', borderLeft: `3px solid ${teamHex}`, opacity: 0.9 }}>
+        <div className="mt-5 rounded-2xl p-4" style={{ background: 'var(--hp-muted)', borderLeft: `3px solid ${cardAccentColor ?? teamHex}`, opacity: 0.9 }}>
           <span style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--hp-muted-foreground)' }}>Insight</span>
           <p className="mt-2" style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--hp-foreground)', opacity: 0.65 }}>{insight}</p>
         </div>
@@ -344,7 +420,7 @@ export function EditorialCard({
           </p>
         </div>
       )}
-      <EngagementRow stats={stats} articleUrl={articleUrl} />
+      <EngagementRow stats={stats} articleUrl={articleUrl} listenButtonStyle={breakingIndicator === "REPORT" ? "circle" : "pill"} slug={slug} headline={headline} />
 
       {gmQuestion && (
         <div className="mt-5 rounded-2xl p-4" style={{ border: '1px solid var(--hp-border)', background: 'var(--hp-muted)', opacity: 0.9 }}>
@@ -769,8 +845,7 @@ interface ScoutSummaryCardProps extends BaseCardProps {
 export function ScoutSummaryCard({ summary, bullets, topic, team, teamColor, timestamp, slug, categorySlug, stats }: ScoutSummaryCardProps) {
   const teamHex = teamColor
   const router = useRouter()
-  const [isPlaying, setIsPlaying] = useState(false)
-  const audioRef = useRef<HTMLAudioElement | null>(null)
+  const audio = useAudioPlayer()
 
   const normalizedTeam = team.toLowerCase()
   const edgeColor =
@@ -783,35 +858,22 @@ export function ScoutSummaryCard({ summary, bullets, topic, team, teamColor, tim
 
   const articleHref = slug && categorySlug ? `/${categorySlug}/${slug}` : null
 
+  const insightAudioUrl = bullets?.length
+    ? `/api/audio/scout-insight?${bullets.map((b) => `b=${encodeURIComponent(b)}`).join('&')}`
+    : null
+  const isPlaying = !!insightAudioUrl && audio.currentArticle?.url === insightAudioUrl && audio.isPlaying
+
   const handleScoutPlay = () => {
-    if (!bullets || bullets.length === 0) return
-
-    // Build query with bullets as repeated b= params
-    const params = new URLSearchParams()
-    bullets.forEach((b) => {
-      params.append('b', b)
-    })
-
-    const url = `/api/audio/scout-insight?${params.toString()}`
-
-    // Stop any existing playback
-    if (audioRef.current) {
-      audioRef.current.pause()
-      audioRef.current.src = ''
+    if (!bullets?.length || !insightAudioUrl) return
+    if (isPlaying) {
+      audio.pause()
+    } else {
+      audio.play({
+        title: 'Scout Insight',
+        slug: 'scout-insight',
+        url: insightAudioUrl,
+      })
     }
-
-    const audio = new Audio(url)
-    audioRef.current = audio
-    setIsPlaying(true)
-    audio.onended = () => {
-      setIsPlaying(false)
-    }
-    audio.onerror = () => {
-      setIsPlaying(false)
-    }
-    audio.play().catch(() => {
-      setIsPlaying(false)
-    })
   }
 
   return (
@@ -832,19 +894,6 @@ export function ScoutSummaryCard({ summary, bullets, topic, team, teamColor, tim
             }}
           >
             Scout AI Insight
-          </span>
-          <span
-            className="inline-flex items-center rounded-full px-2 py-0.5"
-            style={{
-              fontSize: 10,
-              fontWeight: 600,
-              letterSpacing: "0.03em",
-              backgroundColor: "rgba(0,0,0,0.06)",
-              color: "#3a3a3a",
-              textTransform: "uppercase",
-            }}
-          >
-            Report
           </span>
           <span style={{ fontSize: 11, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
         </div>
@@ -1086,26 +1135,23 @@ const BRIEFING_BULLETS = [
   "Blackhawks youth movement showing promise",
 ]
 
+const SCOUT_BRIEFING_AUDIO_URL = '/api/audio/scout-briefing?voice=scout'
+
 export function ScoutBriefingCard() {
   const router = useRouter()
-  const [isPlaying, setIsPlaying] = useState(false)
-  const briefingAudioRef = useRef<HTMLAudioElement | null>(null)
+  const audio = useAudioPlayer()
+  const isPlaying = audio.currentArticle?.slug === 'scout-briefing' && audio.isPlaying
 
   const handleBriefingPlay = () => {
-    const url = '/api/audio/scout-briefing?voice=scout'
-
-    // Stop any existing Scout briefing playback
-    if (briefingAudioRef.current) {
-      briefingAudioRef.current.pause()
-      briefingAudioRef.current.src = ''
+    if (isPlaying) {
+      audio.pause()
+    } else {
+      audio.play({
+        title: 'Scout Briefing',
+        slug: 'scout-briefing',
+        url: SCOUT_BRIEFING_AUDIO_URL,
+      })
     }
-
-    const audio = new Audio(url)
-    briefingAudioRef.current = audio
-    setIsPlaying(true)
-    audio.onended = () => setIsPlaying(false)
-    audio.onerror = () => setIsPlaying(false)
-    audio.play().catch(() => setIsPlaying(false))
   }
 
   return (
@@ -1254,9 +1300,12 @@ export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team,
 
   return (
     <article className="hp-feed-card hp-card-enter">
-      <div className="flex items-center justify-between gap-3 mb-4">
-        {/* Top left: Pinwheels & Ivy logo on PI cards; VIDEO + timestamp on others */}
-        <div className="flex items-center gap-3 flex-shrink-0" style={{ height: 66 }}>
+      <div
+        className="flex items-center justify-between gap-3 mb-4"
+        style={isUntoldChicago(source) ? { marginTop: -8 } : undefined}
+      >
+        {/* Top left: P&I or Untold logo on partner cards; VIDEO + timestamp on others */}
+        <div className="flex items-center gap-3 flex-shrink-0" style={{ height: isUntoldChicago(source) ? 40 : 66 }}>
           {isPinwheelsAndIvy(source) ? (
             <>
               <div className="hp-pi-logo">
@@ -1272,6 +1321,19 @@ export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team,
               </div>
               <span style={{ fontSize: 11, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
             </>
+          ) : isUntoldChicago(source) ? (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={UNTOLD_LOGO_SRC}
+                alt="Untold Chicago"
+                width={150}
+                height={40}
+                style={{ height: 40, width: 'auto', objectFit: 'contain' }}
+                loading="eager"
+              />
+              <span style={{ fontSize: 11, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
+            </>
           ) : (
             <>
               <CardLabel label="VIDEO" />
@@ -1279,7 +1341,7 @@ export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team,
             </>
           )}
         </div>
-        {/* Top right: Pinwheels & Ivy logo for PI cards; team logo for others */}
+        {/* Top right: P&I logo for PI cards; nothing for Untold; team logo for others */}
         <div className="flex items-center justify-end flex-shrink-0" style={{ height: 32 }}>
           {isPinwheelsAndIvy(source) ? (
             <span className="hp-pi-logo">
@@ -1293,9 +1355,9 @@ export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team,
                 loading="eager"
               />
             </span>
-          ) : (
+          ) : !isUntoldChicago(source) ? (
             <TeamTag team={team} teamHex={teamHex} />
-          )}
+          ) : null}
         </div>
       </div>
 
@@ -1308,15 +1370,13 @@ export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team,
       )}
       <p className="mt-2.5 line-clamp-2" style={{ fontSize: 15, lineHeight: 1.65, color: 'var(--hp-foreground)', opacity: 0.7 }}>{teaser}</p>
 
-      {/* Video container — centered, plays inline */}
+      {/* Video container — all YouTube embeds (live, shorts, regular) share one standard 16:9 size, full card width */}
       <div className="mt-4 flex justify-center">
         <div
           className="relative rounded-2xl overflow-hidden shadow-md w-full"
           style={{
             background: '#000',
-            aspectRatio: isShort ? '9/16' : '16/9',
-            maxWidth: isShort ? 300 : undefined,
-            maxHeight: isShort ? 530 : undefined,
+            aspectRatio: '16/9',
           }}
         >
           {playing && embedUrl ? (
@@ -1384,7 +1444,23 @@ export function FanReactionsCard() {
   return (
     <article className="hp-feed-card hp-card-enter">
       <div className="flex items-center gap-2.5 mb-4">
-        <Users className="h-4 w-4" style={{ color: "#D6B05E" }} />
+        {/* Fan Chat icon */}
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          style={{ color: '#D6B05E' }}
+          aria-hidden="true"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+          />
+        </svg>
         <span style={{ fontSize: 14, fontWeight: 700, color: "var(--hp-foreground)" }}>
           What Fans Are Saying
         </span>

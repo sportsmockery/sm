@@ -160,7 +160,7 @@ export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarP
                 </div>
                 <div style={{ flex: 1 }}>
                   <span>{item.label}</span>
-                  {item.desc && <p style={{ fontSize: 11, color: 'var(--hp-muted-foreground)', margin: '2px 0 0', lineHeight: 1.3 }}>{item.desc}</p>}
+                  {/* No descriptions on left sidebar when team selected — keep descriptions on right (TrendsSidebar) */}
                 </div>
                 {(item.label === 'Fan Chat' || item.label === 'Game Center') && (
                   <span
