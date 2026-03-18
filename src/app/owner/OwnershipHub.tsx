@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import OwnershipCard from '@/components/ownership/OwnershipCard'
 import LeagueCompareTable from '@/components/ownership/LeagueCompareTable'
+import ScoutCommentary from '@/components/ownership/ScoutCommentary'
 
 interface OwnershipGrade {
   id: string
@@ -118,6 +119,9 @@ export default function OwnershipHub({ grades }: { grades: OwnershipGrade[] }) {
           ))}
         </div>
       </div>
+
+      {/* Scout Commentary */}
+      <ScoutCommentary />
 
       {/* How We Grade Modal */}
       {showMethodology && (

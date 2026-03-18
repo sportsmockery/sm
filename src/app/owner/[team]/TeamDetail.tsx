@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import OwnershipCard from '@/components/ownership/OwnershipCard'
 import GradeTimeline from '@/components/ownership/GradeTimeline'
+import ScoutCommentary from '@/components/ownership/ScoutCommentary'
 
 interface OwnershipGrade {
   id: string
@@ -325,6 +326,9 @@ export default function TeamDetail({ grade, history }: { grade: OwnershipGrade; 
           </div>
         </div>
       )}
+
+      {/* Scout Commentary */}
+      <ScoutCommentary teamSlug={grade.team_slug} />
     </div>
   )
 }
