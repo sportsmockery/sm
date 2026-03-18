@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 import GradeBar from './GradeBar'
 import FanVoteWidget from './FanVoteWidget'
@@ -38,7 +37,6 @@ function getOverallColor(grade: number): string {
 }
 
 export default function OwnershipCard({ grade, showLink = true }: { grade: OwnershipGrade; showLink?: boolean }) {
-  const [showNotes, setShowNotes] = useState(false)
   const team = TEAM_CONFIG[grade.team_slug] || { name: grade.team_slug, color: '#333', logo: '' }
   const overallColor = getOverallColor(grade.overall_grade)
 
@@ -103,32 +101,11 @@ export default function OwnershipCard({ grade, showLink = true }: { grade: Owner
       <GradeBar label="Fan Sentiment" value={grade.sentiment_grade} />
       <GradeBar label="Loyalty Tax" value={grade.loyalty_tax} inverted />
 
-      {/* Notes toggle */}
+      {/* Analysis */}
       {grade.notes && (
-        <div style={{ marginTop: 12 }}>
-          <button
-            onClick={() => setShowNotes(!showNotes)}
-            style={{
-              fontSize: 12,
-              color: 'var(--sm-text-muted)',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: '4px 0',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 4,
-            }}
-          >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: showNotes ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }}><path d="M9 18l6-6-6-6" /></svg>
-            {showNotes ? 'Hide analysis' : 'Show analysis'}
-          </button>
-          {showNotes && (
-            <p style={{ fontSize: 13, color: 'var(--sm-text-dim)', marginTop: 8, lineHeight: 1.5 }}>
-              {grade.notes}
-            </p>
-          )}
-        </div>
+        <p style={{ fontSize: 13, color: 'var(--sm-text-dim)', marginTop: 12, lineHeight: 1.5 }}>
+          {grade.notes}
+        </p>
       )}
 
       {/* Fan vote */}

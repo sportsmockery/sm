@@ -45,6 +45,14 @@ const TEAM_NAMES: Record<string, string> = {
   whitesox: 'Chicago White Sox',
 }
 
+const TEAM_LOGOS: Record<string, string> = {
+  bears: 'https://a.espncdn.com/i/teamlogos/nfl/500/chi.png',
+  bulls: 'https://a.espncdn.com/i/teamlogos/nba/500/chi.png',
+  blackhawks: 'https://a.espncdn.com/i/teamlogos/nhl/500/chi.png',
+  cubs: 'https://a.espncdn.com/i/teamlogos/mlb/500/chc.png',
+  whitesox: 'https://a.espncdn.com/i/teamlogos/mlb/500/chw.png',
+}
+
 const TEAM_TENURE: Record<string, {
   owner: string; ownerSince: string;
   gm?: string; gmSince?: string;
@@ -113,12 +121,24 @@ export default function TeamDetail({ grade, history }: { grade: OwnershipGrade; 
       </Link>
 
       {/* Team header */}
-      <h1 style={{ fontSize: 28, fontWeight: 800, color: 'var(--sm-text)', margin: '0 0 8px' }}>
-        {teamName} Report Card
-      </h1>
-      <p style={{ fontSize: 14, color: 'var(--sm-text-dim)', margin: '0 0 20px', lineHeight: 1.5 }}>
-        {grade.season_label} Season &middot; Grades reflect 3 years of ownership performance (Q1 2023 – Present)
-      </p>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
+        <div>
+          <h1 style={{ fontSize: 28, fontWeight: 800, color: 'var(--sm-text)', margin: '0 0 8px' }}>
+            {teamName} Report Card
+          </h1>
+          <p style={{ fontSize: 14, color: 'var(--sm-text-dim)', margin: '0 0 20px', lineHeight: 1.5 }}>
+            {grade.season_label} Season &middot; Grades reflect 3 years of ownership performance (Q1 2023 – Present)
+          </p>
+        </div>
+        {TEAM_LOGOS[grade.team_slug] && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={TEAM_LOGOS[grade.team_slug]}
+            alt={teamName}
+            style={{ width: 56, height: 56, objectFit: 'contain', flexShrink: 0, opacity: 0.9 }}
+          />
+        )}
+      </div>
 
       {/* Owner & GM Tenure */}
       {tenure && (
