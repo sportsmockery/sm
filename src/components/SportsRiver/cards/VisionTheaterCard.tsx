@@ -105,10 +105,10 @@ export const VisionTheaterCard = React.memo(function VisionTheaterCard({ card }:
                 className="absolute inset-0 w-full h-full object-cover"
               />
               {!isActive && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/30 pointer-events-none">
-                  <div className="w-14 h-14 rounded-full bg-[#BC0000] flex items-center justify-center min-w-[44px] min-h-[44px]">
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ backgroundColor: 'rgba(0,0,0,0.3)' }}>
+                  <div className="w-14 h-14 rounded-full flex items-center justify-center min-w-[44px] min-h-[44px]" style={{ backgroundColor: '#BC0000', boxShadow: '0 4px 16px rgba(0,0,0,0.3)' }}>
                     <svg width="20" height="24" viewBox="0 0 20 24" fill="none">
-                      <path d="M0 0L20 12L0 24V0Z" fill="white" />
+                      <path d="M2 1L18 12L2 23V1Z" fill="white" />
                     </svg>
                   </div>
                 </div>
@@ -128,10 +128,10 @@ export const VisionTheaterCard = React.memo(function VisionTheaterCard({ card }:
 
           {/* Play overlay when no video URL (hover to play placeholder) or when not active */}
           {!videoUrl && !isHovering && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-              <div className="w-14 h-14 rounded-full bg-[#BC0000] flex items-center justify-center min-w-[44px] min-h-[44px]">
+            <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.3)' }}>
+              <div className="w-14 h-14 rounded-full flex items-center justify-center min-w-[44px] min-h-[44px]" style={{ backgroundColor: '#BC0000', boxShadow: '0 4px 16px rgba(0,0,0,0.3)' }}>
                 <svg width="20" height="24" viewBox="0 0 20 24" fill="none">
-                  <path d="M0 0L20 12L0 24V0Z" fill="white" />
+                  <path d="M2 1L18 12L2 23V1Z" fill="white" />
                 </svg>
               </div>
             </div>

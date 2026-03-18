@@ -114,18 +114,18 @@ export const ListenNowCard = React.memo(function ListenNowCard({ card, siblingAr
       <div className="flex items-center gap-4">
         <button
           onClick={isCurrentlyPlaying ? handlePause : handlePlay}
-          className="w-14 h-14 rounded-full flex items-center justify-center min-w-[44px] min-h-[44px] transition-transform hover:scale-105"
-          style={{ backgroundColor: '#BC0000' }}
+          className="w-14 h-14 rounded-full flex items-center justify-center min-w-[44px] min-h-[44px] transition-all hover:scale-110"
+          style={{ backgroundColor: '#BC0000', boxShadow: '0 4px 16px rgba(188,0,0,0.3)' }}
           aria-label={isCurrentlyPlaying ? 'Pause audio' : 'Play audio'}
         >
           {isCurrentlyPlaying ? (
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="white">
-              <rect x="4" y="3" width="4" height="14" rx="1" />
-              <rect x="12" y="3" width="4" height="14" rx="1" />
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+              <rect x="6" y="4" width="4" height="16" rx="1" />
+              <rect x="14" y="4" width="4" height="16" rx="1" />
             </svg>
           ) : (
             <svg width="20" height="24" viewBox="0 0 20 24" fill="none">
-              <path d="M0 0L20 12L0 24V0Z" fill="white" />
+              <path d="M2 1L18 12L2 23V1Z" fill="white" />
             </svg>
           )}
         </button>

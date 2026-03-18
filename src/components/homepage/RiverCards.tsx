@@ -213,26 +213,31 @@ export function EngagementRow({
                 )
               }
             }}
-            className="group flex items-center justify-center rounded-full transition-transform hp-tap-target hover:scale-105"
-            style={{ width: 30, height: 30, backgroundColor: '#d1d5db' }}
+            className="group flex items-center justify-center rounded-full transition-opacity hp-tap-target hover:opacity-70"
+            style={{ width: 30, height: 30, backgroundColor: 'var(--hp-muted)' }}
             aria-label={isThisArticlePlaying ? 'Pause' : 'Listen to article'}
           >
             {isThisArticlePlaying ? (
-              <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="#FAFAFB" aria-hidden="true">
-                <path d="M7 5h4v14H7zM13 5h4v14h-4z" />
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <rect x="6" y="4" width="4" height="16" rx="1" />
+                <rect x="14" y="4" width="4" height="16" rx="1" />
               </svg>
             ) : (
-              <Play className="h-3.5 w-3.5" strokeWidth={2.5} style={{ color: '#FAFAFB' }} />
+              <svg width="12" height="14" viewBox="0 0 20 24" fill="none" aria-hidden="true">
+                <path d="M2 1L18 12L2 23V1Z" fill="currentColor" />
+              </svg>
             )}
           </button>
         )}
         {listenUrl && listenButtonStyle === "pill" && (
           <Link
             href={listenUrl}
-            className="group flex items-center gap-1.5 rounded-full px-2.5 py-1.5 transition-all hp-tap-target hover:bg-[rgba(0,0,0,0.04)] dark:hover:bg-[rgba(255,255,255,0.04)] hover:text-[#00D4FF]"
+            className="group flex items-center gap-1.5 rounded-full px-2.5 py-1.5 transition-opacity hp-tap-target hover:opacity-70"
             aria-label="Listen to article"
           >
-            <Play className="h-3.5 w-3.5 flex-shrink-0" style={{ color: 'inherit' }} />
+            <svg width="12" height="14" viewBox="0 0 20 24" fill="none" className="flex-shrink-0" aria-hidden="true">
+              <path d="M2 1L18 12L2 23V1Z" fill="currentColor" />
+            </svg>
             <span style={{ fontSize: 12, fontWeight: 500 }}>Listen</span>
           </Link>
         )}
@@ -244,7 +249,7 @@ export function EngagementRow({
           <button
             key={key}
             onClick={() => toggle(key)}
-            className={`group flex items-center gap-1 rounded-full px-2.5 py-1.5 transition-all hp-tap-target ${reactions[key] ? 'bg-[rgba(0,0,0,0.06)] dark:bg-[rgba(255,255,255,0.08)]' : 'hover:bg-[rgba(0,0,0,0.04)] dark:hover:bg-[rgba(255,255,255,0.04)]'}`}
+            className={`group flex items-center gap-1 rounded-full px-2.5 py-1.5 transition-opacity hp-tap-target ${reactions[key] ? 'bg-[rgba(0,0,0,0.06)] dark:bg-[rgba(255,255,255,0.08)]' : 'hover:opacity-70'}`}
             aria-label={label}
           >
             <span style={{ fontSize: 14 }}>{emoji}</span>
@@ -252,27 +257,21 @@ export function EngagementRow({
           </button>
         ))}
         {articleUrl ? (
-          <Link href={articleUrl} className="group flex items-center gap-1 transition-colors hover:text-[#00D4FF] hp-tap-target" aria-label="Comments">
-            <div className="rounded-full p-2 group-hover:bg-[#00D4FF]/10 transition-colors">
-              <MessageCircle className="h-4 w-4" />
-            </div>
+          <Link href={articleUrl} className="group flex items-center gap-1 transition-opacity hover:opacity-70 hp-tap-target" aria-label="Comments">
+            <MessageCircle className="h-4 w-4" />
             <span style={{ fontSize: 12 }}>{stats.comments}</span>
           </Link>
         ) : (
           <span className="group flex items-center gap-1 hp-tap-target" aria-label="Comments">
-            <div className="rounded-full p-2">
-              <MessageCircle className="h-4 w-4" />
-            </div>
+            <MessageCircle className="h-4 w-4" />
             <span style={{ fontSize: 12 }}>{stats.comments}</span>
           </span>
         )}
         <span className="flex items-center gap-1 hp-tap-target" style={{ fontSize: 12 }} title="Views">
-          <div className="rounded-full p-2">
-            <Eye className="h-4 w-4" />
-          </div>
+          <Eye className="h-4 w-4" />
           {stats.views && stats.views !== '0' ? stats.views : '0'}
         </span>
-        <button onClick={handleShare} className="rounded-full p-2 transition-colors hover:bg-[#00D4FF]/10 hover:text-[#00D4FF] hp-tap-target" aria-label="Share">
+        <button onClick={handleShare} className="transition-opacity hover:opacity-70 hp-tap-target" aria-label="Share">
           <Share className="h-4 w-4" />
         </button>
       </div>
@@ -976,43 +975,37 @@ export function ScoutSummaryCard({ summary, bullets, topic, team, teamColor, tim
         </div>
       )}
 
-      <div className="mt-4 flex gap-4 items-center justify-between flex-wrap">
-        <div className="flex gap-3 items-center flex-wrap">
+      <div className="mt-5 flex items-center justify-between" style={{ color: 'var(--hp-muted-foreground)' }}>
+        <div className="flex items-center gap-3">
           <button
-          onClick={() => router.push(`/scout-ai?q=${encodeURIComponent(`${topic} ${team}`)}`)}
-          className="flex items-center gap-1.5 rounded-xl px-4 py-2.5 transition-colors hp-tap-target hover:opacity-90"
-          style={{
-            fontSize: 14,
-            fontWeight: 600,
-            background: '#BC0000',
-            color: '#FAFAFB',
-          }}
-        >
-          <Image src="/downloads/scout-v2.png" alt="Scout" width={16} height={16} className="h-4 w-4 rounded-full object-contain" /> Ask Scout
-        </button>
-        <button
-          type="button"
-          onClick={handleScoutPlay}
-          className="hp-tap-target flex items-center justify-center rounded-full transition-transform hover:scale-105"
-          style={{
-            width: 30,
-            height: 30,
-            backgroundColor: '#BC0000',
-            color: '#FAFAFB',
-          }}
-          aria-label="Play Scout Insight"
-        >
-          {isPlaying ? (
-            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M7 5h4v14H7zM13 5h4v14h-4z" />
-            </svg>
-          ) : (
-            <Play className="h-3.5 w-3.5" style={{ color: 'currentColor' }} />
-          )}
-        </button>
+            type="button"
+            onClick={handleScoutPlay}
+            className="hp-tap-target flex items-center justify-center rounded-full transition-opacity hover:opacity-70"
+            style={{ width: 30, height: 30, backgroundColor: 'var(--hp-muted)' }}
+            aria-label="Play Scout Insight"
+          >
+            {isPlaying ? (
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <rect x="6" y="4" width="4" height="16" rx="1" />
+                <rect x="14" y="4" width="4" height="16" rx="1" />
+              </svg>
+            ) : (
+              <svg width="12" height="14" viewBox="0 0 20 24" fill="none" aria-hidden="true">
+                <path d="M2 1L18 12L2 23V1Z" fill="currentColor" />
+              </svg>
+            )}
+          </button>
+          <button
+            onClick={() => router.push(`/scout-ai?q=${encodeURIComponent(`${topic} ${team}`)}`)}
+            className="flex items-center gap-1.5 transition-opacity hp-tap-target hover:opacity-70"
+            style={{ fontSize: 12, fontWeight: 500 }}
+          >
+            <Image src="/downloads/scout-v2.png" alt="Scout" width={16} height={16} className="h-4 w-4 rounded-full object-contain" />
+            <span>Ask Scout</span>
+          </button>
         </div>
-        <div className="flex items-center gap-1 ml-auto" style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }} title="Views">
-          <Eye className="h-3.5 w-3.5" />
+        <div className="flex items-center gap-1" style={{ fontSize: 12 }} title="Views">
+          <Eye className="h-4 w-4" />
           <span>{stats?.views && stats.views !== '0' ? stats.views : '0'}</span>
         </div>
       </div>
@@ -1061,8 +1054,8 @@ export function TrendingArticleCard({ headline, summary, trendMetric, team, team
       )}
       <p className="mt-3 line-clamp-3" style={{ fontSize: 15, lineHeight: 1.65, color: 'var(--hp-foreground)', opacity: 0.7 }}>{summary}</p>
 
-      <div className="mt-4 flex items-center justify-end gap-1" style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }} title="Views">
-        <Eye className="h-3.5 w-3.5" />
+      <div className="mt-5 flex items-center justify-end gap-1" style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }} title="Views">
+        <Eye className="h-4 w-4" />
         <span>{stats.views && stats.views !== '0' ? stats.views : '0'}</span>
       </div>
     </article>
@@ -1219,38 +1212,32 @@ export function ScoutBriefingCard() {
         ))}
       </ul>
 
-      <div className="mt-4 flex gap-4 items-center flex-wrap">
-        <button
-          onClick={() => router.push("/scout-ai")}
-          className="flex items-center gap-1.5 rounded-xl px-4 py-2.5 transition-colors hp-tap-target hover:opacity-80"
-          style={{
-            fontSize: 14,
-            fontWeight: 600,
-            background: "rgba(0, 212, 255, 0.1)",
-            color: "#0891b2",
-          }}
-        >
-          <Image src="/downloads/scout-v2.png" alt="Scout" width={16} height={16} className="h-4 w-4 rounded-full object-contain" /> Ask Scout
-        </button>
+      <div className="mt-5 flex items-center gap-3" style={{ color: 'var(--hp-muted-foreground)' }}>
         <button
           type="button"
           onClick={handleBriefingPlay}
-          className="hp-tap-target flex items-center justify-center rounded-full transition-transform hover:scale-105"
-          style={{
-            width: 30,
-            height: 30,
-            backgroundColor: 'rgba(0,212,255,0.12)',
-            color: '#00D4FF',
-          }}
+          className="hp-tap-target flex items-center justify-center rounded-full transition-opacity hover:opacity-70"
+          style={{ width: 30, height: 30, backgroundColor: 'var(--hp-muted)' }}
           aria-label="Play Scout Briefing"
         >
           {isPlaying ? (
-            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M7 5h4v14H7zM13 5h4v14h-4z" />
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <rect x="6" y="4" width="4" height="16" rx="1" />
+              <rect x="14" y="4" width="4" height="16" rx="1" />
             </svg>
           ) : (
-            <Play className="h-3.5 w-3.5" style={{ color: 'currentColor' }} />
+            <svg width="12" height="14" viewBox="0 0 20 24" fill="none" aria-hidden="true">
+              <path d="M2 1L18 12L2 23V1Z" fill="currentColor" />
+            </svg>
           )}
+        </button>
+        <button
+          onClick={() => router.push("/scout-ai")}
+          className="flex items-center gap-1.5 transition-opacity hp-tap-target hover:opacity-70"
+          style={{ fontSize: 12, fontWeight: 500 }}
+        >
+          <Image src="/downloads/scout-v2.png" alt="Scout" width={16} height={16} className="h-4 w-4 rounded-full object-contain" />
+          <span>Ask Scout</span>
         </button>
       </div>
     </article>
@@ -1460,8 +1447,10 @@ export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team,
               />
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.6), transparent, transparent)' }} />
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="h-16 w-16 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform" style={{ background: 'rgba(255,255,255,0.95)' }}>
-                  <Play className="h-7 w-7 ml-1" style={{ color: '#000' }} fill="#000" />
+                <div className="h-16 w-16 rounded-full flex items-center justify-center group-hover:scale-110 transition-all" style={{ background: 'rgba(255,255,255,0.95)', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
+                  <svg width="24" height="28" viewBox="0 0 20 24" fill="none" className="ml-1" aria-hidden="true">
+                    <path d="M2 1L18 12L2 23V1Z" fill="#0B0F14" />
+                  </svg>
                 </div>
               </div>
               <div className="absolute bottom-3 right-3 rounded-lg px-2.5 py-1" style={{ background: 'rgba(0,0,0,0.8)', fontSize: 12, fontWeight: 500, color: '#fff' }}>
