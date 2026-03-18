@@ -29,9 +29,8 @@ interface Comment {
 
 const CHANNEL_FILTERS = [
   { slug: 'all', label: 'All Videos' },
-  { slug: 'bears-film-room', label: 'Bears Film Room' },
   { slug: 'pinwheels-and-ivy', label: 'Pinwheels & Ivy' },
-  { slug: 'untold-chicago', label: 'Untold Chicago Stories' },
+  { slug: 'untold-chicago', label: '@untoldchicago' },
 ] as const
 
 const KEYWORD_FILTERS = [
@@ -327,7 +326,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
 
   const isDark = theme === 'dark'
 
-  // Generate 1000 floating orbs with randomized properties
+  // Generate 1000 floating orbs with randomized properties (re-generate on theme change)
   const orbs = useMemo(() => {
     // Seeded pseudo-random for consistent SSR/CSR
     const seed = (n: number) => {
@@ -351,26 +350,27 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
       const opacity = size > 10 ? 0.15 + rand() * 0.25 : size > 5 ? 0.2 + rand() * 0.4 : 0.3 + rand() * 0.5
       // Color variety: mostly reds, some oranges/whites
       const colorPick = rand()
+      // Orb colors adapt to theme (isDark is captured at render time, orbs re-render with theme)
       const color =
         colorPick < 0.5
-          ? `rgba(188,0,0,${opacity})`
+          ? `rgba(188,0,0,${opacity * 0.4})`
           : colorPick < 0.75
-            ? `rgba(255,68,68,${opacity})`
+            ? `rgba(255,68,68,${opacity * 0.4})`
             : colorPick < 0.9
-              ? `rgba(255,120,60,${opacity * 0.7})`
-              : `rgba(255,255,255,${opacity * 0.5})`
+              ? `rgba(255,120,60,${opacity * 0.3})`
+              : `rgba(188,0,0,${opacity * 0.2})`
       const blur = size > 8 ? 2 + rand() * 4 : size > 4 ? 0.5 + rand() * 2 : 0
 
       return { i, size, x, y, duration, delay, driftX, driftY, color, blur }
     })
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDark])
 
   return (
     <div
       style={{
-        background: 'var(--sm-dark, #050508)',
-        color: 'var(--sm-text, #FAFAFB)',
-       
+        background: 'var(--hp-background)',
+        color: 'var(--hp-foreground)',
         minHeight: '100vh',
       }}
     >
@@ -383,7 +383,9 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
           alignItems: 'center',
           justifyContent: 'center',
           overflow: 'hidden',
-          background: 'linear-gradient(135deg, rgba(188,0,0,0.15) 0%, rgba(5,5,8,1) 50%, rgba(255,68,68,0.05) 100%)',
+          background: isDark
+            ? 'linear-gradient(135deg, rgba(188,0,0,0.15) 0%, rgba(5,5,8,1) 50%, rgba(255,68,68,0.05) 100%)'
+            : 'linear-gradient(135deg, rgba(188,0,0,0.06) 0%, var(--hp-background) 50%, rgba(188,0,0,0.03) 100%)',
         }}
       >
         {/* 1000 floating orbs */}
@@ -457,10 +459,11 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
               lineHeight: 0.95,
               letterSpacing: '0.01em',
               textTransform: 'uppercase',
-              color: '#FAFAFB',
+              color: isDark ? '#FAFAFB' : '#0B0F14',
               margin: '0 0 24px',
-              textShadow:
-                '0 0 8px rgba(188, 0, 0, 0.4), 0 0 20px rgba(188, 0, 0, 0.25), 0 0 40px rgba(188, 0, 0, 0.15)',
+              textShadow: isDark
+                ? '0 0 8px rgba(188, 0, 0, 0.4), 0 0 20px rgba(188, 0, 0, 0.25), 0 0 40px rgba(188, 0, 0, 0.15)'
+                : 'none',
             }}
           >
             Vision Theater
@@ -469,13 +472,13 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
           <p
             style={{
               fontSize: '16px',
-              color: '#8a8a9a',
+              color: 'var(--hp-muted-foreground)',
               lineHeight: 1.6,
               maxWidth: '500px',
               margin: '0 auto',
             }}
           >
-            Stream the latest from Bears Film Room, Pinwheels &amp; Ivy, and Untold Chicago Stories
+            Stream the latest from Pinwheels &amp; Ivy and @untoldchicago
             &mdash; all in one place.
           </p>
         </div>
@@ -487,8 +490,8 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
           position: 'sticky',
           top: 0,
           zIndex: 10,
-          background: 'var(--sm-dark, #050508)',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          background: 'var(--hp-background)',
+          borderBottom: '1px solid var(--hp-border)',
           padding: '16px 24px',
         }}
       >
@@ -509,9 +512,9 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                 key={f.slug}
                 onClick={() => setChannelFilter(f.slug)}
                 style={{
-                  backgroundColor: channelFilter === f.slug ? '#bc0000' : '#13131d',
-                  color: channelFilter === f.slug ? '#FAFAFB' : '#8a8a9a',
-                  border: '1px solid ' + (channelFilter === f.slug ? '#bc0000' : 'rgba(255,255,255,0.1)'),
+                  backgroundColor: channelFilter === f.slug ? '#bc0000' : 'var(--hp-muted)',
+                  color: channelFilter === f.slug ? '#FAFAFB' : 'var(--hp-muted-foreground)',
+                  border: '1px solid ' + (channelFilter === f.slug ? '#bc0000' : 'var(--hp-border)'),
                   borderRadius: '8px',
                   padding: '8px 16px',
                   fontSize: '13px',
@@ -531,9 +534,9 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
             value={keywordFilter}
             onChange={(e) => setKeywordFilter(e.target.value)}
             style={{
-              backgroundColor: '#13131d',
-              color: '#FAFAFB',
-              border: '1px solid rgba(255,255,255,0.1)',
+              backgroundColor: 'var(--hp-muted)',
+              color: 'var(--hp-foreground)',
+              border: '1px solid var(--hp-border)',
               borderRadius: '8px',
               padding: '8px 12px',
               fontSize: '13px',
@@ -555,9 +558,9 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{
-              backgroundColor: '#13131d',
-              color: '#FAFAFB',
-              border: '1px solid rgba(255,255,255,0.1)',
+              backgroundColor: 'var(--hp-muted)',
+              color: 'var(--hp-foreground)',
+              border: '1px solid var(--hp-border)',
               borderRadius: '8px',
               padding: '8px 14px',
               fontSize: '13px',
@@ -601,7 +604,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                     paddingBottom: '56.25%',
                     borderRadius: '16px',
                     overflow: 'hidden',
-                    background: '#0c0c12',
+                    background: 'var(--hp-card)',
                   }}
                 >
                   <div
@@ -634,13 +637,13 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                      
                       fontSize: '24px',
                       fontWeight: 700,
-                      color: '#FAFAFB',
+                      color: 'var(--hp-foreground)',
                       margin: '4px 0 8px',
                     }}
                   >
                     {activeVideo.title}
                   </h2>
-                  <p style={{ fontSize: '14px', color: '#8a8a9a', lineHeight: 1.6 }}>
+                  <p style={{ fontSize: '14px', color: 'var(--hp-muted-foreground)', lineHeight: 1.6 }}>
                     {formatDate(activeVideo.publishedAt)} &middot;{' '}
                     {truncate(activeVideo.description, 300)}
                   </p>
@@ -655,8 +658,8 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                     style={{
                       marginTop: '12px',
                       backgroundColor: 'transparent',
-                      color: '#8a8a9a',
-                      border: '1px solid rgba(255,255,255,0.1)',
+                      color: 'var(--hp-muted-foreground)',
+                      border: '1px solid var(--hp-border)',
                       borderRadius: '8px',
                       padding: '6px 14px',
                       fontSize: '13px',
@@ -672,17 +675,17 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
               {/* Comments section */}
               <div
                 style={{
-                  background: '#0c0c12',
+                  background: 'var(--hp-card)',
                   borderRadius: '16px',
                   padding: '20px',
-                  border: '1px solid rgba(255,255,255,0.06)',
+                  border: '1px solid var(--hp-border)',
                 }}
               >
                 <h3
                   style={{
                     fontSize: '16px',
                     fontWeight: 600,
-                    color: '#FAFAFB',
+                    color: 'var(--hp-foreground)',
                     margin: '0 0 16px',
                    
                   }}
@@ -702,9 +705,9 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                       maxLength={1000}
                       style={{
                         flex: 1,
-                        backgroundColor: '#13131d',
-                        color: '#FAFAFB',
-                        border: '1px solid rgba(255,255,255,0.1)',
+                        backgroundColor: 'var(--hp-muted)',
+                        color: 'var(--hp-foreground)',
+                        border: '1px solid var(--hp-border)',
                         borderRadius: '8px',
                         padding: '10px 14px',
                         fontSize: '14px',
@@ -717,7 +720,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                       disabled={commentPosting || !commentInput.trim()}
                       style={{
                         backgroundColor: '#bc0000',
-                        color: '#FAFAFB',
+                        color: 'var(--hp-foreground)',
                         border: 'none',
                         borderRadius: '8px',
                         padding: '10px 18px',
@@ -732,7 +735,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                     </button>
                   </div>
                 ) : (
-                  <p style={{ fontSize: '14px', color: '#8a8a9a', marginBottom: '16px' }}>
+                  <p style={{ fontSize: '14px', color: 'var(--hp-muted-foreground)', marginBottom: '16px' }}>
                     <Link
                       href={`/login?next=${encodeURIComponent('/vision-theater')}`}
                       style={{ color: '#bc0000', textDecoration: 'underline' }}
@@ -745,7 +748,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
 
                 {/* Comment list */}
                 {comments.length === 0 ? (
-                  <p style={{ fontSize: '14px', color: '#55556a', fontStyle: 'italic' }}>
+                  <p style={{ fontSize: '14px', color: 'var(--hp-muted-foreground)', fontStyle: 'italic' }}>
                     No comments yet. Be the first!
                   </p>
                 ) : (
@@ -757,7 +760,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                           display: 'flex',
                           gap: '10px',
                           padding: '10px',
-                          background: '#13131d',
+                          background: 'var(--hp-muted)',
                           borderRadius: '10px',
                         }}
                       >
@@ -766,14 +769,14 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                             width: '32px',
                             height: '32px',
                             borderRadius: '50%',
-                            background: '#1a1a28',
+                            background: 'var(--hp-muted)',
                             flexShrink: 0,
                             overflow: 'hidden',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             fontSize: '14px',
-                            color: '#8a8a9a',
+                            color: 'var(--hp-muted-foreground)',
                           }}
                         >
                           {c.user_avatar ? (
@@ -788,14 +791,14 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ display: 'flex', gap: '8px', alignItems: 'baseline' }}>
-                            <span style={{ fontSize: '13px', fontWeight: 600, color: '#FAFAFB' }}>
+                            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--hp-foreground)' }}>
                               {c.user_name}
                             </span>
-                            <span style={{ fontSize: '11px', color: '#55556a' }}>
+                            <span style={{ fontSize: '11px', color: 'var(--hp-muted-foreground)' }}>
                               {formatDate(c.created_at)}
                             </span>
                           </div>
-                          <p style={{ fontSize: '14px', color: '#8a8a9a', margin: '4px 0 0', lineHeight: 1.5 }}>
+                          <p style={{ fontSize: '14px', color: 'var(--hp-muted-foreground)', margin: '4px 0 0', lineHeight: 1.5 }}>
                             {c.content}
                           </p>
                         </div>
@@ -824,7 +827,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
              
               fontSize: '22px',
               fontWeight: 700,
-              color: '#FAFAFB',
+              color: 'var(--hp-foreground)',
               margin: 0,
             }}
           >
@@ -832,7 +835,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
               ? 'Latest Videos'
               : CHANNEL_FILTERS.find((f) => f.slug === channelFilter)?.label ?? 'Videos'}
           </h2>
-          <span style={{ fontSize: '13px', color: '#55556a' }}>
+          <span style={{ fontSize: '13px', color: 'var(--hp-muted-foreground)' }}>
             {fullVideos.length} video{fullVideos.length !== 1 ? 's' : ''}
           </span>
         </div>
@@ -842,7 +845,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
             style={{
               textAlign: 'center',
               padding: '60px 24px',
-              color: '#55556a',
+              color: 'var(--hp-muted-foreground)',
               fontSize: '16px',
             }}
           >
@@ -863,10 +866,10 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                 hoverLift
                 as="article"
                 style={{
-                  background: '#13131d',
+                  background: 'var(--hp-muted)',
                   borderRadius: '16px',
                   overflow: 'hidden',
-                  border: '1px solid rgba(255,255,255,0.06)',
+                  border: '1px solid var(--hp-border)',
                   cursor: 'pointer',
                   transition: 'box-shadow 0.2s',
                 }}
@@ -924,7 +927,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                       top: '8px',
                       left: '8px',
                       background: 'rgba(0,0,0,0.7)',
-                      color: '#FAFAFB',
+                      color: 'var(--hp-foreground)',
                       fontSize: '11px',
                       fontWeight: 600,
                       padding: '3px 8px',
@@ -942,7 +945,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                     style={{
                       fontSize: '14px',
                       fontWeight: 700,
-                      color: '#FAFAFB',
+                      color: 'var(--hp-foreground)',
                       margin: '0 0 6px',
                       lineHeight: 1.4,
                       display: '-webkit-box',
@@ -956,7 +959,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                   <p
                     style={{
                       fontSize: '12px',
-                      color: '#8a8a9a',
+                      color: 'var(--hp-muted-foreground)',
                       margin: '0 0 8px',
                       lineHeight: 1.5,
                       display: '-webkit-box',
@@ -967,7 +970,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                   >
                     {truncate(video.description, 100)}
                   </p>
-                  <span style={{ fontSize: '11px', color: '#55556a' }}>
+                  <span style={{ fontSize: '11px', color: 'var(--hp-muted-foreground)' }}>
                     {formatDate(video.publishedAt)}
                   </span>
                 </div>
@@ -985,7 +988,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#55556a',
+              color: 'var(--hp-muted-foreground)',
               fontSize: '14px',
               marginTop: '24px',
             }}
@@ -1017,13 +1020,13 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                
                 fontSize: '22px',
                 fontWeight: 700,
-                color: '#FAFAFB',
+                color: 'var(--hp-foreground)',
                 margin: 0,
               }}
             >
               Shorts
             </h2>
-            <span style={{ fontSize: '13px', color: '#55556a' }}>
+            <span style={{ fontSize: '13px', color: 'var(--hp-muted-foreground)' }}>
               {shorts.length} clip{shorts.length !== 1 ? 's' : ''}
             </span>
           </div>
@@ -1042,10 +1045,10 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                 hoverLift
                 as="article"
                 style={{
-                  background: '#13131d',
+                  background: 'var(--hp-muted)',
                   borderRadius: '14px',
                   overflow: 'hidden',
-                  border: '1px solid rgba(255,255,255,0.06)',
+                  border: '1px solid var(--hp-border)',
                   cursor: 'pointer',
                   transition: 'box-shadow 0.2s',
                 }}
@@ -1103,7 +1106,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                       bottom: '8px',
                       left: '8px',
                       background: 'rgba(188,0,0,0.85)',
-                      color: '#FAFAFB',
+                      color: 'var(--hp-foreground)',
                       fontSize: '10px',
                       fontWeight: 700,
                       padding: '2px 7px',
@@ -1121,7 +1124,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                       top: '6px',
                       left: '6px',
                       background: 'rgba(0,0,0,0.7)',
-                      color: '#FAFAFB',
+                      color: 'var(--hp-foreground)',
                       fontSize: '10px',
                       fontWeight: 600,
                       padding: '2px 6px',
@@ -1139,7 +1142,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                     style={{
                       fontSize: '12px',
                       fontWeight: 700,
-                      color: '#FAFAFB',
+                      color: 'var(--hp-foreground)',
                       margin: 0,
                       lineHeight: 1.3,
                       display: '-webkit-box',
@@ -1171,7 +1174,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
             fontWeight: 600,
             textTransform: 'uppercase',
             letterSpacing: '1px',
-            color: '#8a8a9a',
+            color: 'var(--hp-muted-foreground)',
             textAlign: 'center',
             margin: '0 0 24px',
           }}
@@ -1194,9 +1197,9 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                 window.scrollTo({ top: 0, behavior: 'smooth' })
               }}
               style={{
-                backgroundColor: '#13131d',
+                backgroundColor: 'var(--hp-muted)',
                 color: '#bc0000',
-                border: '1px solid rgba(255,255,255,0.06)',
+                border: '1px solid var(--hp-border)',
                 borderRadius: '12px',
                 padding: '16px 24px',
                 fontSize: '16px',
@@ -1213,7 +1216,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                 style={{
                   display: 'block',
                   fontSize: '12px',
-                  color: '#55556a',
+                  color: 'var(--hp-muted-foreground)',
                   fontWeight: 400,
                   marginTop: '4px',
                  
@@ -1229,7 +1232,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
       {/* ========== MOBILE APP TEASER ========== */}
       <section
         style={{
-          background: '#0c0c12',
+          background: 'var(--hp-card)',
           padding: '64px 24px',
           textAlign: 'center',
         }}
@@ -1240,7 +1243,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
             fontWeight: 600,
             textTransform: 'uppercase',
             letterSpacing: '1px',
-            color: '#8a8a9a',
+            color: 'var(--hp-muted-foreground)',
             margin: '0 0 12px',
           }}
         >
@@ -1249,7 +1252,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
         <p
           style={{
             fontSize: '18px',
-            color: '#FAFAFB',
+            color: 'var(--hp-foreground)',
             margin: '0 0 24px',
             maxWidth: '400px',
             marginLeft: 'auto',
@@ -1263,7 +1266,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
         <button
           style={{
             backgroundColor: '#bc0000',
-            color: '#FAFAFB',
+            color: 'var(--hp-foreground)',
             border: 'none',
             borderRadius: '8px',
             padding: '14px 32px',
@@ -1282,7 +1285,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
         style={{
           padding: '32px 24px',
           textAlign: 'center',
-          color: '#55556a',
+          color: 'var(--hp-muted-foreground)',
           fontSize: '13px',
         }}
       >
@@ -1321,12 +1324,12 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
               transition={{ duration: 0.2 }}
               onClick={(e) => e.stopPropagation()}
               style={{
-                background: '#13131d',
+                background: 'var(--hp-muted)',
                 borderRadius: '20px',
                 padding: '32px',
                 width: '100%',
                 maxWidth: '500px',
-                border: '1px solid rgba(255,255,255,0.1)',
+                border: '1px solid var(--hp-border)',
                 boxShadow: '0 0 40px rgba(188,0,0,0.15)',
               }}
             >
@@ -1345,13 +1348,13 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                      
                       fontSize: '18px',
                       fontWeight: 700,
-                      color: '#FAFAFB',
+                      color: 'var(--hp-foreground)',
                       margin: 0,
                     }}
                   >
                     Scout AI
                   </h3>
-                  <p style={{ fontSize: '12px', color: '#8a8a9a', margin: 0 }}>
+                  <p style={{ fontSize: '12px', color: 'var(--hp-muted-foreground)', margin: 0 }}>
                     Video paused &mdash; got a question about what you&apos;re watching?
                   </p>
                 </div>
@@ -1367,9 +1370,9 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                   onKeyDown={(e) => e.key === 'Enter' && handleScoutQuery()}
                   style={{
                     flex: 1,
-                    backgroundColor: '#0c0c12',
-                    color: '#FAFAFB',
-                    border: '1px solid rgba(255,255,255,0.1)',
+                    backgroundColor: 'var(--hp-card)',
+                    color: 'var(--hp-foreground)',
+                    border: '1px solid var(--hp-border)',
                     borderRadius: '8px',
                     padding: '12px 14px',
                     fontSize: '14px',
@@ -1382,7 +1385,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                   disabled={scoutLoading || !scoutQuery.trim()}
                   style={{
                     backgroundColor: '#bc0000',
-                    color: '#FAFAFB',
+                    color: 'var(--hp-foreground)',
                     border: 'none',
                     borderRadius: '8px',
                     padding: '12px 18px',
@@ -1401,12 +1404,12 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
               {scoutResponse && (
                 <div
                   style={{
-                    background: '#0c0c12',
+                    background: 'var(--hp-card)',
                     borderRadius: '10px',
                     padding: '14px',
                     marginBottom: '16px',
                     fontSize: '14px',
-                    color: '#8a8a9a',
+                    color: 'var(--hp-muted-foreground)',
                     lineHeight: 1.6,
                     maxHeight: '200px',
                     overflowY: 'auto',
@@ -1428,8 +1431,8 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                   }}
                   style={{
                     backgroundColor: 'transparent',
-                    color: '#55556a',
-                    border: '1px solid rgba(255,255,255,0.06)',
+                    color: 'var(--hp-muted-foreground)',
+                    border: '1px solid var(--hp-border)',
                     borderRadius: '8px',
                     padding: '10px 16px',
                     fontSize: '13px',
@@ -1443,7 +1446,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                   onClick={handleResumeVideo}
                   style={{
                     backgroundColor: '#bc0000',
-                    color: '#FAFAFB',
+                    color: 'var(--hp-foreground)',
                     border: 'none',
                     borderRadius: '8px',
                     padding: '10px 20px',

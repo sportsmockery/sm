@@ -1332,7 +1332,7 @@ export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team,
         className="flex items-center justify-between gap-3 mb-4"
         style={isUntoldChicago(source) ? { marginTop: -8 } : undefined}
       >
-        {/* Top left: P&I or Untold logo on partner cards; VIDEO + timestamp on others */}
+      {/* Top left: P&I or Untold logo on partner cards; VIDEO + timestamp on others */}
         <div className="flex items-center gap-3 flex-shrink-0" style={{ height: isUntoldChicago(source) ? 40 : 66 }}>
           {isPinwheelsAndIvy(source) ? (
             <>
@@ -1369,24 +1369,54 @@ export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team,
             </>
           )}
         </div>
-        {/* Top right: P&I logo for PI cards; nothing for Untold; team logo for others */}
-        <div className="flex items-center justify-end flex-shrink-0" style={{ height: 32 }}>
-          {isPinwheelsAndIvy(source) ? (
-            <span className="hp-pi-logo">
-              <img
-                src={PI_LOGO_SRC}
-                alt="Pinwheels & Ivy"
-                width={32}
-                height={32}
-                className="object-contain"
-                style={{ width: 32, height: 32 }}
-                loading="eager"
-              />
-            </span>
-          ) : !isUntoldChicago(source) ? (
-            <TeamTag team={team} teamHex={teamHex} />
-          ) : null}
-        </div>
+      {/* Top right: YouTube subscribe button on P&I cards; team logo on others */}
+      <div className="flex items-center justify-end flex-shrink-0" style={{ height: 32 }}>
+        {isPinwheelsAndIvy(source) ? (
+          <a
+            href="https://www.youtube.com/@PinwheelsandIvyPodcast?sub_confirmation=1"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 rounded-full px-3 py-1 transition-opacity hover:opacity-80"
+            style={{
+              backgroundColor: '#FF0000',
+              color: '#fff',
+              fontSize: 11,
+              fontWeight: 600,
+              textDecoration: 'none',
+              lineHeight: '20px',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <svg width="14" height="10" viewBox="0 0 24 17" fill="#fff">
+              <path d="M23.5 2.5a3 3 0 00-2.1-2.1C19.5 0 12 0 12 0S4.5 0 2.6.4A3 3 0 00.5 2.5 31.5 31.5 0 000 8.5a31.5 31.5 0 00.5 6 3 3 0 002.1 2.1c1.9.4 9.4.4 9.4.4s7.5 0 9.4-.4a3 3 0 002.1-2.1 31.5 31.5 0 00.5-6 31.5 31.5 0 00-.5-6zM9.6 12.1V4.9l6.3 3.6-6.3 3.6z" />
+            </svg>
+            Subscribe
+          </a>
+        ) : isUntoldChicago(source) ? (
+          <a
+            href="https://www.youtube.com/@untoldchicago?sub_confirmation=1"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 rounded-full px-3 py-1 transition-opacity hover:opacity-80"
+            style={{
+              backgroundColor: '#FF0000',
+              color: '#fff',
+              fontSize: 11,
+              fontWeight: 600,
+              textDecoration: 'none',
+              lineHeight: '20px',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <svg width="14" height="10" viewBox="0 0 24 17" fill="#fff">
+              <path d="M23.5 2.5a3 3 0 00-2.1-2.1C19.5 0 12 0 12 0S4.5 0 2.6.4A3 3 0 00.5 2.5 31.5 31.5 0 000 8.5a31.5 31.5 0 00.5 6 3 3 0 002.1 2.1c1.9.4 9.4.4 9.4.4s7.5 0 9.4-.4a3 3 0 002.1-2.1 31.5 31.5 0 00.5-6 31.5 31.5 0 00-.5-6zM9.6 12.1V4.9l6.3 3.6-6.3 3.6z" />
+            </svg>
+            Subscribe
+          </a>
+        ) : (
+          <TeamTag team={team} teamHex={teamHex} />
+        )}
+      </div>
       </div>
 
       {articleUrl ? (

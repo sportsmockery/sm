@@ -5,7 +5,7 @@ import VisionTheaterClient from './VisionTheaterClient'
 export const metadata: Metadata = {
   title: 'Vision Theater',
   description:
-    'Watch the latest Chicago sports videos from Bears Film Room, Pinwheels & Ivy, and Untold Chicago Stories.',
+    'Watch the latest Chicago sports videos from Pinwheels & Ivy and @untoldchicago.',
   openGraph: {
     title: 'Vision Theater | Sports Mockery',
     description: 'Your Chicago sports video hub.',

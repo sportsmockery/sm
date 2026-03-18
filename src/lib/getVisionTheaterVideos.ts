@@ -24,7 +24,7 @@ export interface VisionTheaterData {
 
 const CHANNELS = [
   { slug: 'pinwheels-and-ivy', name: 'Pinwheels & Ivy', handle: '@PinwheelsandIvyPodcast' },
-  { slug: 'untold-chicago', name: 'Untold Chicago Stories', handle: '@untoldchicago' },
+  { slug: 'untold-chicago', name: '@untoldchicago', handle: '@untoldchicago' },
 ] as const
 
 // Parse ISO 8601 duration to seconds
