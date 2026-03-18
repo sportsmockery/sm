@@ -66,7 +66,7 @@ export default function OwnershipHub({ grades }: { grades: OwnershipGrade[] }) {
           margin: 0,
           lineHeight: 1.5,
         }}>
-          Data-backed grades on every Chicago ownership group. Spending, Results, Fan Sentiment, and Loyalty Tax.
+          Data-backed grades on every Chicago ownership group. Spending, Results, Fan Sentiment, and Loyalty Tax. Grades are reviewed and updated monthly.
         </p>
       </div>
 

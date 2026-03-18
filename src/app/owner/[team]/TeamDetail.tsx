@@ -131,7 +131,7 @@ export default function TeamDetail({ grade, history }: { grade: OwnershipGrade; 
             {teamName} Report Card
           </h1>
           <p style={{ fontSize: 14, color: 'var(--sm-text-dim)', margin: '0 0 20px', lineHeight: 1.5 }}>
-            {grade.season_label} Season &middot; Grades reflect 3 years of ownership performance (Q1 2023 – Present)
+            {grade.season_label} Season &middot; Grades reflect 3 years of ownership performance (Q1 2023 – Present). Updated monthly.
           </p>
         </div>
         {TEAM_LOGOS[grade.team_slug] && (
