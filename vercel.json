@@ -65,6 +65,10 @@
     {
       "path": "/api/cron/scout-prompts",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/refresh-homepage",
+      "schedule": "*/5 * * * *"
     }
   ],
   "headers": [
