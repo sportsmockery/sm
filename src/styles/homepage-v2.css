@@ -296,6 +296,12 @@
   animation: hp-card-enter 0.3s ease-out forwards;
 }
 
+/* Pinwheels & Ivy logos: always full color (red pinwheel, green ivy) */
+.hp-feed-card .hp-pi-logo,
+.hp-feed-card .hp-pi-logo img {
+  filter: none !important;
+}
+
 /* Staggered entrance for feed items */
 .hp-feed-card:nth-child(1) { animation-delay: 0ms; }
 .hp-feed-card:nth-child(2) { animation-delay: 50ms; }

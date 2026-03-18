@@ -98,6 +98,7 @@ export default function ScrollToTop() {
   }
 
   if (pathname?.startsWith('/admin') || pathname === '/scout-ai') return null
+  if (pathname === '/') return null // No floating Scout on homepage
   if (!visible) return null
 
   return (

@@ -18,7 +18,23 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts"
-import PiLogo from "@/assets/PI-Logo-c04e6913-525e-46c7-ab7b-10522464bc42.png"
+/** Pinwheels & Ivy logo — top right of PI cards. */
+const PI_LOGO_SRC = "/youtubelogos/pi-logo.png"
+/** Pinwheels & Ivy logo for top left of PI cards (pinwheel + "Pinwheels and Ivy" text). Use same or pi-logo-left.png. */
+const PI_LOGO_LEFT_SRC = "/youtubelogos/pi-logo.png"
+
+function isPinwheelsAndIvy(source: string | undefined): boolean {
+  if (!source || typeof source !== 'string') return false
+  const n = source.toLowerCase().replace(/\s+/g, ' ').trim()
+  return (
+    n.includes('pinwheels') ||
+    (n.includes('pinwheel') && n.includes('ivy')) ||
+    n.includes('pinwheels and ivy') ||
+    n.includes('pinwheels & ivy') ||
+    n.includes('p&i') ||
+    (n.includes('cubs') && n.includes('white sox'))
+  )
+}
 
 // ============================================
 // SHARED TYPES & UTILITIES
@@ -218,10 +234,12 @@ interface EditorialCardProps extends BaseCardProps {
   authorPhoto?: string
   slug?: string
   categorySlug?: string
+  /** Featured image above headline; fades down into headline (like article pages, more prominent) */
+  featuredImage?: string
 }
 
 export function EditorialCard({
-  headline, summary, insight, team, teamColor, timestamp, stats, author_name, breakingIndicator, gmQuestion, trendingContext, rumorCredibility, scoutStat, authorPhoto, slug, categorySlug,
+  headline, summary, insight, team, teamColor, timestamp, stats, author_name, breakingIndicator, gmQuestion, trendingContext, rumorCredibility, scoutStat, authorPhoto, slug, categorySlug, featuredImage,
 }: EditorialCardProps) {
   const [vote, setVote] = useState<"yes" | "no" | null>(null)
   const [yesVotes, setYesVotes] = useState(Math.floor(Math.random() * 500) + 200)
@@ -250,13 +268,47 @@ export function EditorialCard({
         <TeamTag team={team} teamHex={teamHex} />
       </div>
 
-      {articleUrl ? (
-        <Link href={articleUrl}>
-          <h2 className="hover:underline" style={{ fontSize: 21, fontWeight: 700, lineHeight: 1.25, letterSpacing: '-0.02em', color: 'var(--hp-foreground)' }}>{headline}</h2>
-        </Link>
-      ) : (
-        <h2 style={{ fontSize: 21, fontWeight: 700, lineHeight: 1.25, letterSpacing: '-0.02em', color: 'var(--hp-foreground)' }}>{headline}</h2>
+      {/* Featured image above headline with prominent fade into headline (like article pages) */}
+      {featuredImage && featuredImage.length > 0 && (
+        <div className="relative mb-4 rounded-xl overflow-hidden" style={{ aspectRatio: '16/9' }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={featuredImage}
+            alt=""
+            className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
+          />
+          {/* Strong gradient fade down into headline area — more prominent than article page */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: 'linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.5) 28%, rgba(0,0,0,0.15) 50%, transparent 72%)',
+              borderRadius: 12,
+            }}
+          />
+          {/* Headline overlaid at bottom of image */}
+          <div className="absolute bottom-0 left-0 right-0 z-10 px-4 pb-4 pt-12">
+            {articleUrl ? (
+              <Link href={articleUrl}>
+                <h2 className="hover:underline" style={{ fontSize: 20, fontWeight: 700, lineHeight: 1.25, letterSpacing: '-0.02em', color: '#FAFAFB', textShadow: '0 2px 12px rgba(0,0,0,0.8), 0 1px 4px rgba(0,0,0,0.9)' }}>{headline}</h2>
+              </Link>
+            ) : (
+              <h2 style={{ fontSize: 20, fontWeight: 700, lineHeight: 1.25, letterSpacing: '-0.02em', color: '#FAFAFB', textShadow: '0 2px 12px rgba(0,0,0,0.8), 0 1px 4px rgba(0,0,0,0.9)' }}>{headline}</h2>
+            )}
+          </div>
+        </div>
       )}
+
+      {!featuredImage || featuredImage.length === 0 ? (
+        <>
+          {articleUrl ? (
+            <Link href={articleUrl}>
+              <h2 className="hover:underline" style={{ fontSize: 21, fontWeight: 700, lineHeight: 1.25, letterSpacing: '-0.02em', color: 'var(--hp-foreground)' }}>{headline}</h2>
+            </Link>
+          ) : (
+            <h2 style={{ fontSize: 21, fontWeight: 700, lineHeight: 1.25, letterSpacing: '-0.02em', color: 'var(--hp-foreground)' }}>{headline}</h2>
+          )}
+        </>
+      ) : null}
       {rumorCredibility && breakingIndicator === "RUMOR" && <RumorCredibilityMeter level={rumorCredibility} />}
       {trendingContext && <TrendingContextLine context={trendingContext} />}
       <p className="mt-3 line-clamp-3" style={{ fontSize: 15, lineHeight: 1.65, color: 'var(--hp-foreground)', opacity: 0.7 }}>{summary}</p>
@@ -1208,24 +1260,45 @@ export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team,
   return (
     <article className="hp-feed-card hp-card-enter">
       <div className="flex items-center justify-between gap-3 mb-4">
-        <div className="flex items-center gap-3">
-          <CardLabel label="VIDEO" />
-          <span style={{ fontSize: 11, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
+        {/* Top left: Pinwheels & Ivy logo on PI cards; VIDEO + timestamp on others */}
+        <div className="flex items-center gap-3 flex-shrink-0" style={{ height: 36 }}>
+          {isPinwheelsAndIvy(source) ? (
+            <div className="hp-pi-logo">
+              <img
+                src={PI_LOGO_LEFT_SRC}
+                alt="Pinwheels and Ivy"
+                width={140}
+                height={36}
+                className="object-contain object-left"
+                style={{ maxHeight: 36, width: 'auto', height: 36 }}
+                loading="eager"
+              />
+            </div>
+          ) : (
+            <>
+              <CardLabel label="VIDEO" />
+              <span style={{ fontSize: 11, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
+            </>
+          )}
         </div>
-        {/* Team logo on the right; Pinwheels & Ivy uses its own logo */}
-        {source && source.toLowerCase().includes('pinwheels') ? (
-          <div className="flex items-center justify-center">
-            <Image
-              src={PiLogo}
-              alt="Pinwheels & Ivy"
-              width={28}
-              height={28}
-              className="object-contain"
-            />
-          </div>
-        ) : (
-          <TeamTag team={team} teamHex={teamHex} />
-        )}
+        {/* Top right: Pinwheels & Ivy logo for PI cards; team logo for others */}
+        <div className="flex items-center justify-end flex-shrink-0" style={{ height: 32 }}>
+          {isPinwheelsAndIvy(source) ? (
+            <span className="hp-pi-logo">
+              <img
+                src={PI_LOGO_SRC}
+                alt="Pinwheels & Ivy"
+                width={32}
+                height={32}
+                className="object-contain"
+                style={{ width: 32, height: 32 }}
+                loading="eager"
+              />
+            </span>
+          ) : (
+            <TeamTag team={team} teamHex={teamHex} />
+          )}
+        </div>
       </div>
 
       {articleUrl ? (
