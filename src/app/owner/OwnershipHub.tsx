@@ -24,40 +24,45 @@ export default function OwnershipHub({ grades }: { grades: OwnershipGrade[] }) {
   return (
     <div style={{
       minHeight: '100vh',
-      padding: 'calc(var(--sm-nav-height, 72px) + 32px) 24px 64px',
+      padding: 'calc(var(--sm-nav-height, 72px) + 16px) 24px 64px',
       maxWidth: 'var(--sm-max-width, 1200px)',
       margin: '0 auto',
     }}>
       {/* Hero */}
-      <div style={{ textAlign: 'center', marginBottom: 40 }}>
-        <div style={{
-          fontSize: 11,
-          fontWeight: 600,
-          letterSpacing: 2,
-          textTransform: 'uppercase',
-          color: 'var(--sm-red)',
-          marginBottom: 8,
-        }}>
-          Sports Mockery Data Lab
+      <div style={{ marginBottom: 32 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+          <div style={{
+            fontSize: 10,
+            fontWeight: 700,
+            letterSpacing: 1.5,
+            textTransform: 'uppercase',
+            color: '#FAFAFB',
+            backgroundColor: '#BC0000',
+            padding: '3px 8px',
+            borderRadius: 4,
+            lineHeight: 1,
+          }}>
+            Data Lab
+          </div>
         </div>
         <h1 style={{
-          fontSize: 32,
+          fontSize: 'clamp(26px, 4vw, 36px)',
           fontWeight: 800,
           color: 'var(--sm-text)',
-          margin: '0 0 12px',
+          margin: '0 0 8px',
           lineHeight: 1.1,
+          letterSpacing: '-0.5px',
         }}>
           Owner & GM Report Cards
         </h1>
         <p style={{
-          fontSize: 15,
+          fontSize: 14,
           color: 'var(--sm-text-dim)',
-          maxWidth: 600,
-          margin: '0 auto',
+          maxWidth: 520,
+          margin: 0,
           lineHeight: 1.5,
         }}>
-          Transparent, data-backed grades on every Chicago ownership group.
-          Four dimensions: Spending, Results, Fan Sentiment, and Loyalty Tax.
+          Data-backed grades on every Chicago ownership group. Spending, Results, Fan Sentiment, and Loyalty Tax.
         </p>
       </div>
 

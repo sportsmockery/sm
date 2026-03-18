@@ -90,7 +90,7 @@ export default function TeamDetail({ grade, history }: { grade: OwnershipGrade; 
   return (
     <div style={{
       minHeight: '100vh',
-      padding: 'calc(var(--sm-nav-height, 72px) + 32px) 24px 64px',
+      padding: 'calc(var(--sm-nav-height, 72px) + 16px) 24px 64px',
       maxWidth: 800,
       margin: '0 auto',
     }}>
