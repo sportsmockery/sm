@@ -27,6 +27,7 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
   const [displayedText, setDisplayedText] = useState('')
   const [isTalking, setIsTalking] = useState(false)
   const [currentAngle, setCurrentAngle] = useState(0)
+  const [isSpeaking, setIsSpeaking] = useState(false)
   const animFrameRef = useRef<number | null>(null)
   const textRef = useRef<HTMLDivElement>(null)
 
@@ -83,8 +84,8 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
     setDisplayedText('')
 
     let charIndex = 0
-    const charsPerFrame = 3
-    const intervalMs = 16
+    const charsPerFrame = 2
+    const intervalMs = 22
 
     const tick = () => {
       charIndex += charsPerFrame
@@ -126,6 +127,8 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
   const handleAnotherTake = () => {
     const nextAngle = (currentAngle + 1) % 3
     if (animFrameRef.current) clearTimeout(animFrameRef.current)
+    window.speechSynthesis.cancel()
+    setIsSpeaking(false)
     setDisplayedText('')
     setIsTalking(false)
     fetchCommentary(nextAngle)
@@ -147,6 +150,8 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
   const handleClose = () => {
     setIsOpen(false)
     if (animFrameRef.current) clearTimeout(animFrameRef.current)
+    window.speechSynthesis.cancel()
+    setIsSpeaking(false)
     setIsTalking(false)
   }
 
@@ -156,6 +161,22 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
       setDisplayedText(data.commentary)
       setIsTalking(false)
     }
+  }
+
+  const handleSpeak = () => {
+    if (!data?.commentary) return
+    if (isSpeaking) {
+      window.speechSynthesis.cancel()
+      setIsSpeaking(false)
+      return
+    }
+    const utterance = new SpeechSynthesisUtterance(data.commentary)
+    utterance.rate = 1.05
+    utterance.pitch = 0.95
+    utterance.onend = () => setIsSpeaking(false)
+    utterance.onerror = () => setIsSpeaking(false)
+    setIsSpeaking(true)
+    window.speechSynthesis.speak(utterance)
   }
 
   const paragraphs = displayedText.split('\n\n').filter(Boolean)
@@ -228,7 +249,7 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
             flexShrink: 0,
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--sm-text)' }}>Scout</span>
+              <span style={{ fontSize: 20, fontWeight: 800, color: 'var(--sm-text)' }}>Scout</span>
               {data?.angle_name && (
                 <span style={{
                   fontSize: 10,
@@ -340,6 +361,37 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 4v6h6M23 20v-6h-6" /><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15" /></svg>
               Another Take
+            </button>
+            <button
+              onClick={handleSpeak}
+              disabled={loading || !data?.commentary}
+              style={{
+                fontSize: 12,
+                fontWeight: 600,
+                color: isSpeaking ? '#BC0000' : 'var(--sm-text-muted)',
+                background: isSpeaking ? 'rgba(188,0,0,0.1)' : 'var(--sm-surface)',
+                border: `1px solid ${isSpeaking ? 'rgba(188,0,0,0.2)' : 'var(--sm-border)'}`,
+                borderRadius: 8,
+                padding: '6px 14px',
+                cursor: loading || !data?.commentary ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 5,
+                lineHeight: 1,
+                opacity: loading || !data?.commentary ? 0.5 : 1,
+              }}
+            >
+              {isSpeaking ? (
+                <>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></svg>
+                  Stop
+                </>
+              ) : (
+                <>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" /><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07" /></svg>
+                  Listen
+                </>
+              )}
             </button>
           </div>
 
