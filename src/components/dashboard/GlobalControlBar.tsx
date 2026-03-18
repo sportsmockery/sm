@@ -12,53 +12,57 @@ interface Props {
 export default function GlobalControlBar({ meta, lastFetched, onRefresh, loading }: Props) {
   return (
     <div
-      className="sticky top-0 z-50 flex items-center justify-between px-4 py-2.5 backdrop-blur-md border-b"
+      className="sticky top-0 z-50 flex items-center justify-between px-4 lg:px-8 py-3 backdrop-blur-xl border-b"
       style={{
-        backgroundColor: 'rgba(250,250,251,0.92)',
-        borderColor: 'rgba(11,15,20,0.10)',
+        backgroundColor: 'rgba(9,12,16,0.85)',
+        borderColor: 'rgba(255,255,255,0.05)',
       }}
     >
-      <div className="flex items-center gap-3">
-        <h1 className="text-sm font-bold tracking-wide" style={{ color: '#0B0F14' }}>
-          CHICAGO SPORTS INTELLIGENCE
-        </h1>
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2.5">
+          <div className="w-1.5 h-5 rounded-full" style={{ backgroundColor: '#00D4FF' }} />
+          <h1 className="text-[13px] font-bold tracking-[0.12em] uppercase" style={{ color: '#E8EAED' }}>
+            Chicago Sports Intelligence
+          </h1>
+        </div>
         {meta?.live_mode && (
           <span
-            className="flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium"
-            style={{ backgroundColor: 'rgba(188,0,0,0.2)', color: '#BC0000' }}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold tracking-wider uppercase"
+            style={{ backgroundColor: 'rgba(188,0,0,0.15)', color: '#BC0000', border: '1px solid rgba(188,0,0,0.2)' }}
           >
             <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: '#BC0000' }} />
-            LIVE
+            Live
           </span>
         )}
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-5">
         {meta && (
-          <span className="text-xs hidden sm:block" style={{ color: 'rgba(11,15,20,0.4)' }}>
-            v{meta.version} &middot; schema {meta.schema_version}
+          <span className="text-[10px] tracking-wide hidden sm:block" style={{ color: 'rgba(232,234,237,0.2)' }}>
+            v{meta.version}
           </span>
         )}
         {lastFetched && (
-          <span className="text-xs" style={{ color: 'rgba(11,15,20,0.5)' }}>
-            {lastFetched.toLocaleTimeString('en-US', {
-              hour: 'numeric',
-              minute: '2-digit',
-              second: '2-digit',
-              hour12: true,
-            })}
+          <span className="text-[10px] tracking-wide" style={{ color: 'rgba(232,234,237,0.35)' }}>
+            {lastFetched.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true })}
           </span>
         )}
         {meta?.cache_hit && (
-          <span className="text-xs px-1.5 py-0.5 rounded" style={{ backgroundColor: 'rgba(0,212,255,0.1)', color: '#00D4FF' }}>
+          <span
+            className="text-[10px] px-2 py-0.5 rounded-md font-medium tracking-wide"
+            style={{ backgroundColor: 'rgba(0,212,255,0.08)', color: 'rgba(0,212,255,0.6)' }}
+          >
             CACHED
           </span>
         )}
         <button
           onClick={onRefresh}
           disabled={loading}
-          className="p-1.5 rounded transition-colors"
-          style={{ color: loading ? 'rgba(11,15,20,0.3)' : '#00D4FF' }}
+          className="p-2 rounded-lg transition-all"
+          style={{
+            color: loading ? 'rgba(232,234,237,0.15)' : '#00D4FF',
+            backgroundColor: 'rgba(255,255,255,0.03)',
+          }}
           title="Refresh data"
         >
           <svg

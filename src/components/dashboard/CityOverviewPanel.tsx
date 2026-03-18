@@ -13,18 +13,15 @@ function MoodGauge({ score, label, emoji, direction }: { score: number; label: s
     <div className="flex flex-col gap-1.5">
       <div className="flex items-center gap-2">
         <span className="text-lg">{emoji}</span>
-        <span className="text-sm font-medium" style={{ color: '#0B0F14' }}>{label}</span>
-        <span className="text-xs" style={{ color: 'rgba(11,15,20,0.4)' }}>
+        <span className="text-sm font-bold" style={{ color: '#E8EAED' }}>{label}</span>
+        <span className="text-xs" style={{ color: 'rgba(232,234,237,0.35)' }}>
           {direction === 'up' ? '\u2191' : direction === 'down' ? '\u2193' : '\u2192'}
         </span>
       </div>
-      <div className="h-1.5 rounded-full w-full" style={{ backgroundColor: 'rgba(11,15,20,0.08)' }}>
-        <div
-          className="h-full rounded-full transition-all duration-700"
-          style={{ width: `${score}%`, backgroundColor: barColor }}
-        />
+      <div className="h-1.5 rounded-full w-full" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}>
+        <div className="h-full rounded-full transition-all duration-700" style={{ width: `${score}%`, backgroundColor: barColor }} />
       </div>
-      <span className="text-xs" style={{ color: 'rgba(11,15,20,0.4)' }}>{score}/100</span>
+      <span className="text-[10px] tabular-nums" style={{ color: 'rgba(232,234,237,0.3)' }}>{score}/100</span>
     </div>
   )
 }
@@ -32,9 +29,9 @@ function MoodGauge({ score, label, emoji, direction }: { score: number; label: s
 function StatBlock({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
     <div className="flex flex-col gap-0.5">
-      <span className="text-xs uppercase tracking-wider" style={{ color: 'rgba(11,15,20,0.35)' }}>{label}</span>
-      <span className="text-lg font-bold" style={{ color: '#0B0F14' }}>{value}</span>
-      {sub && <span className="text-xs" style={{ color: 'rgba(11,15,20,0.5)' }}>{sub}</span>}
+      <span className="text-[10px] uppercase tracking-[0.12em]" style={{ color: 'rgba(232,234,237,0.3)' }}>{label}</span>
+      <span className="text-lg font-bold tabular-nums" style={{ color: '#E8EAED' }}>{value}</span>
+      {sub && <span className="text-[10px]" style={{ color: 'rgba(232,234,237,0.35)' }}>{sub}</span>}
     </div>
   )
 }
@@ -51,61 +48,53 @@ function getTeamColor(teamKey: string, teams: Team[]): string {
 export default function CityOverviewPanel({ city, teams }: Props) {
   return (
     <div
-      className="rounded-xl p-4 border"
+      className="rounded-2xl p-5 border backdrop-blur-xl"
       style={{
-        backgroundColor: 'rgba(11,15,20,0.03)',
-        borderColor: 'rgba(11,15,20,0.08)',
+        backgroundColor: 'rgba(255,255,255,0.03)',
+        borderColor: 'rgba(255,255,255,0.06)',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.2)',
       }}
     >
-      {/* Summary */}
-      <p className="text-sm mb-4 leading-relaxed" style={{ color: 'rgba(11,15,20,0.7)' }}>
+      <div className="flex items-center gap-2 mb-3">
+        <span className="text-[10px] font-bold uppercase tracking-[0.15em]" style={{ color: 'rgba(232,234,237,0.3)' }}>
+          Executive Briefing
+        </span>
+        <div className="flex-1 h-px" style={{ backgroundColor: 'rgba(255,255,255,0.04)' }} />
+      </div>
+
+      <p className="text-sm mb-5 leading-relaxed" style={{ color: 'rgba(232,234,237,0.6)' }}>
         {city.summary}
       </p>
 
-      {/* Metrics Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-4">
-        {/* Mood */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-5">
         <div className="col-span-2 sm:col-span-1">
-          <MoodGauge
-            score={city.mood.score}
-            label={city.mood.label}
-            emoji={city.mood.emoji}
-            direction={city.mood.direction}
-          />
+          <MoodGauge score={city.mood.score} label={city.mood.label} emoji={city.mood.emoji} direction={city.mood.direction} />
         </div>
 
-        <StatBlock
-          label="City Record"
-          value={`${city.record.wins}-${city.record.losses}`}
-          sub={`${(city.record.win_pct * 100).toFixed(1)}%`}
-        />
-
+        <StatBlock label="City Record" value={`${city.record.wins}-${city.record.losses}`} sub={`${(city.record.win_pct * 100).toFixed(1)}%`} />
         <StatBlock label="Active" value={city.teams_active} sub="teams in-season" />
         <StatBlock label="Above .500" value={city.teams_above_500} sub={`of ${city.teams_active}`} />
 
         <div className="flex flex-col gap-0.5">
-          <span className="text-xs uppercase tracking-wider" style={{ color: 'rgba(11,15,20,0.35)' }}>Hottest</span>
+          <span className="text-[10px] uppercase tracking-[0.12em]" style={{ color: 'rgba(232,234,237,0.3)' }}>Hottest</span>
           <span className="text-sm font-bold" style={{ color: getTeamColor(city.hottest_team, teams) }}>
             {getTeamName(city.hottest_team, teams)}
           </span>
         </div>
 
         <div className="flex flex-col gap-0.5">
-          <span className="text-xs uppercase tracking-wider" style={{ color: 'rgba(11,15,20,0.35)' }}>Coldest</span>
+          <span className="text-[10px] uppercase tracking-[0.12em]" style={{ color: 'rgba(232,234,237,0.3)' }}>Coldest</span>
           <span className="text-sm font-bold" style={{ color: getTeamColor(city.coldest_team, teams) }}>
             {getTeamName(city.coldest_team, teams)}
           </span>
         </div>
 
-        {/* Next Event */}
         <div className="flex flex-col gap-0.5">
-          <span className="text-xs uppercase tracking-wider" style={{ color: 'rgba(11,15,20,0.35)' }}>Next Up</span>
-          <span className="text-sm font-medium" style={{ color: '#0B0F14' }}>
+          <span className="text-[10px] uppercase tracking-[0.12em]" style={{ color: 'rgba(232,234,237,0.3)' }}>Next Up</span>
+          <span className="text-sm font-medium" style={{ color: '#E8EAED' }}>
             {city.next_event.team_name} {city.next_event.home ? 'vs' : '@'} {city.next_event.opponent}
           </span>
-          <span className="text-xs" style={{ color: '#00D4FF' }}>
-            {city.next_event.datetime_display}
-          </span>
+          <span className="text-[10px]" style={{ color: '#00D4FF' }}>{city.next_event.datetime_display}</span>
         </div>
       </div>
     </div>
