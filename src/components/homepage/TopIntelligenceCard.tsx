@@ -4,6 +4,7 @@ import { ChevronRight } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { homepageTeams } from "@/lib/homepage-team-data"
 
 interface TopIntelligenceCardProps {
   headline: string
@@ -19,6 +20,10 @@ interface TopIntelligenceCardProps {
 export default function TopIntelligenceCard({ headline, summary, imageUrl, team, teamColor, timestamp, slug, categorySlug }: TopIntelligenceCardProps) {
   const router = useRouter()
   const articleUrl = slug && categorySlug ? `/${categorySlug}/${slug}` : undefined
+  const teamMeta = homepageTeams.find((t) => t.name.toLowerCase() === team.toLowerCase())
+  const teamLogoSrc = teamMeta?.logo
+  // For cards, Bears use orange (#C83803); others use primary team color from feed or homepageTeams
+  const borderColor = teamMeta?.name.toLowerCase() === 'bears' ? '#C83803' : (teamMeta?.color ?? teamColor)
 
   const handleCardClick = (e: React.MouseEvent) => {
     // Don't navigate if clicking on interactive elements (buttons, links)
@@ -33,9 +38,9 @@ export default function TopIntelligenceCard({ headline, summary, imageUrl, team,
       onClick={handleCardClick}
       style={{
         borderRadius: 16,
-        border: '2px solid rgba(188, 0, 0, 0.2)',
+        border: `2px solid ${borderColor}`,
         background: 'var(--hp-card)',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+        boxShadow: `0 0 28px ${borderColor}50, 0 0 14px ${borderColor}30, 0 4px 12px rgba(0,0,0,0.08)`,
         transition: 'all 0.3s',
       }}
     >
@@ -55,7 +60,7 @@ export default function TopIntelligenceCard({ headline, summary, imageUrl, team,
       )}
 
       <div className="p-5">
-        {/* Label Row */}
+        {/* Label Row — team logo top right (where pill was) */}
         <div className="flex items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-2">
             <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#BC0000' }}>
@@ -63,12 +68,31 @@ export default function TopIntelligenceCard({ headline, summary, imageUrl, team,
             </span>
             <span style={{ fontSize: 11, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
           </div>
-          <span
-            className="inline-flex items-center px-2 py-0.5 text-white shadow-sm"
-            style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', borderRadius: 6, backgroundColor: teamColor }}
-          >
-            {team}
-          </span>
+          {teamLogoSrc ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={teamLogoSrc}
+              alt={team}
+              width={28}
+              height={28}
+              style={{ width: 28, height: 28, objectFit: 'contain' }}
+              crossOrigin="anonymous"
+            />
+          ) : (
+            <span
+              className="inline-flex items-center justify-center rounded-full"
+              style={{
+                width: 28,
+                height: 28,
+                fontSize: 12,
+                fontWeight: 700,
+                backgroundColor: borderColor,
+                color: '#FAFAFB',
+              }}
+            >
+              {team.charAt(0)}
+            </span>
+          )}
         </div>
 
         {/* Headline */}

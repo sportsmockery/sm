@@ -53,6 +53,7 @@ function RiverCard({ item }: { item: HomepageRiverItem }) {
           authorPhoto={data.authorPhoto as string | undefined}
           slug={data.slug as string | undefined}
           categorySlug={data.categorySlug as string | undefined}
+          featuredImage={(data.featuredImage as string) || undefined}
         />
       )
     case "poll":
@@ -273,28 +274,30 @@ export default function MainFeed({ activeTab, setActiveTab, selectedTeam, heroAr
 
   return (
     <main className="min-h-screen w-full max-w-[600px] pt-4" style={{ borderLeft: '1px solid var(--hp-border)', borderRight: '1px solid var(--hp-border)' }}>
-      {/* Top Intelligence Card - Featured Story (from live data) */}
-      {featuredItem ? (
-        <TopIntelligenceCard
-          headline={featuredItem.data.headline as string}
-          summary={featuredItem.data.summary as string}
-          imageUrl={(featuredItem.data.featuredImage as string) || ""}
-          team={featuredItem.team}
-          teamColor={featuredItem.teamColor}
-          timestamp={featuredItem.timestamp}
-          slug={featuredItem.data.slug as string | undefined}
-          categorySlug={featuredItem.data.categorySlug as string | undefined}
-        />
-      ) : !loading && (
-        <TopIntelligenceCard
-          headline="Welcome to SM Edge"
-          summary="Your Chicago sports intelligence feed is loading. Check back soon for the latest news, analysis, and fan engagement."
-          imageUrl=""
-          team="Chicago Sports"
-          teamColor="#0B0F14"
-          timestamp=""
-        />
-      )}
+      {/* Top Intelligence Card - aligned with top of side borders */}
+      <div className="-mt-4">
+        {featuredItem ? (
+          <TopIntelligenceCard
+            headline={featuredItem.data.headline as string}
+            summary={featuredItem.data.summary as string}
+            imageUrl={(featuredItem.data.featuredImage as string) || ""}
+            team={featuredItem.team}
+            teamColor={featuredItem.teamColor}
+            timestamp={featuredItem.timestamp}
+            slug={featuredItem.data.slug as string | undefined}
+            categorySlug={featuredItem.data.categorySlug as string | undefined}
+          />
+        ) : !loading && (
+          <TopIntelligenceCard
+            headline="Welcome to SM Edge"
+            summary="Your Chicago sports intelligence feed is loading. Check back soon for the latest news, analysis, and fan engagement."
+            imageUrl=""
+            team="Chicago Sports"
+            teamColor="#0B0F14"
+            timestamp=""
+          />
+        )}
+      </div>
 
       {/* River Feed */}
       <div className="pb-24" key={selectedTeam}>
