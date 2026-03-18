@@ -7,6 +7,17 @@ import { usePathname } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { homepageTeams } from '@/lib/homepage-team-data'
 import { ArrowRightLeft, ClipboardPen, MessageSquare, BarChart3, Video, Volume2, MoreVertical, Tv } from 'lucide-react'
+
+function ReportCardIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="4" y="2" width="16" height="20" rx="2" />
+      <text x="10" y="11" fill="currentColor" stroke="none" fontSize="8" fontWeight="700" fontFamily="sans-serif">A+</text>
+      <line x1="8" y1="15" x2="16" y2="15" />
+      <line x1="8" y1="18" x2="14" y2="18" />
+    </svg>
+  )
+}
 import type { Role } from '@/lib/roles'
 
 interface NavItem {
@@ -22,6 +33,7 @@ const EDGE_TOOLS: { id: string; title: string; href: string; icon: React.Compone
   { id: 'analytics', title: 'Team Stats', href: '/chicago-bears', icon: BarChart3 },
   { id: 'vision', title: 'Vision Theater', href: '/vision-theater', icon: Video },
   { id: 'audio', title: 'Hands-Free Audio', href: '/audio', icon: Volume2 },
+  { id: 'owners', title: 'Owner Report Cards', href: '/owner', icon: ReportCardIcon },
 ]
 
 const TEAM_ID_TO_ROUTE: Record<string, string> = {

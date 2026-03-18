@@ -72,6 +72,14 @@ interface TeamHubLayoutProps {
 }
 
 // Standard tabs for all team hubs
+const TEAM_SLUG_TO_OWNER: Record<string, string> = {
+  'chicago-bears': 'bears',
+  'chicago-bulls': 'bulls',
+  'chicago-blackhawks': 'blackhawks',
+  'chicago-cubs': 'cubs',
+  'chicago-white-sox': 'whitesox',
+}
+
 const TEAM_TABS = [
   { id: 'overview', label: 'EDGE', path: '' },
   { id: 'live', label: 'Live', path: '/live' },
@@ -81,7 +89,7 @@ const TEAM_TABS = [
   { id: 'roster', label: 'Roster', path: '/roster' },
   { id: 'players', label: 'Players', path: '/players' },
   { id: 'news', label: 'News', path: '/news' },
-  { id: 'fan-chat', label: 'Fan Chat', path: '', external: '/fan-chat' },
+  { id: 'gm-report', label: 'GM Report Card', path: '', ownerLink: true },
 ]
 
 // NFL tabs
@@ -93,7 +101,7 @@ const NFL_TABS = [
   { id: 'stats', label: 'Stats', path: '/stats' },
   { id: 'roster', label: 'Roster', path: '/roster' },
   { id: 'players', label: 'Players', path: '/players' },
-  { id: 'fan-chat', label: 'Fan Chat', path: '', external: '/fan-chat' },
+  { id: 'gm-report', label: 'GM Report Card', path: '', ownerLink: true },
 ]
 
 // Team taglines
@@ -171,12 +179,14 @@ export default function TeamHubLayout({
       {/* ===== STICKY SUBNAV ===== */}
       <div
         ref={navRef}
-        className={isSticky ? 'sticky' : ''}
         style={{
-          ...(isSticky ? { top: 'var(--sm-nav-height, 72px)', zIndex: 40, boxShadow: '0 4px 12px rgba(0,0,0,0.3)' } : {}),
+          position: 'sticky',
+          top: 'var(--sm-nav-height, 72px)',
+          zIndex: 40,
           background: 'var(--sm-surface)',
           borderBottom: '1px solid var(--sm-border)',
           transition: 'box-shadow 0.2s ease',
+          boxShadow: isSticky ? '0 4px 12px rgba(0,0,0,0.3)' : 'none',
         }}
       >
         <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '0 24px' }}>
@@ -184,8 +194,10 @@ export default function TeamHubLayout({
           <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', overflowX: 'auto', padding: '4px 0' }}>
             {tabs.map((tab: typeof tabs[number]) => {
               const isActive = tab.id === currentTab
-              const href = tab.external
-                ? `${tab.external}?channel=${team.slug.replace('chicago-', '')}`
+              const href = (tab as any).ownerLink
+                ? `/owner/${TEAM_SLUG_TO_OWNER[team.slug] || team.slug.replace('chicago-', '')}`
+                : (tab as any).external
+                ? `${(tab as any).external}?channel=${team.slug.replace('chicago-', '')}`
                 : basePath + tab.path
 
               const isEdgeTab = tab.id === 'overview'

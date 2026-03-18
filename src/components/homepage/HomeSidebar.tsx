@@ -2,6 +2,17 @@
 
 import { useState, useEffect } from "react"
 import { ArrowRightLeft, ClipboardPen, MessageSquare, BarChart3, Video, Volume2, Tv } from "lucide-react"
+
+function ReportCardIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="4" y="2" width="16" height="20" rx="2" />
+      <text x="10" y="11" fill="currentColor" stroke="none" fontSize="8" fontWeight="700" fontFamily="sans-serif">A+</text>
+      <line x1="8" y1="15" x2="16" y2="15" />
+      <line x1="8" y1="18" x2="14" y2="18" />
+    </svg>
+  )
+}
 import { homepageTeams } from "@/lib/homepage-team-data"
 
 interface HomeSidebarProps {
@@ -16,6 +27,7 @@ const edgeTools: { icon: React.ComponentType<{ className?: string }>; label: str
   { icon: BarChart3, label: 'Team Stats', desc: 'The numbers that explain the wins… and the excuses.', href: '/chicago-bears' },
   { icon: Video, label: 'Vision Theater', desc: 'All videos, no digging. Just press play.', href: '/vision-theater' },
   { icon: Volume2, label: 'Hands-Free Audio', desc: 'Sit back, choose a voice, and press play.', href: '/audio' },
+  { icon: ReportCardIcon, label: 'Owner Report Cards', desc: 'Transparent, data-backed grades on every Chicago ownership group.', href: '/owner' },
 ]
 
 export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarProps) {
