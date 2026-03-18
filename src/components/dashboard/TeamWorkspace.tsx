@@ -159,27 +159,39 @@ export default function TeamWorkspace({ team, onClose }: Props) {
             </div>
 
             {/* Next Game */}
-            <div
-              className="rounded-lg p-3 border"
-              style={{ backgroundColor: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.04)' }}
-            >
-              <span className="text-xs uppercase tracking-wider block mb-1" style={{ color: 'rgba(250,250,251,0.35)' }}>
-                Next Game
-              </span>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium" style={{ color: '#FAFAFB' }}>
-                  {team.status.next_game.home ? 'vs' : '@'} {team.status.next_game.opponent}
+            {team.status.next_game ? (
+              <div
+                className="rounded-lg p-3 border"
+                style={{ backgroundColor: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.04)' }}
+              >
+                <span className="text-xs uppercase tracking-wider block mb-1" style={{ color: 'rgba(250,250,251,0.35)' }}>
+                  Next Game
                 </span>
-                <div className="text-right">
-                  <span className="text-xs block" style={{ color: '#00D4FF' }}>
-                    {team.status.next_game.datetime_display}
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium" style={{ color: '#FAFAFB' }}>
+                    {team.status.next_game.home ? 'vs' : '@'} {team.status.next_game.opponent}
                   </span>
-                  <span className="text-xs" style={{ color: 'rgba(250,250,251,0.35)' }}>
-                    {team.status.next_game.venue} &middot; {team.status.next_game.importance_label}
-                  </span>
+                  <div className="text-right">
+                    <span className="text-xs block" style={{ color: '#00D4FF' }}>
+                      {team.status.next_game.datetime_display}
+                    </span>
+                    <span className="text-xs" style={{ color: 'rgba(250,250,251,0.35)' }}>
+                      {team.status.next_game.venue} &middot; {team.status.next_game.importance_label}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div
+                className="rounded-lg p-3 border"
+                style={{ backgroundColor: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.04)' }}
+              >
+                <span className="text-xs uppercase tracking-wider block mb-1" style={{ color: 'rgba(250,250,251,0.35)' }}>
+                  Next Game
+                </span>
+                <span className="text-sm" style={{ color: 'rgba(250,250,251,0.4)' }}>No games scheduled</span>
+              </div>
+            )}
           </div>
         )}
 

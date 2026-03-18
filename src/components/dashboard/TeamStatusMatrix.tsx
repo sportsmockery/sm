@@ -185,14 +185,18 @@ export default function TeamStatusMatrix({ teams, selectedTeam, onSelectTeam }: 
 
                 {/* Next Game */}
                 <td className="py-2.5 px-3">
-                  <div className="max-w-[140px]">
-                    <span className="text-xs block truncate" style={{ color: 'rgba(250,250,251,0.7)' }}>
-                      {team.status.next_game.home ? 'vs' : '@'} {team.status.next_game.opponent}
-                    </span>
-                    <span className="text-xs block" style={{ color: 'rgba(250,250,251,0.35)' }}>
-                      {team.status.next_game.datetime_display}
-                    </span>
-                  </div>
+                  {team.status.next_game ? (
+                    <div className="max-w-[140px]">
+                      <span className="text-xs block truncate" style={{ color: 'rgba(250,250,251,0.7)' }}>
+                        {team.status.next_game.home ? 'vs' : '@'} {team.status.next_game.opponent}
+                      </span>
+                      <span className="text-xs block" style={{ color: 'rgba(250,250,251,0.35)' }}>
+                        {team.status.next_game.datetime_display}
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="text-xs" style={{ color: 'rgba(250,250,251,0.25)' }}>—</span>
+                  )}
                 </td>
 
                 {/* Offense */}

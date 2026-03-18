@@ -117,7 +117,7 @@ export interface NextGame {
 export interface TeamStatus {
   phase: SeasonPhase;
   is_live: boolean;
-  next_game: NextGame;
+  next_game: NextGame | null;
 }
 
 export interface PerformanceUnit {
