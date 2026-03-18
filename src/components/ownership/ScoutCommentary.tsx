@@ -27,8 +27,9 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
   const [displayedText, setDisplayedText] = useState('')
   const [isTalking, setIsTalking] = useState(false)
   const [currentAngle, setCurrentAngle] = useState(0)
-  const [isSpeaking, setIsSpeaking] = useState(false)
+  const [playing, setPlaying] = useState(false)
   const animFrameRef = useRef<number | null>(null)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
   const textRef = useRef<HTMLDivElement>(null)
 
   const fetchCommentary = useCallback(async (angle: number) => {
@@ -127,8 +128,8 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
   const handleAnotherTake = () => {
     const nextAngle = (currentAngle + 1) % 3
     if (animFrameRef.current) clearTimeout(animFrameRef.current)
-    window.speechSynthesis.cancel()
-    setIsSpeaking(false)
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null }
+    setPlaying(false)
     setDisplayedText('')
     setIsTalking(false)
     fetchCommentary(nextAngle)
@@ -150,8 +151,8 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
   const handleClose = () => {
     setIsOpen(false)
     if (animFrameRef.current) clearTimeout(animFrameRef.current)
-    window.speechSynthesis.cancel()
-    setIsSpeaking(false)
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null }
+    setPlaying(false)
     setIsTalking(false)
   }
 
@@ -163,20 +164,41 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
     }
   }
 
-  const handleSpeak = () => {
+  const handlePlayVoice = async () => {
     if (!data?.commentary) return
-    if (isSpeaking) {
-      window.speechSynthesis.cancel()
-      setIsSpeaking(false)
+
+    if (playing && audioRef.current) {
+      audioRef.current.pause()
+      setPlaying(false)
       return
     }
-    const utterance = new SpeechSynthesisUtterance(data.commentary)
-    utterance.rate = 1.05
-    utterance.pitch = 0.95
-    utterance.onend = () => setIsSpeaking(false)
-    utterance.onerror = () => setIsSpeaking(false)
-    setIsSpeaking(true)
-    window.speechSynthesis.speak(utterance)
+
+    // Check cache
+    const cacheKey = `scout-audio-${teamSlug || 'all'}-${currentAngle}`
+    let audioUrl = sessionStorage.getItem(cacheKey)
+
+    if (!audioUrl) {
+      try {
+        const res = await fetch('/api/scout/speak', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: data.commentary }),
+        })
+        if (!res.ok) throw new Error('TTS failed')
+        const blob = await res.blob()
+        audioUrl = URL.createObjectURL(blob)
+        sessionStorage.setItem(cacheKey, audioUrl)
+      } catch (err) {
+        console.error('Scout TTS failed:', err)
+        return
+      }
+    }
+
+    const audio = new Audio(audioUrl)
+    audioRef.current = audio
+    audio.onended = () => setPlaying(false)
+    audio.play()
+    setPlaying(true)
   }
 
   const paragraphs = displayedText.split('\n\n').filter(Boolean)
@@ -363,7 +385,7 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
               Another Take
             </button>
             <button
-              onClick={handleSpeak}
+              onClick={handlePlayVoice}
               disabled={loading || !data?.commentary}
               style={{
                 width: 32,
@@ -374,15 +396,15 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
                 justifyContent: 'center',
                 cursor: loading || !data?.commentary ? 'not-allowed' : 'pointer',
                 opacity: loading || !data?.commentary ? 0.4 : 1,
-                backgroundColor: isSpeaking ? 'rgba(188,0,0,0.1)' : 'var(--sm-surface)',
-                border: `1px solid ${isSpeaking ? 'rgba(188,0,0,0.2)' : 'var(--sm-border)'}`,
-                color: isSpeaking ? '#BC0000' : 'var(--sm-text-muted)',
+                backgroundColor: playing ? 'rgba(188,0,0,0.1)' : 'var(--sm-surface)',
+                border: `1px solid ${playing ? 'rgba(188,0,0,0.2)' : 'var(--sm-border)'}`,
+                color: playing ? '#BC0000' : 'var(--sm-text-muted)',
                 padding: 0,
                 flexShrink: 0,
               }}
-              aria-label={isSpeaking ? 'Stop' : 'Play'}
+              aria-label={playing ? 'Pause' : 'Play'}
             >
-              {isSpeaking ? (
+              {playing ? (
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></svg>
               ) : (
                 <svg width="14" height="16" viewBox="0 0 20 24" fill="none"><path d="M2 1L18 12L2 23V1Z" fill="currentColor" /></svg>
