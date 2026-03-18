@@ -180,8 +180,7 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
           height: 68,
           borderRadius: '50%',
           border: '2px solid rgba(0,212,255,0.3)',
-          backgroundColor: 'rgba(11,15,20,0.9)',
-          backdropFilter: 'blur(8px)',
+          backgroundColor: 'var(--sm-card)',
           cursor: 'pointer',
           zIndex: 9998,
           display: 'flex',
@@ -220,10 +219,9 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
             marginRight: 'auto',
             maxHeight: '40vh',
             borderRadius: 16,
-            backgroundColor: 'rgba(11,15,20,0.95)',
-            backdropFilter: 'blur(16px)',
-            border: '1px solid rgba(0,212,255,0.15)',
-            boxShadow: '0 8px 40px rgba(0,0,0,0.5)',
+            backgroundColor: 'var(--sm-card)',
+            border: '1px solid var(--sm-border)',
+            boxShadow: '0 8px 40px rgba(0,0,0,0.15)',
             zIndex: 9997,
             display: 'flex',
             flexDirection: 'column',
@@ -237,12 +235,12 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '12px 16px',
-            borderBottom: '1px solid rgba(255,255,255,0.06)',
+            borderBottom: '1px solid var(--sm-border)',
             flexShrink: 0,
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <Image src="/downloads/scout-v2.png" alt="Scout" width={24} height={24} style={{ borderRadius: '50%' }} />
-              <span style={{ fontSize: 13, fontWeight: 700, color: '#FAFAFB' }}>Scout</span>
+              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--sm-text)' }}>Scout</span>
               {data?.angle_name && (
                 <span style={{
                   fontSize: 10,
@@ -266,7 +264,7 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
-                color: 'rgba(255,255,255,0.4)',
+                color: 'var(--sm-text-muted)',
                 padding: 4,
                 display: 'flex',
                 alignItems: 'center',
@@ -286,7 +284,7 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
               overflowY: 'auto',
               padding: '16px',
               fontSize: 13,
-              color: 'rgba(250,250,251,0.9)',
+              color: 'var(--sm-text)',
               lineHeight: 1.65,
             }}
           >
@@ -309,7 +307,7 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
           {/* Footer */}
           <div style={{
             padding: '10px 16px',
-            borderTop: '1px solid rgba(255,255,255,0.06)',
+            borderTop: '1px solid var(--sm-border)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -321,7 +319,7 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
                 style={{
                   fontSize: 12,
                   fontWeight: 500,
-                  color: 'rgba(255,255,255,0.4)',
+                  color: 'var(--sm-text-muted)',
                   background: 'none',
                   border: 'none',
                   cursor: 'pointer',
