@@ -46,8 +46,9 @@ export default async function TeamOwnerPage({ params }: { params: Promise<{ team
         .single(),
       datalabAdmin
         .from('ownership_grade_history')
-        .select('*')
+        .select('team_slug, recorded_at, season_label, spend_grade, results_grade, sentiment_grade, loyalty_tax, overall_grade, trigger_event, notes')
         .eq('team_slug', team)
+        .eq('trigger_event', 'quarterly')
         .order('recorded_at', { ascending: true }),
     ])
 
