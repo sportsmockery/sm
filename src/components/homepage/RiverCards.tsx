@@ -210,8 +210,18 @@ export function EngagementRow({
           <button
             type="button"
             onClick={() => {
-              if (isThisArticlePlaying) audio.pause()
-              else audio.play({ title: headline, slug, url: `/api/audio/${encodeURIComponent(slug)}?voice=will` })
+              if (isThisArticlePlaying) {
+                audio.pause()
+              } else {
+                audio.play(
+                  {
+                    title: headline,
+                    slug,
+                    url: `/api/audio/${encodeURIComponent(slug)}?voice=will`,
+                  },
+                  'Will'
+                )
+              }
             }}
             className="group flex items-center justify-center rounded-full transition-transform hp-tap-target hover:scale-105"
             style={{ width: 38, height: 38, backgroundColor: '#d1d5db', border: '1px solid rgba(11,15,20,0.12)' }}
@@ -880,11 +890,14 @@ export function ScoutSummaryCard({ summary, bullets, topic, team, teamColor, tim
     if (isPlaying) {
       audio.pause()
     } else {
-      audio.play({
-        title: 'Scout Insight',
-        slug: 'scout-insight',
-        url: insightAudioUrl,
-      })
+      audio.play(
+        {
+          title: 'Scout Insight',
+          slug: 'scout-insight',
+          url: insightAudioUrl,
+        },
+        'Scout'
+      )
     }
   }
 
@@ -1158,11 +1171,14 @@ export function ScoutBriefingCard() {
     if (isPlaying) {
       audio.pause()
     } else {
-      audio.play({
-        title: 'Scout Briefing',
-        slug: 'scout-briefing',
-        url: SCOUT_BRIEFING_AUDIO_URL,
-      })
+      audio.play(
+        {
+          title: 'Scout Briefing',
+          slug: 'scout-briefing',
+          url: SCOUT_BRIEFING_AUDIO_URL,
+        },
+        'Scout'
+      )
     }
   }
 

@@ -13,7 +13,14 @@ interface AudioState {
   currentArticle: AudioArticle | null;
   currentTime: number;
   duration: number;
-  voice: 'Voice A' | 'Voice B' | 'Team Voice';
+  /**
+   * UI voice label shown in the global mini player.
+   * - "Will"      → ?voice=will
+   * - "Brian"     → ?voice=brian
+   * - "Team Voice"→ ?voice=laura
+   * - "Scout"     → ?voice=scout (used for Scout insights/briefings)
+   */
+  voice: 'Will' | 'Brian' | 'Team Voice' | 'Scout';
   cardOutOfView: boolean;
   queue: AudioArticle[];
 }
@@ -36,7 +43,7 @@ const defaultState: AudioState = {
   currentArticle: null,
   currentTime: 0,
   duration: 0,
-  voice: 'Voice A',
+  voice: 'Will',
   cardOutOfView: false,
   queue: [],
 };
@@ -174,11 +181,12 @@ export function AudioPlayerProvider({ children }: { children: React.ReactNode })
         return { ...prev, voice };
       }
 
-      // Map UI voice names to API voice params
+      // Map UI voice names to API voice params for /api/audio
       const voiceMap: Record<string, string> = {
-        'Voice A': 'will',
-        'Voice B': 'brian',
+        Will: 'will',
+        Brian: 'brian',
         'Team Voice': 'laura',
+        Scout: 'scout',
       };
       const voiceParam = voiceMap[voice] || 'will';
 

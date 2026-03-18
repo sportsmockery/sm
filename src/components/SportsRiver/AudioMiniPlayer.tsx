@@ -4,7 +4,8 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAudioPlayer } from '@/context/AudioPlayerContext';
 
-const VOICES = ['Voice A', 'Voice B', 'Team Voice'] as const;
+// Voice labels must stay in sync with AudioPlayerContext.voice
+const VOICES = ['Will', 'Brian', 'Team Voice', 'Scout'] as const;
 
 export default function AudioMiniPlayer() {
   const audio = useAudioPlayer();
