@@ -71,10 +71,13 @@ export default function OwnershipHub({ grades }: { grades: OwnershipGrade[] }) {
 
       {/* League Comparison Table */}
       <div style={{ marginBottom: 40 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--sm-text)', margin: 0 }}>
-            League Comparison
-          </h2>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--sm-text)', margin: 0 }}>
+              League Comparison
+            </h2>
+            <span style={{ fontSize: 11, color: 'var(--sm-text-dim)', fontWeight: 500 }}>Q1 2023 – Present</span>
+          </div>
           <button
             onClick={() => setShowMethodology(true)}
             style={{
