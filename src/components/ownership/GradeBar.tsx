@@ -41,13 +41,17 @@ export default function GradeBar({ label, value, maxValue = 10, inverted = false
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ fontSize: 13, color: 'var(--sm-text)', fontWeight: 600 }}>{value.toFixed(1)}</span>
           <span style={{
-            fontSize: 11,
+            fontSize: 10,
             fontWeight: 700,
-            color: '#fff',
+            color: '#FAFAFB',
             background: color,
-            padding: '1px 6px',
+            padding: '2px 7px',
             borderRadius: 4,
-            lineHeight: '18px',
+            lineHeight: 1,
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minWidth: 24,
           }}>
             {letter}
           </span>

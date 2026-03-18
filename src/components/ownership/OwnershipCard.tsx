@@ -89,8 +89,9 @@ export default function OwnershipCard({ grade, showLink = true }: { grade: Owner
           alignItems: 'center',
           justifyContent: 'center',
           flexShrink: 0,
+          lineHeight: 1,
         }}>
-          <span style={{ fontSize: 20, fontWeight: 800, color: overallColor }}>
+          <span style={{ fontSize: 20, fontWeight: 800, color: overallColor, lineHeight: 1 }}>
             {grade.overall_grade.toFixed(1)}
           </span>
         </div>
@@ -113,10 +114,13 @@ export default function OwnershipCard({ grade, showLink = true }: { grade: Owner
               background: 'none',
               border: 'none',
               cursor: 'pointer',
-              textDecoration: 'underline',
-              padding: 0,
+              padding: '4px 0',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
             }}
           >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: showNotes ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }}><path d="M9 18l6-6-6-6" /></svg>
             {showNotes ? 'Hide analysis' : 'Show analysis'}
           </button>
           {showNotes && (
@@ -140,16 +144,24 @@ export default function OwnershipCard({ grade, showLink = true }: { grade: Owner
         <Link
           href={`/owner/${grade.team_slug}`}
           style={{
-            display: 'block',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 6,
             marginTop: 16,
-            textAlign: 'center',
+            padding: '10px 0',
+            borderRadius: 10,
+            border: '1px solid var(--sm-border)',
+            background: 'var(--sm-surface)',
             fontSize: 13,
             fontWeight: 600,
-            color: 'var(--sm-red)',
+            color: 'var(--sm-text)',
             textDecoration: 'none',
+            transition: 'opacity 0.2s',
           }}
         >
-          Full Report Card →
+          Full Report Card
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
         </Link>
       )}
     </div>
