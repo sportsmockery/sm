@@ -1,3 +1,4 @@
+import { datalabAdmin } from '@/lib/supabase-datalab'
 import { notFound } from 'next/navigation'
 import TeamDetail from './TeamDetail'
 
@@ -11,8 +12,6 @@ const TEAM_NAMES: Record<string, string> = {
   cubs: 'Chicago Cubs',
   whitesox: 'Chicago White Sox',
 }
-
-const DATALAB_URL = process.env.DATALAB_API_URL || 'https://datalab.sportsmockery.com'
 
 export async function generateStaticParams() {
   return VALID_TEAMS.map(team => ({ team }))
@@ -38,29 +37,44 @@ export default async function TeamOwnerPage({ params }: { params: Promise<{ team
   let history: any[] = []
 
   try {
-    const res = await fetch(`${DATALAB_URL}/api/ownership-scores/grades/${team}`, {
-      next: { revalidate: 3600 },
-    })
-    if (res.ok) {
-      const json = await res.json()
-      grade = json.grade || json.data || json
-      history = json.history || []
+    const [gradeResult, historyResult] = await Promise.all([
+      datalabAdmin
+        .from('ownership_grades')
+        .select('*')
+        .eq('team_slug', team)
+        .eq('is_current', true)
+        .single(),
+      datalabAdmin
+        .from('ownership_grade_history')
+        .select('*')
+        .eq('team_slug', team)
+        .order('recorded_at', { ascending: true }),
+    ])
+
+    grade = gradeResult.data
+    history = historyResult.data || []
+
+    if (grade) {
+      const { data: votes } = await datalabAdmin
+        .from('ownership_vote_counts')
+        .select('*')
+        .eq('grade_id', grade.id)
+
+      const v = votes?.[0]
+      grade = {
+        ...grade,
+        agree_count: v?.agree_count || 0,
+        disagree_count: v?.disagree_count || 0,
+        total_votes: v?.total_votes || 0,
+      }
     }
   } catch (err) {
-    console.error(`Failed to fetch ownership grade for ${team}:`, err)
+    console.error(`Failed to fetch ownership data for ${team}:`, err)
   }
 
   if (!grade) {
     notFound()
   }
 
-  // Ensure vote counts exist
-  const gradeWithVotes = {
-    ...grade,
-    agree_count: grade.agree_count || 0,
-    disagree_count: grade.disagree_count || 0,
-    total_votes: grade.total_votes || 0,
-  }
-
-  return <TeamDetail grade={gradeWithVotes} history={history} />
+  return <TeamDetail grade={grade} history={history} />
 }
