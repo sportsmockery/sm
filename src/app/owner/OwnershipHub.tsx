@@ -28,7 +28,7 @@ export default function OwnershipHub({ grades }: { grades: OwnershipGrade[] }) {
   return (
     <div style={{
       minHeight: '100vh',
-      padding: 'calc(var(--sm-nav-height, 72px) + 16px) 24px 64px',
+      padding: 'calc(var(--sm-nav-height, 72px) + 8px) 24px 64px',
       maxWidth: 'var(--sm-max-width, 1200px)',
       margin: '0 auto',
     }}>
