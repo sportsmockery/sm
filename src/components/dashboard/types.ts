@@ -185,6 +185,63 @@ export interface TeamLeaders {
   struggling_players: PlayerEntry[];
 }
 
+// intelligence_extended — backend-computed narrative intelligence
+export interface IntelligenceDriver {
+  key: string;
+  label: string;
+  impact: 'positive' | 'negative' | 'neutral';
+  weight: number;
+  evidence: string;
+}
+
+export interface TrendExplanation {
+  summary: string;
+  direction: TrendDirection;
+  reasons: string[];
+}
+
+export interface WhatItMeans {
+  short_term: string;
+  medium_term: string;
+}
+
+export interface Strategy {
+  phase_focus: string;
+  priorities: string[];
+  opportunities: string[];
+  risks: string[];
+}
+
+export interface WatchItem {
+  label: string;
+  context: string;
+}
+
+export interface EventAnalysis {
+  event: string;
+  before: string;
+  after: string;
+  impact: string;
+}
+
+export interface IntelligenceExtended {
+  drivers: IntelligenceDriver[];
+  trend_explanation: TrendExplanation;
+  what_it_means: WhatItMeans;
+  strategy: Strategy;
+  watch_items: WatchItem[];
+  event_analysis: EventAnalysis | null;
+  sport_context: string;
+  snapshot_delta: Record<string, unknown> | null;
+}
+
+// Top-level team fields (some may not be populated yet in snapshot)
+export interface MetricRef {
+  metric: string;
+  value: number | string;
+  context: string;
+}
+
 export interface Team {
   team_key: string;
   team_name: string;
@@ -204,6 +261,12 @@ export interface Team {
   insight: Insight;
   units: Units;
   leaders: TeamLeaders;
+  // Extended intelligence fields
+  intelligence_extended?: IntelligenceExtended;
+  executive_take?: string;
+  dashboard_priority?: number;
+  confidence?: number;
+  metric_refs?: MetricRef[];
 }
 
 // =============================================

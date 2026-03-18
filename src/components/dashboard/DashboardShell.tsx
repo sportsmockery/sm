@@ -82,6 +82,13 @@ export default function DashboardShell() {
 
   if (!data) return null
 
+  // Sort teams by dashboard_priority (lower = higher priority), fallback to original order
+  const sortedTeams = [...data.teams].sort((a, b) => {
+    const ap = a.dashboard_priority ?? 99
+    const bp = b.dashboard_priority ?? 99
+    return ap - bp
+  })
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#FAFAFB' }}>
       {/* Global Control Bar */}
@@ -95,14 +102,14 @@ export default function DashboardShell() {
       {/* Main Content */}
       <div className="px-3 sm:px-4 lg:px-5 py-4 space-y-4 max-w-[1600px] mx-auto">
         {/* City Overview */}
-        <CityOverviewPanel city={data.city} teams={data.teams} />
+        <CityOverviewPanel city={data.city} teams={sortedTeams} />
 
         {/* Live Command Center (conditional) */}
         <LiveCommandCenter live={data.live} />
 
         {/* Mobile Team Selector (visible on mobile/tablet) */}
         <MobileTeamSelector
-          teams={data.teams}
+          teams={sortedTeams}
           selectedTeam={mobileDrawerTeam}
           onSelectTeam={handleMobileSelectTeam}
         />
@@ -130,7 +137,7 @@ export default function DashboardShell() {
             )}
           </div>
           <TeamStatusMatrix
-            teams={data.teams}
+            teams={sortedTeams}
             selectedTeam={selectedTeamKey}
             onSelectTeam={handleSelectTeam}
           />
