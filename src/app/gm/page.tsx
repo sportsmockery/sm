@@ -18,6 +18,7 @@ import { TradeModePicker } from '@/components/gm/TradeModePicker'
 import { SimulationTrigger } from '@/components/gm/SimulationTrigger'
 import { SimulationResults } from '@/components/gm/SimulationResults'
 import { DestinationPicker } from '@/components/gm/DestinationPicker'
+import { CyberParticleBg } from '@/components/gm/CyberParticleBg'
 import type { PlayerData } from '@/components/gm/PlayerCard'
 import type { ValidationState } from '@/components/gm/ValidationIndicator'
 import type { TradeMode, MLBProspect, SimulationResult, TradeFlow, SimulationPhase } from '@/types/gm'
@@ -1239,7 +1240,8 @@ export default function GMPage() {
 
   if (authLoading || pageLoading) {
     return (
-      <div className="sm-hero-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="sm-hero-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+        <CyberParticleBg />
         <div className="sm-grid-overlay" />
         <div style={{ width: 32, height: 32, border: '3px solid var(--sm-red)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin-2030 1s linear infinite' }} />
       </div>
@@ -1253,7 +1255,8 @@ export default function GMPage() {
   const pageBg = 'var(--sm-dark)'
 
   return (
-    <div className="sm-hero-bg gm-page-content" style={{ minHeight: '100vh', color: textColor }}>
+    <div className="sm-hero-bg gm-page-content" style={{ minHeight: '100vh', color: textColor, position: 'relative' }}>
+      <CyberParticleBg />
       <div className="sm-grid-overlay" />
       {/* HEADER: Title + Team Tabs + GM Score (single sticky band) — hidden on welcome */}
       <div style={{
