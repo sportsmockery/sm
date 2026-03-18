@@ -1,9 +1,11 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import OwnershipCard from '@/components/ownership/OwnershipCard'
 import GradeTimeline from '@/components/ownership/GradeTimeline'
 import ScoutCommentary from '@/components/ownership/ScoutCommentary'
+import FanGMComments from '@/components/ownership/FanGMComments'
 
 interface OwnershipGrade {
   id: string
@@ -95,6 +97,7 @@ export default function TeamDetail({ grade, history }: { grade: OwnershipGrade; 
   const teamName = TEAM_NAMES[grade.team_slug] || grade.team_slug
   const tenure = TEAM_TENURE[grade.team_slug]
   const currentYear = new Date().getFullYear()
+  const [showAllMoves, setShowAllMoves] = useState(false)
 
   return (
     <div style={{
@@ -263,7 +266,14 @@ export default function TeamDetail({ grade, history }: { grade: OwnershipGrade; 
               backgroundColor: 'var(--sm-border)',
             }} />
 
-            {[...history].filter(h => h.notes).reverse().map((h, i, arr) => {
+            {(() => {
+              const allItems = [...history].filter(h => h.notes).reverse()
+              const visibleItems = showAllMoves ? allItems : allItems.slice(0, 3)
+              const hasMore = allItems.length > 3
+
+              return (
+                <>
+                  {visibleItems.map((h, i, arr) => {
               const overallNum = Number(h.overall_grade)
               const prevIdx = i < arr.length - 1 ? i + 1 : null
               const prevOverall = prevIdx !== null ? Number(arr[prevIdx].overall_grade) : null
@@ -323,7 +333,37 @@ export default function TeamDetail({ grade, history }: { grade: OwnershipGrade; 
                 </div>
               )
             })}
+                  {hasMore && !showAllMoves && (
+                    <button
+                      onClick={() => setShowAllMoves(true)}
+                      style={{
+                        fontSize: 13,
+                        fontWeight: 600,
+                        color: 'var(--sm-text-muted)',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: '8px 0',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 4,
+                      }}
+                    >
+                      Show all {allItems.length} moves
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+                    </button>
+                  )}
+                </>
+              )
+            })()}
           </div>
+        </div>
+      )}
+
+      {/* Fan Comments */}
+      {tenure?.gm && (
+        <div style={{ marginBottom: 32 }}>
+          <FanGMComments teamSlug={grade.team_slug} gmName={tenure.gm} />
         </div>
       )}
 
