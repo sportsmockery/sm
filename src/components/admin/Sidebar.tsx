@@ -190,6 +190,7 @@ const navSections: NavSection[] = [
       { name: 'Leaderboard', href: '/admin/leaderboard', icon: 'gmScoring' },
       { name: 'GM Errors', href: '/admin/gm-errors', icon: 'aiLogging' },
       { name: 'Data Cards', href: '/admin/data-cards', icon: 'dataCards' },
+      { name: 'Fan Showcase', href: '/admin/fan-showcase', icon: 'media' },
     ],
   },
   {
