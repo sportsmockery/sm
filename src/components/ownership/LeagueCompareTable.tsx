@@ -59,9 +59,9 @@ export default function LeagueCompareTable({ grades }: { grades: GradeRow[] }) {
   })
 
   const cellStyle: React.CSSProperties = {
-    padding: '10px 12px',
-    fontSize: 13,
-    fontWeight: 600,
+    padding: '12px 12px',
+    fontSize: 16,
+    fontWeight: 700,
     textAlign: 'right',
   }
 
@@ -107,17 +107,17 @@ export default function LeagueCompareTable({ grades }: { grades: GradeRow[] }) {
                 onMouseEnter={e => e.currentTarget.style.background = 'var(--sm-surface)'}
                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
               >
-                <td style={{ padding: '10px 12px' }}>
-                  <Link href={`/owner/${g.team_slug}`} style={{ textDecoration: 'none', color: 'var(--sm-text)', fontWeight: 600, fontSize: 13 }}>
+                <td style={{ padding: '12px 12px' }}>
+                  <Link href={`/owner/${g.team_slug}`} style={{ textDecoration: 'none', color: 'var(--sm-text)', fontWeight: 700, fontSize: 16 }}>
                     {TEAM_NAMES[g.team_slug] || g.team_slug}
                   </Link>
-                  <div style={{ fontSize: 11, color: 'var(--sm-text-muted)' }}>{g.league}</div>
+                  <div style={{ fontSize: 12, color: 'var(--sm-text-muted)', marginTop: 1 }}>{g.league}</div>
                 </td>
                 <td style={{ ...cellStyle, color: gradeColor(g.spend_grade) }}>{g.spend_grade.toFixed(1)}</td>
                 <td style={{ ...cellStyle, color: gradeColor(g.results_grade) }}>{g.results_grade.toFixed(1)}</td>
                 <td style={{ ...cellStyle, color: gradeColor(g.sentiment_grade) }}>{g.sentiment_grade.toFixed(1)}</td>
                 <td style={{ ...cellStyle, color: gradeColor(10 - g.loyalty_tax) }}>{g.loyalty_tax.toFixed(1)}</td>
-                <td style={{ ...cellStyle, color: gradeColor(g.overall_grade), fontSize: 15, fontWeight: 800 }}>{g.overall_grade.toFixed(1)}</td>
+                <td style={{ ...cellStyle, color: gradeColor(g.overall_grade), fontSize: 18, fontWeight: 800 }}>{g.overall_grade.toFixed(1)}</td>
               </tr>
             ))}
           </tbody>
