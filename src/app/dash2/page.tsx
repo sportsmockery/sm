@@ -395,8 +395,8 @@ function VibesGauge({ score, size = "large" }: { score: number; size?: "large" |
   const isLarge = size === "large";
 
   return (
-    <div className={cn("relative", isLarge ? "w-[280px] h-[200px]" : "w-full h-[80px]")}>
-      <ResponsiveContainer width="100%" height="100%">
+    <div className={cn("relative", isLarge ? "w-[280px] h-[200px]" : "w-full min-w-[100px] h-[80px]")}>
+      <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={isLarge ? 200 : 80}>
         <RadialBarChart
           cx="50%"
           cy={isLarge ? "70%" : "100%"}
@@ -418,7 +418,7 @@ function VibesGauge({ score, size = "large" }: { score: number; size?: "large" |
           </defs>
           <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
           <RadialBar
-            background={{ fill: "rgba(255,255,255,0.1)" }}
+            background={{ fill: "rgba(0,0,0,0.08)" }}
             dataKey="value"
             cornerRadius={10}
             angleAxisId={0}
@@ -427,8 +427,8 @@ function VibesGauge({ score, size = "large" }: { score: number; size?: "large" |
       </ResponsiveContainer>
       {isLarge && (
         <div className="absolute inset-0 flex flex-col items-center justify-end pb-4">
-          <span className="text-5xl font-bold text-white tabular-nums">{score}</span>
-          <span className="text-sm text-gray-400 uppercase tracking-wider">/ 100</span>
+          <span className="text-5xl font-bold text-gray-900 tabular-nums">{score}</span>
+          <span className="text-sm text-gray-500 uppercase tracking-wider">/ 100</span>
         </div>
       )}
     </div>
@@ -441,25 +441,25 @@ function TeamCard({ team, rank }: { team: TeamData; rank: number }) {
   const vibe = calculateVibe(team.winPct, team.streakType, team.streakCount);
 
   const statusColors: Record<string, string> = {
-    Out: "bg-red-500/20 text-red-400 border-red-500/30",
-    Questionable: "bg-amber-500/20 text-amber-400 border-amber-500/30",
-    "Day-To-Day": "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+    Out: "bg-red-100 text-red-700 border-red-200",
+    Questionable: "bg-amber-100 text-amber-700 border-amber-200",
+    "Day-To-Day": "bg-yellow-100 text-yellow-700 border-yellow-200",
   };
 
   const getVibeColor = (score: number) => {
-    if (score >= 70) return "text-emerald-400";
-    if (score >= 50) return "text-yellow-400";
-    if (score >= 30) return "text-orange-400";
-    return "text-red-400";
+    if (score >= 70) return "text-emerald-600";
+    if (score >= 50) return "text-yellow-600";
+    if (score >= 30) return "text-orange-600";
+    return "text-red-600";
   };
 
   return (
     <div
       className={cn(
         "relative overflow-hidden rounded-2xl border transition-all duration-300",
-        "bg-[#0f0f1a]/80 backdrop-blur-sm border-white/5",
-        "hover:border-white/10 hover:shadow-lg hover:shadow-black/20",
-        expanded && "ring-1 ring-white/10"
+        "bg-white border-gray-200 shadow-sm",
+        "hover:border-gray-300 hover:shadow-md",
+        expanded && "ring-1 ring-gray-300"
       )}
       style={{ borderLeftColor: team.color, borderLeftWidth: "4px" }}
     >
@@ -485,29 +485,29 @@ function TeamCard({ team, rank }: { team: TeamData; rank: number }) {
           {/* Info */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <h3 className="text-lg font-bold text-white truncate">{team.name}</h3>
+              <h3 className="text-lg font-bold text-gray-900 truncate">{team.name}</h3>
               <span
                 className={cn(
                   "px-2 py-0.5 rounded-full text-xs font-medium",
                   team.seasonPhase === "Regular Season"
-                    ? "bg-emerald-500/20 text-emerald-400"
+                    ? "bg-emerald-100 text-emerald-700"
                     : team.seasonPhase === "Playoffs"
-                    ? "bg-amber-500/20 text-amber-400"
-                    : "bg-gray-500/20 text-gray-400"
+                    ? "bg-amber-100 text-amber-700"
+                    : "bg-gray-100 text-gray-600"
                 )}
               >
                 {team.seasonPhase}
               </span>
             </div>
-            <p className="text-sm text-gray-400 italic">{team.tagline}</p>
+            <p className="text-sm text-gray-500 italic">{team.tagline}</p>
           </div>
 
           {/* Expand Button */}
-          <button className="p-2 rounded-lg hover:bg-white/5 transition-colors">
+          <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
             {expanded ? (
-              <ChevronUp className="w-5 h-5 text-gray-400" />
+              <ChevronUp className="w-5 h-5 text-gray-500" />
             ) : (
-              <ChevronDown className="w-5 h-5 text-gray-400" />
+              <ChevronDown className="w-5 h-5 text-gray-500" />
             )}
           </button>
         </div>
@@ -516,13 +516,13 @@ function TeamCard({ team, rank }: { team: TeamData; rank: number }) {
         <div className="mt-4 grid grid-cols-4 gap-3">
           {/* Record */}
           <div className="text-center">
-            <div className="text-2xl font-bold text-white tabular-nums">{team.record}</div>
+            <div className="text-2xl font-bold text-gray-900 tabular-nums">{team.record}</div>
             <div className="text-xs text-gray-500 uppercase">Record</div>
           </div>
 
           {/* Win % */}
           <div className="text-center">
-            <div className="text-2xl font-bold text-white tabular-nums">{team.winPct}%</div>
+            <div className="text-2xl font-bold text-gray-900 tabular-nums">{team.winPct}%</div>
             <div className="text-xs text-gray-500 uppercase">Win %</div>
           </div>
 
@@ -531,7 +531,7 @@ function TeamCard({ team, rank }: { team: TeamData; rank: number }) {
             <div
               className={cn(
                 "text-2xl font-bold tabular-nums",
-                team.streakType === "W" ? "text-emerald-400" : "text-red-400"
+                team.streakType === "W" ? "text-emerald-600" : "text-red-600"
               )}
             >
               {team.streak}
@@ -541,13 +541,13 @@ function TeamCard({ team, rank }: { team: TeamData; rank: number }) {
 
           {/* Playoff Odds */}
           <div className="text-center">
-            <div className="text-2xl font-bold text-white tabular-nums">{team.playoffOdds}%</div>
+            <div className="text-2xl font-bold text-gray-900 tabular-nums">{team.playoffOdds}%</div>
             <div className="text-xs text-gray-500 uppercase">Playoffs</div>
           </div>
         </div>
 
         {/* Vibes Section */}
-        <div className="mt-4 p-3 rounded-xl bg-white/5">
+        <div className="mt-4 p-3 rounded-xl bg-gray-50 border border-gray-100">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <span className="text-xl">{vibe.emoji}</span>
@@ -555,7 +555,7 @@ function TeamCard({ team, rank }: { team: TeamData; rank: number }) {
                 {vibe.label}
               </span>
             </div>
-            <span className="text-sm text-gray-400">{vibe.description}</span>
+            <span className="text-sm text-gray-500">{vibe.description}</span>
           </div>
           <VibesGauge score={vibe.score} size="small" />
         </div>
@@ -564,14 +564,14 @@ function TeamCard({ team, rank }: { team: TeamData; rank: number }) {
         <div className="mt-3 flex items-center justify-between text-sm">
           <div className="flex items-center gap-2">
             <span className="text-gray-500">Last:</span>
-            <span className={cn("font-medium", team.lastResult.startsWith("W") ? "text-emerald-400" : team.lastResult.startsWith("L") ? "text-red-400" : "text-gray-300")}>
+            <span className={cn("font-medium", team.lastResult.startsWith("W") ? "text-emerald-600" : team.lastResult.startsWith("L") ? "text-red-600" : "text-gray-600")}>
               {team.lastResult}
             </span>
           </div>
           {team.nextGame && (
             <div className="flex items-center gap-2">
               <span className="text-gray-500">Next:</span>
-              <span className="text-cyan-400 font-medium">{team.nextGame}</span>
+              <span className="text-blue-600 font-medium">{team.nextGame}</span>
             </div>
           )}
         </div>
@@ -579,24 +579,24 @@ function TeamCard({ team, rank }: { team: TeamData; rank: number }) {
 
       {/* Expanded Content */}
       {expanded && (
-        <div className="px-5 pb-5 border-t border-white/5 pt-4 space-y-4">
+        <div className="px-5 pb-5 border-t border-gray-100 pt-4 space-y-4">
           {/* Standing */}
           <div className="flex items-center gap-2 text-sm">
-            <Trophy className="w-4 h-4 text-amber-400" />
-            <span className="text-gray-300">{team.standingSummary}</span>
+            <Trophy className="w-4 h-4 text-amber-500" />
+            <span className="text-gray-700">{team.standingSummary}</span>
           </div>
 
           {/* Injuries */}
           <div>
-            <h4 className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-red-400" />
+            <h4 className="text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-red-500" />
               Injury Report
             </h4>
             <div className="space-y-2">
               {team.injuries.map((injury, idx) => (
                 <div
                   key={idx}
-                  className="flex items-start gap-3 p-2 rounded-lg bg-white/5"
+                  className="flex items-start gap-3 p-2 rounded-lg bg-gray-50"
                 >
                   <span
                     className={cn(
@@ -607,10 +607,10 @@ function TeamCard({ team, rank }: { team: TeamData; rank: number }) {
                     {injury.status.toUpperCase()}
                   </span>
                   <div className="min-w-0">
-                    <div className="text-sm text-white font-medium">
+                    <div className="text-sm text-gray-900 font-medium">
                       {injury.name} <span className="text-gray-500">({injury.detail})</span>
                     </div>
-                    <div className="text-xs text-gray-400 italic">{injury.snark}</div>
+                    <div className="text-xs text-gray-500 italic">{injury.snark}</div>
                   </div>
                 </div>
               ))}
@@ -618,12 +618,12 @@ function TeamCard({ team, rank }: { team: TeamData; rank: number }) {
           </div>
 
           {/* Hope Score */}
-          <div className="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/20">
+          <div className="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-rose-50 to-pink-50 border border-rose-200">
             <div className="flex items-center gap-2">
-              <Heart className="w-5 h-5 text-pink-400" />
-              <span className="text-sm font-medium text-white">Hope Score™</span>
+              <Heart className="w-5 h-5 text-rose-500" />
+              <span className="text-sm font-medium text-gray-900">Hope Score™</span>
             </div>
-            <span className="text-2xl font-bold text-pink-400 tabular-nums">{team.hopeScore}</span>
+            <span className="text-2xl font-bold text-rose-600 tabular-nums">{team.hopeScore}</span>
           </div>
         </div>
       )}
@@ -641,23 +641,23 @@ function RankingsTable({ teams }: { teams: TeamData[] }) {
   const displayTeams = sortedTeams.length > 0 ? sortedTeams : [...teams].sort((a, b) => a.hopeScore - b.hopeScore);
 
   return (
-    <div className="rounded-2xl border border-white/5 bg-[#0f0f1a]/80 backdrop-blur-sm overflow-hidden">
-      <div className="p-5 border-b border-white/5">
-        <h2 className="text-xl font-bold text-white flex items-center gap-3">
-          <Skull className="w-6 h-6 text-red-400" />
+    <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+      <div className="p-5 border-b border-gray-100">
+        <h2 className="text-xl font-bold text-gray-900 flex items-center gap-3">
+          <Skull className="w-6 h-6 text-red-500" />
           Most Screwed → Most Hopeful Ranking
         </h2>
-        <p className="text-sm text-gray-400 mt-1">Sorted by the Hope Score™ algorithm (lower = more screwed)</p>
+        <p className="text-sm text-gray-500 mt-1">Sorted by the Hope Score™ algorithm (lower = more screwed)</p>
       </div>
 
-      <div className="divide-y divide-white/5">
+      <div className="divide-y divide-gray-100">
         {displayTeams.map((team, idx) => (
           <div
             key={team.key}
             className={cn(
-              "p-4 flex items-center gap-4 transition-colors hover:bg-white/5",
-              idx === 0 && "bg-red-500/5",
-              idx === displayTeams.length - 1 && "bg-emerald-500/5"
+              "p-4 flex items-center gap-4 transition-colors hover:bg-gray-50",
+              idx === 0 && "bg-red-50",
+              idx === displayTeams.length - 1 && "bg-emerald-50"
             )}
           >
             {/* Rank */}
@@ -665,10 +665,10 @@ function RankingsTable({ teams }: { teams: TeamData[] }) {
               className={cn(
                 "w-10 h-10 rounded-xl flex items-center justify-center text-xl font-bold shrink-0",
                 idx === 0
-                  ? "bg-red-500/20 text-red-400"
+                  ? "bg-red-100 text-red-600"
                   : idx === displayTeams.length - 1
-                  ? "bg-emerald-500/20 text-emerald-400"
-                  : "bg-white/10 text-gray-300"
+                  ? "bg-emerald-100 text-emerald-600"
+                  : "bg-gray-100 text-gray-600"
               )}
             >
               {idx + 1}
@@ -683,8 +683,8 @@ function RankingsTable({ teams }: { teams: TeamData[] }) {
                 crossOrigin="anonymous"
               />
               <div className="min-w-0">
-                <div className="font-semibold text-white truncate">{team.name}</div>
-                <div className="text-xs text-gray-400">
+                <div className="font-semibold text-gray-900 truncate">{team.name}</div>
+                <div className="text-xs text-gray-500">
                   {team.record} • {team.standingSummary}
                 </div>
               </div>
@@ -696,10 +696,10 @@ function RankingsTable({ teams }: { teams: TeamData[] }) {
                 className={cn(
                   "text-2xl font-bold tabular-nums",
                   team.hopeScore >= 50
-                    ? "text-emerald-400"
+                    ? "text-emerald-600"
                     : team.hopeScore >= 30
-                    ? "text-yellow-400"
-                    : "text-red-400"
+                    ? "text-yellow-600"
+                    : "text-red-600"
                 )}
               >
                 {team.hopeScore}
@@ -708,17 +708,17 @@ function RankingsTable({ teams }: { teams: TeamData[] }) {
             </div>
 
             {/* Blurb */}
-            <div className="hidden lg:block text-sm text-gray-400 italic max-w-xs">
+            <div className="hidden lg:block text-sm text-gray-500 italic max-w-xs">
               {getBlurb(team, idx + 1)}
             </div>
 
             {/* Icon */}
             {idx === 0 ? (
-              <HeartCrack className="w-5 h-5 text-red-400 shrink-0" />
+              <HeartCrack className="w-5 h-5 text-red-500 shrink-0" />
             ) : idx === displayTeams.length - 1 ? (
-              <Star className="w-5 h-5 text-amber-400 shrink-0" />
+              <Star className="w-5 h-5 text-amber-500 shrink-0" />
             ) : (
-              <Activity className="w-5 h-5 text-gray-500 shrink-0" />
+              <Activity className="w-5 h-5 text-gray-400 shrink-0" />
             )}
           </div>
         ))}
@@ -817,12 +817,12 @@ export default function ChicagoDashboard() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div className="min-h-screen bg-gray-50">
       {/* Background Pattern */}
       <div
-        className="fixed inset-0 opacity-[0.03] pointer-events-none"
+        className="fixed inset-0 opacity-[0.4] pointer-events-none"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5L35 25H55L39 35L44 55L30 43L16 55L21 35L5 25H25L30 5Z' fill='%23ffffff' fill-opacity='0.5'/%3E%3C/svg%3E")`,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5L35 25H55L39 35L44 55L30 43L16 55L21 35L5 25H25L30 5Z' fill='%23000000' fill-opacity='0.02'/%3E%3C/svg%3E")`,
           backgroundSize: "60px 60px",
         }}
       />
@@ -832,16 +832,16 @@ export default function ChicagoDashboard() {
         <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <Star className="w-5 h-5 text-cyan-400" />
-              <span className="text-sm font-semibold text-cyan-400 uppercase tracking-wider">
+              <Star className="w-5 h-5 text-blue-600" />
+              <span className="text-sm font-semibold text-blue-600 uppercase tracking-wider">
                 Sports Mockery
               </span>
-              <Star className="w-5 h-5 text-cyan-400" />
+              <Star className="w-5 h-5 text-blue-600" />
             </div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-white leading-tight">
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight">
               STATE OF CHICAGO SPORTS
             </h1>
-            <p className="text-sm text-red-400 font-medium uppercase tracking-wide mt-1">
+            <p className="text-sm text-red-600 font-medium uppercase tracking-wide mt-1">
               Today&apos;s Damage Report
             </p>
           </div>
@@ -849,7 +849,7 @@ export default function ChicagoDashboard() {
           <div className="flex items-center gap-3">
             <div className="text-right">
               <div className="text-xs text-gray-500 uppercase">Last Updated</div>
-              <div className="text-sm text-gray-300 tabular-nums">
+              <div className="text-sm text-gray-700 tabular-nums">
                 {lastUpdated.toLocaleTimeString()}
               </div>
             </div>
@@ -858,7 +858,7 @@ export default function ChicagoDashboard() {
               disabled={isRefreshing}
               className={cn(
                 "px-4 py-2 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all",
-                "bg-red-600 hover:bg-red-500 text-white",
+                "bg-red-600 hover:bg-red-500 text-white shadow-sm",
                 "disabled:opacity-50 disabled:cursor-not-allowed"
               )}
             >
@@ -872,24 +872,24 @@ export default function ChicagoDashboard() {
 
         {/* City Vibes Hero */}
         <section className="mb-8">
-          <div className="rounded-2xl border border-white/5 bg-gradient-to-br from-[#0f0f1a] to-[#1a0a1a] p-6 sm:p-8">
+          <div className="rounded-2xl border border-gray-200 bg-white shadow-sm p-6 sm:p-8">
             <div className="flex flex-col md:flex-row items-center gap-6">
               <div className="flex-1 text-center md:text-left">
-                <h2 className="text-lg text-gray-400 uppercase tracking-wider mb-2">
+                <h2 className="text-lg text-gray-500 uppercase tracking-wider mb-2">
                   How Cooked Are We As a City Right Now?
                 </h2>
-                <p className="text-xl sm:text-2xl font-medium text-white mb-2">
+                <p className="text-xl sm:text-2xl font-medium text-gray-900 mb-2">
                   {getCityVibesSubtitle(cityMetrics.avgVibes)}
                 </p>
                 <div className="flex items-center justify-center md:justify-start gap-4 mt-4 text-sm">
-                  <span className="text-gray-400">
-                    <span className="text-emerald-400 font-bold">{cityMetrics.totalWins}</span> Wins
+                  <span className="text-gray-500">
+                    <span className="text-emerald-600 font-bold">{cityMetrics.totalWins}</span> Wins
                   </span>
-                  <span className="text-gray-400">
-                    <span className="text-red-400 font-bold">{cityMetrics.totalLosses}</span> Losses
+                  <span className="text-gray-500">
+                    <span className="text-red-600 font-bold">{cityMetrics.totalLosses}</span> Losses
                   </span>
-                  <span className="text-gray-400">
-                    <span className="text-cyan-400 font-bold">{cityMetrics.teamsActive}</span>/5 Active
+                  <span className="text-gray-500">
+                    <span className="text-blue-600 font-bold">{cityMetrics.teamsActive}</span>/5 Active
                   </span>
                 </div>
               </div>
@@ -906,54 +906,54 @@ export default function ChicagoDashboard() {
         {/* KPI Bar */}
         <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {/* City Pulse */}
-          <div className="rounded-xl border border-white/5 bg-[#0f0f1a]/80 p-4">
-            <div className="flex items-center gap-2 text-gray-400 text-sm mb-2">
+          <div className="rounded-xl border border-gray-200 bg-white shadow-sm p-4">
+            <div className="flex items-center gap-2 text-gray-500 text-sm mb-2">
               <Activity className="w-4 h-4" />
               City Pulse
             </div>
-            <div className="text-2xl font-bold text-white tabular-nums">
+            <div className="text-2xl font-bold text-gray-900 tabular-nums">
               {cityMetrics.totalWins}-{cityMetrics.totalLosses}
             </div>
             <div className="text-xs text-gray-500">Combined Record</div>
           </div>
 
           {/* Hottest */}
-          <div className="rounded-xl border border-white/5 bg-[#0f0f1a]/80 p-4">
-            <div className="flex items-center gap-2 text-emerald-400 text-sm mb-2">
+          <div className="rounded-xl border border-gray-200 bg-white shadow-sm p-4">
+            <div className="flex items-center gap-2 text-emerald-600 text-sm mb-2">
               <TrendingUp className="w-4 h-4" />
               Hottest Team
             </div>
-            <div className="text-xl font-bold text-white flex items-center gap-2">
+            <div className="text-xl font-bold text-gray-900 flex items-center gap-2">
               <img src={cityMetrics.hottestTeam.logo} alt="" className="w-6 h-6" crossOrigin="anonymous" />
               {cityMetrics.hottestTeam.shortName}
             </div>
-            <div className="text-xs text-emerald-400 tabular-nums">
+            <div className="text-xs text-emerald-600 tabular-nums">
               {cityMetrics.hottestTeam.vibesScore} vibes
             </div>
           </div>
 
           {/* Coldest */}
-          <div className="rounded-xl border border-white/5 bg-[#0f0f1a]/80 p-4">
-            <div className="flex items-center gap-2 text-red-400 text-sm mb-2">
+          <div className="rounded-xl border border-gray-200 bg-white shadow-sm p-4">
+            <div className="flex items-center gap-2 text-red-600 text-sm mb-2">
               <TrendingDown className="w-4 h-4" />
               Coldest Team
             </div>
-            <div className="text-xl font-bold text-white flex items-center gap-2">
+            <div className="text-xl font-bold text-gray-900 flex items-center gap-2">
               <img src={cityMetrics.coldestTeam.logo} alt="" className="w-6 h-6" crossOrigin="anonymous" />
               {cityMetrics.coldestTeam.shortName}
             </div>
-            <div className="text-xs text-red-400 tabular-nums">
+            <div className="text-xs text-red-600 tabular-nums">
               {cityMetrics.coldestTeam.vibesScore} vibes
             </div>
           </div>
 
           {/* Teams Active */}
-          <div className="rounded-xl border border-white/5 bg-[#0f0f1a]/80 p-4">
-            <div className="flex items-center gap-2 text-cyan-400 text-sm mb-2">
+          <div className="rounded-xl border border-gray-200 bg-white shadow-sm p-4">
+            <div className="flex items-center gap-2 text-blue-600 text-sm mb-2">
               <Zap className="w-4 h-4" />
               Teams Active
             </div>
-            <div className="text-2xl font-bold text-white tabular-nums">
+            <div className="text-2xl font-bold text-gray-900 tabular-nums">
               {cityMetrics.teamsActive}/5
             </div>
             <div className="text-xs text-gray-500">Currently in-season</div>
@@ -962,8 +962,8 @@ export default function ChicagoDashboard() {
 
         {/* Team Cards Grid */}
         <section className="mb-8">
-          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-            <Flame className="w-5 h-5 text-orange-400" />
+          <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <Flame className="w-5 h-5 text-orange-500" />
             Team Status
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -979,12 +979,12 @@ export default function ChicagoDashboard() {
         </section>
 
         {/* Footer */}
-        <footer className="text-center py-8 border-t border-white/5">
-          <p className="text-sm text-gray-500">
+        <footer className="text-center py-8 border-t border-gray-200">
+          <p className="text-sm text-gray-600">
             Built for the real ones at Sports Mockery • Data refreshed every 60s •{" "}
-            <span className="text-red-400">Not responsible for your broken heart</span>
+            <span className="text-red-600">Not responsible for your broken heart</span>
           </p>
-          <p className="text-xs text-gray-600 mt-2">
+          <p className="text-xs text-gray-500 mt-2">
             Logos via ESPN CDN • All trademarks belong to their respective owners
           </p>
         </footer>
