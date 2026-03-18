@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase-server'
+import { datalabAdmin } from '@/lib/supabase-datalab'
 import type { Team, ContentType } from '@/types/fan-showcase'
 import { TEAMS, CONTENT_TYPES } from '@/types/fan-showcase'
 
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     const offset = (page - 1) * limit
 
     // Build query for approved/featured submissions
-    let query = supabaseAdmin
+    let query = datalabAdmin
       .from('fan_submissions')
       .select(
         '*, creator:fan_creators(*), assets:fan_submission_assets(*), tags:fan_submission_tags(*)',
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Featured content for hero carousel
-    const { data: featured } = await supabaseAdmin
+    const { data: featured } = await datalabAdmin
       .from('fan_submissions')
       .select('*, creator:fan_creators(*), assets:fan_submission_assets(*)')
       .eq('status', 'featured')
@@ -54,14 +54,14 @@ export async function GET(request: NextRequest) {
       .limit(8)
 
     // Featured slots for sections
-    const { data: featuredSlots } = await supabaseAdmin
+    const { data: featuredSlots } = await datalabAdmin
       .from('fan_featured_slots')
       .select('*, submission:fan_submissions(*, creator:fan_creators(*), assets:fan_submission_assets(*))')
       .eq('active', true)
       .order('created_at', { ascending: false })
 
     // Creator discovery
-    const { data: creators } = await supabaseAdmin
+    const { data: creators } = await datalabAdmin
       .from('fan_creators')
       .select('*')
       .limit(12)
@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
     const creatorIds = creators?.map(c => c.id) || []
     let creatorsWithWork: string[] = []
     if (creatorIds.length > 0) {
-      const { data: creatorSubs } = await supabaseAdmin
+      const { data: creatorSubs } = await datalabAdmin
         .from('fan_submissions')
         .select('creator_id')
         .in('creator_id', creatorIds)

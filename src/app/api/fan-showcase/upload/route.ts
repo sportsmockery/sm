@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { datalabAdmin } from '@/lib/supabase-datalab'
 
 const ALLOWED_TYPES = [
   'image/jpeg', 'image/png', 'image/gif', 'image/webp',
@@ -35,8 +36,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'File too large. Maximum 50MB.' }, { status: 400 })
     }
 
-    // Verify submission exists
-    const { data: submission } = await supabaseAdmin
+    // Verify submission exists (fan_submissions is on DataLab)
+    const { data: submission } = await datalabAdmin
       .from('fan_submissions')
       .select('id')
       .eq('id', submissionId)
@@ -71,8 +72,8 @@ export async function POST(request: NextRequest) {
 
     const publicUrl = urlData.publicUrl
 
-    // Save asset record
-    const { data: asset, error: assetErr } = await supabaseAdmin
+    // Save asset record (fan_submission_assets is on DataLab)
+    const { data: asset, error: assetErr } = await datalabAdmin
       .from('fan_submission_assets')
       .insert({
         submission_id: submissionId,

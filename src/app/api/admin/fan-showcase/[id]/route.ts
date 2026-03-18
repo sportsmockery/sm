@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/admin-auth'
-import { supabaseAdmin } from '@/lib/supabase-server'
+import { datalabAdmin } from '@/lib/supabase-datalab'
 import { SUBMISSION_STATUSES } from '@/types/fan-showcase'
 import type { SubmissionStatus } from '@/types/fan-showcase'
 
@@ -16,7 +16,7 @@ export async function GET(
   try {
     const { id } = await params
 
-    const { data: submission, error } = await supabaseAdmin
+    const { data: submission, error } = await datalabAdmin
       .from('fan_submissions')
       .select('*, creator:fan_creators(*), assets:fan_submission_assets(*), tags:fan_submission_tags(*)')
       .eq('id', id)
@@ -27,14 +27,14 @@ export async function GET(
     }
 
     // Moderation history
-    const { data: events } = await supabaseAdmin
+    const { data: events } = await datalabAdmin
       .from('fan_moderation_events')
       .select('*')
       .eq('submission_id', id)
       .order('created_at', { ascending: false })
 
     // Featured slot info
-    const { data: slots } = await supabaseAdmin
+    const { data: slots } = await datalabAdmin
       .from('fan_featured_slots')
       .select('*')
       .eq('submission_id', id)
@@ -70,7 +70,7 @@ export async function PATCH(
     }
 
     // Get current submission
-    const { data: current } = await supabaseAdmin
+    const { data: current } = await datalabAdmin
       .from('fan_submissions')
       .select('id, status')
       .eq('id', id)
@@ -121,7 +121,7 @@ export async function PATCH(
     }
 
     // Update submission
-    const { error: updateErr } = await supabaseAdmin
+    const { error: updateErr } = await datalabAdmin
       .from('fan_submissions')
       .update(updates)
       .eq('id', id)
@@ -132,7 +132,7 @@ export async function PATCH(
     }
 
     // Log moderation event
-    await supabaseAdmin.from('fan_moderation_events').insert({
+    await datalabAdmin.from('fan_moderation_events').insert({
       submission_id: id,
       action,
       previous_status: previousStatus,
@@ -144,13 +144,13 @@ export async function PATCH(
     // Handle featured slot
     if (action === 'feature' && slot_type) {
       // Deactivate existing slots of same type
-      await supabaseAdmin
+      await datalabAdmin
         .from('fan_featured_slots')
         .update({ active: false })
         .eq('slot_type', slot_type)
         .eq('active', true)
 
-      await supabaseAdmin.from('fan_featured_slots').insert({
+      await datalabAdmin.from('fan_featured_slots').insert({
         submission_id: id,
         slot_type,
         active: true,
@@ -158,7 +158,7 @@ export async function PATCH(
     }
 
     if (action === 'unfeature') {
-      await supabaseAdmin
+      await datalabAdmin
         .from('fan_featured_slots')
         .update({ active: false })
         .eq('submission_id', id)

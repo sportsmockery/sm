@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/admin-auth'
-import { supabaseAdmin } from '@/lib/supabase-server'
+import { datalabAdmin } from '@/lib/supabase-datalab'
 import { SUBMISSION_STATUSES } from '@/types/fan-showcase'
 import type { SubmissionStatus } from '@/types/fan-showcase'
 
@@ -45,12 +45,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Get current statuses for moderation log
-    const { data: currentSubs } = await supabaseAdmin
+    const { data: currentSubs } = await datalabAdmin
       .from('fan_submissions')
       .select('id, status')
       .in('id', ids)
 
-    const { error } = await supabaseAdmin
+    const { error } = await datalabAdmin
       .from('fan_submissions')
       .update(updates)
       .in('id', ids)
@@ -71,12 +71,12 @@ export async function POST(request: NextRequest) {
     }))
 
     if (events.length > 0) {
-      await supabaseAdmin.from('fan_moderation_events').insert(events)
+      await datalabAdmin.from('fan_moderation_events').insert(events)
     }
 
     // Deactivate featured slots on unfeature
     if (action === 'unfeature') {
-      await supabaseAdmin
+      await datalabAdmin
         .from('fan_featured_slots')
         .update({ active: false })
         .in('submission_id', ids)

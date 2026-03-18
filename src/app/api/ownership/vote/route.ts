@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { datalabAdmin } from '@/lib/supabase-datalab'
 
-const DATALAB_URL = process.env.DATALAB_API_URL || 'https://datalab.sportsmockery.com'
 const VALID_TEAMS = ['bears', 'bulls', 'blackhawks', 'cubs', 'whitesox']
 
-// Proxy to DataLab API so vote counts get updated
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
@@ -22,22 +21,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Must provide user_id or fingerprint' }, { status: 400 })
     }
 
-    const res = await fetch(`${DATALAB_URL}/api/ownership-scores/votes`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        grade_id,
-        team_slug,
-        user_id: user_id || null,
-        fingerprint: fingerprint || null,
-        vote,
-        comment: comment?.slice(0, 500) || null,
-      }),
-    })
+    const voteRow: Record<string, unknown> = {
+      grade_id,
+      team_slug,
+      vote,
+      comment: comment?.slice(0, 500) || null,
+    }
+    if (user_id) voteRow.user_id = user_id
+    if (fingerprint) voteRow.fingerprint = fingerprint
 
-    const data = await res.json()
-    if (!res.ok) {
-      return NextResponse.json({ error: data.error || 'Failed to submit vote' }, { status: res.status })
+    const { data, error } = await datalabAdmin
+      .from('ownership_votes')
+      .upsert(voteRow, {
+        onConflict: fingerprint ? 'grade_id,fingerprint' : 'grade_id,user_id',
+      })
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Vote error:', error)
+      return NextResponse.json({ error: 'Failed to submit vote' }, { status: 500 })
     }
 
     return NextResponse.json({ success: true, vote: data })

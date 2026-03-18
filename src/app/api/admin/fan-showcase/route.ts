@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/admin-auth'
-import { supabaseAdmin } from '@/lib/supabase-server'
+import { datalabAdmin } from '@/lib/supabase-datalab'
 import type { SubmissionStatus, Team, ContentType } from '@/types/fan-showcase'
 import { SUBMISSION_STATUSES, TEAMS, CONTENT_TYPES } from '@/types/fan-showcase'
 
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '25', 10)))
     const offset = (page - 1) * limit
 
-    let query = supabaseAdmin
+    let query = datalabAdmin
       .from('fan_submissions')
       .select(
         '*, creator:fan_creators(*), assets:fan_submission_assets(*)',
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
     // Status counts
     const statusCounts: Record<string, number> = { all: 0 }
     for (const s of SUBMISSION_STATUSES) {
-      const { count: c } = await supabaseAdmin
+      const { count: c } = await datalabAdmin
         .from('fan_submissions')
         .select('*', { count: 'exact', head: true })
         .eq('status', s)

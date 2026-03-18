@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase-server'
+import { datalabAdmin } from '@/lib/supabase-datalab'
 import { validateSubmission, generateSlug } from '@/lib/fan-showcase/validation'
 import {
   detectNonChicagoFlag,
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     const data = body as SubmitFormData
 
     // Find or create creator
-    const { data: existingCreator } = await supabaseAdmin
+    const { data: existingCreator } = await datalabAdmin
       .from('fan_creators')
       .select('id')
       .eq('email', data.email)
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
 
     if (existingCreator) {
       // Update existing creator
-      const { error: updateErr } = await supabaseAdmin
+      const { error: updateErr } = await datalabAdmin
         .from('fan_creators')
         .update({
           display_name: data.creator_name,
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
       }
       creatorId = existingCreator.id
     } else {
-      const { data: newCreator, error: createErr } = await supabaseAdmin
+      const { data: newCreator, error: createErr } = await datalabAdmin
         .from('fan_creators')
         .insert({
           display_name: data.creator_name,
@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
     const slug = generateSlug(data.title)
 
     // Create submission
-    const { data: submission, error: subErr } = await supabaseAdmin
+    const { data: submission, error: subErr } = await datalabAdmin
       .from('fan_submissions')
       .insert({
         slug,
@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Log moderation event
-    await supabaseAdmin.from('fan_moderation_events').insert({
+    await datalabAdmin.from('fan_moderation_events').insert({
       submission_id: submission.id,
       action: 'submitted',
       previous_status: null,

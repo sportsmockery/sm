@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase-server'
+import { datalabAdmin } from '@/lib/supabase-datalab'
 import { findSimilarCreators } from '@/lib/fan-showcase/ai-helpers'
 import type { FanCreator, FanSubmission } from '@/types/fan-showcase'
 
@@ -11,7 +11,7 @@ export async function GET(
     const { slug } = await params
 
     // Fetch submission with creator and assets
-    const { data: submission, error } = await supabaseAdmin
+    const { data: submission, error } = await datalabAdmin
       .from('fan_submissions')
       .select('*, creator:fan_creators(*), assets:fan_submission_assets(*), tags:fan_submission_tags(*)')
       .eq('slug', slug)
@@ -28,14 +28,14 @@ export async function GET(
     }
 
     // Increment view count (fire-and-forget)
-    supabaseAdmin
+    datalabAdmin
       .from('fan_submissions')
       .update({ viewed_count: (submission.viewed_count || 0) + 1 })
       .eq('id', submission.id)
       .then()
 
     // More from this creator
-    const { data: moreFromCreator } = await supabaseAdmin
+    const { data: moreFromCreator } = await datalabAdmin
       .from('fan_submissions')
       .select('*, assets:fan_submission_assets(*)')
       .eq('creator_id', submission.creator_id)
@@ -45,11 +45,11 @@ export async function GET(
       .limit(4)
 
     // Similar creators
-    const { data: allCreators } = await supabaseAdmin
+    const { data: allCreators } = await datalabAdmin
       .from('fan_creators')
       .select('*')
 
-    const { data: allSubmissions } = await supabaseAdmin
+    const { data: allSubmissions } = await datalabAdmin
       .from('fan_submissions')
       .select('*')
       .in('status', ['approved', 'featured'])
