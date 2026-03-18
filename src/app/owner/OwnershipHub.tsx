@@ -28,12 +28,12 @@ export default function OwnershipHub({ grades }: { grades: OwnershipGrade[] }) {
   return (
     <div style={{
       minHeight: '100vh',
-      padding: 'calc(var(--sm-nav-height, 72px) + 8px) 24px 64px',
+      padding: 'calc(var(--sm-nav-height, 72px)) 24px 64px',
       maxWidth: 'var(--sm-max-width, 1200px)',
       margin: '0 auto',
     }}>
       {/* Hero */}
-      <div style={{ marginBottom: 32 }}>
+      <div style={{ marginBottom: 24 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
           <div style={{
             fontSize: 10,
