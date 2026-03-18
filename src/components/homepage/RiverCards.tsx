@@ -20,8 +20,8 @@ import {
 } from "recharts"
 /** Pinwheels & Ivy logo — top right of PI cards. */
 const PI_LOGO_SRC = "/youtubelogos/pi-logo.png"
-/** Pinwheels & Ivy logo for top left of PI cards (pinwheel + "Pinwheels and Ivy" text). Use same or pi-logo-left.png. */
-const PI_LOGO_LEFT_SRC = "/youtubelogos/pi-logo.png"
+/** Pinwheels & Ivy logo for top left of PI cards (pinwheel + "Pinwheels and Ivy" text). */
+const PI_LOGO_LEFT_SRC = "/downloads/pinwheels-ivy-logo.png"
 
 function isPinwheelsAndIvy(source: string | undefined): boolean {
   if (!source || typeof source !== 'string') return false
@@ -156,7 +156,7 @@ function EngagementRow({ stats, articleUrl }: { stats: { comments: number; retwe
     { key: "hot" as const, emoji: "\uD83D\uDD25", label: "Hot", count: counts.hot },
   ]
 
-  const listenUrl = articleUrl ? `${articleUrl}${articleUrl.includes('?') ? '&' : '?'}listen=true` : null
+  const listenUrl = articleUrl ? `${articleUrl}${articleUrl.includes('?') ? '&' : '?'}listen=true#article-audio` : null
 
   return (
     <div className="mt-5 flex items-center justify-between" style={{ color: 'var(--hp-muted-foreground)' }}>
@@ -175,10 +175,11 @@ function EngagementRow({ stats, articleUrl }: { stats: { comments: number; retwe
         {listenUrl && (
           <Link
             href={listenUrl}
-            className="group flex items-center gap-1 rounded-full px-2.5 py-1.5 transition-all hp-tap-target hover:bg-[rgba(0,0,0,0.04)] dark:hover:bg-[rgba(255,255,255,0.04)] hover:text-[#00D4FF]"
-            aria-label="Play article"
+            className="group flex items-center gap-1.5 rounded-full px-2.5 py-1.5 transition-all hp-tap-target hover:bg-[rgba(0,0,0,0.04)] dark:hover:bg-[rgba(255,255,255,0.04)] hover:text-[#00D4FF]"
+            aria-label="Listen to article"
           >
-            <Play className="h-3.5 w-3.5" style={{ color: 'inherit' }} />
+            <Play className="h-3.5 w-3.5 flex-shrink-0" style={{ color: 'inherit' }} />
+            <span style={{ fontSize: 12, fontWeight: 500 }}>Listen</span>
           </Link>
         )}
       </div>
@@ -199,14 +200,12 @@ function EngagementRow({ stats, articleUrl }: { stats: { comments: number; retwe
             <span style={{ fontSize: 12 }}>{stats.comments}</span>
           </span>
         )}
-        {stats.views && stats.views !== '0' && (
-          <span className="flex items-center gap-1 hp-tap-target" style={{ fontSize: 12 }}>
-            <div className="rounded-full p-2">
-              <Eye className="h-4 w-4" />
-            </div>
-            {stats.views}
-          </span>
-        )}
+        <span className="flex items-center gap-1 hp-tap-target" style={{ fontSize: 12 }} title="Views">
+          <div className="rounded-full p-2">
+            <Eye className="h-4 w-4" />
+          </div>
+          {stats.views && stats.views !== '0' ? stats.views : '0'}
+        </span>
         <button onClick={handleShare} className="rounded-full p-2 transition-colors hover:bg-[#00D4FF]/10 hover:text-[#00D4FF] hp-tap-target" aria-label="Share">
           <Share className="h-4 w-4" />
         </button>
@@ -938,12 +937,10 @@ export function ScoutSummaryCard({ summary, bullets, topic, team, teamColor, tim
           )}
         </button>
         </div>
-        {stats?.views && stats.views !== '0' && (
-          <div className="flex items-center gap-1 ml-auto" style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }}>
-            <Eye className="h-3.5 w-3.5" />
-            <span>{stats.views}</span>
-          </div>
-        )}
+        <div className="flex items-center gap-1 ml-auto" style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }} title="Views">
+          <Eye className="h-3.5 w-3.5" />
+          <span>{stats?.views && stats.views !== '0' ? stats.views : '0'}</span>
+        </div>
       </div>
     </article>
   )
@@ -990,12 +987,10 @@ export function TrendingArticleCard({ headline, summary, trendMetric, team, team
       )}
       <p className="mt-3 line-clamp-3" style={{ fontSize: 15, lineHeight: 1.65, color: 'var(--hp-foreground)', opacity: 0.7 }}>{summary}</p>
 
-      {stats.views && stats.views !== '0' && (
-        <div className="mt-4 flex items-center justify-end gap-1" style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }}>
-          <Eye className="h-3.5 w-3.5" />
-          <span>{stats.views}</span>
-        </div>
-      )}
+      <div className="mt-4 flex items-center justify-end gap-1" style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }} title="Views">
+        <Eye className="h-3.5 w-3.5" />
+        <span>{stats.views && stats.views !== '0' ? stats.views : '0'}</span>
+      </div>
     </article>
   )
 }
@@ -1261,19 +1256,22 @@ export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team,
     <article className="hp-feed-card hp-card-enter">
       <div className="flex items-center justify-between gap-3 mb-4">
         {/* Top left: Pinwheels & Ivy logo on PI cards; VIDEO + timestamp on others */}
-        <div className="flex items-center gap-3 flex-shrink-0" style={{ height: 36 }}>
+        <div className="flex items-center gap-3 flex-shrink-0" style={{ height: 66 }}>
           {isPinwheelsAndIvy(source) ? (
-            <div className="hp-pi-logo">
-              <img
-                src={PI_LOGO_LEFT_SRC}
-                alt="Pinwheels and Ivy"
-                width={140}
-                height={36}
-                className="object-contain object-left"
-                style={{ maxHeight: 36, width: 'auto', height: 36 }}
-                loading="eager"
-              />
-            </div>
+            <>
+              <div className="hp-pi-logo">
+                <img
+                  src={PI_LOGO_LEFT_SRC}
+                  alt="Pinwheels and Ivy"
+                  width={255}
+                  height={66}
+                  className="object-contain object-left"
+                  style={{ maxHeight: 66, width: 'auto', height: 66 }}
+                  loading="eager"
+                />
+              </div>
+              <span style={{ fontSize: 11, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
+            </>
           ) : (
             <>
               <CardLabel label="VIDEO" />

@@ -389,9 +389,9 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
         </div>
       </header>
 
-      {/* Article Audio Player */}
+      {/* Article Audio Player — scroll target for ?listen=true from feed */}
       {audioInfo && (
-        <div style={{ backgroundColor: '#FAFAFB' }}>
+        <div id="article-audio" style={{ backgroundColor: '#FAFAFB' }}>
           <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 24px' }}>
             <ArticleAudioPlayer
               initialArticle={audioInfo.article}
