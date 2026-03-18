@@ -25,7 +25,7 @@ const EDGE_TOOLS: { icon: React.ComponentType<{ className?: string }>; label: st
   { icon: BarChart3, label: 'Team Stats', desc: 'The numbers that explain the wins… and the excuses.', href: '/chicago-bears' },
   { icon: Video, label: 'Vision Theater', desc: 'All videos, no digging. Just press play.', href: '/vision-theater' },
   { icon: Volume2, label: 'Hands-Free Audio', desc: 'Sit back, choose a voice, and press play.', href: '/audio' },
-  { icon: ReportCardIcon, label: 'Owner Report Cards', desc: 'Transparent, data-backed grades on every Chicago ownership group.', href: '/owner' },
+  { icon: ReportCardIcon, label: 'GM Report Cards', desc: 'Transparent, data-backed grades on every Chicago ownership group.', href: '/owner' },
 ]
 
 interface TrendsSidebarProps {

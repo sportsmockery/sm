@@ -33,7 +33,7 @@ const EDGE_TOOLS: { id: string; title: string; href: string; icon: React.Compone
   { id: 'analytics', title: 'Team Stats', href: '/chicago-bears', icon: BarChart3 },
   { id: 'vision', title: 'Vision Theater', href: '/vision-theater', icon: Video },
   { id: 'audio', title: 'Hands-Free Audio', href: '/audio', icon: Volume2 },
-  { id: 'owners', title: 'Owner Report Cards', href: '/owner', icon: ReportCardIcon },
+  { id: 'owners', title: 'GM Report Cards', href: '/owner', icon: ReportCardIcon },
 ]
 
 const TEAM_ID_TO_ROUTE: Record<string, string> = {
