@@ -176,8 +176,8 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
           position: 'fixed',
           bottom: 24,
           right: 24,
-          width: 56,
-          height: 56,
+          width: 68,
+          height: 68,
           borderRadius: '50%',
           border: '2px solid rgba(0,212,255,0.3)',
           backgroundColor: 'rgba(11,15,20,0.9)',
@@ -197,8 +197,8 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
         <Image
           src="/downloads/scout-v2.png"
           alt="Scout AI"
-          width={40}
-          height={40}
+          width={48}
+          height={48}
           style={{
             borderRadius: '50%',
             objectFit: 'contain',
@@ -212,11 +212,13 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
         <div
           style={{
             position: 'fixed',
-            bottom: 90,
+            bottom: 102,
             right: 24,
-            width: '100%',
-            maxWidth: 400,
-            maxHeight: 'calc(100vh - 140px)',
+            left: 24,
+            maxWidth: 900,
+            marginLeft: 'auto',
+            marginRight: 'auto',
+            maxHeight: '40vh',
             borderRadius: 16,
             backgroundColor: 'rgba(11,15,20,0.95)',
             backdropFilter: 'blur(16px)',
@@ -379,15 +381,14 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
           50% { opacity: 1; }
           100% { opacity: 0; }
         }
-        @media (max-width: 480px) {
+        @media (max-width: 640px) {
           .scout-commentary-bubble {
             bottom: 0 !important;
             right: 0 !important;
             left: 0 !important;
             max-width: 100% !important;
-            width: 100% !important;
             border-radius: 16px 16px 0 0 !important;
-            max-height: 70vh !important;
+            max-height: 50vh !important;
           }
         }
       `}</style>
