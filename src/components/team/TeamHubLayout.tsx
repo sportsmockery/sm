@@ -4,19 +4,14 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import TeamHeader from './TeamHeader'
-import ToolGrid from './ToolGrid'
 
 /**
  * Team Hub Layout Component
  *
- * 2030 Premium Design System: Team Hubs
- * - Team Hero with team-hero-{slug} accent background + sm-grid-overlay
- * - Framer Motion hero entrance + shimmer logo + count-up record
- * - Floating orbs background + red gradient overlay
- * - Inline search bar
- * - Glass-card stat pills, Space Grotesk headings
- * - Sticky subnav
- * - Slot for main content
+ * Clean, light design with:
+ * - Team Hero with logo, name, season badge
+ * - Quick links (Trade Rumors, Draft News, Salary Cap, Depth Chart)
+ * - Centered sub-navigation with cyan shimmer EDGE tab and red underline
  */
 
 export interface TeamInfo {
@@ -152,78 +147,115 @@ export default function TeamHubLayout({
   }, [])
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--sm-dark)' }}>
-      {/* ===== COMPACT TEAM HEADER ===== */}
-      <div ref={headerRef} style={{ maxWidth: '1320px', margin: '0 auto' }}>
-        <TeamHeader
-          team={team}
-          rightSlot={
-            <ToolGrid
-              teamSlug={team.slug}
-              accentColor={team.secondaryColor}
-              secondaryColor={team.primaryColor}
-              compact
-            />
-          }
-        />
+    <div style={{ minHeight: '100vh', background: '#f8f9fa' }}>
+      {/* ===== TEAM HEADER ===== */}
+      <div ref={headerRef}>
+        <TeamHeader team={team} />
       </div>
 
-      {/* ===== STICKY SUBNAV ===== */}
-      <div
+      {/* ===== SUB-NAVIGATION ===== */}
+      <nav
         ref={navRef}
-        className={isSticky ? 'sticky' : ''}
+        className={`team-sub-nav ${isSticky ? 'sticky' : ''}`}
         style={{
-          ...(isSticky ? { top: 'var(--sm-nav-height, 72px)', zIndex: 40, boxShadow: '0 4px 12px rgba(0,0,0,0.3)' } : {}),
-          background: 'var(--sm-surface)',
-          borderBottom: '1px solid var(--sm-border)',
+          ...(isSticky ? { top: 'var(--sm-nav-height, 72px)', zIndex: 40 } : {}),
+          backgroundColor: '#f1f3f5',
+          borderBottom: '1px solid #dee2e6',
+          borderTop: '1px solid #dee2e6',
+          display: 'flex',
+          justifyContent: 'center',
           transition: 'box-shadow 0.2s ease',
+          ...(isSticky ? { boxShadow: '0 4px 12px rgba(0,0,0,0.1)' } : {}),
         }}
       >
-        <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '0 24px' }}>
-          {/* Desktop tabs */}
-          <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', overflowX: 'auto', padding: '4px 0' }}>
-            {tabs.map((tab: typeof tabs[number]) => {
-              const isActive = tab.id === currentTab
-              const href = tab.external
-                ? `${tab.external}?channel=${team.slug.replace('chicago-', '')}`
-                : basePath + tab.path
+        <div
+          className="nav-container"
+          style={{
+            display: 'flex',
+            gap: '32px',
+            overflowX: 'auto',
+            padding: '0 20px',
+          }}
+        >
+          {tabs.map((tab: typeof tabs[number]) => {
+            const isActive = tab.id === currentTab
+            const href = tab.external
+              ? `${tab.external}?channel=${team.slug.replace('chicago-', '')}`
+              : basePath + tab.path
 
-              const isEdgeTab = tab.id === 'overview'
-              return (
-                <Link
-                  key={tab.id}
-                  href={href}
-                  style={{
-                    padding: '12px 16px',
-                    fontSize: '14px',
-                    fontWeight: 600,
-                    whiteSpace: 'nowrap',
-                    color: isEdgeTab ? '#00D4FF' : (isActive ? 'var(--sm-text)' : 'var(--sm-text-muted)'),
-                    textDecoration: 'none',
-                    position: 'relative',
-                    transition: 'color 0.2s',
-                  }}
-                >
-                  {tab.label}
-                  {isActive && (
-                    <span
-                      style={{
-                        position: 'absolute',
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        height: '2px',
-                        borderRadius: '2px',
-                        background: 'var(--sm-red)',
-                      }}
-                    />
-                  )}
-                </Link>
-              )
-            })}
-          </nav>
+            const isEdgeTab = tab.id === 'overview'
+            return (
+              <Link
+                key={tab.id}
+                href={href}
+                className="nav-item"
+                style={{
+                  position: 'relative',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  textDecoration: 'none',
+                  color: isEdgeTab ? 'transparent' : (isActive ? '#111' : '#5f6368'),
+                  fontWeight: 600,
+                  fontSize: '14px',
+                  padding: '16px 4px',
+                  transition: 'color 0.2s ease',
+                  whiteSpace: 'nowrap',
+                  ...(isEdgeTab ? {
+                    background: 'linear-gradient(90deg, #00bcd4 0%, #ffffff 40%, #ffffff 60%, #00bcd4 100%)',
+                    backgroundSize: '200% auto',
+                    WebkitBackgroundClip: 'text',
+                    backgroundClip: 'text',
+                    animation: 'shimmer 3s linear infinite',
+                    textShadow: '0 0 8px rgba(0, 188, 212, 0.3)',
+                  } : {}),
+                }}
+                onMouseEnter={(e) => {
+                  if (!isEdgeTab) {
+                    e.currentTarget.style.color = '#111'
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isEdgeTab && !isActive) {
+                    e.currentTarget.style.color = '#5f6368'
+                  }
+                }}
+              >
+                {tab.label}
+                {isActive && (
+                  <span
+                    className="active-underline"
+                    style={{
+                      position: 'absolute',
+                      bottom: '-1px',
+                      height: '3px',
+                      width: '100%',
+                      backgroundColor: '#bc0000',
+                      borderRadius: '3px 3px 0 0',
+                    }}
+                  />
+                )}
+              </Link>
+            )
+          })}
         </div>
-      </div>
+      </nav>
+
+      {/* Shimmer animation keyframes */}
+      <style>{`
+        @keyframes shimmer {
+          to {
+            background-position: 200% center;
+          }
+        }
+        @media (max-width: 1024px) {
+          .nav-container {
+            gap: 20px !important;
+            justify-content: flex-start !important;
+          }
+        }
+      `}</style>
 
       {/* ===== MAIN CONTENT ===== */}
       <div
@@ -231,7 +263,7 @@ export default function TeamHubLayout({
           maxWidth: '1320px',
           margin: '0 auto',
           padding: '32px 24px 48px',
-          background: 'var(--sm-dark)',
+          background: '#f8f9fa',
         }}
       >
         {children}
