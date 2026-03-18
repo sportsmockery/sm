@@ -10,31 +10,37 @@ export const metadata = {
 
 export default async function OwnerPage() {
   // Fetch grades + vote counts from shared Supabase
-  const [gradesResult, voteResult] = await Promise.all([
-    datalabAdmin
-      .from('ownership_grades')
-      .select('*')
-      .eq('is_current', true)
-      .order('overall_grade', { ascending: false }),
-    datalabAdmin
-      .from('ownership_vote_counts')
-      .select('*'),
-  ])
+  let gradesWithVotes: any[] = []
 
-  const grades = gradesResult.data || []
-  const voteCounts = voteResult.data || []
+  try {
+    const [gradesResult, voteResult] = await Promise.all([
+      datalabAdmin
+        .from('ownership_grades')
+        .select('*')
+        .eq('is_current', true)
+        .order('overall_grade', { ascending: false }),
+      datalabAdmin
+        .from('ownership_vote_counts')
+        .select('*'),
+    ])
 
-  // Merge vote counts
-  const voteMap = new Map(voteCounts.map((v: any) => [v.grade_id, v]))
-  const gradesWithVotes = grades.map((g: any) => {
-    const votes = voteMap.get(g.id)
-    return {
-      ...g,
-      agree_count: votes?.agree_count || 0,
-      disagree_count: votes?.disagree_count || 0,
-      total_votes: votes?.total_votes || 0,
-    }
-  })
+    const grades = gradesResult.data || []
+    const voteCounts = voteResult.data || []
+
+    // Merge vote counts
+    const voteMap = new Map(voteCounts.map((v: any) => [v.grade_id, v]))
+    gradesWithVotes = grades.map((g: any) => {
+      const votes = voteMap.get(g.id)
+      return {
+        ...g,
+        agree_count: votes?.agree_count || 0,
+        disagree_count: votes?.disagree_count || 0,
+        total_votes: votes?.total_votes || 0,
+      }
+    })
+  } catch (err) {
+    console.error('Failed to fetch ownership grades:', err)
+  }
 
   return <OwnershipHub grades={gradesWithVotes} />
 }
