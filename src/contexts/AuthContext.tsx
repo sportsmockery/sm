@@ -269,10 +269,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   )
 }
 
+// Default auth context for SSR or when outside provider
+const defaultAuthContext: AuthContextType = {
+  user: null,
+  loading: true,
+  signIn: async () => ({ error: 'Auth not initialized' }),
+  signUp: async () => ({ error: 'Auth not initialized' }),
+  signOut: async () => {},
+  resetPassword: async () => ({ error: 'Auth not initialized' }),
+  refreshUser: async () => {},
+  isAuthenticated: false,
+}
+
 export function useAuth() {
   const context = useContext(AuthContext)
+  // Return default context during SSR or if provider is missing
+  // This prevents errors during server-side rendering
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider')
+    return defaultAuthContext
   }
   return context
 }
