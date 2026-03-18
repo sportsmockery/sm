@@ -196,10 +196,19 @@ function ShowcaseContent() {
         </p>
         <Link
           href="/fan-showcase/submit"
-          className="mt-6 inline-block rounded-lg px-8 py-3 text-base font-medium text-white transition hover:opacity-90"
-          style={{ backgroundColor: '#BC0000' }}
+          className="mt-6 inline-flex items-center gap-2 rounded-xl px-8 py-3.5 font-semibold transition-opacity hover:opacity-90"
+          style={{
+            backgroundColor: '#BC0000',
+            color: '#FAFAFB',
+            fontSize: 15,
+            letterSpacing: '-0.01em',
+            boxShadow: '0 2px 12px rgba(188,0,0,0.25)',
+          }}
         >
           Submit Your Work
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
         </Link>
       </section>
     </div>
