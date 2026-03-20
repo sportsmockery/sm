@@ -23,8 +23,10 @@ import {
 const PI_LOGO_SRC = "/youtubelogos/pi-logo.png"
 /** Pinwheels & Ivy logo for top left of PI cards (pinwheel + "Pinwheels and Ivy" text). */
 const PI_LOGO_LEFT_SRC = "/downloads/pinwheels-ivy-logo.png"
+const PI_LOGO_LEFT_DARK_SRC = "/downloads/pinwheels-ivy-logo-dark.png"
 /** Untold Chicago logo for video cards from Untold Chicago. */
 const UNTOLD_LOGO_SRC = "/downloads/untold-logo.png"
+const UNTOLD_LOGO_DARK_SRC = "/downloads/untold-logo-dark.png"
 
 function isPinwheelsAndIvy(source: string | undefined): boolean {
   if (!source || typeof source !== 'string') return false
@@ -333,13 +335,23 @@ export function EditorialCard({
         <div className="flex items-center gap-3">
           {breakingIndicator === "REPORT" ? (
             <>
-              {/* Sports Mockery wordmark — top left */}
+              {/* Sports Mockery wordmark — top left, swap per theme */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/downloads/sm-logo-wordmark.png"
                 alt="Sports Mockery"
                 width={160}
                 height={32}
+                className="dark:hidden"
+                style={{ height: 32, width: 'auto', objectFit: 'contain' }}
+              />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/downloads/sm-logo-wordmark-dark.png"
+                alt="Sports Mockery"
+                width={160}
+                height={32}
+                className="hidden dark:block"
                 style={{ height: 32, width: 'auto', objectFit: 'contain' }}
               />
               <span
@@ -1329,7 +1341,16 @@ export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team,
                   alt="Pinwheels and Ivy"
                   width={255}
                   height={66}
-                  className="object-contain object-left"
+                  className="object-contain object-left dark:hidden"
+                  style={{ maxHeight: 66, width: 'auto', height: 66 }}
+                  loading="eager"
+                />
+                <img
+                  src={PI_LOGO_LEFT_DARK_SRC}
+                  alt="Pinwheels and Ivy"
+                  width={255}
+                  height={66}
+                  className="object-contain object-left hidden dark:block"
                   style={{ maxHeight: 66, width: 'auto', height: 66 }}
                   loading="eager"
                 />
@@ -1344,6 +1365,17 @@ export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team,
                 alt="Untold Chicago"
                 width={150}
                 height={40}
+                className="dark:hidden"
+                style={{ height: 40, width: 'auto', objectFit: 'contain' }}
+                loading="eager"
+              />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={UNTOLD_LOGO_DARK_SRC}
+                alt="Untold Chicago"
+                width={150}
+                height={40}
+                className="hidden dark:block"
                 style={{ height: 40, width: 'auto', objectFit: 'contain' }}
                 loading="eager"
               />
