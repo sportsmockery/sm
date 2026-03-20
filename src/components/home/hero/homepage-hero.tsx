@@ -140,7 +140,7 @@ export function HomepageHero(props: HomepageHeroProps) {
       return resolveHeroModeSkippingTakeovers(props)
     }
 
-    let resolved: HeroModeName = baseMode
+    let resolved: HeroModeName = baseMode as HeroModeName
 
     // Game Day visit cap: logged-in users only, only while game is still upcoming
     if (isLoggedIn && resolved === "gameday" && props.gameContexts && props.gameContexts[0]) {
