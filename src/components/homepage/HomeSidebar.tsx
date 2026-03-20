@@ -1,7 +1,11 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { ArrowRightLeft, ClipboardPen, MessageSquare, BarChart3, Video, Volume2, Tv } from "lucide-react"
+import { useState, useEffect, useRef } from "react"
+import Link from "next/link"
+import Image from "next/image"
+import { ArrowRightLeft, ClipboardPen, MessageSquare, BarChart3, Video, Volume2, Tv, MoreVertical } from "lucide-react"
+import { useAuth } from "@/contexts/AuthContext"
+import type { Role } from "@/lib/roles"
 
 function ReportCardIcon({ className }: { className?: string }) {
   return (
@@ -30,6 +34,10 @@ const edgeTools: { icon: React.ComponentType<{ className?: string }>; label: str
 export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarProps) {
   const [hoveredTeam, setHoveredTeam] = useState<string | null>(null)
   const [hasLiveGames, setHasLiveGames] = useState(false)
+  const { user, isAuthenticated, signOut } = useAuth()
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false)
+  const [userRole, setUserRole] = useState<Role | null>(null)
+  const profileMenuRef = useRef<HTMLDivElement>(null)
 
   // Poll for live games to show/hide Game Center
   useEffect(() => {
@@ -43,6 +51,30 @@ export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarP
     const id = setInterval(check, 30_000)
     return () => clearInterval(id)
   }, [])
+
+  // Fetch user role when authenticated
+  useEffect(() => {
+    if (isAuthenticated && user?.email) {
+      fetch(`/api/user/role?email=${encodeURIComponent(user.email)}`)
+        .then(res => (res.ok ? res.json() : null))
+        .then(data => { if (data?.role) setUserRole(data.role) })
+        .catch(() => {})
+    } else {
+      setUserRole(null)
+    }
+  }, [isAuthenticated, user?.email])
+
+  // Close profile menu on outside click
+  useEffect(() => {
+    if (!profileMenuOpen) return
+    const handler = (e: MouseEvent) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(e.target as Node)) {
+        setProfileMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [profileMenuOpen])
 
   // Update Team Stats link based on selected team
   const getToolHref = (tool: typeof edgeTools[0]) => {
@@ -197,6 +229,216 @@ export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarP
           </div>
         )}
       </div>
+
+      {/* User profile — bottom */}
+      {isAuthenticated && user && (
+        <div
+          style={{
+            flexShrink: 0,
+            marginTop: 'auto',
+            padding: '12px 8px 16px',
+            borderTop: '1px solid var(--hp-border)',
+          }}
+          ref={profileMenuRef}
+        >
+          <div
+            style={{
+              borderRadius: 12,
+              background: 'var(--hp-muted)',
+              padding: '8px 10px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              position: 'relative',
+            }}
+          >
+            <Link
+              href="/profile"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                flex: 1,
+                minWidth: 0,
+                textDecoration: 'none',
+              }}
+            >
+              <div
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: '50%',
+                  overflow: 'hidden',
+                  flexShrink: 0,
+                  background: 'var(--hp-card)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                {user.avatar ? (
+                  <Image
+                    src={user.avatar}
+                    alt=""
+                    width={32}
+                    height={32}
+                    style={{ width: 32, height: 32, objectFit: 'cover' }}
+                    unoptimized
+                  />
+                ) : (
+                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--hp-foreground)' }}>
+                    {(user.name || user.email || '?').charAt(0).toUpperCase()}
+                  </span>
+                )}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: 'var(--hp-foreground)',
+                    lineHeight: 1.2,
+                  }}
+                  className="truncate"
+                >
+                  {user.name || user.email?.split('@')[0] || 'Profile'}
+                </p>
+                <p
+                  style={{
+                    margin: 0,
+                    marginTop: 2,
+                    fontSize: 10,
+                    color: 'var(--hp-foreground)',
+                    opacity: 0.5,
+                    lineHeight: 1.2,
+                  }}
+                  className="truncate"
+                >
+                  View profile & activity
+                </p>
+              </div>
+            </Link>
+            <button
+              type="button"
+              onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+              aria-label="Profile options"
+              style={{
+                border: 'none',
+                background: 'none',
+                padding: 4,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                flexShrink: 0,
+                color: 'var(--hp-foreground)',
+                opacity: 0.5,
+              }}
+            >
+              <MoreVertical size={18} aria-hidden />
+            </button>
+
+            {profileMenuOpen && (
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: '100%',
+                  right: 0,
+                  marginBottom: 8,
+                  width: 220,
+                  borderRadius: 12,
+                  backgroundColor: 'var(--hp-card)',
+                  border: '1px solid var(--hp-border)',
+                  boxShadow: '0 8px 28px rgba(0,0,0,0.28)',
+                  overflow: 'hidden',
+                  zIndex: 1000,
+                }}
+              >
+                <div style={{ padding: '8px 0' }}>
+                  {userRole === 'admin' && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setProfileMenuOpen(false)}
+                      style={{
+                        display: 'block',
+                        padding: '8px 14px',
+                        fontSize: 13,
+                        color: 'var(--hp-foreground)',
+                        textDecoration: 'none',
+                      }}
+                    >
+                      Admin Dashboard
+                    </Link>
+                  )}
+                  {(userRole === 'editor' || userRole === 'author') && (
+                    <Link
+                      href="/studio"
+                      onClick={() => setProfileMenuOpen(false)}
+                      style={{
+                        display: 'block',
+                        padding: '8px 14px',
+                        fontSize: 13,
+                        color: 'var(--hp-foreground)',
+                        textDecoration: 'none',
+                      }}
+                    >
+                      Creator Studio
+                    </Link>
+                  )}
+                  <Link
+                    href="/profile"
+                    onClick={() => setProfileMenuOpen(false)}
+                    style={{
+                      display: 'block',
+                      padding: '8px 14px',
+                      fontSize: 13,
+                      color: 'var(--hp-foreground)',
+                      textDecoration: 'none',
+                    }}
+                  >
+                    My Profile
+                  </Link>
+                  <Link
+                    href="/my-gm-score"
+                    onClick={() => setProfileMenuOpen(false)}
+                    style={{
+                      display: 'block',
+                      padding: '8px 14px',
+                      fontSize: 13,
+                      color: 'var(--hp-foreground)',
+                      textDecoration: 'none',
+                    }}
+                  >
+                    My GM Score
+                  </Link>
+                  <div style={{ height: 1, background: 'var(--hp-border)', margin: '4px 0' }} />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setProfileMenuOpen(false)
+                      signOut()
+                    }}
+                    style={{
+                      display: 'block',
+                      padding: '8px 14px',
+                      fontSize: 13,
+                      color: '#BC0000',
+                      width: '100%',
+                      textAlign: 'left',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </header>
   )
 }
