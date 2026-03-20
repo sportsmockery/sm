@@ -64,7 +64,46 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "integer",
+                      "description": "Number of results returned"
+                    },
+                    "articles": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "integer" },
+                          "title": { "type": "string" },
+                          "url": { "type": "string" },
+                          "excerpt": { "type": "string" },
+                          "image": { "type": "string" },
+                          "author": { "type": "string" },
+                          "team": { "type": "string" },
+                          "published_at": { "type": "string" },
+                          "views": { "type": "integer" }
+                        }
+                      }
+                    },
+                    "teams": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "key": { "type": "string" },
+                          "name": { "type": "string" },
+                          "sport": { "type": "string" },
+                          "url": { "type": "string" }
+                        }
+                      }
+                    },
+                    "live": { "type": "boolean" },
+                    "games": { "type": "array", "items": { "type": "object" } },
+                    "query": { "type": "string" },
+                    "message": { "type": "string" }
+                  }
                 }
               }
             }
