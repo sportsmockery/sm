@@ -27,28 +27,12 @@
       "schedule": "* * * * *"
     },
     {
-      "path": "/api/cron/send-chicago-daily",
-      "schedule": "0 12 * * *"
-    },
-    {
-      "path": "/api/cron/cleanup-scout-history",
-      "schedule": "0 3 * * *"
-    },
-    {
       "path": "/api/cron/sync-gm-rosters",
       "schedule": "45 * * * *"
     },
     {
       "path": "/api/cron/audit-gm",
       "schedule": "50 * * * *"
-    },
-    {
-      "path": "/api/cron/mobile-alerts",
-      "schedule": "* * * * *"
-    },
-    {
-      "path": "/api/cron/sync-depth-charts",
-      "schedule": "55 * * * *"
     },
     {
       "path": "/api/cron/audit-orbs",
