@@ -5,7 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import {
-  MessageCircle, Share, Eye,
+  Activity, MessageCircle, Share, Eye,
   TrendingUp, Play, Clock, Check, X, ChevronRight,
   BarChart3, Users
 } from "lucide-react"
