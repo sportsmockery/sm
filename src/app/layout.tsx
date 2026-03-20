@@ -111,7 +111,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scroll-smooth dark" data-theme="dark" suppressHydrationWarning>
+    <html lang="en" className="scroll-smooth dark" data-theme="dark" style={{ colorScheme: 'dark' }} suppressHydrationWarning>
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="dns-prefetch" href="https://izwhcuccuwvlqqhpprbb.supabase.co" />

@@ -3,8 +3,9 @@
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { ArrowRightLeft, ClipboardPen, MessageSquare, BarChart3, Video, Volume2, Tv, MoreVertical } from "lucide-react"
+import { ArrowRightLeft, ClipboardPen, MessageSquare, BarChart3, Video, Volume2, Tv, MoreVertical, Sun, Moon } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
+import { useTheme } from "@/contexts/ThemeContext"
 import type { Role } from "@/lib/roles"
 
 function ReportCardIcon({ className }: { className?: string }) {
@@ -35,6 +36,7 @@ export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarP
   const [hoveredTeam, setHoveredTeam] = useState<string | null>(null)
   const [hasLiveGames, setHasLiveGames] = useState(false)
   const { user, isAuthenticated, signOut } = useAuth()
+  const { theme, toggleTheme } = useTheme()
   const [profileMenuOpen, setProfileMenuOpen] = useState(false)
   const [userRole, setUserRole] = useState<Role | null>(null)
   const profileMenuRef = useRef<HTMLDivElement>(null)
@@ -412,6 +414,29 @@ export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarP
                   >
                     My GM Score
                   </Link>
+                  <div style={{ height: 1, background: 'var(--hp-border)', margin: '4px 0' }} />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      toggleTheme()
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      padding: '8px 14px',
+                      fontSize: 13,
+                      color: 'var(--hp-foreground)',
+                      width: '100%',
+                      textAlign: 'left',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
+                    {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                  </button>
                   <div style={{ height: 1, background: 'var(--hp-border)', margin: '4px 0' }} />
                   <button
                     type="button"

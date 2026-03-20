@@ -279,6 +279,15 @@
 /* ===== LIGHT MODE OVERRIDE ===== */
 [data-theme="light"],
 .light {
+  /* Foundation overrides */
+  --color-bg: #fafafa;
+  --color-surface: #f5f5f7;
+  --color-surface-elevated: #FAFAFB;
+  --color-text-primary: #1a1a2e;
+  --color-text-secondary: #5c6470;
+  --color-cyan: #00D4FF;
+  --color-cyan-glow: rgba(0, 212, 255, 0.12);
+
   --sm-dark: #fafafa;
   --sm-surface: #f5f5f7;
   --sm-card: #FAFAFB;

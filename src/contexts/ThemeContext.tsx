@@ -20,7 +20,7 @@ function getTimeOfDay(): TimeOfDay {
   return 'dawn'
 }
 
-// Time-of-day CSS variable overrides (layered on top of light/dark theme)
+// Time-of-day CSS variable overrides (layered on top of dark theme only)
 const TIME_CSS_VARS: Record<TimeOfDay, Record<string, string>> = {
   day: {
     '--sm-time-card': 'rgba(18, 18, 22, 0.85)',
@@ -39,29 +39,65 @@ const TIME_CSS_VARS: Record<TimeOfDay, Record<string, string>> = {
   },
 }
 
+// Light-mode time-of-day overrides (subtle, no dark tints)
+const TIME_CSS_VARS_LIGHT: Record<TimeOfDay, Record<string, string>> = {
+  day: {
+    '--sm-time-card': 'rgba(255, 255, 255, 0.9)',
+    '--sm-time-glass-glow': 'rgba(0, 0, 0, 0.02)',
+    '--sm-time-hero-haze': 'linear-gradient(180deg, rgba(0,0,0,0.01) 0%, transparent 60%)',
+  },
+  night: {
+    '--sm-time-card': 'rgba(255, 255, 255, 0.92)',
+    '--sm-time-glass-glow': 'rgba(0, 212, 255, 0.03)',
+    '--sm-time-hero-haze': 'linear-gradient(135deg, rgba(0,212,255,0.02) 0%, rgba(250,250,251,0.95) 100%)',
+  },
+  dawn: {
+    '--sm-time-card': 'rgba(255, 255, 255, 0.9)',
+    '--sm-time-glass-glow': 'rgba(0, 212, 255, 0.02)',
+    '--sm-time-hero-haze': 'linear-gradient(180deg, rgba(0,0,0,0.02) 0%, transparent 50%)',
+  },
+}
+
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
+
+function applyThemeToDOM(theme: Theme) {
+  const root = document.documentElement
+  if (theme === 'dark') {
+    root.classList.remove('light')
+    root.classList.add('dark')
+    root.setAttribute('data-theme', 'dark')
+    root.style.colorScheme = 'dark'
+  } else {
+    root.classList.remove('dark')
+    root.classList.add('light')
+    root.setAttribute('data-theme', 'light')
+    root.style.colorScheme = 'light'
+  }
+}
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>('dark')
   const [timeOfDay, setTimeOfDay] = useState<TimeOfDay>('day')
   const [mounted, setMounted] = useState(false)
 
-  // On mount, force dark mode (Apple-black)
+  // On mount, read saved preference (default: dark)
   useEffect(() => {
+    let saved: Theme = 'dark'
+    try {
+      const stored = localStorage.getItem('sm-theme')
+      if (stored === 'light' || stored === 'dark') saved = stored
+    } catch {}
+    setThemeState(saved)
+    applyThemeToDOM(saved)
     setMounted(true)
-    localStorage.setItem('sm-theme', 'dark')
   }, [])
 
-  // Apply dark theme to document (always)
+  // Apply theme to document whenever it changes
   useEffect(() => {
     if (!mounted) return
-
-    const root = document.documentElement
-    root.classList.remove('light')
-    root.classList.add('dark')
-    root.setAttribute('data-theme', 'dark')
-    localStorage.setItem('sm-theme', 'dark')
-  }, [mounted])
+    applyThemeToDOM(theme)
+    try { localStorage.setItem('sm-theme', theme) } catch {}
+  }, [theme, mounted])
 
   // Time-of-day reactive CSS vars — checks every 10 minutes
   useEffect(() => {
@@ -71,7 +107,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       const tod = getTimeOfDay()
       setTimeOfDay(tod)
       const root = document.documentElement
-      const vars = TIME_CSS_VARS[tod]
+      const vars = theme === 'dark' ? TIME_CSS_VARS[tod] : TIME_CSS_VARS_LIGHT[tod]
       Object.entries(vars).forEach(([key, value]) => {
         root.style.setProperty(key, value)
       })
@@ -88,12 +124,15 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     applyTimeVars()
     const interval = setInterval(applyTimeVars, 10 * 60 * 1000) // 10 min
     return () => clearInterval(interval)
-  }, [mounted])
+  }, [mounted, theme])
 
-  // Light mode is forced — toggle and setTheme are no-ops
-  const toggleTheme = () => {}
+  const toggleTheme = () => {
+    setThemeState(prev => prev === 'dark' ? 'light' : 'dark')
+  }
 
-  const setTheme = (_newTheme: Theme) => {}
+  const setTheme = (newTheme: Theme) => {
+    setThemeState(newTheme)
+  }
 
   return (
     <ThemeContext.Provider value={{ theme, resolvedTheme: theme, toggleTheme, setTheme, timeOfDay }}>
