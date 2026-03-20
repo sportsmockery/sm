@@ -744,12 +744,12 @@
 
 /* Preferred team highlight for returning users */
 .sm-latest-item-preferred {
-  border-left: 4px solid var(--preferred-color, #bc0000);
-  background: linear-gradient(to right, rgba(188, 0, 0, 0.03) 0%, transparent 10%);
+  border-left: 4px solid var(--preferred-color, #00F5FF);
+  background: linear-gradient(to right, rgba(0, 245, 255, 0.03) 0%, transparent 10%);
 }
 
 .dark .sm-latest-item-preferred {
-  border-left-color: var(--preferred-dark-color, var(--preferred-color, #bc0000));
+  border-left-color: var(--preferred-dark-color, var(--preferred-color, #00F5FF));
   background: linear-gradient(to right, rgba(255, 255, 255, 0.03) 0%, transparent 10%);
 }
 

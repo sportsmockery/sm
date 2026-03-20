@@ -1,0 +1,76 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "SM Edge - Chicago Sports API",
+    "description": "Public read-only API for Chicago sports content from Sports Mockery. Covers Bears (NFL), Bulls (NBA), Cubs (MLB), Blackhawks (NHL), and White Sox (MLB).",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://test.sportsmockery.com"
+    }
+  ],
+  "paths": {
+    "/api/public": {
+      "get": {
+        "operationId": "getContent",
+        "summary": "Get Chicago sports content - articles, live scores, search, or team info",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["articles", "search", "live", "teams"],
+              "default": "articles"
+            },
+            "description": "Content type: articles (latest news), search (find by keyword), live (current game scores), teams (team directory)"
+          },
+          {
+            "name": "team",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["bears", "bulls", "cubs", "blackhawks", "white-sox"]
+            },
+            "description": "Filter by Chicago team (only for type=articles)"
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search query (required for type=search, optional filter for type=articles)"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "maximum": 50
+            },
+            "description": "Max results to return (default 20, max 50)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,18 +1,18 @@
 /* ═══════════════════════════════════════════════════════════════════
    bears1.css — Obsidian Intelligence Hub
-   Scoped under .b1-root — strict palette: #bc0000, #000, #fff
+   Scoped under .b1-root — strict palette: #00F5FF, #000, #fff
    ═══════════════════════════════════════════════════════════════════ */
 
 .b1-root {
   /* Core palette */
-  --b1-red: #bc0000;
+  --b1-red: #00F5FF;
   --b1-black: #0B0F14;
   --b1-white: #FAFAFB;
 
   /* Functional */
   --b1-obsidian: #050505;
-  --b1-glow: rgba(188, 0, 0, 0.4);
-  --b1-glow-soft: rgba(188, 0, 0, 0.12);
+  --b1-glow: rgba(0, 245, 255, 0.4);
+  --b1-glow-soft: rgba(0, 245, 255, 0.12);
   --b1-glass: rgba(10, 10, 10, 0.7);
   --b1-glass-border: rgba(255, 255, 255, 0.06);
   --b1-text: #FAFAFB;
@@ -39,8 +39,8 @@
 /* ─── Light mode ─────────────────────────────────────────────────── */
 [data-theme="light"] .b1-root {
   --b1-obsidian: #f8f8f8;
-  --b1-glow: rgba(188, 0, 0, 0.2);
-  --b1-glow-soft: rgba(188, 0, 0, 0.08);
+  --b1-glow: rgba(0, 245, 255, 0.2);
+  --b1-glow-soft: rgba(0, 245, 255, 0.08);
   --b1-glass: rgba(245, 245, 245, 0.8);
   --b1-glass-border: rgba(0, 0, 0, 0.08);
   --b1-text: #111111;
@@ -57,7 +57,7 @@
   position: relative;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(188, 0, 0, 0.1);
+  border: 1px solid rgba(0, 245, 255, 0.1);
   overflow: hidden;
   transition: transform var(--b1-transition-med), box-shadow var(--b1-transition-med);
 }
@@ -69,15 +69,15 @@
   background: conic-gradient(
     from var(--b1-holo-angle, 0deg),
     transparent 0%,
-    rgba(188, 0, 0, 0.08) 10%,
+    rgba(0, 245, 255, 0.08) 10%,
     transparent 20%,
-    rgba(188, 0, 0, 0.05) 30%,
+    rgba(0, 245, 255, 0.05) 30%,
     transparent 40%,
-    rgba(188, 0, 0, 0.1) 50%,
+    rgba(0, 245, 255, 0.1) 50%,
     transparent 60%,
-    rgba(188, 0, 0, 0.06) 70%,
+    rgba(0, 245, 255, 0.06) 70%,
     transparent 80%,
-    rgba(188, 0, 0, 0.04) 90%,
+    rgba(0, 245, 255, 0.04) 90%,
     transparent 100%
   );
   animation: b1-holo-shimmer 6s linear infinite;
@@ -91,8 +91,8 @@
 }
 
 .b1-holo-card-active {
-  box-shadow: 0 0 30px rgba(188, 0, 0, 0.2), 0 0 60px rgba(188, 0, 0, 0.08);
-  border-color: rgba(188, 0, 0, 0.3);
+  box-shadow: 0 0 30px rgba(0, 245, 255, 0.2), 0 0 60px rgba(0, 245, 255, 0.08);
+  border-color: rgba(0, 245, 255, 0.3);
 }
 
 /* ─── Radar ──────────────────────────────────────────────────────── */
@@ -114,7 +114,7 @@
   content: attr(data-text);
   position: absolute;
   inset: 0;
-  color: rgba(188, 0, 0, 0.3);
+  color: rgba(0, 245, 255, 0.3);
   clip-path: inset(0 0 0 0);
   transform: translateX(1px);
   pointer-events: none;
@@ -178,11 +178,11 @@
 @keyframes b1-ping-pulse {
   0%, 100% {
     opacity: 0.6;
-    box-shadow: 0 0 4px rgba(188, 0, 0, 0.3);
+    box-shadow: 0 0 4px rgba(0, 245, 255, 0.3);
   }
   50% {
     opacity: 1;
-    box-shadow: 0 0 12px rgba(188, 0, 0, 0.6);
+    box-shadow: 0 0 12px rgba(0, 245, 255, 0.6);
   }
 }
 

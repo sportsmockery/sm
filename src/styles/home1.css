@@ -1,17 +1,17 @@
 /* ═══════════════════════════════════════════════════════════════════
    home1.css — Chicago Sports Command Center
-   Scoped under .h1-root — strict palette: #bc0000, #000, #fff
+   Scoped under .h1-root — strict palette: #00F5FF, #000, #fff
    ═══════════════════════════════════════════════════════════════════ */
 
 .h1-root {
   /* Core palette */
-  --h1-red: #bc0000;
+  --h1-red: #00F5FF;
   --h1-black: #0B0F14;
   --h1-white: #FAFAFB;
 
   /* Functional */
-  --h1-glow: rgba(188, 0, 0, 0.4);
-  --h1-glow-soft: rgba(188, 0, 0, 0.15);
+  --h1-glow: rgba(0, 245, 255, 0.4);
+  --h1-glow-soft: rgba(0, 245, 255, 0.15);
   --h1-glass: rgba(10, 10, 10, 0.7);
   --h1-glass-border: rgba(255, 255, 255, 0.06);
   --h1-text: #FAFAFB;
@@ -41,8 +41,8 @@
 
 /* ─── Light mode ─────────────────────────────────────────────────── */
 [data-theme="light"] .h1-root {
-  --h1-glow: rgba(188, 0, 0, 0.2);
-  --h1-glow-soft: rgba(188, 0, 0, 0.08);
+  --h1-glow: rgba(0, 245, 255, 0.2);
+  --h1-glow-soft: rgba(0, 245, 255, 0.08);
   --h1-glass: rgba(245, 245, 245, 0.8);
   --h1-glass-border: rgba(0, 0, 0, 0.08);
   --h1-text: #111111;
@@ -87,7 +87,7 @@
 .h1-shard:hover {
   transform: scale(1.02);
   z-index: 10;
-  box-shadow: 0 0 20px rgba(188, 0, 0, 0.15);
+  box-shadow: 0 0 20px rgba(0, 245, 255, 0.15);
 }
 
 /* ─── Boot-up animation states ───────────────────────────────────── */
@@ -185,12 +185,12 @@
 /* ─── Keyframes ──────────────────────────────────────────────────── */
 @keyframes h1-pulse-glow {
   0%, 100% {
-    box-shadow: 0 0 8px rgba(188, 0, 0, 0.2);
-    border-color: rgba(188, 0, 0, 0.4);
+    box-shadow: 0 0 8px rgba(0, 245, 255, 0.2);
+    border-color: rgba(0, 245, 255, 0.4);
   }
   50% {
-    box-shadow: 0 0 24px rgba(188, 0, 0, 0.5);
-    border-color: rgba(188, 0, 0, 0.8);
+    box-shadow: 0 0 24px rgba(0, 245, 255, 0.5);
+    border-color: rgba(0, 245, 255, 0.8);
   }
 }
 
@@ -212,8 +212,8 @@
 }
 
 @keyframes h1-ecg-glow {
-  0%, 100% { filter: drop-shadow(0 0 4px rgba(188,0,0,0.3)); }
-  50% { filter: drop-shadow(0 0 12px rgba(188,0,0,0.6)); }
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(0,245,255,0.3)); }
+  50% { filter: drop-shadow(0 0 12px rgba(0,245,255,0.6)); }
 }
 
 /* ─── Reduced motion ─────────────────────────────────────────────── */

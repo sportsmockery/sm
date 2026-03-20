@@ -111,7 +111,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scroll-smooth light" suppressHydrationWarning>
+    <html lang="en" className="scroll-smooth dark" data-theme="dark" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="dns-prefetch" href="https://izwhcuccuwvlqqhpprbb.supabase.co" />
@@ -121,7 +121,7 @@ export default function RootLayout({
         <link rel="prefetch" href="/chicago-bears" />
         <link rel="prefetch" href="/scout-ai" />
         <link rel="prefetch" href="/gm" />
-        {/* Light mode forced — no theme-switching script needed */}
+        {/* Dark mode (Apple-black) forced */}
       </head>
       <body
         className={`${spaceGrotesk.variable} font-sans antialiased`}

@@ -7,52 +7,63 @@
      COLORS - Dark Theme (Primary)
      ========================================= */
 
-  /* Background Colors */
-  --bg-primary: #0a0a0b;
-  --bg-secondary: #111113;
-  --bg-tertiary: #18181b;
-  --bg-card: #1c1c1f;
-  --bg-hover: #252528;
-  --bg-elevated: #27272a;
+  /* ===== Apple-Black Foundation ===== */
+  --color-bg: #050508;
+  --color-surface: #121216;
+  --color-surface-elevated: #1C1C22;
+  --color-text-primary: #F8F8F8;
+  --color-text-secondary: #A0A0A5;
+  --color-cyan: #00F5FF;
+  --color-cyan-glow: rgba(0, 245, 255, 0.15);
+  --color-success: #00E676;
+  --color-alert: #FF3B5C;
+
+  /* Background Colors (mapped) */
+  --bg-primary: #050508;
+  --bg-secondary: #121216;
+  --bg-tertiary: #1C1C22;
+  --bg-card: #121216;
+  --bg-hover: #1C1C22;
+  --bg-elevated: #1C1C22;
 
   /* Text Colors */
-  --text-primary: #FAFAFB;
-  --text-secondary: #a1a1aa;
+  --text-primary: #F8F8F8;
+  --text-secondary: #A0A0A5;
   --text-muted: #71717a;
   --text-disabled: #52525b;
-  --text-inverse: #0B0F14;
+  --text-inverse: #050508;
 
   /* Border Colors */
-  --border-default: #27272a;
-  --border-subtle: #1f1f23;
-  --border-strong: #3f3f46;
-  --border-focus: #BC0000;
+  --border-default: rgba(255, 255, 255, 0.06);
+  --border-subtle: rgba(255, 255, 255, 0.03);
+  --border-strong: rgba(255, 255, 255, 0.10);
+  --border-focus: #00F5FF;
 
-  /* Brand Accent — EDGE Branding Final: #BC0000 */
-  --accent-red: #BC0000;
-  --accent-red-hover: #a00000;
-  --accent-red-active: #8a0000;
-  --accent-red-muted: #4c0000;
-  --accent-red-glow: rgba(188, 0, 0, 0.2);
-  --accent-red-glow-strong: rgba(188, 0, 0, 0.4);
+  /* Brand Accent — mapped to cyan */
+  --accent-red: #00F5FF;
+  --accent-red-hover: #00F5FF;
+  --accent-red-active: #00B8E0;
+  --accent-red-muted: rgba(0, 245, 255, 0.15);
+  --accent-red-glow: rgba(0, 245, 255, 0.15);
+  --accent-red-glow-strong: rgba(0, 245, 255, 0.25);
 
   /* Edge Intelligence */
-  --edge-cyan: #00D4FF;
-  --edge-cyan-glow: rgba(0, 212, 255, 0.2);
+  --edge-cyan: #00F5FF;
+  --edge-cyan-glow: rgba(0, 245, 255, 0.15);
 
   /* Edge Premium */
   --edge-gold: #D6B05E;
-  --edge-gold-glow: rgba(214, 176, 94, 0.2);
+  --edge-gold-glow: rgba(214, 176, 94, 0.15);
 
-  /* Status Colors — mapped to brand palette */
-  --success: #00D4FF;
-  --success-muted: rgba(0, 212, 255, 0.15);
+  /* Status Colors */
+  --success: #00E676;
+  --success-muted: rgba(0, 230, 118, 0.15);
   --warning: #D6B05E;
   --warning-muted: rgba(214, 176, 94, 0.15);
-  --error: #BC0000;
-  --error-muted: rgba(188, 0, 0, 0.15);
-  --info: #00D4FF;
-  --info-muted: rgba(0, 212, 255, 0.15);
+  --error: #FF3B5C;
+  --error-muted: rgba(255, 59, 92, 0.15);
+  --info: #00F5FF;
+  --info-muted: rgba(0, 245, 255, 0.15);
 
   /* =========================================
      TEAM COLORS
@@ -299,7 +310,7 @@
   --border-subtle: #f3f4f6;
   --border-strong: #d1d5db;
 
-  --accent-red: #BC0000;
+  --accent-red: #00F5FF;
   --accent-red-hover: #a00000;
   --accent-red-glow: rgba(139, 0, 0, 0.15);
 
@@ -328,7 +339,7 @@
     --border-subtle: #f3f4f6;
     --border-strong: #d1d5db;
 
-    --accent-red: #BC0000;
+    --accent-red: #00F5FF;
     --accent-red-hover: #a00000;
     --accent-red-glow: rgba(139, 0, 0, 0.15);
 

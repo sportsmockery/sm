@@ -2,7 +2,7 @@
   HomepageV3 CSS - Athletic-Style Premium Design
   Dark and light mode via CSS variables
   Clean, minimal, professional aesthetic
-  Color palette: black, white, red (#bc0000), grays
+  Color palette: black, white, red (#00F5FF), grays
 */
 
 /* THEME VARIABLES */
@@ -12,7 +12,7 @@
   --font-display: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
 
   /* Primary brand color */
-  --color-accent: #bc0000;
+  --color-accent: #00F5FF;
   --color-accent-hover: #a00000;
 
   /* team colors - used sparingly */
@@ -625,7 +625,7 @@ body.theme-light .sm-tag--cubs,
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #bc0000;
+  color: #00F5FF;
   margin-bottom: 6px;
   font-family: var(--font-heading);
 }
@@ -1036,7 +1036,7 @@ body.theme-light .sm-tag--cubs,
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #bc0000;
+  color: #00F5FF;
   margin-bottom: 8px;
   font-family: var(--font-heading);
 }
@@ -1117,7 +1117,7 @@ body.theme-light .sm-tag--cubs,
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #bc0000;
+  color: #00F5FF;
   margin-bottom: 4px;
   font-family: var(--font-heading);
 }
@@ -1196,8 +1196,8 @@ body.theme-light .sm-tag--cubs,
   justify-content: center;
   font-size: 13px;
   font-weight: 700;
-  color: #bc0000;
-  background: rgba(188, 0, 0, 0.08);
+  color: #00F5FF;
+  background: rgba(0, 245, 255, 0.08);
   border-radius: 6px;
   font-family: var(--font-heading);
 }
@@ -1213,7 +1213,7 @@ body.theme-light .sm-tag--cubs,
 }
 
 .sm-headline-link:hover {
-  color: #bc0000;
+  color: #00F5FF;
 }
 
 /* RESPONSIVE ADJUSTMENTS */

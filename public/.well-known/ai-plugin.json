@@ -1,0 +1,17 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "SM Edge - Chicago Sports",
+  "name_for_model": "sm_edge",
+  "description_for_human": "Get the latest Chicago sports news, scores, and analysis from Sports Mockery.",
+  "description_for_model": "Access Chicago sports content from Sports Mockery (SM Edge). Get articles, search news, check live game scores, and get team info for Bears, Bulls, Cubs, Blackhawks, and White Sox. Use type=articles for latest news, type=search&q= to find specific topics, type=live for live scores, type=teams for team directory.",
+  "auth": {
+    "type": "none"
+  },
+  "api": {
+    "type": "openapi",
+    "url": "https://test.sportsmockery.com/.well-known/openapi.json"
+  },
+  "logo_url": "https://test.sportsmockery.com/blitz_logo.svg",
+  "contact_email": "chris@sportsmockery.com",
+  "legal_info_url": "https://test.sportsmockery.com/terms"
+}
