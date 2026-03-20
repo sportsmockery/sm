@@ -4,26 +4,14 @@ import React, { useMemo, useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import {
   ArrowRight,
-  AudioLines,
   Bot,
   BrainCircuit,
   ChevronRight,
   Flame,
-  MessageCircleMore,
-  Play,
   Search,
   Sparkles,
   Star,
-  TrendingUp,
 } from "lucide-react"
-import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-} from "recharts"
 import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -69,6 +57,52 @@ interface PollData {
   team_theme: string | null
   options: { id: number; option_text: string; vote_count: number }[]
 }
+
+/* ------------------------------------------------------------------ */
+/*  Layout constants — single source of truth                          */
+/* ------------------------------------------------------------------ */
+
+const SHELL = "mx-auto w-full max-w-[1440px] px-4 md:px-8"
+const HERO_GRID = "grid gap-10 xl:grid-cols-[minmax(0,1.06fr)_360px] xl:items-start"
+const FEED_GRID = "grid gap-8 xl:grid-cols-[minmax(0,720px)_360px] xl:items-start xl:justify-between"
+const CARD_STACK = "space-y-6"
+
+/* ------------------------------------------------------------------ */
+/*  Fallback seed data — keeps layout stable before hydration          */
+/* ------------------------------------------------------------------ */
+
+const FALLBACK_ARTICLES: FeedArticle[] = [
+  {
+    id: -1,
+    title: "Loading latest Chicago sports intelligence...",
+    slug: "",
+    excerpt: "Your personalized feed is loading. The latest articles, analysis, and rumor updates will appear here momentarily.",
+    featured_image: null,
+    published_at: new Date().toISOString(),
+    views: null,
+    importance_score: 50,
+    category: { slug: "chicago-sports", name: "Chicago Sports" },
+    author: { display_name: "Sports Mockery" },
+  },
+  {
+    id: -2,
+    title: "Scout AI is ready for your questions",
+    slug: "",
+    excerpt: "Ask Scout about any Chicago team — Bears, Bulls, Cubs, Blackhawks, or White Sox. Get instant analysis powered by live data.",
+    featured_image: null,
+    published_at: new Date().toISOString(),
+    views: null,
+    importance_score: 50,
+    category: { slug: "chicago-sports", name: "Scout AI" },
+    author: { display_name: "Scout" },
+  },
+]
+
+const FALLBACK_WATCHLIST = [
+  { label: "Bears", title: "Loading trending stories...", meta: "Just now", href: "#" },
+  { label: "Cubs", title: "Loading trending stories...", meta: "Just now", href: "#" },
+  { label: "Bulls", title: "Loading trending stories...", meta: "Just now", href: "#" },
+]
 
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                            */
@@ -133,7 +167,7 @@ function formatViews(views: number | null): string {
 function articleHref(article: FeedArticle): string {
   const catSlug = getCategorySlug(article)
   if (catSlug && article.slug) return `/${catSlug}/${article.slug}`
-  return `#`
+  return "#"
 }
 
 /* ------------------------------------------------------------------ */
@@ -149,7 +183,6 @@ const toneStyles: Record<
     dot: string
     accent: string
     glow: string
-    button: string
   }
 > = {
   neutral: {
@@ -159,7 +192,6 @@ const toneStyles: Record<
     dot: "bg-white/70",
     accent: "text-white",
     glow: "rgba(255,255,255,0.08)",
-    button: "bg-white text-[#0B0F14]",
   },
   cyan: {
     border: "border-[#00D4FF]/20",
@@ -168,7 +200,6 @@ const toneStyles: Record<
     dot: "bg-[#00D4FF]",
     accent: "text-[#00D4FF]",
     glow: "rgba(0,212,255,0.16)",
-    button: "bg-[#00D4FF] text-[#0B0F14]",
   },
   red: {
     border: "border-[#BC0000]/20",
@@ -177,7 +208,6 @@ const toneStyles: Record<
     dot: "bg-[#BC0000]",
     accent: "text-[#BC0000]",
     glow: "rgba(188,0,0,0.16)",
-    button: "bg-[#BC0000] text-[#FAFAFB]",
   },
   gold: {
     border: "border-[#D6B05E]/20",
@@ -186,12 +216,11 @@ const toneStyles: Record<
     dot: "bg-[#D6B05E]",
     accent: "text-[#D6B05E]",
     glow: "rgba(214,176,94,0.18)",
-    button: "bg-[#D6B05E] text-[#0B0F14]",
   },
 }
 
 /* ------------------------------------------------------------------ */
-/*  Main page                                                          */
+/*  Main page — NO local header/sidebar/shell (layout.tsx owns those)  */
 /* ------------------------------------------------------------------ */
 
 export default function NewHomePage() {
@@ -199,12 +228,12 @@ export default function NewHomePage() {
   const [query, setQuery] = useState("")
   const [activeFilter, setActiveFilter] = useState<FilterKey>("For You")
 
-  // Real data state
-  const [articles, setArticles] = useState<FeedArticle[]>([])
+  // Real data state — initialised with fallbacks so layout never collapses
+  const [articles, setArticles] = useState<FeedArticle[]>(FALLBACK_ARTICLES)
   const [trending, setTrending] = useState<FeedArticle[]>([])
   const [liveGames, setLiveGames] = useState<LiveGame[]>([])
   const [polls, setPolls] = useState<PollData[]>([])
-  const [loading, setLoading] = useState(true)
+  const [isSeeded, setIsSeeded] = useState(true)
 
   // Fetch real data from APIs
   useEffect(() => {
@@ -216,52 +245,48 @@ export default function NewHomePage() {
           fetch("/api/polls?status=active&limit=5").then((r) => r.json()).catch(() => ({ polls: [] })),
         ])
 
-        // Combine all articles — featured + topHeadlines + latestNews
         const all: FeedArticle[] = []
         if (feedRes.featured) all.push(feedRes.featured)
         if (feedRes.topHeadlines) all.push(...feedRes.topHeadlines)
         if (feedRes.latestNews) all.push(...feedRes.latestNews)
-        setArticles(all)
+
+        if (all.length > 0) {
+          setArticles(all)
+          setIsSeeded(false)
+        }
         setTrending(feedRes.trending || [])
         setLiveGames(liveRes.games || [])
         setPolls(pollsRes.polls || pollsRes.data || [])
       } catch (err) {
         console.error("NewHome data fetch error:", err)
-      } finally {
-        setLoading(false)
       }
     }
     fetchData()
   }, [])
 
-  // Filter articles by active filter
+  // Derived data
   const filteredArticles = useMemo(() => {
     return articles.filter((a) => matchesFilter(a, activeFilter))
   }, [articles, activeFilter])
 
-  // Derive hero data from real articles
   const featuredArticle = articles[0] || null
   const topArticles = articles.slice(1, 4)
-
-  // Derive signal counts from real data
   const totalArticles = articles.length
   const liveCount = liveGames.length
   const trendingCount = trending.length
 
-  // Prompt chips from real article titles
   const promptChips = useMemo(() => {
     const chips: string[] = []
-    const bearArticle = articles.find((a) => getCategorySlug(a).includes("bears"))
-    const cubsArticle = articles.find((a) => getCategorySlug(a).includes("cubs"))
-    const bullsArticle = articles.find((a) => getCategorySlug(a).includes("bulls"))
-    if (bearArticle) chips.push(`What's the latest on the Bears?`)
-    if (cubsArticle) chips.push(`Give me the Cubs update today`)
-    if (bullsArticle) chips.push(`What are fans saying about the Bulls?`)
+    if (articles.find((a) => getCategorySlug(a).includes("bears")))
+      chips.push("What's the latest on the Bears?")
+    if (articles.find((a) => getCategorySlug(a).includes("cubs")))
+      chips.push("Give me the Cubs update today")
+    if (articles.find((a) => getCategorySlug(a).includes("bulls")))
+      chips.push("What are fans saying about the Bulls?")
     if (chips.length === 0) chips.push("What's happening in Chicago sports today?")
     return chips.slice(0, 3)
   }, [articles])
 
-  // Team article counts for chips
   const teamChips = useMemo(() => {
     const teams = [
       { label: "Chicago Bears", slug: "bears" },
@@ -273,11 +298,9 @@ export default function NewHomePage() {
     return teams.map((t) => ({
       ...t,
       count: articles.filter((a) => getCategorySlug(a).includes(t.slug)).length,
-      active: t.slug === "bears",
     }))
   }, [articles])
 
-  // Platform messages from real top articles
   const platformMessages = useMemo(() => {
     return topArticles.map((a) => {
       const team = getTeamFromSlug(getCategorySlug(a))
@@ -285,8 +308,8 @@ export default function NewHomePage() {
     })
   }, [topArticles])
 
-  // Watchlist from trending
   const watchlist = useMemo(() => {
+    if (trending.length === 0) return FALLBACK_WATCHLIST
     return trending.slice(0, 3).map((a) => ({
       label: getTeamFromSlug(getCategorySlug(a)),
       title: a.title,
@@ -295,11 +318,9 @@ export default function NewHomePage() {
     }))
   }, [trending])
 
-  // Scout sidebar prompts from real article topics
   const scoutPrompts = useMemo(() => {
     const prompts: string[] = []
-    const teams = ["bears", "bulls", "cubs", "blackhawks", "whitesox"]
-    for (const team of teams) {
+    for (const team of ["bears", "bulls", "cubs", "blackhawks", "whitesox"]) {
       const teamArticle = articles.find((a) => getCategorySlug(a).includes(team))
       if (teamArticle && prompts.length < 3) {
         prompts.push(`Tell me more about: ${teamArticle.title.slice(0, 60)}`)
@@ -314,22 +335,12 @@ export default function NewHomePage() {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0B0F14]">
-        <div className="text-center">
-          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-[#00D4FF] border-t-transparent" />
-          <p className="text-sm text-white/50">Loading intelligence feed...</p>
-        </div>
-      </div>
-    )
-  }
-
+  /* ── Render — always the full page shell, never a bare loader ── */
   return (
     <div className="min-h-screen bg-[#0B0F14] text-[#FAFAFB]">
       {/* Background radials */}
       <div
-        className="pointer-events-none fixed inset-0"
+        className="pointer-events-none fixed inset-0 z-0"
         style={{
           background: `
             radial-gradient(circle at 14% 12%, rgba(0,212,255,0.16), transparent 24%),
@@ -342,8 +353,8 @@ export default function NewHomePage() {
 
       <main className="relative z-10">
         {/* ── HERO SECTION ── */}
-        <section className="flex min-h-screen items-center px-4 pb-16 pt-28 md:px-8">
-          <div className="mx-auto grid w-full max-w-[1440px] gap-10 xl:grid-cols-[minmax(0,1.06fr)_440px] xl:items-center">
+        <section className="min-h-screen px-4 pb-16 pt-[112px] md:px-8">
+          <div className={`${SHELL} ${HERO_GRID}`}>
             {/* Left column */}
             <motion.div
               initial={{ opacity: 0, y: 16 }}
@@ -369,7 +380,7 @@ export default function NewHomePage() {
 
               {/* Scout AI Command */}
               <Panel tone="cyan" className="p-5 md:p-6">
-                <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-wrap items-start justify-between gap-3">
                   <TonePill tone="cyan">Scout AI Command</TonePill>
                   <div className="flex items-center gap-2 rounded-full border border-[#00D4FF]/20 bg-[#00D4FF]/10 px-3 py-1 text-[13px] uppercase tracking-[0.16em] text-[#00D4FF]">
                     <Bot className="h-3.5 w-3.5" />
@@ -405,7 +416,7 @@ export default function NewHomePage() {
                       key={prompt}
                       type="button"
                       onClick={() => setQuery(prompt)}
-                      className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-white/75 transition duration-200 ease-out hover:border-[#00D4FF]/20 hover:bg-[#00D4FF]/10 hover:text-[#00D4FF]"
+                      className="h-10 rounded-full border border-white/10 bg-white/[0.04] px-4 text-sm text-white/75 transition duration-200 ease-out hover:border-[#00D4FF]/20 hover:bg-[#00D4FF]/10 hover:text-[#00D4FF]"
                     >
                       {prompt}
                     </button>
@@ -414,22 +425,22 @@ export default function NewHomePage() {
               </Panel>
 
               {/* Context block — real articles */}
-              {platformMessages.length > 0 && (
-                <Panel tone="neutral" className="p-5 md:p-6">
-                  <div className="flex flex-wrap items-start justify-between gap-4">
-                    <div>
-                      <TonePill tone="neutral">Tonight on EDGE</TonePill>
-                      <h2 className="mt-4 text-[22px] font-medium tracking-[-0.04em]">
-                        What&apos;s moving right now
-                      </h2>
-                    </div>
-                    <div className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-white/70">
-                      {totalArticles} stories live
-                    </div>
+              <Panel tone="neutral" className="p-5 md:p-6">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div>
+                    <TonePill tone="neutral">Tonight on EDGE</TonePill>
+                    <h2 className="mt-4 text-[22px] font-medium tracking-[-0.04em]">
+                      What&apos;s moving right now
+                    </h2>
                   </div>
+                  <div className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-white/70">
+                    {totalArticles} stories live
+                  </div>
+                </div>
 
-                  <div className="mt-5 space-y-3">
-                    {platformMessages.map((msg) => (
+                <div className="mt-5 space-y-3">
+                  {platformMessages.length > 0 ? (
+                    platformMessages.map((msg) => (
                       <div
                         key={msg}
                         className="flex items-start gap-3 rounded-[12px] border border-white/10 bg-white/[0.03] p-4"
@@ -437,26 +448,31 @@ export default function NewHomePage() {
                         <div className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-[#00D4FF]" />
                         <p className="text-[18px] leading-[1.55] text-white/78">{msg}</p>
                       </div>
-                    ))}
-                  </div>
+                    ))
+                  ) : (
+                    <div className="flex items-start gap-3 rounded-[12px] border border-white/10 bg-white/[0.03] p-4">
+                      <div className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-white/30 animate-pulse" />
+                      <p className="text-[18px] leading-[1.55] text-white/40">Loading latest updates...</p>
+                    </div>
+                  )}
+                </div>
 
-                  <div className="mt-5 flex flex-wrap gap-2">
-                    {teamChips.map((team) => (
-                      <button
-                        key={team.label}
-                        type="button"
-                        className={`rounded-full border px-4 py-2 text-sm transition duration-200 ease-out ${
-                          team.count > 0
-                            ? "border-[#00D4FF]/20 bg-[#00D4FF]/10 text-[#00D4FF]"
-                            : "border-white/10 bg-white/[0.04] text-white/72 hover:border-white/20 hover:bg-white/[0.06]"
-                        }`}
-                      >
-                        {team.label} ({team.count})
-                      </button>
-                    ))}
-                  </div>
-                </Panel>
-              )}
+                <div className="mt-5 flex flex-wrap gap-2">
+                  {teamChips.map((team) => (
+                    <button
+                      key={team.label}
+                      type="button"
+                      className={`h-10 rounded-full border px-4 text-sm transition duration-200 ease-out ${
+                        team.count > 0
+                          ? "border-[#00D4FF]/20 bg-[#00D4FF]/10 text-[#00D4FF]"
+                          : "border-white/10 bg-white/[0.04] text-white/72 hover:border-white/20 hover:bg-white/[0.06]"
+                      }`}
+                    >
+                      {team.label} ({team.count})
+                    </button>
+                  ))}
+                </div>
+              </Panel>
 
               {/* Hero signal cards */}
               <div className="grid gap-5 md:grid-cols-3">
@@ -493,7 +509,7 @@ export default function NewHomePage() {
             >
               {/* Live games card */}
               {liveGames.length > 0 && (
-                <Panel tone="red" className="p-6">
+                <Panel tone="red" className="p-5">
                   <TonePill tone="red">Live Now</TonePill>
                   <div className="mt-4 space-y-3">
                     {liveGames.slice(0, 3).map((game) => (
@@ -501,16 +517,16 @@ export default function NewHomePage() {
                         key={game.game_id}
                         className="rounded-[12px] border border-[#BC0000]/20 bg-[#BC0000]/10 p-4"
                       >
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-start justify-between">
                           <span className="text-sm font-medium text-white/80">{game.away_team}</span>
                           <span className="text-lg font-bold">{game.away_score}</span>
                         </div>
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-start justify-between">
                           <span className="text-sm font-medium text-white/80">{game.home_team}</span>
                           <span className="text-lg font-bold">{game.home_score}</span>
                         </div>
                         <p className="mt-2 text-[13px] text-white/50">
-                          {game.period} {game.clock && `• ${game.clock}`}
+                          {game.period} {game.clock && `\u00B7 ${game.clock}`}
                         </p>
                       </div>
                     ))}
@@ -519,7 +535,7 @@ export default function NewHomePage() {
               )}
 
               {/* Trending / top articles sidebar */}
-              <Panel tone="cyan" className="p-6">
+              <Panel tone="cyan" className="p-5">
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <TonePill tone="cyan">Top Stories</TonePill>
@@ -545,7 +561,7 @@ export default function NewHomePage() {
                           {article.title}
                         </p>
                         <p className="mt-1 text-[13px] text-white/50">
-                          {getTeamFromSlug(getCategorySlug(article))} • {formatViews(article.views)} views
+                          {getTeamFromSlug(getCategorySlug(article))} \u00B7 {formatViews(article.views)} views
                         </p>
                       </div>
                       {article.featured_image && (
@@ -559,12 +575,17 @@ export default function NewHomePage() {
                       )}
                     </Link>
                   ))}
+                  {trending.length === 0 && (
+                    <div className="min-h-[120px] rounded-[12px] border border-white/10 bg-white/[0.03] p-4">
+                      <p className="text-sm text-white/40 animate-pulse">Loading trending stories...</p>
+                    </div>
+                  )}
                 </div>
               </Panel>
 
               {/* Active poll */}
               {polls.length > 0 && (
-                <Panel tone="neutral" className="p-6">
+                <Panel tone="neutral" className="p-5">
                   <TonePill tone="neutral">Live Poll</TonePill>
                   <h3 className="mt-4 text-[20px] font-medium leading-[1.2] tracking-[-0.03em]">
                     {polls[0].question}
@@ -575,7 +596,7 @@ export default function NewHomePage() {
                       const pct = totalVotes > 0 ? Math.round((opt.vote_count / totalVotes) * 100) : 0
                       return (
                         <div key={opt.id} className="rounded-[10px] border border-white/10 bg-white/[0.03] p-3">
-                          <div className="flex items-center justify-between text-sm">
+                          <div className="flex items-start justify-between text-sm">
                             <span className="text-white/80">{opt.option_text}</span>
                             <span className="font-medium text-[#00D4FF]">{pct}%</span>
                           </div>
@@ -624,7 +645,7 @@ export default function NewHomePage() {
 
         {/* ── FILTER BAR ── */}
         <section className="sticky top-0 z-40 border-y border-white/10 bg-[#0F141B]/84 backdrop-blur-xl">
-          <div className="mx-auto flex max-w-[1440px] flex-col gap-4 px-4 py-4 md:px-8 xl:flex-row xl:items-center xl:justify-between">
+          <div className={`${SHELL} flex flex-col gap-4 py-4 xl:flex-row xl:items-center xl:justify-between`}>
             <div className="flex items-center gap-3 overflow-x-auto">
               <p className="shrink-0 text-sm text-white/50">Discover</p>
               {filters.map((filter) => (
@@ -632,7 +653,7 @@ export default function NewHomePage() {
                   key={filter}
                   type="button"
                   onClick={() => setActiveFilter(filter)}
-                  className={`shrink-0 rounded-full px-4 py-2 text-sm transition duration-200 ease-out ${
+                  className={`h-10 shrink-0 rounded-full px-4 text-sm transition duration-200 ease-out ${
                     activeFilter === filter
                       ? "text-[#0B0F14]"
                       : "border border-white/10 bg-white/[0.04] text-white/72 hover:border-[#00D4FF]/20 hover:bg-[#00D4FF]/10 hover:text-[#00D4FF]"
@@ -651,13 +672,13 @@ export default function NewHomePage() {
 
         {/* ── FEED SECTION ── */}
         <section className="px-4 py-10 md:px-8">
-          <div className="mx-auto grid w-full max-w-[1440px] gap-8 xl:grid-cols-[minmax(0,720px)_360px] xl:justify-between">
+          <div className={`${SHELL} ${FEED_GRID}`}>
             {/* Main feed */}
-            <div className="space-y-6">
+            <div className={CARD_STACK}>
               {filteredArticles.length === 0 && (
-                <Panel tone="neutral" className="p-6">
+                <FeedCardShell>
                   <p className="text-center text-white/50">No stories found for this filter.</p>
-                </Panel>
+                </FeedCardShell>
               )}
 
               {filteredArticles.slice(0, 20).map((article, index) => (
@@ -668,47 +689,47 @@ export default function NewHomePage() {
                   viewport={{ once: true, margin: "-80px" }}
                   transition={{ duration: 0.38, delay: index * 0.03, ease: "easeOut" }}
                 >
-                  <ArticleFeedCard article={article} />
+                  <ArticleFeedCard article={article} isSeeded={isSeeded} />
                 </motion.article>
               ))}
 
               {filteredArticles.length > 20 && (
-                <div className="flex flex-col items-start gap-4 rounded-[14px] border border-white/10 bg-white/[0.03] p-6 shadow-[0_18px_40px_rgba(0,0,0,0.32)] backdrop-blur-md">
+                <FeedCardShell>
                   <TonePill tone="neutral">More Stories</TonePill>
-                  <p className="text-[18px] leading-[1.55] text-white/72">
+                  <p className="mt-4 text-[18px] leading-[1.55] text-white/72">
                     {filteredArticles.length - 20} more stories available.
                   </p>
-                  <Link
-                    href="/"
-                    className="inline-flex items-center gap-2 rounded-[14px] border border-white/10 bg-white/[0.04] px-5 py-3 text-sm text-white transition duration-200 ease-out hover:border-[#00D4FF]/20 hover:bg-[#00D4FF]/10 hover:text-[#00D4FF]"
-                  >
-                    View full feed
-                    <ChevronRight className="h-4 w-4" />
-                  </Link>
-                </div>
+                  <div className="mt-auto pt-5">
+                    <Link
+                      href="/"
+                      className="inline-flex h-11 items-center gap-2 rounded-[14px] border border-white/10 bg-white/[0.04] px-5 text-sm text-white transition duration-200 ease-out hover:border-[#00D4FF]/20 hover:bg-[#00D4FF]/10 hover:text-[#00D4FF]"
+                    >
+                      View full feed
+                      <ChevronRight className="h-4 w-4" />
+                    </Link>
+                  </div>
+                </FeedCardShell>
               )}
             </div>
 
             {/* Sticky watchlist sidebar */}
-            <aside className="space-y-6 xl:sticky xl:top-[80px] xl:h-fit">
-              {watchlist.length > 0 && (
-                <Panel tone="neutral" className="p-5">
-                  <TonePill tone="neutral">Watchlist</TonePill>
-                  <div className="mt-4 space-y-4">
-                    {watchlist.map((item) => (
-                      <Link
-                        key={item.title}
-                        href={item.href}
-                        className="block rounded-[12px] border border-white/10 bg-white/[0.03] p-4 transition duration-200 hover:-translate-y-0.5 hover:border-white/20"
-                      >
-                        <p className="text-[13px] uppercase tracking-[0.16em] text-white/45">{item.label}</p>
-                        <p className="mt-2 text-[18px] leading-[1.45] text-white/82">{item.title}</p>
-                        <p className="mt-3 text-[13px] text-white/50">{item.meta}</p>
-                      </Link>
-                    ))}
-                  </div>
-                </Panel>
-              )}
+            <aside className="space-y-6 xl:sticky xl:top-[96px] xl:h-fit">
+              <Panel tone="neutral" className="p-5">
+                <TonePill tone="neutral">Watchlist</TonePill>
+                <div className="mt-4 space-y-4">
+                  {watchlist.map((item) => (
+                    <Link
+                      key={item.title}
+                      href={item.href}
+                      className="block rounded-[12px] border border-white/10 bg-white/[0.03] p-4 transition duration-200 hover:-translate-y-0.5 hover:border-white/20"
+                    >
+                      <p className="text-[13px] uppercase tracking-[0.16em] text-white/45">{item.label}</p>
+                      <p className="mt-2 text-[18px] leading-[1.45] text-white/82">{item.title}</p>
+                      <p className="mt-3 text-[13px] text-white/50">{item.meta}</p>
+                    </Link>
+                  ))}
+                </div>
+              </Panel>
 
               {/* Additional polls in sidebar */}
               {polls.length > 1 && (
@@ -722,7 +743,7 @@ export default function NewHomePage() {
                       const totalVotes = polls[1].options.reduce((s, o) => s + (o.vote_count || 0), 0)
                       const pct = totalVotes > 0 ? Math.round((opt.vote_count / totalVotes) * 100) : 0
                       return (
-                        <div key={opt.id} className="flex items-center justify-between rounded-[10px] border border-[#D6B05E]/20 bg-[#D6B05E]/10 p-3 text-sm">
+                        <div key={opt.id} className="flex items-start justify-between rounded-[10px] border border-[#D6B05E]/20 bg-[#D6B05E]/10 p-3 text-sm">
                           <span className="text-white/80">{opt.option_text}</span>
                           <span className="font-medium text-[#D6B05E]">{pct}%</span>
                         </div>
@@ -770,6 +791,22 @@ function Panel({
   )
 }
 
+function FeedCardShell({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode
+  className?: string
+}) {
+  return (
+    <article
+      className={`relative min-h-[220px] overflow-hidden rounded-[14px] border border-white/10 bg-[#0F141B]/88 p-5 shadow-[0_18px_40px_rgba(0,0,0,0.32)] backdrop-blur-md ${className}`}
+    >
+      <div className="relative flex h-full flex-col">{children}</div>
+    </article>
+  )
+}
+
 function TonePill({ tone, children }: { tone: Tone; children: React.ReactNode }) {
   const style = toneStyles[tone]
   return (
@@ -795,7 +832,7 @@ function HeroSignal({
 }) {
   return (
     <Panel tone={tone} className="p-5">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex items-start justify-between gap-4">
         <p className="text-sm text-white/55">{label}</p>
         <Icon className={toneStyles[tone].accent + " h-4 w-4"} />
       </div>
@@ -806,10 +843,10 @@ function HeroSignal({
 }
 
 /* ------------------------------------------------------------------ */
-/*  Article Feed Card — renders real articles                          */
+/*  Article Feed Card                                                  */
 /* ------------------------------------------------------------------ */
 
-function ArticleFeedCard({ article }: { article: FeedArticle }) {
+function ArticleFeedCard({ article, isSeeded }: { article: FeedArticle; isSeeded?: boolean }) {
   const catSlug = getCategorySlug(article)
   const team = getTeamFromSlug(catSlug)
   const author = getAuthorName(article)
@@ -818,65 +855,66 @@ function ArticleFeedCard({ article }: { article: FeedArticle }) {
   const timeAgo = formatRelativeTime(article.published_at)
   const views = formatViews(article.views)
 
-  // Determine card tone from category
   let tone: Tone = "neutral"
   if (catSlug.includes("bears")) tone = "red"
   else if (catSlug.includes("cubs") || catSlug.includes("bulls")) tone = "cyan"
-  else if (catSlug.includes("blackhawks") || catSlug.includes("whitesox")) tone = "neutral"
 
-  // High importance articles get premium treatment
   if (article.importance_score && article.importance_score >= 80) tone = "gold"
 
+  const Wrapper = isSeeded ? "div" : Link
+  const wrapperProps = isSeeded ? {} : { href }
+
   return (
-    <Link href={href} className="block">
-      <Panel tone={tone} className="p-6 transition duration-200 hover:-translate-y-0.5">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-3">
-              <TonePill tone={tone}>{categoryName}</TonePill>
-              {article.importance_score && article.importance_score >= 70 && (
-                <span className="text-[13px] text-[#D6B05E]">
-                  <Sparkles className="inline h-3.5 w-3.5" /> Featured
-                </span>
-              )}
+    <Wrapper {...(wrapperProps as any)} className="block">
+      <FeedCardShell className={toneStyles[tone].border}>
+        {/* Tone glow */}
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{ background: `radial-gradient(circle at top right, ${toneStyles[tone].glow}, transparent 62%)` }}
+        />
+
+        <div className="relative flex h-full flex-col">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0 flex-1">
+              <div className="mb-4 flex items-center gap-3">
+                <TonePill tone={tone}>{categoryName}</TonePill>
+                {article.importance_score && article.importance_score >= 70 && (
+                  <span className="text-[13px] text-[#D6B05E]">
+                    <Sparkles className="inline h-3.5 w-3.5" /> Featured
+                  </span>
+                )}
+              </div>
+              <h3 className="text-[24px] font-medium leading-[1.08] tracking-[-0.04em] text-[#FAFAFB]">
+                {article.title}
+              </h3>
             </div>
-            <h2 className="mt-4 text-[24px] font-medium leading-[1.08] tracking-[-0.04em]">
-              {article.title}
-            </h2>
+            {article.featured_image && (
+              <Image
+                src={article.featured_image}
+                alt=""
+                width={120}
+                height={80}
+                className="h-20 w-[120px] shrink-0 rounded-[10px] object-cover"
+              />
+            )}
           </div>
-          {article.featured_image && (
-            <Image
-              src={article.featured_image}
-              alt=""
-              width={120}
-              height={80}
-              className="h-20 w-[120px] shrink-0 rounded-[10px] object-cover"
-            />
-          )}
-        </div>
 
-        {article.excerpt && (
-          <p className="mt-4 text-[18px] leading-[1.6] text-white/75">
-            {article.excerpt.length > 200
-              ? article.excerpt.slice(0, 200) + "..."
-              : article.excerpt}
-          </p>
-        )}
-
-        <div className="mt-5 flex flex-wrap items-center gap-4 text-[13px] text-white/50">
-          <span>{author}</span>
-          <span>•</span>
-          <span>{team}</span>
-          <span>•</span>
-          <span>{timeAgo}</span>
-          {article.views && article.views > 0 && (
-            <>
-              <span>•</span>
-              <span>{views} views</span>
-            </>
+          {article.excerpt && (
+            <p className="mt-4 text-[18px] leading-[1.6] text-white/75">
+              {article.excerpt.length > 200
+                ? article.excerpt.slice(0, 200) + "..."
+                : article.excerpt}
+            </p>
           )}
+
+          <div className="mt-auto pt-5">
+            <p className="text-[13px] text-white/50">
+              {author} \u00B7 {team} \u00B7 {timeAgo}
+              {article.views && article.views > 0 ? ` \u00B7 ${views} views` : ""}
+            </p>
+          </div>
         </div>
-      </Panel>
-    </Link>
+      </FeedCardShell>
+    </Wrapper>
   )
 }

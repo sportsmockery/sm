@@ -72,7 +72,7 @@ const TEAM_TENURE: Record<string, {
     gmRecords: ['2020-21: 31-41', '2021-22: 46-36', '2022-23: 40-42', '2023-24: 39-43', '2024-25: 23-22*'],
   },
   blackhawks: {
-    owner: 'Rocky Wirtz', ownerSince: '2007',
+    owner: 'Danny Wirtz', ownerSince: '2023',
     gm: 'Kyle Davidson', gmSince: '2022',
     gmRecords: ['2022-23: 26-49-7', '2023-24: 23-53-6', '2024-25: 21-22-8*'],
   },
