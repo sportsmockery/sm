@@ -7,8 +7,20 @@ import { createClient } from '@supabase/supabase-js'
 const DATALAB_URL = 'https://siwoqfzzcxmngnseyzpv.supabase.co'
 const DATALAB_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpd29xZnp6Y3htbmduc2V5enB2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc2NDk0ODAsImV4cCI6MjA4MzIyNTQ4MH0.PzeJ6OG2ofjLWSpJ2UmI-1aXVrHnh3ar6eTgph4uJgc'
 
+// 15-second global fetch timeout to prevent build hangs
+const DATALAB_FETCH_TIMEOUT_MS = 15_000
+
+const globalFetchWithTimeout: typeof fetch = (input, init) => {
+  return fetch(input, {
+    ...init,
+    signal: init?.signal ?? AbortSignal.timeout(DATALAB_FETCH_TIMEOUT_MS),
+  })
+}
+
 // Public client for read-only operations (used by all team data layers)
-export const datalabClient = createClient(DATALAB_URL, DATALAB_ANON_KEY)
+export const datalabClient = createClient(DATALAB_URL, DATALAB_ANON_KEY, {
+  global: { fetch: globalFetchWithTimeout },
+})
 
 // Admin client - uses service key from env if available, falls back to anon key
 const DATALAB_SERVICE_KEY = process.env.DATALAB_SUPABASE_SERVICE_ROLE_KEY || DATALAB_ANON_KEY
@@ -17,6 +29,7 @@ export const datalabAdmin = createClient(DATALAB_URL, DATALAB_SERVICE_KEY, {
     autoRefreshToken: false,
     persistSession: false,
   },
+  global: { fetch: globalFetchWithTimeout },
 })
 
 // Type definitions for Bears data tables

@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   },
 }
 
-export const revalidate = 1800
+export const dynamic = 'force-dynamic'
 
 export default async function WhiteSoxGameCenterPage() {
   const team = CHICAGO_TEAMS.whitesox

@@ -9,6 +9,8 @@ import { CHICAGO_TEAMS, fetchTeamRecord, fetchNextGame, fetchLastGame } from '@/
 import { getTeamSeasonOverview, getTeamKeyPlayers, getTeamTrends } from '@/lib/team-sidebar-data'
 import { supabaseAdmin } from '@/lib/supabase-server'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Chicago Bulls | News, Stats, Schedule & Roster | SportsMockery',
   description: 'Complete Chicago Bulls coverage including latest news, team stats, schedule, roster, and expert analysis.',
@@ -18,9 +20,6 @@ export const metadata: Metadata = {
     type: 'website',
   },
 }
-
-// Revalidate every hour
-export const revalidate = 3600
 
 // Fetch Bulls posts from database
 async function getBullsPosts(limit: number = 12) {

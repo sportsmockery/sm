@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   description: 'Full Chicago Bears box scores with detailed player stats. View passing, rushing, receiving, and defensive stats for every game.',
 }
 
-export const revalidate = 1800
+export const dynamic = 'force-dynamic'
 
 export default async function BearsScoresPage() {
   const team = CHICAGO_TEAMS.bears

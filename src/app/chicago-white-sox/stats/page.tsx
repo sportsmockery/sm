@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: 'Chicago White Sox 2025 team and player statistics. View batting averages, home runs, RBIs, and pitching stats.',
 }
 
-export const revalidate = 3600
+export const dynamic = 'force-dynamic'
 
 export default async function WhiteSoxStatsPage() {
   const team = CHICAGO_TEAMS.whitesox

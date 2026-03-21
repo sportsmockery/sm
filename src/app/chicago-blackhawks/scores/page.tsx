@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: 'Chicago Blackhawks box scores with detailed player stats. View goals, assists, saves, and more for every game.',
 }
 
-export const revalidate = 1800
+export const dynamic = 'force-dynamic'
 
 export default async function BlackhawksScoresPage() {
   const team = CHICAGO_TEAMS.blackhawks

@@ -8,6 +8,7 @@
  */
 
 import { datalabAdmin } from './supabase-datalab'
+import { buildSafeFetch, safeDatalabQuery } from './build-safe-fetch'
 
 // =============================================================================
 // TYPE DEFINITIONS
@@ -210,20 +211,18 @@ export async function getBullsPlayers(): Promise<BullsPlayer[]> {
     return []
   }
 
-  // Get current roster players (is_current_bulls = true)
-  const { data, error } = await datalabAdmin
-    .from('bulls_players')
-    .select('*')
-    .eq('is_current_bulls', true)
-    .order('position')
-    .order('name')
+  const data = await safeDatalabQuery(
+    () => datalabAdmin
+      .from('bulls_players')
+      .select('*')
+      .eq('is_current_bulls', true)
+      .order('position')
+      .order('name'),
+    [] as any[],
+    'bulls players'
+  )
 
-  if (error) {
-    console.error('DataLab fetch error:', error)
-    return []
-  }
-
-  return transformPlayers(data || [])
+  return transformPlayers(data)
 }
 
 /**
@@ -312,28 +311,34 @@ export async function getBullsRosterGrouped(): Promise<Record<PositionGroup, Bul
  * Get a single player profile with stats and game log
  */
 export async function getPlayerProfile(slug: string): Promise<PlayerProfile | null> {
-  const players = await getBullsPlayers()
-  const player = players.find(p => p.slug === slug)
+  return buildSafeFetch(
+    async () => {
+      const players = await getBullsPlayers()
+      const player = players.find(p => p.slug === slug)
 
-  if (!player) return null
+      if (!player) return null
 
-  // Use playerId (ESPN ID) since stats tables use ESPN IDs in player_id column
-  const espnId = player.playerId
-  const seasons = await getPlayerSeasonStats(espnId)
-  const gameLog = await getPlayerGameLog(espnId)
+      // Use playerId (ESPN ID) since stats tables use ESPN IDs in player_id column
+      const espnId = player.playerId
+      const seasons = await getPlayerSeasonStats(espnId)
+      const gameLog = await getPlayerGameLog(espnId)
 
-  // Current season (2024-25 season stored as 2025)
-  const currentYear = getCurrentSeason()
-  const currentSeason = seasons.find(s => s.season === currentYear) ||
-                        seasons.find(s => s.season === currentYear - 1) ||
-                        seasons[0] || null
+      // Current season (2024-25 season stored as 2025)
+      const currentYear = getCurrentSeason()
+      const currentSeason = seasons.find(s => s.season === currentYear) ||
+                            seasons.find(s => s.season === currentYear - 1) ||
+                            seasons[0] || null
 
-  return {
-    player,
-    seasons,
-    currentSeason,
-    gameLog,
-  }
+      return {
+        player,
+        seasons,
+        currentSeason,
+        gameLog,
+      }
+    },
+    null,
+    { label: `bulls player profile: ${slug}` }
+  )
 }
 
 async function getPlayerSeasonStats(espnId: string): Promise<PlayerSeasonStats[]> {
@@ -496,99 +501,105 @@ export async function getBullsSchedule(season?: number): Promise<BullsGame[]> {
     return []
   }
 
-  const { data, error } = await datalabAdmin
-    .from('bulls_games_master')
-    .select(`
-      id,
-      game_date,
-      game_time,
-      game_time_display,
-      season,
-      game_type,
-      data_status,
-      opponent,
-      opponent_full_name,
-      is_bulls_home,
-      arena,
-      bulls_score,
-      opponent_score,
-      bulls_win,
-      broadcast
-    `)
-    .eq('season', targetSeason)
-    .neq('data_status', 'postponed')
-    .order('game_date', { ascending: false })
+  return buildSafeFetch(
+    async () => {
+      const { data, error } = await datalabAdmin
+        .from('bulls_games_master')
+        .select(`
+          id,
+          game_date,
+          game_time,
+          game_time_display,
+          season,
+          game_type,
+          data_status,
+          opponent,
+          opponent_full_name,
+          is_bulls_home,
+          arena,
+          bulls_score,
+          opponent_score,
+          bulls_win,
+          broadcast
+        `)
+        .eq('season', targetSeason)
+        .neq('data_status', 'postponed')
+        .order('game_date', { ascending: false })
 
-  if (error) {
-    console.error('[Bulls Schedule] Query error:', error.message, error.details)
-    return []
-  }
+      if (error) {
+        console.error('[Bulls Schedule] Query error:', error.message, error.details)
+        return []
+      }
 
-  // If no games in current season, fall back to previous season
-  if (!data || data.length === 0) {
-    const { data: prevData, error: prevError } = await datalabAdmin
-      .from('bulls_games_master')
-      .select(`
-        id,
-        game_date,
-        game_time,
-        season,
-        game_type,
-        data_status,
-        opponent,
-        opponent_full_name,
-        is_bulls_home,
-        arena,
-        bulls_score,
-        opponent_score,
-        bulls_win,
-        broadcast
-      `)
-      .eq('season', targetSeason - 1)
-      .neq('data_status', 'postponed')
-      .order('game_date', { ascending: false })
+      // If no games in current season, fall back to previous season
+      if (!data || data.length === 0) {
+        const { data: prevData, error: prevError } = await datalabAdmin
+          .from('bulls_games_master')
+          .select(`
+            id,
+            game_date,
+            game_time,
+            season,
+            game_type,
+            data_status,
+            opponent,
+            opponent_full_name,
+            is_bulls_home,
+            arena,
+            bulls_score,
+            opponent_score,
+            bulls_win,
+            broadcast
+          `)
+          .eq('season', targetSeason - 1)
+          .neq('data_status', 'postponed')
+          .order('game_date', { ascending: false })
 
-    if (prevError || !prevData) return []
-    // Deduplicate by game_date and filter out bad data
-    const prevSeenDates = new Map<string, any>()
-    for (const g of prevData) {
-      const date = g.game_date
-      const existing = prevSeenDates.get(date)
-      if (!existing) {
-        prevSeenDates.set(date, g)
-      } else {
-        const existingHasScore = (existing.bulls_score ?? 0) > 0 || (existing.opponent_score ?? 0) > 0
-        const newHasScore = (g.bulls_score ?? 0) > 0 || (g.opponent_score ?? 0) > 0
-        if (newHasScore && !existingHasScore) {
-          prevSeenDates.set(date, g)
+        if (prevError || !prevData) return []
+        // Deduplicate by game_date and filter out bad data
+        const prevSeenDates = new Map<string, any>()
+        for (const g of prevData) {
+          const date = g.game_date
+          const existing = prevSeenDates.get(date)
+          if (!existing) {
+            prevSeenDates.set(date, g)
+          } else {
+            const existingHasScore = (existing.bulls_score ?? 0) > 0 || (existing.opponent_score ?? 0) > 0
+            const newHasScore = (g.bulls_score ?? 0) > 0 || (g.opponent_score ?? 0) > 0
+            if (newHasScore && !existingHasScore) {
+              prevSeenDates.set(date, g)
+            }
+          }
+        }
+        const prevDeduped = Array.from(prevSeenDates.values())
+        return prevDeduped.map((g: any) => transformGame(g))
+      }
+
+      // Deduplicate by game_date — NBA teams never play two games on the same day
+      // DB may have duplicate entries (e.g. same date, different opponents); keep the one with scores
+      const seenDates = new Map<string, any>()
+      for (const g of data) {
+        const date = g.game_date
+        const existing = seenDates.get(date)
+        if (!existing) {
+          seenDates.set(date, g)
+        } else {
+          // Keep the entry with scores (or the one with a real opponent name)
+          const existingHasScore = (existing.bulls_score ?? 0) > 0 || (existing.opponent_score ?? 0) > 0
+          const newHasScore = (g.bulls_score ?? 0) > 0 || (g.opponent_score ?? 0) > 0
+          if (newHasScore && !existingHasScore) {
+            seenDates.set(date, g)
+          }
         }
       }
-    }
-    const prevDeduped = Array.from(prevSeenDates.values())
-    return prevDeduped.map((g: any) => transformGame(g))
-  }
 
-  // Deduplicate by game_date — NBA teams never play two games on the same day
-  // DB may have duplicate entries (e.g. same date, different opponents); keep the one with scores
-  const seenDates = new Map<string, any>()
-  for (const g of data) {
-    const date = g.game_date
-    const existing = seenDates.get(date)
-    if (!existing) {
-      seenDates.set(date, g)
-    } else {
-      // Keep the entry with scores (or the one with a real opponent name)
-      const existingHasScore = (existing.bulls_score ?? 0) > 0 || (existing.opponent_score ?? 0) > 0
-      const newHasScore = (g.bulls_score ?? 0) > 0 || (g.opponent_score ?? 0) > 0
-      if (newHasScore && !existingHasScore) {
-        seenDates.set(date, g)
-      }
-    }
-  }
+      const deduped = Array.from(seenDates.values())
 
-  const deduped = Array.from(seenDates.values())
-
-  return deduped.map((g: any) => transformGame(g))
+      return deduped.map((g: any) => transformGame(g))
+    },
+    [],
+    { label: 'bulls schedule' }
+  )
 }
 
 // Format time from 24-hour (17:30:00) to 12-hour (5:30 PM CT)
@@ -646,13 +657,18 @@ export async function getBullsRecentScores(limit: number = 10): Promise<BullsGam
 export async function getBullsStats(season?: number): Promise<BullsStats> {
   const targetSeason = season || getCurrentSeason()
 
-  const teamStats = await getTeamStats(targetSeason)
-  const leaderboards = await getLeaderboards(targetSeason)
-
-  return {
-    team: teamStats,
-    leaderboards,
-  }
+  return buildSafeFetch(
+    async () => {
+      const teamStats = await getTeamStats(targetSeason)
+      const leaderboards = await getLeaderboards(targetSeason)
+      return { team: teamStats, leaderboards }
+    },
+    {
+      team: getDefaultTeamStats(targetSeason),
+      leaderboards: { scoring: [], rebounding: [], assists: [], defense: [], steals: [], blocks: [] },
+    },
+    { label: 'bulls stats' }
+  )
 }
 
 async function getTeamStats(season: number): Promise<BullsTeamStats> {
@@ -895,56 +911,62 @@ export interface BullsRecord {
 export async function getBullsRecord(season?: number): Promise<BullsRecord> {
   const targetSeason = season || getCurrentSeason()
 
-  // CRITICAL: Get authoritative record from bulls_seasons table (recommended by Datalab)
-  let wins = 0
-  let losses = 0
-  if (datalabAdmin) {
-    const { data: seasonRecord } = await datalabAdmin
-      .from('bulls_seasons')
-      .select('wins, losses')
-      .eq('season', targetSeason)
-      .single()
+  return buildSafeFetch(
+    async () => {
+      // CRITICAL: Get authoritative record from bulls_seasons table (recommended by Datalab)
+      let wins = 0
+      let losses = 0
+      if (datalabAdmin) {
+        const { data: seasonRecord } = await datalabAdmin
+          .from('bulls_seasons')
+          .select('wins, losses')
+          .eq('season', targetSeason)
+          .single()
 
-    if (seasonRecord) {
-      wins = seasonRecord.wins || 0
-      losses = seasonRecord.losses || 0
-    }
-  }
-
-  // Get streak from schedule (need to look at game results)
-  const schedule = await getBullsSchedule(targetSeason)
-  const completedGames = schedule.filter(g => g.status === 'final')
-
-  // Fallback to calculated record if seasons table didn't have data
-  if (wins === 0 && losses === 0) {
-    wins = completedGames.filter(g => g.result === 'W').length
-    losses = completedGames.filter(g => g.result === 'L').length
-  }
-
-  // Calculate streak from most recent games
-  let streak: string | null = null
-  if (completedGames.length > 0) {
-    const sortedGames = [...completedGames].sort((a, b) =>
-      new Date(b.date).getTime() - new Date(a.date).getTime()
-    )
-    let streakCount = 1
-    const streakType = sortedGames[0].result
-    for (let i = 1; i < sortedGames.length && i < 10; i++) {
-      if (sortedGames[i].result === streakType) {
-        streakCount++
-      } else {
-        break
+        if (seasonRecord) {
+          wins = seasonRecord.wins || 0
+          losses = seasonRecord.losses || 0
+        }
       }
-    }
-    streak = `${streakType}${streakCount}`
-  }
 
-  return {
-    wins,
-    losses,
-    streak,
-    divisionRank: '3rd Central', // Default to expected value
-  }
+      // Get streak from schedule (need to look at game results)
+      const schedule = await getBullsSchedule(targetSeason)
+      const completedGames = schedule.filter(g => g.status === 'final')
+
+      // Fallback to calculated record if seasons table didn't have data
+      if (wins === 0 && losses === 0) {
+        wins = completedGames.filter(g => g.result === 'W').length
+        losses = completedGames.filter(g => g.result === 'L').length
+      }
+
+      // Calculate streak from most recent games
+      let streak: string | null = null
+      if (completedGames.length > 0) {
+        const sortedGames = [...completedGames].sort((a, b) =>
+          new Date(b.date).getTime() - new Date(a.date).getTime()
+        )
+        let streakCount = 1
+        const streakType = sortedGames[0].result
+        for (let i = 1; i < sortedGames.length && i < 10; i++) {
+          if (sortedGames[i].result === streakType) {
+            streakCount++
+          } else {
+            break
+          }
+        }
+        streak = `${streakType}${streakCount}`
+      }
+
+      return {
+        wins,
+        losses,
+        streak,
+        divisionRank: '3rd Central', // Default to expected value
+      }
+    },
+    { wins: 0, losses: 0, streak: null, divisionRank: null } as BullsRecord,
+    { label: 'bulls season record' }
+  )
 }
 
 /**

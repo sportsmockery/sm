@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: 'Complete 2025 Chicago White Sox roster with player profiles, positions, measurements, and stats.',
 }
 
-export const revalidate = 3600
+export const dynamic = 'force-dynamic'
 
 const TEAM_COLOR = 'var(--sm-red)'
 

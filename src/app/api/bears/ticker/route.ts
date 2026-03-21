@@ -2,8 +2,7 @@ import { NextResponse } from 'next/server'
 import { datalabAdmin } from '@/lib/supabase-datalab'
 import { fetchTeamRecord } from '@/lib/team-config'
 
-// Revalidate every 5 minutes during non-game times, shorter during games
-export const revalidate = 300
+export const dynamic = 'force-dynamic'
 
 // GET /api/bears/ticker - Lightweight endpoint for Bears sticky bar
 // Returns: record, next game, last game result

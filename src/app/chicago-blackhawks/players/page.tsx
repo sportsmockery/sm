@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: 'Complete list of Chicago Blackhawks players with photos, positions, stats, and player profiles.',
 }
 
-export const revalidate = 3600
+export const dynamic = 'force-dynamic'
 
 type PositionGroup = 'forwards' | 'defensemen' | 'goalies'
 

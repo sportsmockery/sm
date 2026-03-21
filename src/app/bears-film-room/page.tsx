@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = 900; // 15 minutes
+export const dynamic = 'force-dynamic';
 
 export default async function BearsFilmRoomPage() {
   const { latestVideo, previousVideos } = await getBearsFilmRoomVideos();

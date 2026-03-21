@@ -13,6 +13,7 @@ import {
 } from './types'
 import { fetchTeamRecord, fetchNextGame } from './team-config'
 import { getBearsSchedule } from './bearsData'
+import { buildSafeFetch, safeDatalabQuery } from './build-safe-fetch'
 
 /**
  * Get Bears season overview data
@@ -200,17 +201,8 @@ function getStaticKeyPlayers(): BearsPlayer[] {
  * Get trending Bears topics from recent articles
  */
 export async function getBearsTrends(): Promise<BearsTrend[]> {
-  // Fetch recent Bears articles and extract common topics
-  const { data: posts } = await supabaseAdmin
-    .from('sm_posts')
-    .select('id, title, slug')
-    .eq('status', 'published')
-    .in('category_id', await getBearsCategoryIds())
-    .order('published_at', { ascending: false })
-    .limit(50)
-
-  // Extract common themes from titles (simplified)
-  // In production, this would use NLP or tag analysis
+  // Static trends - the Supabase query here was unused (fetches posts but returns hardcoded trends)
+  // Removed the unnecessary Supabase call that was contributing to build timeouts
   const trends: BearsTrend[] = [
     {
       id: 1,
@@ -265,26 +257,32 @@ async function getBearsCategoryIds(): Promise<number[]> {
  * Get latest Bears posts
  */
 export async function getBearsPosts(limit: number = 10): Promise<PostSummary[]> {
-  const categoryIds = await getBearsCategoryIds()
+  return buildSafeFetch(
+    async () => {
+      const categoryIds = await getBearsCategoryIds()
 
-  if (categoryIds.length === 0) {
-    return []
-  }
+      if (categoryIds.length === 0) {
+        return []
+      }
 
-  const { data: posts, error } = await supabaseAdmin
-    .from('sm_posts')
-    .select(POST_SUMMARY_SELECT)
-    .eq('status', 'published')
-    .in('category_id', categoryIds)
-    .order('published_at', { ascending: false })
-    .limit(limit)
+      const { data: posts, error } = await supabaseAdmin
+        .from('sm_posts')
+        .select(POST_SUMMARY_SELECT)
+        .eq('status', 'published')
+        .in('category_id', categoryIds)
+        .order('published_at', { ascending: false })
+        .limit(limit)
 
-  if (error) {
-    console.error('Error fetching Bears posts:', error)
-    return []
-  }
+      if (error) {
+        console.error('Error fetching Bears posts:', error)
+        return []
+      }
 
-  return (posts || []).map(mapToPostSummary)
+      return (posts || []).map(mapToPostSummary)
+    },
+    [],
+    { label: 'bears posts' }
+  )
 }
 
 /**
@@ -294,42 +292,45 @@ export async function getBearsPostsByType(
   type: 'news' | 'rumor' | 'analysis',
   limit: number = 5
 ): Promise<PostSummary[]> {
-  const categoryIds = await getBearsCategoryIds()
+  return buildSafeFetch(
+    async () => {
+      const categoryIds = await getBearsCategoryIds()
 
-  if (categoryIds.length === 0) {
-    return []
-  }
+      if (categoryIds.length === 0) {
+        return []
+      }
 
-  // Filter by title keywords for type (simplified approach)
-  // In production, posts would have a type field
-  const typeKeywords: Record<string, string[]> = {
-    news: ['news', 'report', 'update', 'breaking'],
-    rumor: ['rumor', 'could', 'may', 'might', 'trade', 'signing'],
-    analysis: ['analysis', 'breakdown', 'film', 'review', 'grade'],
-  }
+      const typeKeywords: Record<string, string[]> = {
+        news: ['news', 'report', 'update', 'breaking'],
+        rumor: ['rumor', 'could', 'may', 'might', 'trade', 'signing'],
+        analysis: ['analysis', 'breakdown', 'film', 'review', 'grade'],
+      }
 
-  const { data: posts, error } = await supabaseAdmin
-    .from('sm_posts')
-    .select(POST_SUMMARY_SELECT)
-    .eq('status', 'published')
-    .in('category_id', categoryIds)
-    .order('published_at', { ascending: false })
-    .limit(50) // Fetch more to filter
+      const { data: posts, error } = await supabaseAdmin
+        .from('sm_posts')
+        .select(POST_SUMMARY_SELECT)
+        .eq('status', 'published')
+        .in('category_id', categoryIds)
+        .order('published_at', { ascending: false })
+        .limit(50)
 
-  if (error) {
-    console.error('Error fetching Bears posts by type:', error)
-    return []
-  }
+      if (error) {
+        console.error('Error fetching Bears posts by type:', error)
+        return []
+      }
 
-  // Filter by keywords in title
-  const keywords = typeKeywords[type] || []
-  const filtered = (posts || [])
-    .filter(post =>
-      keywords.some(kw => post.title.toLowerCase().includes(kw))
-    )
-    .slice(0, limit)
+      const keywords = typeKeywords[type] || []
+      const filtered = (posts || [])
+        .filter(post =>
+          keywords.some(kw => post.title.toLowerCase().includes(kw))
+        )
+        .slice(0, limit)
 
-  return filtered.map(mapToPostSummary)
+      return filtered.map(mapToPostSummary)
+    },
+    [],
+    { label: `bears posts (${type})` }
+  )
 }
 
 /**

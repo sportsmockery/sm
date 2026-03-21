@@ -31,12 +31,7 @@ export async function generateMetadata({ params }: PlayerPageProps): Promise<Met
   }
 }
 
-export async function generateStaticParams() {
-  const players = await getBearsPlayers()
-  return players.map(player => ({ slug: player.slug }))
-}
-
-export const revalidate = 3600 // Revalidate every hour
+export const dynamic = 'force-dynamic'
 
 export default async function PlayerProfilePage({ params }: PlayerPageProps) {
   const { slug } = await params

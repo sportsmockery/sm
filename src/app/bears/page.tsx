@@ -16,6 +16,8 @@ import {
   AskBearsAI,
 } from '@/components/bears'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Chicago Bears Hub | News, Stats & Analysis',
   description: 'Your complete Chicago Bears destination. Get the latest Bears news, season stats, roster updates, trade rumors, and expert analysis.',

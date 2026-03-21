@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   },
 }
 
-export const revalidate = 1800 // 30 min for fresh rumor content
+export const dynamic = 'force-dynamic'
 
 async function getCubsPosts(limit: number = 20) {
   try {

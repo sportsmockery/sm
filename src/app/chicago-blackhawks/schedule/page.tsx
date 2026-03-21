@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description: 'Complete Chicago Blackhawks 2025-26 schedule with game dates, times, opponents, scores, and results. View upcoming games and past results.',
 }
 
-export const revalidate = 3600
+export const dynamic = 'force-dynamic'
 
 export default async function BlackhawksSchedulePage() {
   const team = CHICAGO_TEAMS.blackhawks

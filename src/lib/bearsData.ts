@@ -10,6 +10,7 @@
 
 import { supabase } from './supabase'
 import { datalabAdmin } from './supabase-datalab'
+import { buildSafeFetch, safeDatalabQuery } from './build-safe-fetch'
 
 // =============================================================================
 // TYPE DEFINITIONS
@@ -313,39 +314,36 @@ async function getBearsPlayersFromDatalab(): Promise<BearsPlayer[]> {
     return []
   }
 
-  // Get all active roster players (is_active = true)
-  // This gives us the full current roster (53+ players)
-  const { data, error } = await datalabAdmin
-    .from('bears_players')
-    .select(`
-      id,
-      player_id,
-      espn_id,
-      name,
-      first_name,
-      last_name,
-      position,
-      position_group,
-      jersey_number,
-      height_inches,
-      weight_lbs,
-      age,
-      college,
-      years_exp,
-      status,
-      is_active,
-      headshot_url
-    `)
-    .eq('is_active', true)
-    .order('position_group')
-    .order('name')
+  const data = await safeDatalabQuery(
+    () => datalabAdmin
+      .from('bears_players')
+      .select(`
+        id,
+        player_id,
+        espn_id,
+        name,
+        first_name,
+        last_name,
+        position,
+        position_group,
+        jersey_number,
+        height_inches,
+        weight_lbs,
+        age,
+        college,
+        years_exp,
+        status,
+        is_active,
+        headshot_url
+      `)
+      .eq('is_active', true)
+      .order('position_group')
+      .order('name'),
+    [] as any[],
+    'bears players'
+  )
 
-  if (error) {
-    console.error('Datalab fetch error:', error)
-    return []
-  }
-
-  return transformPlayers(data || [])
+  return transformPlayers(data)
 }
 
 /**
@@ -426,39 +424,41 @@ export async function getBearsRosterGrouped(): Promise<Record<PositionGroup, Bea
  * Get a single player profile with stats and game log
  */
 export async function getPlayerProfile(slug: string): Promise<PlayerProfile | null> {
-  const players = await getBearsPlayers()
-  const player = players.find(p => p.slug === slug)
+  return buildSafeFetch(
+    async () => {
+      const players = await getBearsPlayers()
+      const player = players.find(p => p.slug === slug)
 
-  if (!player) return null
+      if (!player) return null
 
-  // Bears now uses ESPN ID for stats joins (bp.espn_id = bpgs.player_id)
-  const espnId = player.playerId
+      const espnId = player.playerId
 
-  // Fetch regular and postseason stats separately
-  const [regularSeasons, postseasonSeasons, gameLog] = await Promise.all([
-    getPlayerSeasonStats(espnId, 'regular'),
-    getPlayerSeasonStats(espnId, 'postseason'),
-    getPlayerGameLog(espnId),
-  ])
+      const [regularSeasons, postseasonSeasons, gameLog] = await Promise.all([
+        getPlayerSeasonStats(espnId, 'regular'),
+        getPlayerSeasonStats(espnId, 'postseason'),
+        getPlayerGameLog(espnId),
+      ])
 
-  // Current regular season stats
-  const currentYear = new Date().getFullYear()
-  const currentSeason = regularSeasons.find(s => s.season === currentYear) ||
-                        regularSeasons.find(s => s.season === currentYear - 1) ||
-                        regularSeasons[0] || null
+      const currentYear = new Date().getFullYear()
+      const currentSeason = regularSeasons.find(s => s.season === currentYear) ||
+                            regularSeasons.find(s => s.season === currentYear - 1) ||
+                            regularSeasons[0] || null
 
-  // Current postseason stats (if any)
-  const postseasonStats = postseasonSeasons.find(s => s.season === currentYear) ||
-                          postseasonSeasons.find(s => s.season === currentYear - 1) ||
-                          postseasonSeasons[0] || null
+      const postseasonStats = postseasonSeasons.find(s => s.season === currentYear) ||
+                              postseasonSeasons.find(s => s.season === currentYear - 1) ||
+                              postseasonSeasons[0] || null
 
-  return {
-    player,
-    seasons: regularSeasons,
-    currentSeason,
-    postseasonStats,
-    gameLog,
-  }
+      return {
+        player,
+        seasons: regularSeasons,
+        currentSeason,
+        postseasonStats,
+        gameLog,
+      }
+    },
+    null,
+    { label: `bears player profile: ${slug}` }
+  )
 }
 
 async function getPlayerSeasonStats(espnId: string, gameType?: GameType): Promise<PlayerSeasonStats[]> {
@@ -701,30 +701,34 @@ export async function getBearsSchedule(season?: number): Promise<BearsGame[]> {
 async function getBearsScheduleFromDatalab(season: number): Promise<BearsGame[]> {
   if (!datalabAdmin) return []
 
-  // Query for all games in the season - use select('*') to avoid column mismatch issues
-  const { data, error } = await datalabAdmin
-    .from('bears_games_master')
-    .select('*')
-    .eq('season', season)
-    .order('game_date', { ascending: true })
+  return buildSafeFetch(
+    async () => {
+      const { data, error } = await datalabAdmin
+        .from('bears_games_master')
+        .select('*')
+        .eq('season', season)
+        .order('game_date', { ascending: true })
 
-  if (error) {
-    console.error('Bears schedule fetch error:', error)
-    return []
-  }
+      if (error) {
+        console.error('Bears schedule fetch error:', error)
+        return []
+      }
 
-  // If no games in current season, fall back to previous season (off-season)
-  if (!data || data.length === 0) {
-    const { data: prevData, error: prevError } = await datalabAdmin
-      .from('bears_games_master')
-      .select('*')
-      .eq('season', season - 1)
-      .order('game_date', { ascending: true })
+      if (!data || data.length === 0) {
+        const { data: prevData, error: prevError } = await datalabAdmin
+          .from('bears_games_master')
+          .select('*')
+          .eq('season', season - 1)
+          .order('game_date', { ascending: true })
 
-    if (prevError || !prevData) return []
-    return prevData.map((g: any) => transformGame(g, null))
-  }
-  return data.map((g: any) => transformGame(g, null))
+        if (prevError || !prevData) return []
+        return prevData.map((g: any) => transformGame(g, null))
+      }
+      return data.map((g: any) => transformGame(g, null))
+    },
+    [],
+    { label: 'bears schedule' }
+  )
 }
 
 // Format time from 24-hour (17:30:00) to 12-hour (5:30 PM CT)
@@ -824,17 +828,19 @@ export async function getBearsStats(
 ): Promise<BearsStats> {
   const targetSeason = season || getCurrentSeason()
 
-  // Get team stats
-  const teamStats = await getTeamStats(targetSeason, gameType)
-
-  // Get leaderboards
-  const leaderboards = await getLeaderboards(targetSeason, gameType)
-
-  return {
-    team: teamStats,
-    leaderboards,
-    gameType,
-  }
+  return buildSafeFetch(
+    async () => {
+      const teamStats = await getTeamStats(targetSeason, gameType)
+      const leaderboards = await getLeaderboards(targetSeason, gameType)
+      return { team: teamStats, leaderboards, gameType }
+    },
+    {
+      team: getDefaultTeamStats(targetSeason),
+      leaderboards: { passing: [], rushing: [], receiving: [], defense: [], sacks: [], interceptions: [] },
+      gameType,
+    },
+    { label: 'bears stats' }
+  )
 }
 
 /**

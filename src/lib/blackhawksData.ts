@@ -8,6 +8,7 @@
  */
 
 import { datalabAdmin } from './supabase-datalab'
+import { buildSafeFetch, safeDatalabQuery } from './build-safe-fetch'
 
 // =============================================================================
 // TYPE DEFINITIONS
@@ -196,20 +197,18 @@ export async function getBlackhawksPlayers(): Promise<BlackhawksPlayer[]> {
     return []
   }
 
-  // Get current roster players (is_active = true)
-  const { data, error } = await datalabAdmin
-    .from('blackhawks_players')
-    .select('*')
-    .eq('is_active', true)
-    .order('position')
-    .order('name')
+  const data = await safeDatalabQuery(
+    () => datalabAdmin
+      .from('blackhawks_players')
+      .select('*')
+      .eq('is_active', true)
+      .order('position')
+      .order('name'),
+    [] as any[],
+    'blackhawks players'
+  )
 
-  if (error) {
-    console.error('DataLab fetch error:', error)
-    return []
-  }
-
-  return transformPlayers(data || [])
+  return transformPlayers(data)
 }
 
 /**
@@ -300,27 +299,33 @@ export async function getBlackhawksRosterGrouped(): Promise<Record<PositionGroup
  * Get a single player profile with stats and game log
  */
 export async function getPlayerProfile(slug: string): Promise<PlayerProfile | null> {
-  const players = await getBlackhawksPlayers()
-  const player = players.find(p => p.slug === slug)
+  return buildSafeFetch(
+    async () => {
+      const players = await getBlackhawksPlayers()
+      const player = players.find(p => p.slug === slug)
 
-  if (!player) return null
+      if (!player) return null
 
-  // Use playerId (ESPN ID) since stats tables use ESPN IDs in player_id column
-  const statsId = player.playerId
-  const seasons = await getPlayerSeasonStats(statsId, player.positionGroup === 'goalies')
-  const gameLog = await getPlayerGameLog(statsId)
+      // Use playerId (ESPN ID) since stats tables use ESPN IDs in player_id column
+      const statsId = player.playerId
+      const seasons = await getPlayerSeasonStats(statsId, player.positionGroup === 'goalies')
+      const gameLog = await getPlayerGameLog(statsId)
 
-  const currentYear = getCurrentSeason()
-  const currentSeason = seasons.find(s => s.season === currentYear) ||
-                        seasons.find(s => s.season === currentYear - 1) ||
-                        seasons[0] || null
+      const currentYear = getCurrentSeason()
+      const currentSeason = seasons.find(s => s.season === currentYear) ||
+                            seasons.find(s => s.season === currentYear - 1) ||
+                            seasons[0] || null
 
-  return {
-    player,
-    seasons,
-    currentSeason,
-    gameLog,
-  }
+      return {
+        player,
+        seasons,
+        currentSeason,
+        gameLog,
+      }
+    },
+    null,
+    { label: `blackhawks player profile: ${slug}` }
+  )
 }
 
 async function getPlayerSeasonStats(statsId: string, isGoalie: boolean): Promise<PlayerSeasonStats[]> {
@@ -488,72 +493,78 @@ export async function getBlackhawksSchedule(season?: number): Promise<Blackhawks
     return []
   }
 
-  // Try using the canonical view first (blackhawks_schedule_all)
-  let data: any[] | null = null
-  let error: any = null
+  return buildSafeFetch(
+    async () => {
+      // Try using the canonical view first (blackhawks_schedule_all)
+      let data: any[] | null = null
+      let error: any = null
 
-  // First attempt: try blackhawks_schedule_all view with season
-  const viewResult = await datalabAdmin
-    .from('blackhawks_schedule_all')
-    .select('*')
-    .eq('season', targetSeason)
-    .order('game_date', { ascending: true })
-
-  if (!viewResult.error && viewResult.data && viewResult.data.length > 0) {
-    data = viewResult.data
-  } else {
-    // Fallback: try blackhawks_games_master with season
-    const masterResult = await datalabAdmin
-      .from('blackhawks_games_master')
-      .select('*')
-      .eq('season', targetSeason)
-      .order('game_date', { ascending: true })
-
-    if (!masterResult.error && masterResult.data && masterResult.data.length > 0) {
-      data = masterResult.data
-    } else {
-      // Final fallback: try with 'season' column
-      const seasonResult = await datalabAdmin
-        .from('blackhawks_games_master')
+      // First attempt: try blackhawks_schedule_all view with season
+      const viewResult = await datalabAdmin
+        .from('blackhawks_schedule_all')
         .select('*')
         .eq('season', targetSeason)
         .order('game_date', { ascending: true })
 
-      if (!seasonResult.error && seasonResult.data && seasonResult.data.length > 0) {
-        data = seasonResult.data
+      if (!viewResult.error && viewResult.data && viewResult.data.length > 0) {
+        data = viewResult.data
       } else {
-        error = seasonResult.error || masterResult.error || viewResult.error
+        // Fallback: try blackhawks_games_master with season
+        const masterResult = await datalabAdmin
+          .from('blackhawks_games_master')
+          .select('*')
+          .eq('season', targetSeason)
+          .order('game_date', { ascending: true })
+
+        if (!masterResult.error && masterResult.data && masterResult.data.length > 0) {
+          data = masterResult.data
+        } else {
+          // Final fallback: try with 'season' column
+          const seasonResult = await datalabAdmin
+            .from('blackhawks_games_master')
+            .select('*')
+            .eq('season', targetSeason)
+            .order('game_date', { ascending: true })
+
+          if (!seasonResult.error && seasonResult.data && seasonResult.data.length > 0) {
+            data = seasonResult.data
+          } else {
+            error = seasonResult.error || masterResult.error || viewResult.error
+          }
+        }
       }
-    }
-  }
 
-  if (error) {
-    console.error('Blackhawks schedule error:', error)
-    return []
-  }
+      if (error) {
+        console.error('Blackhawks schedule error:', error)
+        return []
+      }
 
-  if (!data || data.length === 0) {
-    return []
-  }
+      if (!data || data.length === 0) {
+        return []
+      }
 
-  // Filter to current season dates only (Oct to June)
-  // Season is stored as ENDING year (e.g., 2026 for 2025-26 season)
-  // So dates should be Oct of (targetSeason-1) to June of targetSeason
-  const seasonStartDate = `${targetSeason - 1}-10-01`
-  const seasonEndDate = `${targetSeason}-06-30`
+      // Filter to current season dates only (Oct to June)
+      // Season is stored as ENDING year (e.g., 2026 for 2025-26 season)
+      // So dates should be Oct of (targetSeason-1) to June of targetSeason
+      const seasonStartDate = `${targetSeason - 1}-10-01`
+      const seasonEndDate = `${targetSeason}-06-30`
 
-  const dateFiltered = data.filter((g: any) => {
-    const gameDate = g.game_date
-    return gameDate >= seasonStartDate && gameDate <= seasonEndDate
-  })
+      const dateFiltered = data.filter((g: any) => {
+        const gameDate = g.game_date
+        return gameDate >= seasonStartDate && gameDate <= seasonEndDate
+      })
 
-  // Filter to regular season and postseason only (exclude preseason)
-  const filtered = dateFiltered.filter((g: any) => {
-    const gameType = g.game_type?.toUpperCase() || ''
-    return gameType !== 'PRE' && gameType !== 'PRESEASON'
-  })
+      // Filter to regular season and postseason only (exclude preseason)
+      const filtered = dateFiltered.filter((g: any) => {
+        const gameType = g.game_type?.toUpperCase() || ''
+        return gameType !== 'PRE' && gameType !== 'PRESEASON'
+      })
 
-  return filtered.map((g: any) => transformGame(g))
+      return filtered.map((g: any) => transformGame(g))
+    },
+    [],
+    { label: 'blackhawks schedule' }
+  )
 }
 
 function formatGameTime(timeStr: string | null): string | null {
@@ -628,13 +639,18 @@ export async function getBlackhawksRecentScores(limit: number = 10): Promise<Bla
 export async function getBlackhawksStats(season?: number): Promise<BlackhawksStats> {
   const targetSeason = season || getCurrentSeason()
 
-  const teamStats = await getTeamStats(targetSeason)
-  const leaderboards = await getLeaderboards(targetSeason)
-
-  return {
-    team: teamStats,
-    leaderboards,
-  }
+  return buildSafeFetch(
+    async () => {
+      const teamStats = await getTeamStats(targetSeason)
+      const leaderboards = await getLeaderboards(targetSeason)
+      return { team: teamStats, leaderboards }
+    },
+    {
+      team: getDefaultTeamStats(targetSeason),
+      leaderboards: { goals: [], assists: [], points: [], goaltending: [] },
+    },
+    { label: 'blackhawks stats' }
+  )
 }
 
 async function getTeamStats(season: number): Promise<BlackhawksTeamStats> {
@@ -861,19 +877,55 @@ export interface BlackhawksRecord {
 export async function getBlackhawksRecord(season?: number): Promise<BlackhawksRecord> {
   const targetSeason = season || getCurrentSeason()
 
-  // CRITICAL: Get authoritative record from blackhawks_seasons table (recommended by Datalab)
-  if (datalabAdmin) {
-    const { data: seasonRecord } = await datalabAdmin
-      .from('blackhawks_seasons')
-      .select('wins, losses, otl')
-      .eq('season', targetSeason)
-      .single()
+  return buildSafeFetch(
+    async () => {
+      // CRITICAL: Get authoritative record from blackhawks_seasons table (recommended by Datalab)
+      if (datalabAdmin) {
+        const { data: seasonRecord } = await datalabAdmin
+          .from('blackhawks_seasons')
+          .select('wins, losses, otl')
+          .eq('season', targetSeason)
+          .single()
 
-    if (seasonRecord) {
-      // Get streak from schedule
+        if (seasonRecord) {
+          // Get streak from schedule
+          const schedule = await getBlackhawksSchedule(targetSeason)
+          const completedGames = schedule.filter(g => g.status === 'final')
+
+          let streak: string | null = null
+          if (completedGames.length > 0) {
+            const sortedGames = [...completedGames].sort((a, b) =>
+              new Date(b.date).getTime() - new Date(a.date).getTime()
+            )
+            let streakCount = 1
+            const streakType = sortedGames[0].result
+            for (let i = 1; i < sortedGames.length && i < 10; i++) {
+              if (sortedGames[i].result === streakType) {
+                streakCount++
+              } else {
+                break
+              }
+            }
+            streak = `${streakType}${streakCount}`
+          }
+
+          return {
+            wins: seasonRecord.wins || 0,
+            losses: seasonRecord.losses || 0,
+            otLosses: seasonRecord.otl || 0,
+            streak,
+          }
+        }
+      }
+
+      // Fallback: Calculate from schedule if seasons table unavailable
       const schedule = await getBlackhawksSchedule(targetSeason)
       const completedGames = schedule.filter(g => g.status === 'final')
+      const wins = completedGames.filter(g => g.result === 'W').length
+      const losses = completedGames.filter(g => g.result === 'L').length
+      const otLosses = completedGames.filter(g => g.result === 'OTL').length
 
+      // Calculate streak
       let streak: string | null = null
       if (completedGames.length > 0) {
         const sortedGames = [...completedGames].sort((a, b) =>
@@ -891,41 +943,11 @@ export async function getBlackhawksRecord(season?: number): Promise<BlackhawksRe
         streak = `${streakType}${streakCount}`
       }
 
-      return {
-        wins: seasonRecord.wins || 0,
-        losses: seasonRecord.losses || 0,
-        otLosses: seasonRecord.otl || 0,
-        streak,
-      }
-    }
-  }
-
-  // Fallback: Calculate from schedule if seasons table unavailable
-  const schedule = await getBlackhawksSchedule(targetSeason)
-  const completedGames = schedule.filter(g => g.status === 'final')
-  const wins = completedGames.filter(g => g.result === 'W').length
-  const losses = completedGames.filter(g => g.result === 'L').length
-  const otLosses = completedGames.filter(g => g.result === 'OTL').length
-
-  // Calculate streak
-  let streak: string | null = null
-  if (completedGames.length > 0) {
-    const sortedGames = [...completedGames].sort((a, b) =>
-      new Date(b.date).getTime() - new Date(a.date).getTime()
-    )
-    let streakCount = 1
-    const streakType = sortedGames[0].result
-    for (let i = 1; i < sortedGames.length && i < 10; i++) {
-      if (sortedGames[i].result === streakType) {
-        streakCount++
-      } else {
-        break
-      }
-    }
-    streak = `${streakType}${streakCount}`
-  }
-
-  return { wins, losses, otLosses, streak }
+      return { wins, losses, otLosses, streak }
+    },
+    { wins: 0, losses: 0, otLosses: 0, streak: null },
+    { label: 'blackhawks season record' }
+  )
 }
 
 /**

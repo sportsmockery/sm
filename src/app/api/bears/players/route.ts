@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
 import { datalabAdmin } from '@/lib/supabase-datalab'
+import { safeDatalabQuery } from '@/lib/build-safe-fetch'
 
-// Revalidate every hour
-export const revalidate = 3600
+export const dynamic = 'force-dynamic'
 
 // Position group and side mappings
 const POSITION_TO_GROUP: Record<string, string> = {
@@ -38,41 +38,37 @@ export async function GET() {
     }
 
     // Per SM_INTEGRATION_GUIDE.md: Filter by is_active = true
-    const { data, error } = await datalabAdmin
-      .from('bears_players')
-      .select(`
-        id,
-        player_id,
-        espn_id,
-        name,
-        first_name,
-        last_name,
-        position,
-        position_group,
-        jersey_number,
-        height_inches,
-        weight_lbs,
-        age,
-        college,
-        years_exp,
-        status,
-        is_active,
-        headshot_url
-      `)
-      .eq('is_active', true)
-      .order('position_group')
-      .order('name')
-
-    if (error) {
-      console.error('Bears players fetch error:', error)
-      return NextResponse.json({
-        players: [],
-        error: 'Failed to fetch players',
-      })
-    }
+    const data = await safeDatalabQuery(
+      () => datalabAdmin
+        .from('bears_players')
+        .select(`
+          id,
+          player_id,
+          espn_id,
+          name,
+          first_name,
+          last_name,
+          position,
+          position_group,
+          jersey_number,
+          height_inches,
+          weight_lbs,
+          age,
+          college,
+          years_exp,
+          status,
+          is_active,
+          headshot_url
+        `)
+        .eq('is_active', true)
+        .order('position_group')
+        .order('name'),
+      [] as any[],
+      'bears players API'
+    )
 
     // Transform to match expected BearsPlayer interface
-    const players = (data || []).map((p: any) => {
+    const players = data.map((p: any) => {
       const position = p.position || 'UNKNOWN'
       const side = POSITION_TO_SIDE[position] || 'ST'
 

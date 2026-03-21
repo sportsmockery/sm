@@ -5,6 +5,7 @@ import { TeamHubLayout } from '@/components/team'
 import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
 import { getBearsSeparatedRecord } from '@/lib/bearsData'
 import { datalabAdmin } from '@/lib/supabase-datalab'
+import { buildSafeFetch } from '@/lib/build-safe-fetch'
 import { HubUpdatesFeed } from '@/components/hub'
 
 export const metadata: Metadata = {
@@ -23,7 +24,7 @@ export const metadata: Metadata = {
 }
 
 // Revalidate every hour per user request
-export const revalidate = 3600
+export const dynamic = 'force-dynamic'
 
 function formatMoney(n: number | null | undefined): string {
   if (n == null) return '--'
@@ -80,22 +81,35 @@ interface ContractRow {
 export default async function BearsCapTrackerPage() {
   const team = CHICAGO_TEAMS.bears
 
-  const [separatedRecord, nextGame, capResult, contractsResult, headshotsResult] = await Promise.all([
+  const [separatedRecord, nextGame, capData] = await Promise.all([
     getBearsSeparatedRecord(2025),
     fetchNextGame('bears'),
-    datalabAdmin
-      .from('bears_salary_cap')
-      .select('*')
-      .eq('season', 2026)
-      .single(),
-    datalabAdmin
-      .from('bears_contracts')
-      .select('player_id, player_name, position, age, cap_hit, base_salary, dead_cap, contract_years, free_agent_year')
-      .eq('season', 2026)
-      .order('cap_hit', { ascending: false }),
-    datalabAdmin
-      .from('bears_players')
-      .select('espn_id, headshot_url'),
+    buildSafeFetch(
+      async () => {
+        const [capResult, contractsResult, headshotsResult] = await Promise.all([
+          datalabAdmin
+            .from('bears_salary_cap')
+            .select('*')
+            .eq('season', 2026)
+            .single(),
+          datalabAdmin
+            .from('bears_contracts')
+            .select('player_id, player_name, position, age, cap_hit, base_salary, dead_cap, contract_years, free_agent_year')
+            .eq('season', 2026)
+            .order('cap_hit', { ascending: false }),
+          datalabAdmin
+            .from('bears_players')
+            .select('espn_id, headshot_url'),
+        ])
+        return {
+          cap: capResult.data as CapSummary | null,
+          rows: (contractsResult.data || []) as ContractRow[],
+          headshots: (headshotsResult.data || []) as { espn_id: string; headshot_url: string }[],
+        }
+      },
+      { cap: null, rows: [] as ContractRow[], headshots: [] as { espn_id: string; headshot_url: string }[] },
+      { label: 'bears cap tracker data' }
+    ),
   ])
 
   const record = {
@@ -109,15 +123,13 @@ export default async function BearsCapTrackerPage() {
     divisionRank: separatedRecord.divisionRank || undefined,
   }
 
-  const cap: CapSummary | null = capResult.data
-  const rows: ContractRow[] = (contractsResult.data || []) as ContractRow[]
+  const cap = capData.cap
+  const rows = capData.rows
 
   // Build headshot map: ESPN ID -> headshot URL
   const headshotMap = new Map<string, string>()
-  if (headshotsResult.data) {
-    for (const p of headshotsResult.data as { espn_id: string; headshot_url: string }[]) {
-      if (p.espn_id && p.headshot_url) headshotMap.set(String(p.espn_id), p.headshot_url)
-    }
+  for (const p of capData.headshots) {
+    if (p.espn_id && p.headshot_url) headshotMap.set(String(p.espn_id), p.headshot_url)
   }
 
   const isOverCap = cap ? cap.cap_space < 0 : false

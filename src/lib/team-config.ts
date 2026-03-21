@@ -14,6 +14,7 @@
 
 import type { TeamInfo, NextGameInfo, TeamRecord } from '@/components/team/TeamHubLayout'
 import { datalabAdmin as datalabClient } from './supabase-datalab'
+import { buildSafeFetch } from './build-safe-fetch'
 
 /**
  * Get current MLB season phase based on date boundaries
@@ -173,71 +174,68 @@ export async function fetchTeamRecord(teamKey: string): Promise<TeamRecord | nul
   const seasonsConfig = SEASONS_TABLE_CONFIG[teamKey]
   if (!teamInfo || !seasonsConfig || !datalabClient) return null
 
-  const currentSeason = getCurrentSeason(teamInfo.league)
+  return buildSafeFetch(
+    async () => {
+      const currentSeason = getCurrentSeason(teamInfo.league)
 
-  try {
-    // CRITICAL: Use the authoritative _seasons table for record
-    // This avoids issues with future games having scores of 0-0 or incorrect win flags
-    const { data: seasonData, error } = await datalabClient
-      .from(seasonsConfig.table)
-      .select('*')
-      .eq('season', currentSeason)
-      .single()
+      // CRITICAL: Use the authoritative _seasons table for record
+      const { data: seasonData, error } = await datalabClient
+        .from(seasonsConfig.table)
+        .select('*')
+        .eq('season', currentSeason)
+        .single()
 
-    if (error || !seasonData) {
-      console.error(`Error fetching ${teamKey} season record from ${seasonsConfig.table}:`, error)
-      return null
-    }
+      if (error || !seasonData) {
+        console.error(`Error fetching ${teamKey} season record from ${seasonsConfig.table}:`, error)
+        return null
+      }
 
-    const wins = Number(seasonData[seasonsConfig.winsCol]) || 0
-    const losses = Number(seasonData[seasonsConfig.lossesCol]) || 0
-    const ties = seasonsConfig.tiesCol ? Number(seasonData[seasonsConfig.tiesCol]) || 0 : 0
-    const otLosses = seasonsConfig.otlCol ? Number(seasonData[seasonsConfig.otlCol]) || 0 : 0
+      const wins = Number(seasonData[seasonsConfig.winsCol]) || 0
+      const losses = Number(seasonData[seasonsConfig.lossesCol]) || 0
+      const ties = seasonsConfig.tiesCol ? Number(seasonData[seasonsConfig.tiesCol]) || 0 : 0
+      const otLosses = seasonsConfig.otlCol ? Number(seasonData[seasonsConfig.otlCol]) || 0 : 0
 
-    // For postseason, use the season table columns if available (Bears has them)
-    let postWins = 0
-    let postLosses = 0
+      let postWins = 0
+      let postLosses = 0
 
-    if (seasonsConfig.postWinsCol && seasonsConfig.postLossesCol) {
-      postWins = Number(seasonData[seasonsConfig.postWinsCol]) || 0
-      postLosses = Number(seasonData[seasonsConfig.postLossesCol]) || 0
-    } else {
-      // For teams without postseason columns, calculate from games
-      const gamesConfig = DATALAB_CONFIG[teamKey]
-      if (gamesConfig) {
-        const { data: games } = await datalabClient
-          .from(gamesConfig.gamesTable)
-          .select('*')
-          .eq('season', currentSeason)
-          .or('game_type.eq.postseason,game_type.eq.playoff,is_playoff.eq.true')
-          .gt(gamesConfig.scoreCol, 0)
+      if (seasonsConfig.postWinsCol && seasonsConfig.postLossesCol) {
+        postWins = Number(seasonData[seasonsConfig.postWinsCol]) || 0
+        postLosses = Number(seasonData[seasonsConfig.postLossesCol]) || 0
+      } else {
+        const gamesConfig = DATALAB_CONFIG[teamKey]
+        if (gamesConfig) {
+          const { data: games } = await datalabClient
+            .from(gamesConfig.gamesTable)
+            .select('*')
+            .eq('season', currentSeason)
+            .or('game_type.eq.postseason,game_type.eq.playoff,is_playoff.eq.true')
+            .gt(gamesConfig.scoreCol, 0)
 
-        if (games && games.length > 0) {
-          games.forEach((game: any) => {
-            const teamScore = Number(game[gamesConfig.scoreCol]) || 0
-            const oppScore = Number(game[gamesConfig.oppScoreCol]) || 0
-            if (teamScore > oppScore) postWins++
-            else if (oppScore > teamScore) postLosses++
-          })
+          if (games && games.length > 0) {
+            games.forEach((game: any) => {
+              const teamScore = Number(game[gamesConfig.scoreCol]) || 0
+              const oppScore = Number(game[gamesConfig.oppScoreCol]) || 0
+              if (teamScore > oppScore) postWins++
+              else if (oppScore > teamScore) postLosses++
+            })
+          }
         }
       }
-    }
 
-    // Add season phase label for MLB teams (Spring Training, Postseason, etc.)
-    const recordLabel = teamInfo.league === 'MLB' ? getMLBRecordLabel() : undefined
+      const recordLabel = teamInfo.league === 'MLB' ? getMLBRecordLabel() : undefined
 
-    return {
-      wins,
-      losses,
-      ties: ties > 0 ? ties : undefined,
-      otLosses: otLosses > 0 ? otLosses : undefined,
-      recordLabel,
-      postseason: (postWins > 0 || postLosses > 0) ? { wins: postWins, losses: postLosses } : undefined,
-    }
-  } catch (error) {
-    console.error(`Error fetching ${teamKey} record:`, error)
-    return null
-  }
+      return {
+        wins,
+        losses,
+        ties: ties > 0 ? ties : undefined,
+        otLosses: otLosses > 0 ? otLosses : undefined,
+        recordLabel,
+        postseason: (postWins > 0 || postLosses > 0) ? { wins: postWins, losses: postLosses } : undefined,
+      }
+    },
+    null,
+    { label: `${teamKey} team record` }
+  )
 }
 
 /**
@@ -248,39 +246,36 @@ export async function fetchNextGame(teamKey: string): Promise<NextGameInfo | nul
   const teamInfo = CHICAGO_TEAMS[teamKey]
   if (!config || !teamInfo || !datalabClient) return null
 
-  try {
-    const today = new Date().toISOString().split('T')[0]
+  return buildSafeFetch(
+    async () => {
+      const today = new Date().toISOString().split('T')[0]
 
-    // Get next upcoming game (game_date >= today with no score yet)
-    const { data: games, error } = await datalabClient
-      .from(config.gamesTable)
-      .select('*')
-      .gte('game_date', today)
-      .is(config.scoreCol, null)
-      .order('game_date', { ascending: true })
-      .limit(1)
-
-    if (error || !games || games.length === 0) {
-      // Fallback: try to get any future game
-      const { data: futureGames } = await datalabClient
+      const { data: games, error } = await datalabClient
         .from(config.gamesTable)
         .select('*')
         .gte('game_date', today)
+        .is(config.scoreCol, null)
         .order('game_date', { ascending: true })
         .limit(1)
 
-      if (!futureGames || futureGames.length === 0) return null
+      if (error || !games || games.length === 0) {
+        const { data: futureGames } = await datalabClient
+          .from(config.gamesTable)
+          .select('*')
+          .gte('game_date', today)
+          .order('game_date', { ascending: true })
+          .limit(1)
 
-      const game = futureGames[0]
-      return formatNextGame(game, config)
-    }
+        if (!futureGames || futureGames.length === 0) return null
 
-    const game = games[0]
-    return formatNextGame(game, config)
-  } catch (error) {
-    console.error(`Error fetching ${teamKey} next game:`, error)
-    return null
-  }
+        return formatNextGame(futureGames[0], config)
+      }
+
+      return formatNextGame(games[0], config)
+    },
+    null,
+    { label: `${teamKey} next game` }
+  )
 }
 
 function formatNextGame(game: any, config: { isHomeCol: string }): NextGameInfo {
@@ -354,52 +349,50 @@ export async function fetchLastGame(teamKey: string): Promise<LastGameInfo | nul
   const teamInfo = CHICAGO_TEAMS[teamKey]
   if (!config || !teamInfo || !datalabClient) return null
 
-  try {
-    const today = new Date().toISOString().split('T')[0]
+  return buildSafeFetch(
+    async () => {
+      const today = new Date().toISOString().split('T')[0]
 
-    // Get last completed game (game_date < today with scores)
-    const { data: games, error } = await datalabClient
-      .from(config.gamesTable)
-      .select('*')
-      .lt('game_date', today)
-      .not(config.scoreCol, 'is', null)
-      .order('game_date', { ascending: false })
-      .limit(1)
+      const { data: games, error } = await datalabClient
+        .from(config.gamesTable)
+        .select('*')
+        .lt('game_date', today)
+        .not(config.scoreCol, 'is', null)
+        .order('game_date', { ascending: false })
+        .limit(1)
 
-    if (error || !games || games.length === 0) {
-      return null
-    }
+      if (error || !games || games.length === 0) {
+        return null
+      }
 
-    const game = games[0]
-    const isHome = game[config.isHomeCol] || game.home_away === 'home' || game.homeAway === 'home'
-    const teamScore = Number(game[config.scoreCol]) || 0
-    const opponentScore = Number(game[config.oppScoreCol]) || 0
+      const game = games[0]
+      const isHome = game[config.isHomeCol] || game.home_away === 'home' || game.homeAway === 'home'
+      const teamScore = Number(game[config.scoreCol]) || 0
+      const opponentScore = Number(game[config.oppScoreCol]) || 0
 
-    // Determine result
-    let result: 'W' | 'L' | 'T' = 'T'
-    if (teamScore > opponentScore) result = 'W'
-    else if (opponentScore > teamScore) result = 'L'
+      let result: 'W' | 'L' | 'T' = 'T'
+      if (teamScore > opponentScore) result = 'W'
+      else if (opponentScore > teamScore) result = 'L'
 
-    // Parse date
-    const gameDate = game.game_date ? new Date(game.game_date) : new Date()
+      const gameDate = game.game_date ? new Date(game.game_date) : new Date()
 
-    return {
-      opponent: game.opponent_full_name || game.opponent || 'TBD',
-      opponentLogo: game.opponent_logo || null,
-      date: gameDate.toLocaleDateString('en-US', {
-        weekday: 'short',
-        month: 'short',
-        day: 'numeric',
-      }),
-      isHome,
-      teamScore,
-      opponentScore,
-      result,
-    }
-  } catch (error) {
-    console.error(`Error fetching ${teamKey} last game:`, error)
-    return null
-  }
+      return {
+        opponent: game.opponent_full_name || game.opponent || 'TBD',
+        opponentLogo: game.opponent_logo || null,
+        date: gameDate.toLocaleDateString('en-US', {
+          weekday: 'short',
+          month: 'short',
+          day: 'numeric',
+        }),
+        isHome,
+        teamScore,
+        opponentScore,
+        result,
+      }
+    },
+    null,
+    { label: `${teamKey} last game` }
+  )
 }
 
 // Map team key to sport for live pages
@@ -437,62 +430,56 @@ export async function fetchLastGameWithId(teamKey: string): Promise<LastGameWith
   const teamInfo = CHICAGO_TEAMS[teamKey]
   if (!config || !teamInfo || !datalabClient) return null
 
-  try {
-    const today = new Date().toISOString().split('T')[0]
+  return buildSafeFetch(
+    async () => {
+      const today = new Date().toISOString().split('T')[0]
 
-    // Get last completed game (game_date <= today with scores > 0)
-    const { data: games, error } = await datalabClient
-      .from(config.gamesTable)
-      .select('*')
-      .lte('game_date', today)
-      .gt(config.scoreCol, 0)
-      .order('game_date', { ascending: false })
-      .limit(1)
+      const { data: games, error } = await datalabClient
+        .from(config.gamesTable)
+        .select('*')
+        .lte('game_date', today)
+        .gt(config.scoreCol, 0)
+        .order('game_date', { ascending: false })
+        .limit(1)
 
-    if (error || !games || games.length === 0) {
-      return null
-    }
+      if (error || !games || games.length === 0) {
+        return null
+      }
 
-    const game = games[0]
-    const isHome = game[config.isHomeCol] || game.home_away === 'home' || game.homeAway === 'home'
-    const teamScore = Number(game[config.scoreCol]) || 0
-    const opponentScore = Number(game[config.oppScoreCol]) || 0
+      const game = games[0]
+      const isHome = game[config.isHomeCol] || game.home_away === 'home' || game.homeAway === 'home'
+      const teamScore = Number(game[config.scoreCol]) || 0
+      const opponentScore = Number(game[config.oppScoreCol]) || 0
 
-    // Determine result
-    let result: 'W' | 'L' | 'T' = 'T'
-    if (teamScore > opponentScore) result = 'W'
-    else if (opponentScore > teamScore) result = 'L'
+      let result: 'W' | 'L' | 'T' = 'T'
+      if (teamScore > opponentScore) result = 'W'
+      else if (opponentScore > teamScore) result = 'L'
 
-    // Parse date
-    const gameDate = game.game_date ? new Date(game.game_date) : new Date()
+      const gameDate = game.game_date ? new Date(game.game_date) : new Date()
+      const gameId = game.id?.toString() || ''
+      const opponentAbbrev = game.opponent_abbrev || game.opponent || ''
+      const opponentName = game.opponent_full_name || game.opponent || 'TBD'
+      const opponentLogo = game.opponent_logo || getOpponentLogoUrl(opponentAbbrev, teamInfo.league)
 
-    // Get game ID - all boxscore APIs use internal database id
-    const gameId = game.id?.toString() || ''
-
-    // Get opponent info - use abbreviation to generate logo URL if not stored
-    const opponentAbbrev = game.opponent_abbrev || game.opponent || ''
-    const opponentName = game.opponent_full_name || game.opponent || 'TBD'
-    const opponentLogo = game.opponent_logo || getOpponentLogoUrl(opponentAbbrev, teamInfo.league)
-
-    return {
-      gameId,
-      opponent: opponentName,
-      opponentLogo: opponentLogo || undefined,
-      opponentAbbrev: opponentAbbrev || undefined,
-      date: gameDate.toLocaleDateString('en-US', {
-        weekday: 'short',
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      }),
-      isHome,
-      teamScore,
-      opponentScore,
-      result,
-      sport: TEAM_SPORT[teamKey] || 'nfl',
-    }
-  } catch (error) {
-    console.error(`Error fetching ${teamKey} last game with ID:`, error)
-    return null
-  }
+      return {
+        gameId,
+        opponent: opponentName,
+        opponentLogo: opponentLogo || undefined,
+        opponentAbbrev: opponentAbbrev || undefined,
+        date: gameDate.toLocaleDateString('en-US', {
+          weekday: 'short',
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        }),
+        isHome,
+        teamScore,
+        opponentScore,
+        result,
+        sport: TEAM_SPORT[teamKey] || 'nfl',
+      }
+    },
+    null,
+    { label: `${teamKey} last game with ID` }
+  )
 }
