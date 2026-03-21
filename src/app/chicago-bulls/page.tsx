@@ -21,9 +21,6 @@ export const metadata: Metadata = {
   },
 }
 
-// Revalidate every hour
-export const revalidate = 3600
-
 // Fetch Bulls posts from database
 async function getBullsPosts(limit: number = 12) {
   try {

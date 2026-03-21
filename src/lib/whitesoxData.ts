@@ -218,21 +218,26 @@ export async function getWhiteSoxPlayers(): Promise<WhiteSoxPlayer[]> {
     return []
   }
 
-  // Get current roster players (is_active = true)
-  // Note: Removed data_status filter - Datalab confirmed is_active is sufficient
-  const { data, error } = await datalabAdmin
-    .from('whitesox_players')
-    .select('*')
-    .eq('is_active', true)
-    .order('position')
-    .order('name')
+  try {
+    // Get current roster players (is_active = true)
+    // Note: Removed data_status filter - Datalab confirmed is_active is sufficient
+    const { data, error } = await datalabAdmin
+      .from('whitesox_players')
+      .select('*')
+      .eq('is_active', true)
+      .order('position')
+      .order('name')
 
-  if (error) {
-    console.error('DataLab fetch error:', error)
+    if (error) {
+      console.error('DataLab fetch error:', error)
+      return []
+    }
+
+    return transformPlayers(data || [])
+  } catch (err) {
+    console.error('White Sox players fetch failed (timeout or network):', err)
     return []
   }
-
-  return transformPlayers(data || [])
 }
 
 /**
@@ -327,26 +332,31 @@ export async function getWhiteSoxRosterGrouped(): Promise<Record<PositionGroup, 
  * Get a single player profile with stats and game log
  */
 export async function getPlayerProfile(slug: string): Promise<PlayerProfile | null> {
-  const players = await getWhiteSoxPlayers()
-  const player = players.find(p => p.slug === slug)
+  try {
+    const players = await getWhiteSoxPlayers()
+    const player = players.find(p => p.slug === slug)
 
-  if (!player) return null
+    if (!player) return null
 
-  // Use playerId (ESPN ID) since stats tables use ESPN IDs in player_id column
-  const espnId = player.playerId
-  const seasons = await getPlayerSeasonStats(espnId, player.positionGroup === 'pitchers')
-  const gameLog = await getPlayerGameLog(espnId)
+    // Use playerId (ESPN ID) since stats tables use ESPN IDs in player_id column
+    const espnId = player.playerId
+    const seasons = await getPlayerSeasonStats(espnId, player.positionGroup === 'pitchers')
+    const gameLog = await getPlayerGameLog(espnId)
 
-  const currentYear = getCurrentSeason()
-  const currentSeason = seasons.find(s => s.season === currentYear) ||
-                        seasons.find(s => s.season === currentYear - 1) ||
-                        seasons[0] || null
+    const currentYear = getCurrentSeason()
+    const currentSeason = seasons.find(s => s.season === currentYear) ||
+                          seasons.find(s => s.season === currentYear - 1) ||
+                          seasons[0] || null
 
-  return {
-    player,
-    seasons,
-    currentSeason,
-    gameLog,
+    return {
+      player,
+      seasons,
+      currentSeason,
+      gameLog,
+    }
+  } catch (err) {
+    console.error('White Sox player profile fetch failed:', err)
+    return null
   }
 }
 
@@ -543,46 +553,15 @@ export async function getWhiteSoxSchedule(season?: number): Promise<WhiteSoxGame
 
   if (!datalabAdmin) return []
 
-  // Get all games for the season (spring training + regular + postseason)
-  const { data, error: queryError } = await datalabAdmin
-    .from('whitesox_games_master')
-    .select(`
-      id,
-      game_date,
-      game_time,
-      game_time_display,
-      season,
-      opponent,
-      opponent_full_name,
-      is_whitesox_home,
-      venue,
-      whitesox_score,
-      opponent_score,
-      whitesox_win,
-      broadcast,
-      game_type,
-      probable_pitcher_home,
-      probable_pitcher_away,
-      mlb_game_pk,
-      espn_game_id,
-      weather_temp,
-      weather_condition,
-      weather_wind
-    `)
-    .eq('season', targetSeason)
-    .order('game_date', { ascending: false })
-
-  if (queryError) return []
-
-  // If no games in current season, fall back to previous season
-  if (!data || data.length === 0) {
-    const { data: prevData, error: prevError } = await datalabAdmin
+  try {
+    // Get all games for the season (spring training + regular + postseason)
+    const { data, error: queryError } = await datalabAdmin
       .from('whitesox_games_master')
       .select(`
         id,
         game_date,
         game_time,
-      game_time_display,
+        game_time_display,
         season,
         opponent,
         opponent_full_name,
@@ -592,17 +571,53 @@ export async function getWhiteSoxSchedule(season?: number): Promise<WhiteSoxGame
         opponent_score,
         whitesox_win,
         broadcast,
-        game_type
+        game_type,
+        probable_pitcher_home,
+        probable_pitcher_away,
+        mlb_game_pk,
+        espn_game_id,
+        weather_temp,
+        weather_condition,
+        weather_wind
       `)
-      .eq('season', targetSeason - 1)
+      .eq('season', targetSeason)
       .order('game_date', { ascending: false })
 
-    if (prevError) return []
+    if (queryError) return []
 
-    return (prevData || []).map((g: any) => transformGame(g))
+    // If no games in current season, fall back to previous season
+    if (!data || data.length === 0) {
+      const { data: prevData, error: prevError } = await datalabAdmin
+        .from('whitesox_games_master')
+        .select(`
+          id,
+          game_date,
+          game_time,
+        game_time_display,
+          season,
+          opponent,
+          opponent_full_name,
+          is_whitesox_home,
+          venue,
+          whitesox_score,
+          opponent_score,
+          whitesox_win,
+          broadcast,
+          game_type
+        `)
+        .eq('season', targetSeason - 1)
+        .order('game_date', { ascending: false })
+
+      if (prevError) return []
+
+      return (prevData || []).map((g: any) => transformGame(g))
+    }
+
+    return data.map((g: any) => transformGame(g))
+  } catch (err) {
+    console.error('White Sox schedule fetch failed (timeout or network):', err)
+    return []
   }
-
-  return data.map((g: any) => transformGame(g))
 }
 
 function formatGameTime(timeStr: string | null): string | null {
@@ -680,6 +695,7 @@ async function getTeamStats(season: number): Promise<WhiteSoxTeamStats> {
     return getDefaultTeamStats(season)
   }
 
+  try {
   // Get team season stats
   const { data: teamData } = await datalabAdmin
     .from('whitesox_team_season_stats')
@@ -720,6 +736,10 @@ async function getTeamStats(season: number): Promise<WhiteSoxTeamStats> {
     teamAvg: teamData?.batting_average || null,
     teamEra: teamData?.era || null,
     teamOps: teamData?.ops || null,
+  }
+  } catch (err) {
+    console.error('White Sox team stats fetch failed (timeout or network):', err)
+    return getDefaultTeamStats(season)
   }
 }
 
@@ -973,29 +993,34 @@ export interface WhiteSoxRecord {
 export async function getWhiteSoxRecord(season?: number): Promise<WhiteSoxRecord> {
   const targetSeason = season || getCurrentSeason()
 
-  // CRITICAL: Get authoritative record from whitesox_seasons table (recommended by Datalab)
-  if (datalabAdmin) {
-    const { data: seasonRecord } = await datalabAdmin
-      .from('whitesox_seasons')
-      .select('wins, losses')
-      .eq('season', targetSeason)
-      .single()
+  try {
+    // CRITICAL: Get authoritative record from whitesox_seasons table (recommended by Datalab)
+    if (datalabAdmin) {
+      const { data: seasonRecord } = await datalabAdmin
+        .from('whitesox_seasons')
+        .select('wins, losses')
+        .eq('season', targetSeason)
+        .single()
 
-    if (seasonRecord) {
-      return {
-        wins: seasonRecord.wins || 0,
-        losses: seasonRecord.losses || 0,
+      if (seasonRecord) {
+        return {
+          wins: seasonRecord.wins || 0,
+          losses: seasonRecord.losses || 0,
+        }
       }
     }
+
+    // Fallback: Calculate from schedule if seasons table unavailable
+    const schedule = await getWhiteSoxSchedule(targetSeason)
+    const completedGames = schedule.filter(g => g.status === 'final')
+    const wins = completedGames.filter(g => g.result === 'W').length
+    const losses = completedGames.filter(g => g.result === 'L').length
+
+    return { wins, losses }
+  } catch (err) {
+    console.error('White Sox record fetch failed (timeout or network):', err)
+    return { wins: 0, losses: 0 }
   }
-
-  // Fallback: Calculate from schedule if seasons table unavailable
-  const schedule = await getWhiteSoxSchedule(targetSeason)
-  const completedGames = schedule.filter(g => g.status === 'final')
-  const wins = completedGames.filter(g => g.result === 'W').length
-  const losses = completedGames.filter(g => g.result === 'L').length
-
-  return { wins, losses }
 }
 
 /**

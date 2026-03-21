@@ -313,39 +313,44 @@ async function getBearsPlayersFromDatalab(): Promise<BearsPlayer[]> {
     return []
   }
 
-  // Get all active roster players (is_active = true)
-  // This gives us the full current roster (53+ players)
-  const { data, error } = await datalabAdmin
-    .from('bears_players')
-    .select(`
-      id,
-      player_id,
-      espn_id,
-      name,
-      first_name,
-      last_name,
-      position,
-      position_group,
-      jersey_number,
-      height_inches,
-      weight_lbs,
-      age,
-      college,
-      years_exp,
-      status,
-      is_active,
-      headshot_url
-    `)
-    .eq('is_active', true)
-    .order('position_group')
-    .order('name')
+  try {
+    // Get all active roster players (is_active = true)
+    // This gives us the full current roster (53+ players)
+    const { data, error } = await datalabAdmin
+      .from('bears_players')
+      .select(`
+        id,
+        player_id,
+        espn_id,
+        name,
+        first_name,
+        last_name,
+        position,
+        position_group,
+        jersey_number,
+        height_inches,
+        weight_lbs,
+        age,
+        college,
+        years_exp,
+        status,
+        is_active,
+        headshot_url
+      `)
+      .eq('is_active', true)
+      .order('position_group')
+      .order('name')
 
-  if (error) {
-    console.error('Datalab fetch error:', error)
+    if (error) {
+      console.error('Datalab fetch error:', error)
+      return []
+    }
+
+    return transformPlayers(data || [])
+  } catch (err) {
+    console.error('Bears players fetch failed (timeout or network):', err)
     return []
   }
-
-  return transformPlayers(data || [])
 }
 
 /**
@@ -426,38 +431,43 @@ export async function getBearsRosterGrouped(): Promise<Record<PositionGroup, Bea
  * Get a single player profile with stats and game log
  */
 export async function getPlayerProfile(slug: string): Promise<PlayerProfile | null> {
-  const players = await getBearsPlayers()
-  const player = players.find(p => p.slug === slug)
+  try {
+    const players = await getBearsPlayers()
+    const player = players.find(p => p.slug === slug)
 
-  if (!player) return null
+    if (!player) return null
 
-  // Bears now uses ESPN ID for stats joins (bp.espn_id = bpgs.player_id)
-  const espnId = player.playerId
+    // Bears now uses ESPN ID for stats joins (bp.espn_id = bpgs.player_id)
+    const espnId = player.playerId
 
-  // Fetch regular and postseason stats separately
-  const [regularSeasons, postseasonSeasons, gameLog] = await Promise.all([
-    getPlayerSeasonStats(espnId, 'regular'),
-    getPlayerSeasonStats(espnId, 'postseason'),
-    getPlayerGameLog(espnId),
-  ])
+    // Fetch regular and postseason stats separately
+    const [regularSeasons, postseasonSeasons, gameLog] = await Promise.all([
+      getPlayerSeasonStats(espnId, 'regular'),
+      getPlayerSeasonStats(espnId, 'postseason'),
+      getPlayerGameLog(espnId),
+    ])
 
-  // Current regular season stats
-  const currentYear = new Date().getFullYear()
-  const currentSeason = regularSeasons.find(s => s.season === currentYear) ||
-                        regularSeasons.find(s => s.season === currentYear - 1) ||
-                        regularSeasons[0] || null
+    // Current regular season stats
+    const currentYear = new Date().getFullYear()
+    const currentSeason = regularSeasons.find(s => s.season === currentYear) ||
+                          regularSeasons.find(s => s.season === currentYear - 1) ||
+                          regularSeasons[0] || null
 
-  // Current postseason stats (if any)
-  const postseasonStats = postseasonSeasons.find(s => s.season === currentYear) ||
-                          postseasonSeasons.find(s => s.season === currentYear - 1) ||
-                          postseasonSeasons[0] || null
+    // Current postseason stats (if any)
+    const postseasonStats = postseasonSeasons.find(s => s.season === currentYear) ||
+                            postseasonSeasons.find(s => s.season === currentYear - 1) ||
+                            postseasonSeasons[0] || null
 
-  return {
-    player,
-    seasons: regularSeasons,
-    currentSeason,
-    postseasonStats,
-    gameLog,
+    return {
+      player,
+      seasons: regularSeasons,
+      currentSeason,
+      postseasonStats,
+      gameLog,
+    }
+  } catch (err) {
+    console.error('Bears player profile fetch failed:', err)
+    return null
   }
 }
 
@@ -701,30 +711,35 @@ export async function getBearsSchedule(season?: number): Promise<BearsGame[]> {
 async function getBearsScheduleFromDatalab(season: number): Promise<BearsGame[]> {
   if (!datalabAdmin) return []
 
-  // Query for all games in the season - use select('*') to avoid column mismatch issues
-  const { data, error } = await datalabAdmin
-    .from('bears_games_master')
-    .select('*')
-    .eq('season', season)
-    .order('game_date', { ascending: true })
-
-  if (error) {
-    console.error('Bears schedule fetch error:', error)
-    return []
-  }
-
-  // If no games in current season, fall back to previous season (off-season)
-  if (!data || data.length === 0) {
-    const { data: prevData, error: prevError } = await datalabAdmin
+  try {
+    // Query for all games in the season - use select('*') to avoid column mismatch issues
+    const { data, error } = await datalabAdmin
       .from('bears_games_master')
       .select('*')
-      .eq('season', season - 1)
+      .eq('season', season)
       .order('game_date', { ascending: true })
 
-    if (prevError || !prevData) return []
-    return prevData.map((g: any) => transformGame(g, null))
+    if (error) {
+      console.error('Bears schedule fetch error:', error)
+      return []
+    }
+
+    // If no games in current season, fall back to previous season (off-season)
+    if (!data || data.length === 0) {
+      const { data: prevData, error: prevError } = await datalabAdmin
+        .from('bears_games_master')
+        .select('*')
+        .eq('season', season - 1)
+        .order('game_date', { ascending: true })
+
+      if (prevError || !prevData) return []
+      return prevData.map((g: any) => transformGame(g, null))
+    }
+    return data.map((g: any) => transformGame(g, null))
+  } catch (err) {
+    console.error('Bears schedule fetch failed (timeout or network):', err)
+    return []
   }
-  return data.map((g: any) => transformGame(g, null))
 }
 
 // Format time from 24-hour (17:30:00) to 12-hour (5:30 PM CT)
@@ -844,14 +859,18 @@ export async function hasBearsPostseasonStats(season?: number): Promise<boolean>
   const targetSeason = season || getCurrentSeason()
   if (!datalabAdmin) return false
 
-  const { data } = await datalabAdmin
-    .from('bears_team_season_stats')
-    .select('id')
-    .eq('season', targetSeason)
-    .eq('game_type', 'postseason')
-    .limit(1)
+  try {
+    const { data } = await datalabAdmin
+      .from('bears_team_season_stats')
+      .select('id')
+      .eq('season', targetSeason)
+      .eq('game_type', 'postseason')
+      .limit(1)
 
-  return !!(data && data.length > 0)
+    return !!(data && data.length > 0)
+  } catch {
+    return false
+  }
 }
 
 async function getTeamStats(season: number, gameType: GameType = 'regular'): Promise<BearsTeamStats> {
@@ -1137,34 +1156,46 @@ export interface BearsSeparatedRecord {
 }
 
 export async function getBearsSeparatedRecord(season?: number): Promise<BearsSeparatedRecord> {
-  const schedule = await getBearsSchedule(season)
+  try {
+    const schedule = await getBearsSchedule(season)
 
-  // Calculate regular season record
-  const regularGames = schedule.filter(g => g.status === 'final' && g.gameType === 'regular')
-  const regWins = regularGames.filter(g => g.result === 'W').length
-  const regLosses = regularGames.filter(g => g.result === 'L').length
-  const regTies = regularGames.filter(g => g.result === 'T').length
+    // Calculate regular season record
+    const regularGames = schedule.filter(g => g.status === 'final' && g.gameType === 'regular')
+    const regWins = regularGames.filter(g => g.result === 'W').length
+    const regLosses = regularGames.filter(g => g.result === 'L').length
+    const regTies = regularGames.filter(g => g.result === 'T').length
 
-  // Calculate postseason record
-  const postGames = schedule.filter(g => g.status === 'final' && g.gameType === 'postseason')
-  const postWins = postGames.filter(g => g.result === 'W').length
-  const postLosses = postGames.filter(g => g.result === 'L').length
+    // Calculate postseason record
+    const postGames = schedule.filter(g => g.status === 'final' && g.gameType === 'postseason')
+    const postWins = postGames.filter(g => g.result === 'W').length
+    const postLosses = postGames.filter(g => g.result === 'L').length
 
-  // VALIDATION: Expected from ESPN - Bears 2025: Regular 11-6 (1st NFC North), Post 1-1
-  // Get division rank from Datalab if available
-  let divisionRank: string | null = null
-  if (datalabAdmin) {
-    const { data } = await datalabAdmin
-      .from('bears_season_record')
-      .select('division_rank')
-      .single()
-    divisionRank = data?.division_rank || '1st NFC North' // Fallback to expected value
-  }
+    // Get division rank from Datalab if available
+    let divisionRank: string | null = null
+    if (datalabAdmin) {
+      try {
+        const { data } = await datalabAdmin
+          .from('bears_season_record')
+          .select('division_rank')
+          .single()
+        divisionRank = data?.division_rank || '1st NFC North'
+      } catch {
+        divisionRank = null
+      }
+    }
 
-  return {
-    regularSeason: { wins: regWins, losses: regLosses, ties: regTies },
-    postseason: { wins: postWins, losses: postLosses },
-    divisionRank,
+    return {
+      regularSeason: { wins: regWins, losses: regLosses, ties: regTies },
+      postseason: { wins: postWins, losses: postLosses },
+      divisionRank,
+    }
+  } catch (err) {
+    console.error('Bears separated record fetch failed:', err)
+    return {
+      regularSeason: { wins: 0, losses: 0, ties: 0 },
+      postseason: { wins: 0, losses: 0 },
+      divisionRank: null,
+    }
   }
 }
 
@@ -1176,30 +1207,35 @@ export async function getLatestGameWithStats(season?: number): Promise<string | 
   const targetSeason = season || getCurrentSeason()
   if (!datalabAdmin) return null
 
-  const { data: games } = await datalabAdmin
-    .from('bears_games_master')
-    .select('id')
-    .eq('season', targetSeason)
-    .order('game_date', { ascending: false })
+  try {
+    const { data: games } = await datalabAdmin
+      .from('bears_games_master')
+      .select('id')
+      .eq('season', targetSeason)
+      .order('game_date', { ascending: false })
 
-  if (!games || games.length === 0) return null
+    if (!games || games.length === 0) return null
 
-  // Check each game (most recent first) for non-null stats
-  for (const game of games) {
-    const { data: stats } = await datalabAdmin
-      .from('bears_player_game_stats')
-      .select('passing_yds')
-      .eq('bears_game_id', game.id)
-      .not('passing_yds', 'is', null)
-      .limit(1)
+    // Check each game (most recent first) for non-null stats
+    for (const game of games) {
+      const { data: stats } = await datalabAdmin
+        .from('bears_player_game_stats')
+        .select('passing_yds')
+        .eq('bears_game_id', game.id)
+        .not('passing_yds', 'is', null)
+        .limit(1)
 
-    if (stats && stats.length > 0) {
-      return String(game.id)
+      if (stats && stats.length > 0) {
+        return String(game.id)
+      }
     }
-  }
 
-  // Fallback to most recent game even without stats
-  return String(games[0].id)
+    // Fallback to most recent game even without stats
+    return String(games[0].id)
+  } catch (err) {
+    console.error('Bears latest game fetch failed (timeout or network):', err)
+    return null
+  }
 }
 
 /**

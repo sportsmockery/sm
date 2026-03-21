@@ -21,9 +21,6 @@ export const metadata: Metadata = {
   },
 }
 
-// Revalidate every hour
-export const revalidate = 3600
-
 // Fetch Blackhawks posts from database
 async function getBlackhawksPosts(limit: number = 12) {
   try {

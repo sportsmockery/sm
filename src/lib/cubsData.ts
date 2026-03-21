@@ -552,47 +552,16 @@ export async function getCubsSchedule(season?: number): Promise<CubsGame[]> {
 
   if (!datalabAdmin) return []
 
-  // Include spring training, regular season, and postseason games
-  // game_type from DataLab: 'spring_training', 'regular', 'postseason'
-  const { data, error } = await datalabAdmin
-    .from('cubs_games_master')
-    .select(`
-      id,
-      game_date,
-      game_time,
-      game_time_display,
-      season,
-      opponent,
-      opponent_full_name,
-      is_cubs_home,
-      venue,
-      cubs_score,
-      opponent_score,
-      cubs_win,
-      broadcast,
-      game_type,
-      probable_pitcher_home,
-      probable_pitcher_away,
-      mlb_game_pk,
-      espn_game_id,
-      weather_temp,
-      weather_condition,
-      weather_wind
-    `)
-    .eq('season', targetSeason)
-    .order('game_date', { ascending: false })
-
-  if (error) return []
-
-  // If no games in current season, fall back to previous season
-  if (!data || data.length === 0) {
-    const { data: prevData, error: prevError } = await datalabAdmin
+  try {
+    // Include spring training, regular season, and postseason games
+    // game_type from DataLab: 'spring_training', 'regular', 'postseason'
+    const { data, error } = await datalabAdmin
       .from('cubs_games_master')
       .select(`
         id,
         game_date,
         game_time,
-      game_time_display,
+        game_time_display,
         season,
         opponent,
         opponent_full_name,
@@ -602,17 +571,53 @@ export async function getCubsSchedule(season?: number): Promise<CubsGame[]> {
         opponent_score,
         cubs_win,
         broadcast,
-        game_type
+        game_type,
+        probable_pitcher_home,
+        probable_pitcher_away,
+        mlb_game_pk,
+        espn_game_id,
+        weather_temp,
+        weather_condition,
+        weather_wind
       `)
-      .eq('season', targetSeason - 1)
+      .eq('season', targetSeason)
       .order('game_date', { ascending: false })
 
-    if (prevError) return []
+    if (error) return []
 
-    return (prevData || []).map((g: any) => transformGame(g))
+    // If no games in current season, fall back to previous season
+    if (!data || data.length === 0) {
+      const { data: prevData, error: prevError } = await datalabAdmin
+        .from('cubs_games_master')
+        .select(`
+          id,
+          game_date,
+          game_time,
+        game_time_display,
+          season,
+          opponent,
+          opponent_full_name,
+          is_cubs_home,
+          venue,
+          cubs_score,
+          opponent_score,
+          cubs_win,
+          broadcast,
+          game_type
+        `)
+        .eq('season', targetSeason - 1)
+        .order('game_date', { ascending: false })
+
+      if (prevError) return []
+
+      return (prevData || []).map((g: any) => transformGame(g))
+    }
+
+    return data.map((g: any) => transformGame(g))
+  } catch (err) {
+    console.error('Cubs schedule fetch failed (timeout or network):', err)
+    return []
   }
-
-  return data.map((g: any) => transformGame(g))
 }
 
 function formatGameTime(timeStr: string | null): string | null {
@@ -983,29 +988,34 @@ export interface CubsRecord {
 export async function getCubsRecord(season?: number): Promise<CubsRecord> {
   const targetSeason = season || getCurrentSeason()
 
-  // CRITICAL: Get authoritative record from cubs_seasons table (recommended by Datalab)
-  if (datalabAdmin) {
-    const { data: seasonRecord } = await datalabAdmin
-      .from('cubs_seasons')
-      .select('wins, losses')
-      .eq('season', targetSeason)
-      .single()
+  try {
+    // CRITICAL: Get authoritative record from cubs_seasons table (recommended by Datalab)
+    if (datalabAdmin) {
+      const { data: seasonRecord } = await datalabAdmin
+        .from('cubs_seasons')
+        .select('wins, losses')
+        .eq('season', targetSeason)
+        .single()
 
-    if (seasonRecord) {
-      return {
-        wins: seasonRecord.wins || 0,
-        losses: seasonRecord.losses || 0,
+      if (seasonRecord) {
+        return {
+          wins: seasonRecord.wins || 0,
+          losses: seasonRecord.losses || 0,
+        }
       }
     }
+
+    // Fallback: Calculate from schedule if seasons table unavailable
+    const schedule = await getCubsSchedule(targetSeason)
+    const completedGames = schedule.filter(g => g.status === 'final')
+    const wins = completedGames.filter(g => g.result === 'W').length
+    const losses = completedGames.filter(g => g.result === 'L').length
+
+    return { wins, losses }
+  } catch (err) {
+    console.error('Cubs record fetch failed (timeout or network):', err)
+    return { wins: 0, losses: 0 }
   }
-
-  // Fallback: Calculate from schedule if seasons table unavailable
-  const schedule = await getCubsSchedule(targetSeason)
-  const completedGames = schedule.filter(g => g.status === 'final')
-  const wins = completedGames.filter(g => g.result === 'W').length
-  const losses = completedGames.filter(g => g.result === 'L').length
-
-  return { wins, losses }
 }
 
 /**
@@ -1015,43 +1025,56 @@ export async function getCubsRecord(season?: number): Promise<CubsRecord> {
 export async function getCubsSeparatedRecord(season?: number): Promise<CubsSeparatedRecord> {
   const targetSeason = season || getCurrentSeason()
 
-  // Use authoritative cubs_seasons table for regular season record
-  let regWins = 0
-  let regLosses = 0
-  let divisionRank: string | null = null
+  try {
+    // Use authoritative cubs_seasons table for regular season record
+    let regWins = 0
+    let regLosses = 0
+    let divisionRank: string | null = null
 
-  if (datalabAdmin) {
-    const { data: seasonRecord } = await datalabAdmin
-      .from('cubs_seasons')
-      .select('wins, losses, division_rank')
-      .eq('season', targetSeason)
-      .single()
+    if (datalabAdmin) {
+      try {
+        const { data: seasonRecord } = await datalabAdmin
+          .from('cubs_seasons')
+          .select('wins, losses, division_rank')
+          .eq('season', targetSeason)
+          .single()
 
-    if (seasonRecord) {
-      regWins = seasonRecord.wins || 0
-      regLosses = seasonRecord.losses || 0
-      divisionRank = seasonRecord.division_rank || null
+        if (seasonRecord) {
+          regWins = seasonRecord.wins || 0
+          regLosses = seasonRecord.losses || 0
+          divisionRank = seasonRecord.division_rank || null
+        }
+      } catch {
+        // Timeout or network error - use fallback
+      }
     }
-  }
 
-  // Fallback: calculate from schedule if seasons table unavailable
-  if (regWins === 0 && regLosses === 0) {
+    // Fallback: calculate from schedule if seasons table unavailable
+    if (regWins === 0 && regLosses === 0) {
+      const schedule = await getCubsSchedule(targetSeason)
+      const regularGames = schedule.filter(g => g.status === 'final' && g.gameType === 'regular')
+      regWins = regularGames.filter(g => g.result === 'W').length
+      regLosses = regularGames.filter(g => g.result === 'L').length
+    }
+
+    // Calculate postseason record from schedule (not in seasons table)
     const schedule = await getCubsSchedule(targetSeason)
-    const regularGames = schedule.filter(g => g.status === 'final' && g.gameType === 'regular')
-    regWins = regularGames.filter(g => g.result === 'W').length
-    regLosses = regularGames.filter(g => g.result === 'L').length
-  }
+    const postGames = schedule.filter(g => g.status === 'final' && g.gameType === 'postseason')
+    const postWins = postGames.filter(g => g.result === 'W').length
+    const postLosses = postGames.filter(g => g.result === 'L').length
 
-  // Calculate postseason record from schedule (not in seasons table)
-  const schedule = await getCubsSchedule(targetSeason)
-  const postGames = schedule.filter(g => g.status === 'final' && g.gameType === 'postseason')
-  const postWins = postGames.filter(g => g.result === 'W').length
-  const postLosses = postGames.filter(g => g.result === 'L').length
-
-  return {
-    regularSeason: { wins: regWins, losses: regLosses },
-    postseason: { wins: postWins, losses: postLosses },
-    divisionRank,
+    return {
+      regularSeason: { wins: regWins, losses: regLosses },
+      postseason: { wins: postWins, losses: postLosses },
+      divisionRank,
+    }
+  } catch (err) {
+    console.error('Cubs separated record fetch failed:', err)
+    return {
+      regularSeason: { wins: 0, losses: 0 },
+      postseason: { wins: 0, losses: 0 },
+      divisionRank: null,
+    }
   }
 }
 
