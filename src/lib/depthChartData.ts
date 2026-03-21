@@ -1,4 +1,5 @@
 import { datalabAdmin } from '@/lib/supabase-datalab'
+import { buildSafeFetch } from './build-safe-fetch'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -120,6 +121,14 @@ function calcExperience(draftYear: number | null, yearsPro: number | null): stri
 // ─── Main Function ───────────────────────────────────────────────────────────
 
 export async function getDepthChart(teamKey: TeamKey): Promise<DepthChartPositionGroup[]> {
+  return buildSafeFetch(
+    async () => _getDepthChartInner(teamKey),
+    [],
+    { label: `${teamKey} depth chart` }
+  )
+}
+
+async function _getDepthChartInner(teamKey: TeamKey): Promise<DepthChartPositionGroup[]> {
   const config = TEAM_PLAYER_CONFIG[teamKey]
 
   // Fetch depth chart and player bio data in parallel
