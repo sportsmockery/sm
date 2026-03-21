@@ -51,6 +51,7 @@ const publicPaths = [
   '/api/audio',  // Audio TTS API
   '/api/cron',   // Vercel cron jobs
   '/gm',         // GM Trade Simulator (handles own auth)
+  '/owner',      // Ownership report cards
 ]
 
 // Paths that should never trigger the first-time visitor redirect
