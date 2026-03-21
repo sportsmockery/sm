@@ -6,7 +6,16 @@ import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { homepageTeams } from '@/lib/homepage-team-data'
-import { ArrowRightLeft, ClipboardPen, MessageSquare, BarChart3, Video, Volume2, MoreVertical, Tv } from 'lucide-react'
+import { ArrowRightLeft, ClipboardPen, MessageSquare, BarChart3, Video, Volume2, MoreVertical, Tv, Sun, Moon } from 'lucide-react'
+import { useTheme } from '@/contexts/ThemeContext'
+
+function ReportCardIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <text x="12" y="17" fill="currentColor" fontSize="16" fontWeight="800" fontFamily="sans-serif" textAnchor="middle">A+</text>
+    </svg>
+  )
+}
 import type { Role } from '@/lib/roles'
 
 interface NavItem {
@@ -22,6 +31,7 @@ const EDGE_TOOLS: { id: string; title: string; href: string; icon: React.Compone
   { id: 'analytics', title: 'Team Stats', href: '/chicago-bears', icon: BarChart3 },
   { id: 'vision', title: 'Vision Theater', href: '/vision-theater', icon: Video },
   { id: 'audio', title: 'Hands-Free Audio', href: '/audio', icon: Volume2 },
+  { id: 'owners', title: 'GM Report Cards', href: '/owner', icon: ReportCardIcon },
 ]
 
 const TEAM_ID_TO_ROUTE: Record<string, string> = {
@@ -122,6 +132,7 @@ function NavSection({ label, items, isActive }: { label: string; items: NavItem[
 export default function AppSidebar() {
   const pathname = usePathname()
   const { user, isAuthenticated, signOut } = useAuth()
+  const { theme, toggleTheme } = useTheme()
   const [mobileOpen, setMobileOpen] = useState(false)
   const sidebarRef = useRef<HTMLDivElement>(null)
   const [hasLiveGames, setHasLiveGames] = useState(false)
@@ -516,6 +527,30 @@ export default function AppSidebar() {
                   <button
                     type="button"
                     onClick={() => {
+                      toggleTheme()
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      padding: '8px 14px',
+                      fontSize: 13,
+                      color: 'var(--sm-text)',
+                      width: '100%',
+                      textAlign: 'left',
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                    }}
+                    className="hover:bg-[var(--sm-card-hover)] transition-colors"
+                  >
+                    {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
+                    {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                  </button>
+                  <div style={{ height: 1, background: 'var(--sm-border)', margin: '4px 0' }} />
+                  <button
+                    type="button"
+                    onClick={() => {
                       setProfileMenuOpen(false)
                       signOut()
                     }}
@@ -539,6 +574,34 @@ export default function AppSidebar() {
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {/* Theme toggle — always visible at bottom */}
+      {!isAuthenticated && (
+        <div style={{ flexShrink: 0, marginTop: 'auto', padding: '8px 8px 16px', borderTop: '1px solid var(--sm-border)' }}>
+          <button
+            type="button"
+            onClick={toggleTheme}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              padding: '8px 12px',
+              fontSize: 12,
+              fontWeight: 500,
+              color: 'var(--sm-text-muted)',
+              width: '100%',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              borderRadius: 8,
+            }}
+            className="hover:bg-[var(--sm-card-hover)] transition-colors"
+          >
+            {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
+            {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+          </button>
         </div>
       )}
     </>

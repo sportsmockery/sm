@@ -99,6 +99,7 @@ export default function ScrollToTop() {
 
   if (pathname?.startsWith('/admin') || pathname === '/scout-ai') return null
   if (pathname === '/') return null // No floating Scout on homepage
+  if (pathname?.startsWith('/owner')) return null // Owner pages have their own Scout commentary
   if (!visible) return null
 
   return (
@@ -120,9 +121,9 @@ export default function ScrollToTop() {
         <div
           style={{
             width: 300,
-            background: '#FAFAFB',
+            background: 'var(--sm-card)',
             backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(11,15,20,0.12)',
+            border: '1px solid var(--sm-border)',
             borderRadius: 12,
             boxShadow: '0 8px 40px rgba(0,0,0,0.15), 0 0 20px rgba(188,0,0,0.08)',
             overflow: 'hidden',

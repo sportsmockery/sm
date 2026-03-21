@@ -5,9 +5,9 @@ import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import {
-  Activity, MessageCircle, Share, Eye,
+  MessageCircle, Share, Eye,
   TrendingUp, Play, Clock, Check, X, ChevronRight,
-  BarChart3, Users
+  BarChart3, Users, Activity
 } from "lucide-react"
 import { useAudioPlayer } from "@/context/AudioPlayerContext"
 import { homepageTeams } from "@/lib/homepage-team-data"
@@ -23,8 +23,10 @@ import {
 const PI_LOGO_SRC = "/youtubelogos/pi-logo.png"
 /** Pinwheels & Ivy logo for top left of PI cards (pinwheel + "Pinwheels and Ivy" text). */
 const PI_LOGO_LEFT_SRC = "/downloads/pinwheels-ivy-logo.png"
+const PI_LOGO_LEFT_DARK_SRC = "/downloads/pinwheels-ivy-logo-dark.png"
 /** Untold Chicago logo for video cards from Untold Chicago. */
 const UNTOLD_LOGO_SRC = "/downloads/untold-logo.png"
+const UNTOLD_LOGO_DARK_SRC = "/downloads/untold-logo-dark.png"
 
 function isPinwheelsAndIvy(source: string | undefined): boolean {
   if (!source || typeof source !== 'string') return false
@@ -194,36 +196,37 @@ export function EngagementRow({
 
   return (
     <div className="mt-5 flex items-center justify-between" style={{ color: 'var(--hp-muted-foreground)' }}>
+      {/* Left: Play button */}
       <div className="flex items-center gap-3">
-        {reactionButtons.map(({ key, emoji, label, count }) => (
-          <button
-            key={key}
-            onClick={() => toggle(key)}
-            className={`group flex items-center gap-1 rounded-full px-2.5 py-1.5 transition-all hp-tap-target ${reactions[key] ? 'bg-[rgba(0,0,0,0.06)] dark:bg-[rgba(255,255,255,0.08)]' : 'hover:bg-[rgba(0,0,0,0.04)] dark:hover:bg-[rgba(255,255,255,0.04)]'}`}
-            aria-label={label}
-          >
-            <span style={{ fontSize: 14 }}>{emoji}</span>
-            <span style={{ fontSize: 12, fontWeight: reactions[key] ? 600 : 400 }}>{count}</span>
-          </button>
-        ))}
         {listenUrl && listenButtonStyle === "circle" && slug && headline && (
           <button
             type="button"
             onClick={() => {
-              if (isThisArticlePlaying) audio.pause()
-              else audio.play({ title: headline, slug, url: `/api/audio/${encodeURIComponent(slug)}?voice=will` })
+              if (isThisArticlePlaying) {
+                audio.pause()
+              } else {
+                audio.play(
+                  {
+                    title: headline,
+                    slug,
+                    url: `/api/audio/${encodeURIComponent(slug)}?voice=will`,
+                  },
+                  'Will'
+                )
+              }
             }}
-            className="group flex items-center justify-center rounded-full transition-transform hp-tap-target hover:scale-105"
-            style={{ width: 38, height: 38, backgroundColor: '#d1d5db', border: '1px solid rgba(11,15,20,0.12)' }}
+            className="group flex items-center justify-center rounded-full transition-opacity hp-tap-target hover:opacity-70"
+            style={{ width: 30, height: 30, backgroundColor: 'var(--hp-muted)' }}
             aria-label={isThisArticlePlaying ? 'Pause' : 'Listen to article'}
           >
             {isThisArticlePlaying ? (
-              <svg className="w-4 h-4 flex-shrink-0" fill="#FAFAFB" viewBox="0 0 24 24" aria-hidden>
-                <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <rect x="6" y="4" width="4" height="16" rx="1" />
+                <rect x="14" y="4" width="4" height="16" rx="1" />
               </svg>
             ) : (
-              <svg className="w-4 h-4 ml-0.5 flex-shrink-0" fill="#FAFAFB" viewBox="0 0 24 24" aria-hidden>
-                <path d="M8 5v14l11-7L8 5z" />
+              <svg width="12" height="14" viewBox="0 0 20 24" fill="none" aria-hidden="true">
+                <path d="M2 1L18 12L2 23V1Z" fill="currentColor" />
               </svg>
             )}
           </button>
@@ -231,38 +234,46 @@ export function EngagementRow({
         {listenUrl && listenButtonStyle === "pill" && (
           <Link
             href={listenUrl}
-            className="group flex items-center gap-1.5 rounded-full px-2.5 py-1.5 transition-all hp-tap-target hover:bg-[rgba(0,0,0,0.04)] dark:hover:bg-[rgba(255,255,255,0.04)] hover:text-[#00D4FF]"
+            className="group flex items-center gap-1.5 rounded-full px-2.5 py-1.5 transition-opacity hp-tap-target hover:opacity-70"
             aria-label="Listen to article"
           >
-            <Play className="h-3.5 w-3.5 flex-shrink-0" style={{ color: 'inherit' }} />
+            <svg width="12" height="14" viewBox="0 0 20 24" fill="none" className="flex-shrink-0" aria-hidden="true">
+              <path d="M2 1L18 12L2 23V1Z" fill="currentColor" />
+            </svg>
             <span style={{ fontSize: 12, fontWeight: 500 }}>Listen</span>
           </Link>
         )}
       </div>
 
+      {/* Right: Reactions + Comments + Views + Share */}
       <div className="flex items-center gap-2">
+        {reactionButtons.map(({ key, emoji, label, count }) => (
+          <button
+            key={key}
+            onClick={() => toggle(key)}
+            className={`group flex items-center gap-1 rounded-full px-2.5 py-1.5 transition-opacity hp-tap-target ${reactions[key] ? 'bg-[rgba(0,0,0,0.06)] dark:bg-[rgba(255,255,255,0.08)]' : 'hover:opacity-70'}`}
+            aria-label={label}
+          >
+            <span style={{ fontSize: 14 }}>{emoji}</span>
+            <span style={{ fontSize: 12, fontWeight: reactions[key] ? 600 : 400 }}>{count}</span>
+          </button>
+        ))}
         {articleUrl ? (
-          <Link href={articleUrl} className="group flex items-center gap-1 transition-colors hover:text-[#00D4FF] hp-tap-target" aria-label="Comments">
-            <div className="rounded-full p-2 group-hover:bg-[#00D4FF]/10 transition-colors">
-              <MessageCircle className="h-4 w-4" />
-            </div>
+          <Link href={articleUrl} className="group flex items-center gap-1 transition-opacity hover:opacity-70 hp-tap-target" aria-label="Comments">
+            <MessageCircle className="h-4 w-4" />
             <span style={{ fontSize: 12 }}>{stats.comments}</span>
           </Link>
         ) : (
           <span className="group flex items-center gap-1 hp-tap-target" aria-label="Comments">
-            <div className="rounded-full p-2">
-              <MessageCircle className="h-4 w-4" />
-            </div>
+            <MessageCircle className="h-4 w-4" />
             <span style={{ fontSize: 12 }}>{stats.comments}</span>
           </span>
         )}
         <span className="flex items-center gap-1 hp-tap-target" style={{ fontSize: 12 }} title="Views">
-          <div className="rounded-full p-2">
-            <Eye className="h-4 w-4" />
-          </div>
+          <Eye className="h-4 w-4" />
           {stats.views && stats.views !== '0' ? stats.views : '0'}
         </span>
-        <button onClick={handleShare} className="rounded-full p-2 transition-colors hover:bg-[#00D4FF]/10 hover:text-[#00D4FF] hp-tap-target" aria-label="Share">
+        <button onClick={handleShare} className="transition-opacity hover:opacity-70 hp-tap-target" aria-label="Share">
           <Share className="h-4 w-4" />
         </button>
       </div>
@@ -324,13 +335,23 @@ export function EditorialCard({
         <div className="flex items-center gap-3">
           {breakingIndicator === "REPORT" ? (
             <>
-              {/* Sports Mockery wordmark — top left */}
+              {/* Sports Mockery wordmark — top left, swap per theme */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/downloads/sm-logo-wordmark.png"
                 alt="Sports Mockery"
                 width={160}
                 height={32}
+                className="dark:hidden"
+                style={{ height: 32, width: 'auto', objectFit: 'contain' }}
+              />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/downloads/sm-logo-wordmark-dark.png"
+                alt="Sports Mockery"
+                width={160}
+                height={32}
+                className="hidden dark:block"
                 style={{ height: 32, width: 'auto', objectFit: 'contain' }}
               />
               <span
@@ -880,11 +901,14 @@ export function ScoutSummaryCard({ summary, bullets, topic, team, teamColor, tim
     if (isPlaying) {
       audio.pause()
     } else {
-      audio.play({
-        title: 'Scout Insight',
-        slug: 'scout-insight',
-        url: insightAudioUrl,
-      })
+      audio.play(
+        {
+          title: 'Scout Insight',
+          slug: 'scout-insight',
+          url: insightAudioUrl,
+        },
+        'Scout'
+      )
     }
   }
 
@@ -963,43 +987,37 @@ export function ScoutSummaryCard({ summary, bullets, topic, team, teamColor, tim
         </div>
       )}
 
-      <div className="mt-4 flex gap-4 items-center justify-between flex-wrap">
-        <div className="flex gap-3 items-center flex-wrap">
+      <div className="mt-5 flex items-center justify-between" style={{ color: 'var(--hp-muted-foreground)' }}>
+        <div className="flex items-center gap-3">
           <button
-          onClick={() => router.push(`/scout-ai?q=${encodeURIComponent(`${topic} ${team}`)}`)}
-          className="flex items-center gap-1.5 rounded-xl px-4 py-2.5 transition-colors hp-tap-target hover:opacity-90"
-          style={{
-            fontSize: 14,
-            fontWeight: 600,
-            background: '#BC0000',
-            color: '#FAFAFB',
-          }}
-        >
-          <Image src="/downloads/scout-v2.png" alt="Scout" width={16} height={16} className="h-4 w-4 rounded-full object-contain" /> Ask Scout
-        </button>
-        <button
-          type="button"
-          onClick={handleScoutPlay}
-          className="hp-tap-target flex items-center justify-center rounded-full transition-transform hover:scale-105"
-          style={{
-            width: 22,
-            height: 22,
-            backgroundColor: '#BC0000',
-            color: '#FAFAFB',
-          }}
-          aria-label="Play Scout Insight"
-        >
-          {isPlaying ? (
-            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M7 5h4v14H7zM13 5h4v14h-4z" />
-            </svg>
-          ) : (
-            <Play className="h-3.5 w-3.5" style={{ color: 'currentColor' }} />
-          )}
-        </button>
+            type="button"
+            onClick={handleScoutPlay}
+            className="hp-tap-target flex items-center justify-center rounded-full transition-opacity hover:opacity-70"
+            style={{ width: 30, height: 30, backgroundColor: 'var(--hp-muted)' }}
+            aria-label="Play Scout Insight"
+          >
+            {isPlaying ? (
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <rect x="6" y="4" width="4" height="16" rx="1" />
+                <rect x="14" y="4" width="4" height="16" rx="1" />
+              </svg>
+            ) : (
+              <svg width="12" height="14" viewBox="0 0 20 24" fill="none" aria-hidden="true">
+                <path d="M2 1L18 12L2 23V1Z" fill="currentColor" />
+              </svg>
+            )}
+          </button>
+          <button
+            onClick={() => router.push(`/scout-ai?q=${encodeURIComponent(`${topic} ${team}`)}`)}
+            className="flex items-center gap-1.5 transition-opacity hp-tap-target hover:opacity-70"
+            style={{ fontSize: 12, fontWeight: 500 }}
+          >
+            <Image src="/downloads/scout-v2.png" alt="Scout" width={16} height={16} className="h-4 w-4 rounded-full object-contain" />
+            <span>Ask Scout</span>
+          </button>
         </div>
-        <div className="flex items-center gap-1 ml-auto" style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }} title="Views">
-          <Eye className="h-3.5 w-3.5" />
+        <div className="flex items-center gap-1" style={{ fontSize: 12 }} title="Views">
+          <Eye className="h-4 w-4" />
           <span>{stats?.views && stats.views !== '0' ? stats.views : '0'}</span>
         </div>
       </div>
@@ -1048,8 +1066,8 @@ export function TrendingArticleCard({ headline, summary, trendMetric, team, team
       )}
       <p className="mt-3 line-clamp-3" style={{ fontSize: 15, lineHeight: 1.65, color: 'var(--hp-foreground)', opacity: 0.7 }}>{summary}</p>
 
-      <div className="mt-4 flex items-center justify-end gap-1" style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }} title="Views">
-        <Eye className="h-3.5 w-3.5" />
+      <div className="mt-5 flex items-center justify-end gap-1" style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }} title="Views">
+        <Eye className="h-4 w-4" />
         <span>{stats.views && stats.views !== '0' ? stats.views : '0'}</span>
       </div>
     </article>
@@ -1158,11 +1176,14 @@ export function ScoutBriefingCard() {
     if (isPlaying) {
       audio.pause()
     } else {
-      audio.play({
-        title: 'Scout Briefing',
-        slug: 'scout-briefing',
-        url: SCOUT_BRIEFING_AUDIO_URL,
-      })
+      audio.play(
+        {
+          title: 'Scout Briefing',
+          slug: 'scout-briefing',
+          url: SCOUT_BRIEFING_AUDIO_URL,
+        },
+        'Scout'
+      )
     }
   }
 
@@ -1203,38 +1224,32 @@ export function ScoutBriefingCard() {
         ))}
       </ul>
 
-      <div className="mt-4 flex gap-4 items-center flex-wrap">
-        <button
-          onClick={() => router.push("/scout-ai")}
-          className="flex items-center gap-1.5 rounded-xl px-4 py-2.5 transition-colors hp-tap-target hover:opacity-80"
-          style={{
-            fontSize: 14,
-            fontWeight: 600,
-            background: "rgba(0, 212, 255, 0.1)",
-            color: "#0891b2",
-          }}
-        >
-          <Image src="/downloads/scout-v2.png" alt="Scout" width={16} height={16} className="h-4 w-4 rounded-full object-contain" /> Ask Scout
-        </button>
+      <div className="mt-5 flex items-center gap-3" style={{ color: 'var(--hp-muted-foreground)' }}>
         <button
           type="button"
           onClick={handleBriefingPlay}
-          className="hp-tap-target flex items-center justify-center rounded-full transition-transform hover:scale-105"
-          style={{
-            width: 22,
-            height: 22,
-            backgroundColor: 'rgba(0,212,255,0.12)',
-            color: '#00D4FF',
-          }}
+          className="hp-tap-target flex items-center justify-center rounded-full transition-opacity hover:opacity-70"
+          style={{ width: 30, height: 30, backgroundColor: 'var(--hp-muted)' }}
           aria-label="Play Scout Briefing"
         >
           {isPlaying ? (
-            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M7 5h4v14H7zM13 5h4v14h-4z" />
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <rect x="6" y="4" width="4" height="16" rx="1" />
+              <rect x="14" y="4" width="4" height="16" rx="1" />
             </svg>
           ) : (
-            <Play className="h-3.5 w-3.5" style={{ color: 'currentColor' }} />
+            <svg width="12" height="14" viewBox="0 0 20 24" fill="none" aria-hidden="true">
+              <path d="M2 1L18 12L2 23V1Z" fill="currentColor" />
+            </svg>
           )}
+        </button>
+        <button
+          onClick={() => router.push("/scout-ai")}
+          className="flex items-center gap-1.5 transition-opacity hp-tap-target hover:opacity-70"
+          style={{ fontSize: 12, fontWeight: 500 }}
+        >
+          <Image src="/downloads/scout-v2.png" alt="Scout" width={16} height={16} className="h-4 w-4 rounded-full object-contain" />
+          <span>Ask Scout</span>
         </button>
       </div>
     </article>
@@ -1316,7 +1331,7 @@ export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team,
         className="flex items-center justify-between gap-3 mb-4"
         style={isUntoldChicago(source) ? { marginTop: -8 } : undefined}
       >
-        {/* Top left: P&I or Untold logo on partner cards; VIDEO + timestamp on others */}
+      {/* Top left: P&I or Untold logo on partner cards; VIDEO + timestamp on others */}
         <div className="flex items-center gap-3 flex-shrink-0" style={{ height: isUntoldChicago(source) ? 40 : 66 }}>
           {isPinwheelsAndIvy(source) ? (
             <>
@@ -1326,7 +1341,16 @@ export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team,
                   alt="Pinwheels and Ivy"
                   width={255}
                   height={66}
-                  className="object-contain object-left"
+                  className="object-contain object-left dark:hidden"
+                  style={{ maxHeight: 66, width: 'auto', height: 66 }}
+                  loading="eager"
+                />
+                <img
+                  src={PI_LOGO_LEFT_DARK_SRC}
+                  alt="Pinwheels and Ivy"
+                  width={255}
+                  height={66}
+                  className="object-contain object-left hidden dark:block"
                   style={{ maxHeight: 66, width: 'auto', height: 66 }}
                   loading="eager"
                 />
@@ -1341,6 +1365,17 @@ export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team,
                 alt="Untold Chicago"
                 width={150}
                 height={40}
+                className="dark:hidden"
+                style={{ height: 40, width: 'auto', objectFit: 'contain' }}
+                loading="eager"
+              />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={UNTOLD_LOGO_DARK_SRC}
+                alt="Untold Chicago"
+                width={150}
+                height={40}
+                className="hidden dark:block"
                 style={{ height: 40, width: 'auto', objectFit: 'contain' }}
                 loading="eager"
               />
@@ -1353,24 +1388,54 @@ export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team,
             </>
           )}
         </div>
-        {/* Top right: P&I logo for PI cards; nothing for Untold; team logo for others */}
-        <div className="flex items-center justify-end flex-shrink-0" style={{ height: 32 }}>
-          {isPinwheelsAndIvy(source) ? (
-            <span className="hp-pi-logo">
-              <img
-                src={PI_LOGO_SRC}
-                alt="Pinwheels & Ivy"
-                width={32}
-                height={32}
-                className="object-contain"
-                style={{ width: 32, height: 32 }}
-                loading="eager"
-              />
-            </span>
-          ) : !isUntoldChicago(source) ? (
-            <TeamTag team={team} teamHex={teamHex} />
-          ) : null}
-        </div>
+      {/* Top right: YouTube subscribe button on P&I cards; team logo on others */}
+      <div className="flex items-center justify-end flex-shrink-0" style={{ height: 32 }}>
+        {isPinwheelsAndIvy(source) ? (
+          <a
+            href="https://www.youtube.com/@PinwheelsandIvyPodcast?sub_confirmation=1"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 rounded-full px-3 py-1 transition-opacity hover:opacity-80"
+            style={{
+              backgroundColor: '#FF0000',
+              color: '#fff',
+              fontSize: 11,
+              fontWeight: 600,
+              textDecoration: 'none',
+              lineHeight: '20px',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <svg width="14" height="10" viewBox="0 0 24 17" fill="#fff">
+              <path d="M23.5 2.5a3 3 0 00-2.1-2.1C19.5 0 12 0 12 0S4.5 0 2.6.4A3 3 0 00.5 2.5 31.5 31.5 0 000 8.5a31.5 31.5 0 00.5 6 3 3 0 002.1 2.1c1.9.4 9.4.4 9.4.4s7.5 0 9.4-.4a3 3 0 002.1-2.1 31.5 31.5 0 00.5-6 31.5 31.5 0 00-.5-6zM9.6 12.1V4.9l6.3 3.6-6.3 3.6z" />
+            </svg>
+            Subscribe
+          </a>
+        ) : isUntoldChicago(source) ? (
+          <a
+            href="https://www.youtube.com/@untoldchicago?sub_confirmation=1"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 rounded-full px-3 py-1 transition-opacity hover:opacity-80"
+            style={{
+              backgroundColor: '#FF0000',
+              color: '#fff',
+              fontSize: 11,
+              fontWeight: 600,
+              textDecoration: 'none',
+              lineHeight: '20px',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <svg width="14" height="10" viewBox="0 0 24 17" fill="#fff">
+              <path d="M23.5 2.5a3 3 0 00-2.1-2.1C19.5 0 12 0 12 0S4.5 0 2.6.4A3 3 0 00.5 2.5 31.5 31.5 0 000 8.5a31.5 31.5 0 00.5 6 3 3 0 002.1 2.1c1.9.4 9.4.4 9.4.4s7.5 0 9.4-.4a3 3 0 002.1-2.1 31.5 31.5 0 00.5-6 31.5 31.5 0 00-.5-6zM9.6 12.1V4.9l6.3 3.6-6.3 3.6z" />
+            </svg>
+            Subscribe
+          </a>
+        ) : (
+          <TeamTag team={team} teamHex={teamHex} />
+        )}
+      </div>
       </div>
 
       {articleUrl ? (
@@ -1414,8 +1479,10 @@ export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team,
               />
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.6), transparent, transparent)' }} />
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="h-16 w-16 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform" style={{ background: 'rgba(255,255,255,0.95)' }}>
-                  <Play className="h-7 w-7 ml-1" style={{ color: '#000' }} fill="#000" />
+                <div className="h-16 w-16 rounded-full flex items-center justify-center group-hover:scale-110 transition-all" style={{ background: 'rgba(255,255,255,0.95)', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
+                  <svg width="24" height="28" viewBox="0 0 20 24" fill="none" className="ml-1" aria-hidden="true">
+                    <path d="M2 1L18 12L2 23V1Z" fill="#0B0F14" />
+                  </svg>
                 </div>
               </div>
               <div className="absolute bottom-3 right-3 rounded-lg px-2.5 py-1" style={{ background: 'rgba(0,0,0,0.8)', fontSize: 12, fontWeight: 500, color: '#fff' }}>
