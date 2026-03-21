@@ -93,7 +93,7 @@ function formatMoney(usd: number | null): string {
   return `$${(usd / 1_000_000).toFixed(0)}M`
 }
 
-export default function TeamDetail({ grade, history }: { grade: OwnershipGrade; history: HistoryPoint[] }) {
+export default function TeamDetail({ grade, history, scoutData }: { grade: OwnershipGrade; history: HistoryPoint[]; scoutData?: any }) {
   const teamName = TEAM_NAMES[grade.team_slug] || grade.team_slug
   const tenure = TEAM_TENURE[grade.team_slug]
   const currentYear = new Date().getFullYear()
@@ -368,7 +368,7 @@ export default function TeamDetail({ grade, history }: { grade: OwnershipGrade; 
       )}
 
       {/* Scout Commentary */}
-      <ScoutCommentary teamSlug={grade.team_slug} />
+      <ScoutCommentary teamSlug={grade.team_slug} initialData={scoutData} />
     </div>
   )
 }

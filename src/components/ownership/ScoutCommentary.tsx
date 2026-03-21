@@ -5,6 +5,7 @@ import Image from 'next/image'
 
 interface ScoutCommentaryProps {
   teamSlug?: string
+  initialData?: CommentaryData | null
 }
 
 interface CommentaryData {
@@ -22,7 +23,7 @@ function getCacheKey(teamSlug: string | undefined, angle: number) {
   return `scout_owner_${teamSlug || 'all'}_${angle}`
 }
 
-export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
+export default function ScoutCommentary({ teamSlug, initialData }: ScoutCommentaryProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [data, setData] = useState<CommentaryData | null>(null)
@@ -101,8 +102,8 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
     setIsTalking(true)
     setDisplayedText('')
     let charIndex = 0
-    const charsPerFrame = 2
-    const intervalMs = 22
+    const charsPerFrame = 4
+    const intervalMs = 16
     const tick = () => {
       charIndex += charsPerFrame
       if (charIndex >= fullText.length) { setDisplayedText(fullText); setIsTalking(false); return }
@@ -114,7 +115,14 @@ export default function ScoutCommentary({ teamSlug }: ScoutCommentaryProps) {
   }, [])
 
   useEffect(() => {
-    const timer = setTimeout(() => { setIsOpen(true); fetchCommentary(0) }, 1500)
+    const timer = setTimeout(() => {
+      setIsOpen(true)
+      if (initialData) {
+        showCommentary(initialData, 0)
+      } else {
+        fetchCommentary(0)
+      }
+    }, 1500)
     return () => clearTimeout(timer)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

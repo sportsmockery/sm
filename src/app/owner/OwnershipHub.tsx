@@ -22,7 +22,7 @@ interface OwnershipGrade {
   disagree_count: number
 }
 
-export default function OwnershipHub({ grades }: { grades: OwnershipGrade[] }) {
+export default function OwnershipHub({ grades, scoutData }: { grades: OwnershipGrade[]; scoutData?: any }) {
   const [showMethodology, setShowMethodology] = useState(false)
 
   return (
@@ -121,7 +121,7 @@ export default function OwnershipHub({ grades }: { grades: OwnershipGrade[] }) {
       </div>
 
       {/* Scout Commentary */}
-      <ScoutCommentary />
+      <ScoutCommentary initialData={scoutData} />
 
       {/* How We Grade Modal */}
       {showMethodology && (
