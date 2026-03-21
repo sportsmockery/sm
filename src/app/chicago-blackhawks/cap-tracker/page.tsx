@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   },
 }
 
-export const revalidate = 3600
+export const dynamic = 'force-dynamic'
 
 function formatMoney(n: number | null | undefined): string {
   if (n == null) return '--'

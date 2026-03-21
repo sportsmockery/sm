@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: 'Chicago Bulls 2024-25 team and player statistics. View scoring, rebounding, assists, and defensive leaderboards.',
 }
 
-export const revalidate = 3600
+export const dynamic = 'force-dynamic'
 
 export default async function BullsStatsPage() {
   const team = CHICAGO_TEAMS.bulls

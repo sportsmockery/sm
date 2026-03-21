@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   },
 }
 
-export const revalidate = 1800 // 30 min for fresh rumor content
+export const dynamic = 'force-dynamic'
 
 export default async function BearsTradeRumorsPage() {
   const team = CHICAGO_TEAMS.bears

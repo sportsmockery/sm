@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { datalabAdmin, BearsPlayer } from '@/lib/supabase-datalab'
 

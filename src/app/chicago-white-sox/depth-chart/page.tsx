@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   },
 }
 
-export const revalidate = 3600
+export const dynamic = 'force-dynamic'
 
 export default async function WhiteSoxDepthChartPage() {
   const team = CHICAGO_TEAMS.whitesox

@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   description: 'Complete Chicago Bears 2025 schedule with game dates, times, opponents, scores, and results. View upcoming games and past results.',
 }
 
-export const revalidate = 3600
+export const dynamic = 'force-dynamic'
 
 // Helper to calculate progressive record
 function calculateProgressiveRecord(games: BearsGame[]): (BearsGame & { progressiveRecord: string })[] {

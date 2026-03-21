@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server'
 import { datalabAdmin } from '@/lib/supabase-datalab'
 
-// Revalidate every hour
-export const revalidate = 3600
+export const dynamic = 'force-dynamic'
 
 // Position group and side mappings
 const POSITION_TO_GROUP: Record<string, string> = {

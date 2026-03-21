@@ -9,6 +9,8 @@ import { CHICAGO_TEAMS, fetchTeamRecord, fetchNextGame, fetchLastGame } from '@/
 import { getTeamSeasonOverview, getTeamKeyPlayers, getTeamTrends } from '@/lib/team-sidebar-data'
 import { supabaseAdmin } from '@/lib/supabase-server'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Chicago Cubs | News, Stats, Schedule & Roster | SportsMockery',
   description: 'Complete Chicago Cubs coverage including latest news, team stats, schedule, roster, and expert analysis.',

@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   },
 }
 
-export const revalidate = 1800 // 30 min for fresh rumor content
+export const dynamic = 'force-dynamic'
 
 // Fetch Bulls posts from database
 async function getBullsPosts(limit: number = 20) {
