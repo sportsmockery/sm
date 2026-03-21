@@ -334,7 +334,7 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
       />
 
       {/* 2030 Hero Header */}
-      <header style={{ padding: '40px 0 32px', minHeight: 0, position: 'relative', background: '#FAFAFB' }}>
+      <header style={{ padding: '40px 0 32px', minHeight: 0, position: 'relative', background: 'var(--sm-dark)' }}>
         <div style={{ position: 'relative', zIndex: 1, maxWidth: 1236, margin: '0 auto', padding: '0 24px' }}>
           {/* Featured image with headline overlay */}
           {post.featured_image ? (
@@ -391,7 +391,7 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
 
       {/* Article Audio Player — scroll target for ?listen=true from feed */}
       {audioInfo && (
-        <div id="article-audio" style={{ backgroundColor: '#FAFAFB' }}>
+        <div id="article-audio" style={{ backgroundColor: 'var(--sm-dark)' }}>
           <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 24px' }}>
             <ArticleAudioPlayer
               initialArticle={audioInfo.article}
@@ -404,7 +404,7 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
       )}
 
       {/* 2030 Article Body Area */}
-      <div style={{ backgroundColor: '#FAFAFB' }}>
+      <div style={{ backgroundColor: 'var(--sm-dark)' }}>
         <div style={{ maxWidth: 1460, margin: '0 auto', padding: '16px 24px 48px', display: 'flex', gap: 24 }}>
           {/* Left TOC Sidebar (Desktop only) */}
           <aside className="hidden xl:block" style={{ width: 260, flexShrink: 0 }}>

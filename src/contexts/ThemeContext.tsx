@@ -20,49 +20,84 @@ function getTimeOfDay(): TimeOfDay {
   return 'dawn'
 }
 
-// Time-of-day CSS variable overrides (layered on top of light/dark theme)
+// Time-of-day CSS variable overrides (layered on top of dark theme only)
 const TIME_CSS_VARS: Record<TimeOfDay, Record<string, string>> = {
   day: {
-    '--sm-time-card': 'rgba(19, 19, 29, 0.75)',
-    '--sm-time-glass-glow': 'rgba(255, 255, 255, 0.04)',
-    '--sm-time-hero-haze': 'linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 60%)',
+    '--sm-time-card': 'rgba(18, 18, 22, 0.85)',
+    '--sm-time-glass-glow': 'rgba(255, 255, 255, 0.02)',
+    '--sm-time-hero-haze': 'linear-gradient(180deg, rgba(255,255,255,0.01) 0%, transparent 60%)',
   },
   night: {
-    '--sm-time-card': 'rgba(30, 5, 5, 0.85)',
-    '--sm-time-glass-glow': 'rgba(188, 0, 0, 0.08)',
-    '--sm-time-hero-haze': 'linear-gradient(135deg, rgba(188,0,0,0.06) 0%, rgba(0,0,0,0.9) 100%)',
+    '--sm-time-card': 'rgba(18, 18, 22, 0.9)',
+    '--sm-time-glass-glow': 'rgba(0, 245, 255, 0.04)',
+    '--sm-time-hero-haze': 'linear-gradient(135deg, rgba(0,245,255,0.02) 0%, rgba(5,5,8,0.95) 100%)',
   },
   dawn: {
-    '--sm-time-card': 'rgba(15, 10, 25, 0.8)',
-    '--sm-time-glass-glow': 'rgba(188, 0, 0, 0.04)',
-    '--sm-time-hero-haze': 'linear-gradient(180deg, rgba(40,20,60,0.06) 0%, transparent 50%)',
+    '--sm-time-card': 'rgba(18, 18, 22, 0.85)',
+    '--sm-time-glass-glow': 'rgba(0, 245, 255, 0.02)',
+    '--sm-time-hero-haze': 'linear-gradient(180deg, rgba(18,18,22,0.04) 0%, transparent 50%)',
+  },
+}
+
+// Light-mode time-of-day overrides (subtle, no dark tints)
+const TIME_CSS_VARS_LIGHT: Record<TimeOfDay, Record<string, string>> = {
+  day: {
+    '--sm-time-card': 'rgba(255, 255, 255, 0.9)',
+    '--sm-time-glass-glow': 'rgba(0, 0, 0, 0.02)',
+    '--sm-time-hero-haze': 'linear-gradient(180deg, rgba(0,0,0,0.01) 0%, transparent 60%)',
+  },
+  night: {
+    '--sm-time-card': 'rgba(255, 255, 255, 0.92)',
+    '--sm-time-glass-glow': 'rgba(0, 212, 255, 0.03)',
+    '--sm-time-hero-haze': 'linear-gradient(135deg, rgba(0,212,255,0.02) 0%, rgba(250,250,251,0.95) 100%)',
+  },
+  dawn: {
+    '--sm-time-card': 'rgba(255, 255, 255, 0.9)',
+    '--sm-time-glass-glow': 'rgba(0, 212, 255, 0.02)',
+    '--sm-time-hero-haze': 'linear-gradient(180deg, rgba(0,0,0,0.02) 0%, transparent 50%)',
   },
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
-export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('light')
-  const [timeOfDay, setTimeOfDay] = useState<TimeOfDay>('day')
-  const [mounted, setMounted] = useState(false)
-
-  // On mount, force light mode
-  useEffect(() => {
-    setMounted(true)
-    // Always light mode — clear any stored dark preference
-    localStorage.setItem('sm-theme', 'light')
-  }, [])
-
-  // Apply light theme to document (always)
-  useEffect(() => {
-    if (!mounted) return
-
-    const root = document.documentElement
+function applyThemeToDOM(theme: Theme) {
+  const root = document.documentElement
+  if (theme === 'dark') {
+    root.classList.remove('light')
+    root.classList.add('dark')
+    root.setAttribute('data-theme', 'dark')
+    root.style.colorScheme = 'dark'
+  } else {
     root.classList.remove('dark')
     root.classList.add('light')
     root.setAttribute('data-theme', 'light')
-    localStorage.setItem('sm-theme', 'light')
-  }, [mounted])
+    root.style.colorScheme = 'light'
+  }
+}
+
+export function ThemeProvider({ children }: { children: ReactNode }) {
+  const [theme, setThemeState] = useState<Theme>('dark')
+  const [timeOfDay, setTimeOfDay] = useState<TimeOfDay>('day')
+  const [mounted, setMounted] = useState(false)
+
+  // On mount, read saved preference (default: dark)
+  useEffect(() => {
+    let saved: Theme = 'dark'
+    try {
+      const stored = localStorage.getItem('sm-theme')
+      if (stored === 'light' || stored === 'dark') saved = stored
+    } catch {}
+    setThemeState(saved)
+    applyThemeToDOM(saved)
+    setMounted(true)
+  }, [])
+
+  // Apply theme to document whenever it changes
+  useEffect(() => {
+    if (!mounted) return
+    applyThemeToDOM(theme)
+    try { localStorage.setItem('sm-theme', theme) } catch {}
+  }, [theme, mounted])
 
   // Time-of-day reactive CSS vars — checks every 10 minutes
   useEffect(() => {
@@ -72,7 +107,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       const tod = getTimeOfDay()
       setTimeOfDay(tod)
       const root = document.documentElement
-      const vars = TIME_CSS_VARS[tod]
+      const vars = theme === 'dark' ? TIME_CSS_VARS[tod] : TIME_CSS_VARS_LIGHT[tod]
       Object.entries(vars).forEach(([key, value]) => {
         root.style.setProperty(key, value)
       })
@@ -89,12 +124,15 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     applyTimeVars()
     const interval = setInterval(applyTimeVars, 10 * 60 * 1000) // 10 min
     return () => clearInterval(interval)
-  }, [mounted])
+  }, [mounted, theme])
 
-  // Light mode is forced — toggle and setTheme are no-ops
-  const toggleTheme = () => {}
+  const toggleTheme = () => {
+    setThemeState(prev => prev === 'dark' ? 'light' : 'dark')
+  }
 
-  const setTheme = (_newTheme: Theme) => {}
+  const setTheme = (newTheme: Theme) => {
+    setThemeState(newTheme)
+  }
 
   return (
     <ThemeContext.Provider value={{ theme, resolvedTheme: theme, toggleTheme, setTheme, timeOfDay }}>
