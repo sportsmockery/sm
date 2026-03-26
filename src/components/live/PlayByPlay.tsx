@@ -5,11 +5,12 @@ import PlayByPlayItem from './PlayByPlayItem'
 
 interface PlayByPlayProps {
   plays: Play[]
+  dark?: boolean
 }
 
-export default function PlayByPlay({ plays }: PlayByPlayProps) {
+export default function PlayByPlay({ plays, dark }: PlayByPlayProps) {
   if (plays.length === 0) {
-    return <div className="text-center py-8" style={{ color: 'var(--sm-text-muted)' }}>No plays available yet</div>
+    return <div className="text-center py-8" style={{ color: dark ? 'rgba(255,255,255,0.5)' : 'var(--sm-text-muted)' }}>No plays available yet</div>
   }
 
   const sorted = [...plays].sort((a, b) => b.sequence - a.sequence)
@@ -26,12 +27,12 @@ export default function PlayByPlay({ plays }: PlayByPlayProps) {
         return (
           <div key={play.play_id}>
             {isNewPeriod && (
-              <div className="flex items-center justify-between py-3 px-2 mt-2 rounded-lg" style={{ backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)' }}>
-                <span className="text-sm font-bold" style={{ color: 'var(--sm-text)' }}>{play.period_label}</span>
-                <span className="text-sm font-medium" style={{ color: 'var(--sm-text-muted)' }}>{play.score_away} - {play.score_home}</span>
+              <div className="flex items-center justify-between py-3 px-2 mt-2 rounded-lg" style={{ backgroundColor: dark ? 'rgba(255,255,255,0.05)' : 'var(--sm-surface)', border: dark ? '1px solid rgba(255,255,255,0.15)' : '1px solid var(--sm-border)' }}>
+                <span className="text-sm font-bold" style={{ color: dark ? '#FAFAFB' : 'var(--sm-text)' }}>{play.period_label}</span>
+                <span className="text-sm font-medium" style={{ color: dark ? 'rgba(255,255,255,0.5)' : 'var(--sm-text-muted)' }}>{play.score_away} - {play.score_home}</span>
               </div>
             )}
-            <PlayByPlayItem play={play} />
+            <PlayByPlayItem play={play} dark={dark} />
           </div>
         )
       })}

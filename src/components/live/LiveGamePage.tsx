@@ -104,9 +104,10 @@ export default function LiveGamePage({ sport, gameId }: LiveGamePageProps) {
 
       {/* Content tabs (shown for live and post-game) */}
       {gameState !== 'pre_game' && (
+        <div style={{ backgroundColor: '#0B0F14', minHeight: '50vh', paddingBottom: 48 }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '16px 16px', position: 'relative', zIndex: 1 }}>
           {/* Tab bar */}
-          <div style={{ display: 'flex', gap: 8, marginBottom: 16, overflowX: 'auto', borderBottom: '1px solid var(--sm-border)' }}>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 16, overflowX: 'auto', borderBottom: '1px solid rgba(255,255,255,0.15)' }}>
             {tabs.map(tab => (
               <button
                 key={tab}
@@ -115,8 +116,8 @@ export default function LiveGamePage({ sport, gameId }: LiveGamePageProps) {
                   padding: '8px 16px',
                   fontSize: 14,
                   fontWeight: 500,
-                  borderBottom: activeTab === tab ? '3px solid var(--sm-red)' : '3px solid transparent',
-                  color: activeTab === tab ? 'var(--sm-red)' : 'var(--sm-text-muted)',
+                  borderBottom: activeTab === tab ? '3px solid #BC0000' : '3px solid transparent',
+                  color: activeTab === tab ? '#BC0000' : 'rgba(255,255,255,0.6)',
                   background: 'transparent',
                   whiteSpace: 'nowrap',
                   transition: 'color 0.2s',
@@ -129,9 +130,10 @@ export default function LiveGamePage({ sport, gameId }: LiveGamePageProps) {
           </div>
 
           {/* Tab content */}
-          {activeTab === 'plays' && <PlayByPlay plays={game.play_by_play} />}
+          {activeTab === 'plays' && <PlayByPlay plays={game.play_by_play} dark />}
           {activeTab === 'boxscore' && renderBoxScore()}
-          {activeTab === 'stats' && <TeamStatsComparison game={game} />}
+          {activeTab === 'stats' && <TeamStatsComparison game={game} dark />}
+        </div>
         </div>
       )}
 
