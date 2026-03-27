@@ -48,7 +48,7 @@ interface Data {
 // ═══════════════════════════════════════════════════════════════════════════════
 // CONSTANTS & UTILS
 // ═══════════════════════════════════════════════════════════════════════════════
-const TABS = ['Overview', 'Writers', 'Social', 'SEO', 'Content', 'Revenue', 'Payments', 'Freestar'] as const
+const TABS = ['Overview', 'Writers', 'Social', 'SEO', 'Content', 'Payments', 'Freestar'] as const
 const RANGES = [
   { key: 'today', label: 'Today' },
   { key: 'yesterday', label: 'Yesterday' },
@@ -684,6 +684,107 @@ export default function ExecDashboard() {
   const [editFormulaCode, setEditFormulaCode] = useState('')
   const [editFormulaDate, setEditFormulaDate] = useState('')
   const [expandedHistoryMonth, setExpandedHistoryMonth] = useState<string | null>(null)
+  // Freestar P&L state
+  const [freestarRevenue, setFreestarRevenue] = useState<number | null>(null)
+  const [freestarLoading, setFreestarLoading] = useState(false)
+  const [freehandExpenses, setFreehandExpenses] = useState<Array<{ id: string; desc: string; amount: number; date: string }>>([])
+  const [newExpenseDesc, setNewExpenseDesc] = useState('')
+  const [newExpenseAmount, setNewExpenseAmount] = useState('')
+  const [newExpenseDate, setNewExpenseDate] = useState(new Date().toISOString().slice(0, 10))
+  const [showExpenseForm, setShowExpenseForm] = useState(false)
+
+  // Load freehand expenses from localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('sm-freehand-expenses')
+      if (saved) setFreehandExpenses(JSON.parse(saved))
+    } catch {}
+  }, [])
+
+  // Save freehand expenses to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('sm-freehand-expenses', JSON.stringify(freehandExpenses))
+    } catch {}
+  }, [freehandExpenses])
+
+  // Fetch Freestar revenue when on Freestar tab or range changes
+  useEffect(() => {
+    if (tab !== 'Freestar') return
+    const fetchFreestarRevenue = async () => {
+      setFreestarLoading(true)
+      try {
+        // Calculate date range based on current range filter
+        const now = new Date()
+        let start: Date, end: Date
+        if (range === 'today') {
+          start = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+          end = now
+        } else if (range === 'yesterday') {
+          start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1)
+          end = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+        } else if (range === 'this-week') {
+          const day = now.getDay()
+          start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - day)
+          end = now
+        } else if (range === 'this-month') {
+          start = new Date(now.getFullYear(), now.getMonth(), 1)
+          end = now
+        } else if (range === 'last-month') {
+          start = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+          end = new Date(now.getFullYear(), now.getMonth(), 0)
+        } else if (range === 'ytd') {
+          start = new Date(now.getFullYear(), 0, 1)
+          end = now
+        } else if (range === 'last-year') {
+          start = new Date(now.getFullYear() - 1, 0, 1)
+          end = new Date(now.getFullYear() - 1, 11, 31)
+        } else if (range === 'custom' && customStart && customEnd) {
+          start = new Date(customStart)
+          end = new Date(customEnd)
+        } else {
+          start = new Date(now.getFullYear(), now.getMonth(), 1)
+          end = now
+        }
+        const startStr = start.toISOString().slice(0, 10)
+        const endStr = end.toISOString().slice(0, 10)
+        // Freestar API via proxy
+        const res = await fetch(`/api/freestar-revenue?start=${startStr}&end=${endStr}`)
+        if (res.ok) {
+          const json = await res.json()
+          setFreestarRevenue(json.revenue ?? null)
+        }
+      } catch {
+        // Fallback: estimate from dashboard data
+        if (data?.overview) {
+          setFreestarRevenue(Math.round(data.overview.periodViews * 0.00186))
+        }
+      } finally {
+        setFreestarLoading(false)
+      }
+    }
+    fetchFreestarRevenue()
+  }, [tab, range, customStart, customEnd, data])
+
+  const addFreehandExpense = () => {
+    if (!newExpenseDesc.trim() || !newExpenseAmount) return
+    const amount = parseFloat(newExpenseAmount)
+    if (isNaN(amount) || amount <= 0) return
+    setFreehandExpenses(prev => [...prev, {
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      desc: newExpenseDesc.trim(),
+      amount,
+      date: newExpenseDate,
+    }])
+    setNewExpenseDesc('')
+    setNewExpenseAmount('')
+    setNewExpenseDate(new Date().toISOString().slice(0, 10))
+    setShowExpenseForm(false)
+  }
+
+  const removeFreehandExpense = (id: string) => {
+    setFreehandExpenses(prev => prev.filter(e => e.id !== id))
+  }
 
   const load = useCallback(async (silent = false) => {
     if (!silent) setLoading(true); else setRefreshing(true)
@@ -747,9 +848,6 @@ export default function ExecDashboard() {
       Content: [
         { q: 'Publishing velocity?', a: `${d.velocity} posts/week across ${d.totalCategories} categories. ${d.periodPosts} published this period.`, color: C.blue },
       ],
-Revenue: [
-  { q: 'Revenue trend?', a: `Est. $${fN(Math.round(d.periodViews * 0.008))} ad revenue this period at $${((d.periodViews > 0 ? Math.round(d.periodViews * 0.008) / d.periodViews * 1000 : 0)).toFixed(2)} RPM.`, color: C.green },
-  ],
   Payments: [
   { q: 'Payment status?', a: `${d.totalAuthors} writers pending payout review for this period.`, color: C.blue },
   ],
@@ -1097,48 +1195,6 @@ Revenue: [
             </Section>
             <ContentScoreModule topContent={data.topContent} overview={data.overview} onPostClick={openPost} />
           </>}
-
-          {/* ═══════ REVENUE TAB ═══════ */}
-          {tab === 'Revenue' && (() => {
-            const estRev = Math.round(data.overview.periodViews * 0.008)
-            const rpm = data.overview.periodViews > 0 ? (estRev / data.overview.periodViews * 1000).toFixed(2) : '0.00'
-            const revPerArticle = data.overview.periodPosts > 0 ? Math.round(estRev / data.overview.periodPosts) : 0
-            return <>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {[
-                  { l: 'Est. Ad Revenue', v: '$' + fN(estRev), c: C.green, s: 'this period' },
-                  { l: 'RPM', v: '$' + rpm, c: C.amber, s: 'per 1K views' },
-                  { l: 'Revenue/Article', v: '$' + fN(revPerArticle), c: C.purple, s: 'avg per published' },
-                ].map(m => (
-                  <div key={m.l} className="rounded-lg border px-4 py-3" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
-                    <p className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--sm-text-dim)' }}>{m.l}</p>
-                    <p className="text-2xl font-extrabold tabular-nums mt-1" style={{ color: m.c }}>{m.v}</p>
-                    <p className="text-sm mt-0.5" style={{ color: 'var(--sm-text-muted)' }}>{m.s}</p>
-                  </div>
-                ))}
-              </div>
-              <Section title="Revenue by Article">
-                <SortableTable
-                  columns={[
-                    { key: 'title', label: 'Article', render: (v: string) => <span className="font-medium truncate block" style={{ maxWidth: 400 }}>{v}</span> },
-                    { key: 'author_name', label: 'Author' },
-                    { key: 'views', label: 'Views', align: 'right', render: (v: number) => <span className="font-bold tabular-nums" style={{ color: C.blue }}>{fN(v || 0)}</span> },
-                    { key: '_revenue', label: 'Est. Revenue', align: 'right', render: (_v: any, r: any) => <span className="font-bold tabular-nums" style={{ color: C.green }}>${fN(Math.round((r.views || 0) * 0.008))}</span> },
-                    { key: '_source', label: 'Top Source', align: 'right', priority: 'low',
-                      render: (_v: any, r: any) => {
-                        const t = trafficSplit(r.author_name || 'x')
-                        const top = Object.entries(t).sort((a, b) => (b[1] as number) - (a[1] as number))[0]
-                        const colors: Record<string, string> = { organic: C.green, discover: C.blue, social: C.purple, direct: C.amber }
-                        return <span className="text-sm font-semibold capitalize" style={{ color: colors[top[0]] || 'var(--sm-text)' }}>{top[0]} ({top[1]}%)</span>
-                      }
-                    },
-                  ]}
-                  data={[...data.topContent].sort((a: any, b: any) => (b.views || 0) - (a.views || 0)).map(p => ({ ...p, _revenue: Math.round((p.views || 0) * 0.008) }))}
-                  onRowClick={openPost}
-                />
-              </Section>
-            </>
-          })()}
 
           {/* ═══════ PAYMENTS TAB ═══════ */}
           {tab === 'Payments' && <>
@@ -1590,16 +1646,216 @@ Revenue: [
             </Section>
           </>}
 
-          {tab === 'Freestar' && <>
-            <div className="rounded-xl border overflow-hidden" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
-              <iframe
-                src="/admin/freestar"
-                className="w-full border-0"
-                style={{ height: 'calc(100vh - 220px)', minHeight: '700px' }}
-                title="Freestar Revenue Intelligence"
-              />
-            </div>
-          </>}
+          {tab === 'Freestar' && (() => {
+            // Calculate writer expenses from payment data
+            const payments = data.paymentSync?.payments || []
+            const writerExpenses = payments.reduce((s: number, p: any) => s + (p.calculated_pay || 0), 0)
+            // Freehand expenses total
+            const freehandTotal = freehandExpenses.reduce((s, e) => s + e.amount, 0)
+            const totalExpenses = writerExpenses + freehandTotal
+            // Revenue from Freestar (fetched or estimated)
+            const revenue = freestarRevenue ?? (data.overview ? Math.round(data.overview.periodViews * 0.00186) : 0)
+            const profit = revenue - totalExpenses
+            const margin = revenue > 0 ? ((profit / revenue) * 100).toFixed(1) : '0.0'
+
+            return <>
+              {/* ── P&L SUMMARY ── */}
+              <div className="rounded-xl border" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
+                <div className="px-5 py-3 border-b flex items-center justify-between" style={{ borderColor: 'var(--sm-border)' }}>
+                  <div className="flex items-center gap-3">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: '#00D4FF' }}>
+                      <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
+                    </svg>
+                    <h3 className="text-lg font-bold" style={{ color: 'var(--sm-text)' }}>Profit & Loss</h3>
+                    <span className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style={{ background: profit >= 0 ? 'rgba(16,185,129,0.12)' : 'rgba(188,0,0,0.12)', color: profit >= 0 ? '#10b981' : '#bc0000' }}>
+                      {profit >= 0 ? 'Profitable' : 'Loss'}
+                    </span>
+                  </div>
+                  <span className="text-xs" style={{ color: 'var(--sm-text-dim)' }}>
+                    {freestarLoading ? 'Fetching...' : `Filtered: ${range.replace('-', ' ').replace(/\b\w/g, c => c.toUpperCase())}`}
+                  </span>
+                </div>
+
+                {/* Three summary cards */}
+                <div className="p-5">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    {/* Revenue */}
+                    <div className="rounded-xl border px-5 py-4 relative overflow-hidden" style={{ background: 'var(--sm-card)', borderColor: 'rgba(16,185,129,0.25)' }}>
+                      <div className="absolute top-0 left-0 w-1 h-full" style={{ background: '#10b981' }} />
+                      <p className="text-xs font-bold uppercase tracking-wider mb-1" style={{ color: '#10b981' }}>Revenue</p>
+                      <p className="text-3xl font-extrabold tabular-nums" style={{ color: '#10b981' }}>
+                        ${revenue.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                      </p>
+                      <p className="text-xs mt-1" style={{ color: 'var(--sm-text-dim)' }}>Freestar ad revenue</p>
+                    </div>
+                    {/* Expenses */}
+                    <div className="rounded-xl border px-5 py-4 relative overflow-hidden" style={{ background: 'var(--sm-card)', borderColor: 'rgba(188,0,0,0.25)' }}>
+                      <div className="absolute top-0 left-0 w-1 h-full" style={{ background: '#bc0000' }} />
+                      <p className="text-xs font-bold uppercase tracking-wider mb-1" style={{ color: '#bc0000' }}>Expenses</p>
+                      <p className="text-3xl font-extrabold tabular-nums" style={{ color: '#bc0000' }}>
+                        ${totalExpenses.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </p>
+                      <div className="flex items-center gap-3 mt-1">
+                        <span className="text-xs" style={{ color: 'var(--sm-text-dim)' }}>Writers: ${writerExpenses.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        {freehandTotal > 0 && <span className="text-xs" style={{ color: 'var(--sm-text-dim)' }}>Other: ${freehandTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>}
+                      </div>
+                    </div>
+                    {/* Profit */}
+                    <div className="rounded-xl border px-5 py-4 relative overflow-hidden" style={{ background: 'var(--sm-card)', borderColor: profit >= 0 ? 'rgba(16,185,129,0.25)' : 'rgba(188,0,0,0.25)' }}>
+                      <div className="absolute top-0 left-0 w-1 h-full" style={{ background: profit >= 0 ? '#10b981' : '#bc0000' }} />
+                      <p className="text-xs font-bold uppercase tracking-wider mb-1" style={{ color: profit >= 0 ? '#10b981' : '#bc0000' }}>Profit</p>
+                      <p className="text-3xl font-extrabold tabular-nums" style={{ color: profit >= 0 ? '#10b981' : '#bc0000' }}>
+                        {profit < 0 ? '-' : ''}${Math.abs(profit).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </p>
+                      <p className="text-xs mt-1" style={{ color: 'var(--sm-text-dim)' }}>{margin}% margin</p>
+                    </div>
+                  </div>
+
+                  {/* Expense breakdown */}
+                  <div className="mt-5 rounded-lg border" style={{ background: 'var(--sm-surface)', borderColor: 'var(--sm-border)' }}>
+                    <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: 'var(--sm-border)' }}>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-sm font-bold" style={{ color: 'var(--sm-text)' }}>Expense Breakdown</h4>
+                        <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(188,0,0,0.08)', color: '#bc0000' }}>
+                          {payments.length} writer{payments.length !== 1 ? 's' : ''} + {freehandExpenses.length} other
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => setShowExpenseForm(!showExpenseForm)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"
+                        style={{ background: showExpenseForm ? 'var(--sm-card-hover)' : 'var(--sm-red)', color: showExpenseForm ? 'var(--sm-text-muted)' : '#fff' }}
+                      >
+                        {showExpenseForm ? (
+                          <>Cancel</>
+                        ) : (
+                          <>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 5v14M5 12h14" /></svg>
+                            Add Expense
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Add expense form */}
+                    {showExpenseForm && (
+                      <div className="px-4 py-3 border-b flex items-end gap-3" style={{ borderColor: 'var(--sm-border)', background: 'rgba(188,0,0,0.02)' }}>
+                        <div className="flex-1">
+                          <label className="text-[10px] font-bold uppercase tracking-wide block mb-1" style={{ color: 'var(--sm-text-dim)' }}>Description</label>
+                          <input
+                            value={newExpenseDesc} onChange={e => setNewExpenseDesc(e.target.value)}
+                            placeholder="e.g. Hosting, Software, Freelancer"
+                            className="w-full text-sm px-3 py-2 rounded-lg border outline-none"
+                            style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)', color: 'var(--sm-text)' }}
+                            onKeyDown={e => e.key === 'Enter' && addFreehandExpense()}
+                          />
+                        </div>
+                        <div style={{ width: 130 }}>
+                          <label className="text-[10px] font-bold uppercase tracking-wide block mb-1" style={{ color: 'var(--sm-text-dim)' }}>Amount ($)</label>
+                          <input
+                            value={newExpenseAmount} onChange={e => setNewExpenseAmount(e.target.value)}
+                            placeholder="0.00" type="number" min="0" step="0.01"
+                            className="w-full text-sm px-3 py-2 rounded-lg border outline-none tabular-nums"
+                            style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)', color: 'var(--sm-text)' }}
+                            onKeyDown={e => e.key === 'Enter' && addFreehandExpense()}
+                          />
+                        </div>
+                        <div style={{ width: 150 }}>
+                          <label className="text-[10px] font-bold uppercase tracking-wide block mb-1" style={{ color: 'var(--sm-text-dim)' }}>Date</label>
+                          <input
+                            value={newExpenseDate} onChange={e => setNewExpenseDate(e.target.value)}
+                            type="date"
+                            className="w-full text-sm px-3 py-2 rounded-lg border outline-none"
+                            style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)', color: 'var(--sm-text)' }}
+                          />
+                        </div>
+                        <button
+                          onClick={addFreehandExpense}
+                          disabled={!newExpenseDesc.trim() || !newExpenseAmount}
+                          className="px-4 py-2 rounded-lg text-sm font-bold transition-colors disabled:opacity-30"
+                          style={{ background: '#10b981', color: '#fff' }}
+                        >
+                          Add
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Expense table */}
+                    <div className="px-4 py-2">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="border-b" style={{ borderColor: 'var(--sm-border)' }}>
+                            <th className="text-xs font-semibold uppercase tracking-wide text-left px-2 py-2" style={{ color: 'var(--sm-text-dim)' }}>Type</th>
+                            <th className="text-xs font-semibold uppercase tracking-wide text-left px-2 py-2" style={{ color: 'var(--sm-text-dim)' }}>Description</th>
+                            <th className="text-xs font-semibold uppercase tracking-wide text-right px-2 py-2" style={{ color: 'var(--sm-text-dim)' }}>Amount</th>
+                            <th className="text-xs font-semibold uppercase tracking-wide text-right px-2 py-2" style={{ color: 'var(--sm-text-dim)', width: 40 }}></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {/* Writer expenses row */}
+                          <tr className="border-b" style={{ borderColor: 'var(--sm-border)' }}>
+                            <td className="px-2 py-2.5">
+                              <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full" style={{ background: 'rgba(0,212,255,0.1)', color: '#00D4FF' }}>Writers</span>
+                            </td>
+                            <td className="px-2 py-2.5 text-sm" style={{ color: 'var(--sm-text)' }}>
+                              {payments.length} writer payment{payments.length !== 1 ? 's' : ''} (from Payments tab)
+                            </td>
+                            <td className="px-2 py-2.5 text-sm font-bold tabular-nums text-right" style={{ color: '#bc0000' }}>
+                              ${writerExpenses.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </td>
+                            <td></td>
+                          </tr>
+                          {/* Freehand expenses */}
+                          {freehandExpenses.map(exp => (
+                            <tr key={exp.id} className="border-b transition-colors" style={{ borderColor: 'var(--sm-border)' }}
+                              onMouseEnter={e => (e.currentTarget.style.background = 'var(--sm-card-hover)')}
+                              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                              <td className="px-2 py-2.5">
+                                <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full" style={{ background: 'rgba(245,158,11,0.1)', color: '#f59e0b' }}>Manual</span>
+                              </td>
+                              <td className="px-2 py-2.5">
+                                <div>
+                                  <span className="text-sm" style={{ color: 'var(--sm-text)' }}>{exp.desc}</span>
+                                  <span className="text-xs ml-2" style={{ color: 'var(--sm-text-dim)' }}>{new Date(exp.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                                </div>
+                              </td>
+                              <td className="px-2 py-2.5 text-sm font-bold tabular-nums text-right" style={{ color: '#bc0000' }}>
+                                ${exp.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              </td>
+                              <td className="px-2 py-2.5 text-right">
+                                <button onClick={() => removeFreehandExpense(exp.id)} className="p-1 rounded transition-colors" style={{ color: 'var(--sm-text-dim)' }}
+                                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(188,0,0,0.1)'; e.currentTarget.style.color = '#bc0000' }}
+                                  onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--sm-text-dim)' }}>
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                          {/* Total row */}
+                          <tr>
+                            <td colSpan={2} className="px-2 py-3 text-sm font-bold uppercase tracking-wide" style={{ color: 'var(--sm-text)' }}>Total Expenses</td>
+                            <td className="px-2 py-3 text-base font-extrabold tabular-nums text-right" style={{ color: '#bc0000' }}>
+                              ${totalExpenses.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            </td>
+                            <td></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* ── FREESTAR IFRAME ── */}
+              <div className="rounded-xl border overflow-hidden" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
+                <iframe
+                  src="/admin/freestar"
+                  className="w-full border-0"
+                  style={{ height: 'calc(100vh - 220px)', minHeight: '700px' }}
+                  title="Freestar Revenue Intelligence"
+                />
+              </div>
+            </>
+          })()}
         </div>
       )}
 
