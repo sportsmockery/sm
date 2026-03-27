@@ -1,4 +1,5 @@
 'use client'
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { useTheme } from '@/contexts/ThemeContext'
 import type { ProspectData } from '@/types/gm'
@@ -139,6 +140,7 @@ export function ProspectCard({ prospect, selected, teamColor, onClick }: Prospec
 
       {/* Avatar */}
       <div style={{
+        position: 'relative',
         width: 44,
         height: 44,
         borderRadius: '50%',
@@ -151,10 +153,12 @@ export function ProspectCard({ prospect, selected, teamColor, onClick }: Prospec
         border: `2px solid ${levelColor}40`,
       }}>
         {headshot ? (
-          <img
+          <Image
             src={headshot}
             alt={prospect.name}
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            fill
+            sizes="44px"
+            style={{ objectFit: 'cover' }}
             onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
           />
         ) : (

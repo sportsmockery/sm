@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 
 interface Article {
   id: number
@@ -204,9 +205,11 @@ export default function NotificationsPage() {
                 {selectedArticle ? (
                   <div className="flex items-center gap-3 rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] p-3">
                     {selectedArticle.featured_image && (
-                      <img
+                      <Image
                         src={selectedArticle.featured_image}
                         alt=""
+                        width={64}
+                        height={48}
                         className="h-12 w-16 rounded object-cover"
                       />
                     )}
@@ -406,9 +409,11 @@ export default function NotificationsPage() {
                     className="flex w-full items-center gap-4 px-6 py-4 text-left transition-colors hover:bg-[var(--bg-hover)]"
                   >
                     {article.featured_image ? (
-                      <img
+                      <Image
                         src={article.featured_image}
                         alt=""
+                        width={80}
+                        height={56}
                         className="h-14 w-20 rounded object-cover"
                       />
                     ) : (

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 
 interface FanTool {
   label: string;
@@ -13,7 +14,7 @@ const FAN_TOOLS: FanTool[] = [
     label: 'Scout AI',
     href: '/ask-ai',
     icon: (
-      <img src="/downloads/scout-v2.png" alt="Scout AI" width={16} height={16} style={{ borderRadius: '50%' }} />
+      <Image src="/downloads/scout-v2.png" alt="Scout AI" width={16} height={16} style={{ borderRadius: '50%' }} />
     ),
   },
   {

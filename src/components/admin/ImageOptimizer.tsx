@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import Image from 'next/image'
 import { resizeImage, getImageDimensions } from '@/utils/imageUtils'
 
 interface ImageOptimizerProps {
@@ -95,12 +96,14 @@ export default function ImageOptimizer({
         {/* Preview */}
         <div>
           <label className="text-sm text-gray-400 block mb-2">Preview</label>
-          <div className="aspect-video bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center">
+          <div className="aspect-video bg-gray-900 rounded-lg overflow-hidden relative">
             {preview && (
-              <img
+              <Image
                 src={preview}
                 alt="Preview"
-                className="max-w-full max-h-full object-contain"
+                fill
+                className="object-contain"
+                unoptimized
               />
             )}
           </div>

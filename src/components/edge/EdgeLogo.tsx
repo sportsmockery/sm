@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 
 export type EdgeLogoVariant = 'full' | 'compact' | 'wordmark';
 
@@ -26,7 +27,7 @@ export function EdgeLogo({
 }: EdgeLogoProps) {
   if (preferImage && typeof window !== 'undefined') {
     return (
-      <img
+      <Image
         src="/images/edge/edge-compact.png"
         alt="SM EDGE"
         height={height}

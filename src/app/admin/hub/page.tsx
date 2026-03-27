@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import Image from 'next/image'
 import type { HubItem, HubSlug, HubItemFormData } from '@/types/hub'
 import { HUB_PAGES, TEAM_OPTIONS } from '@/types/hub'
 
@@ -903,7 +904,7 @@ function HubMetaFields({ hubSlug, meta, updateMeta, formData, selectedTeam }: {
                 opacity: capLoading ? 0.6 : 1,
               }}
             >
-              <img src="/downloads/scout-v2.png" alt="Scout" width={16} height={16} style={{ borderRadius: 3 }} />
+              <Image src="/downloads/scout-v2.png" alt="Scout" width={16} height={16} style={{ borderRadius: 3 }} />
               <span>{capLoading ? 'Analyzing...' : 'Ask Scout'}</span>
             </button>
           </div>

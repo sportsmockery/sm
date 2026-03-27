@@ -98,7 +98,7 @@ export default function ChatMessage({ message, isOwn, showAvatar = true, isHighl
 
         <div className="chat-message__bubble">
           {message.content_type === 'gif' && message.gif_url ? (
-            <img src={message.gif_url} alt="GIF" className="chat-message__gif" />
+            <Image src={message.gif_url} alt="GIF" width={200} height={200} className="chat-message__gif" unoptimized />
           ) : (
             <p className="chat-message__text">{message.content}</p>
           )}

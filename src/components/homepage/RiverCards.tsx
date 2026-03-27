@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react"
 import Image from "next/image"
+import OptimizedImage from "@/components/ui/OptimizedImage"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import {
@@ -127,14 +128,14 @@ function TeamTag({ team, teamHex }: { team: string; teamHex: string }) {
 
   return (
     <span className="inline-flex items-center justify-center">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <Image
         src={logoSrc}
         alt={`${team} logo`}
         width={26}
         height={26}
         style={{ width: 26, height: 26, objectFit: 'contain' }}
         crossOrigin="anonymous"
+        unoptimized
       />
     </span>
   )
@@ -353,8 +354,7 @@ export function EditorialCard({
           {breakingIndicator === "REPORT" ? (
             <>
               {/* Sports Mockery wordmark — top left, swap per theme */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 src="/downloads/sm-logo-wordmark.png"
                 alt="Sports Mockery"
                 width={160}
@@ -362,8 +362,7 @@ export function EditorialCard({
                 className="dark:hidden"
                 style={{ height: 32, width: 'auto', objectFit: 'contain' }}
               />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 src="/downloads/sm-logo-wordmark-dark.png"
                 alt="Sports Mockery"
                 width={160}
@@ -396,10 +395,11 @@ export function EditorialCard({
       {/* Featured image above headline with prominent fade into headline (like article pages) */}
       {featuredImage && featuredImage.length > 0 && (
         <div className="relative mb-4 rounded-xl overflow-hidden" style={{ aspectRatio: '16/9' }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <OptimizedImage
             src={featuredImage}
             alt=""
+            variant="card"
+            fill
             className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
           />
           {/* Strong gradient fade down into headline area — more prominent than article page */}
@@ -447,7 +447,7 @@ export function EditorialCard({
 
       <div className="mt-4 flex items-center gap-2">
         {authorPhoto && (
-          <img src={authorPhoto} alt={author_name} className="h-5 w-5 rounded-full object-cover" />
+          <Image src={authorPhoto} alt={author_name} width={20} height={20} className="h-5 w-5 rounded-full object-cover" unoptimized />
         )}
         <span style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }}>By {author_name}</span>
       </div>
@@ -749,7 +749,7 @@ export function BoxScoreCard({ homeTeam, awayTeam, status, period, keyPerformer,
       <div className="mt-4 rounded-2xl p-4" style={{ border: '1px solid var(--hp-border)', background: 'var(--hp-card)' }}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src={awayTeam.logo} alt={awayTeam.name} className="h-10 w-10 object-contain rounded-lg" crossOrigin="anonymous" />
+            <Image src={awayTeam.logo} alt={awayTeam.name} width={40} height={40} className="h-10 w-10 object-contain rounded-lg" crossOrigin="anonymous" unoptimized />
             <div>
               <p style={{ fontWeight: 700, color: 'var(--hp-foreground)' }}>{awayTeam.name}</p>
               <p style={{ fontSize: 30, fontWeight: 700, color: 'var(--hp-foreground)' }}>{awayTeam.score}</p>
@@ -765,7 +765,7 @@ export function BoxScoreCard({ homeTeam, awayTeam, status, period, keyPerformer,
               <p style={{ fontWeight: 700, color: 'var(--hp-foreground)' }}>{homeTeam.name}</p>
               <p style={{ fontSize: 30, fontWeight: 700, color: 'var(--hp-foreground)' }}>{homeTeam.score}</p>
             </div>
-            <img src={homeTeam.logo} alt={homeTeam.name} className="h-10 w-10 object-contain rounded-lg" crossOrigin="anonymous" />
+            <Image src={homeTeam.logo} alt={homeTeam.name} width={40} height={40} className="h-10 w-10 object-contain rounded-lg" crossOrigin="anonymous" unoptimized />
           </div>
         </div>
 
@@ -971,9 +971,11 @@ export function ScoutSummaryCard({ summary, bullets, topic, team, teamColor, tim
     <article className="hp-feed-card hp-card-enter" style={{ borderLeft: `3px solid ${edgeColor}` }}>
       <div className="flex items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-2.5">
-          <img
+          <Image
             src="/downloads/scout-v2.png"
             alt="Scout"
+            width={24}
+            height={24}
             className="h-6 w-6 rounded-full object-contain"
           />
           <span
@@ -1280,9 +1282,11 @@ export function ScoutBriefingCard() {
   return (
     <article className="hp-feed-card hp-card-enter" style={{ borderLeft: "3px solid #00D4FF" }}>
       <div className="flex items-center gap-2.5 mb-4">
-        <img
+        <Image
           src="/downloads/scout-v2.png"
           alt="Scout"
+          width={24}
+          height={24}
           className="h-6 w-6 rounded-full object-contain"
         />
         <span
@@ -1361,9 +1365,11 @@ export function ScoutAnalysisCard({ analysis }: ScoutAnalysisCardProps) {
       style={{ borderLeft: "3px solid #00D4FF" }}
     >
       <div className="flex items-center gap-2.5 mb-3">
-        <img
+        <Image
           src="/downloads/scout-v2.png"
           alt="Scout"
+          width={20}
+          height={20}
           className="h-5 w-5 rounded-full object-contain"
         />
         <span
@@ -1426,48 +1432,46 @@ export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team,
           {isPinwheelsAndIvy(source) ? (
             <>
               <div className="hp-pi-logo">
-                <img
+                <Image
                   src={PI_LOGO_LEFT_SRC}
                   alt="Pinwheels and Ivy"
                   width={255}
                   height={66}
                   className="object-contain object-left dark:hidden"
                   style={{ maxHeight: 66, width: 'auto', height: 66 }}
-                  loading="eager"
+                  priority
                 />
-                <img
+                <Image
                   src={PI_LOGO_LEFT_DARK_SRC}
                   alt="Pinwheels and Ivy"
                   width={255}
                   height={66}
                   className="object-contain object-left hidden dark:block"
                   style={{ maxHeight: 66, width: 'auto', height: 66 }}
-                  loading="eager"
+                  priority
                 />
               </div>
               <span style={{ fontSize: 11, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
             </>
           ) : isUntoldChicago(source) ? (
             <>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 src={UNTOLD_LOGO_SRC}
                 alt="Untold Chicago"
                 width={150}
                 height={40}
                 className="dark:hidden"
                 style={{ height: 40, width: 'auto', objectFit: 'contain' }}
-                loading="eager"
+                priority
               />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 src={UNTOLD_LOGO_DARK_SRC}
                 alt="Untold Chicago"
                 width={150}
                 height={40}
                 className="hidden dark:block"
                 style={{ height: 40, width: 'auto', objectFit: 'contain' }}
-                loading="eager"
+                priority
               />
               <span style={{ fontSize: 11, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
             </>
@@ -1561,9 +1565,11 @@ export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team,
               onClick={() => embedUrl ? setPlaying(true) : undefined}
               aria-label={`Play ${title}`}
             >
-              <img
+              <OptimizedImage
                 src={thumbnailUrl}
                 alt={title}
+                variant="card"
+                fill
                 className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
                 style={{ opacity: 0.9 }}
               />
@@ -1703,7 +1709,7 @@ export function ScoutPredictionCard({ homeTeam, awayTeam, homeScore, awayScore, 
   return (
     <article className="hp-feed-card hp-card-enter" style={{ borderLeft: "3px solid #00D4FF" }}>
       <div className="flex items-center gap-2.5 mb-4">
-        <img src="/downloads/scout-v2.png" alt="Scout" className="h-5 w-5 rounded-full object-contain" />
+        <Image src="/downloads/scout-v2.png" alt="Scout" width={20} height={20} className="h-5 w-5 rounded-full object-contain" />
         <span style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#00D4FF" }}>
           Scout Prediction
         </span>
@@ -1818,7 +1824,7 @@ export function GameModeCard({ homeTeam, awayTeam, kickoff, scoutNote }: GameMod
       </p>
 
       <div className="mt-4 flex items-start gap-2.5 rounded-xl p-3" style={{ background: "var(--hp-muted)", borderLeft: "3px solid #00D4FF" }}>
-        <img src="/downloads/scout-v2.png" alt="Scout" className="h-5 w-5 rounded-full object-contain mt-0.5" />
+        <Image src="/downloads/scout-v2.png" alt="Scout" width={20} height={20} className="h-5 w-5 rounded-full object-contain mt-0.5" />
         <div>
           <span style={{ fontSize: 11, fontWeight: 700, color: "#00D4FF" }}>Scout says:</span>
           <p className="mt-0.5" style={{ fontSize: 14, lineHeight: 1.5, color: "var(--hp-foreground)", opacity: 0.8 }}>

@@ -1,5 +1,6 @@
 'use client'
 import { useState, useCallback, useRef } from 'react'
+import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AssetRow } from './AssetRow'
 import { ValidationIndicator, ValidationState } from './ValidationIndicator'
@@ -164,10 +165,12 @@ export function ThreeTeamTradeBoard({
           borderBottom: `2px solid ${team.color}`,
         }}>
           {team.logo && (
-            <img
+            <Image
               src={team.logo}
               alt={team.name}
-              style={{ width: 32, height: 32, objectFit: 'contain' }}
+              width={32}
+              height={32}
+              style={{ objectFit: 'contain' }}
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
             />
           )}
@@ -220,7 +223,7 @@ export function ThreeTeamTradeBoard({
                   }}>
                     <span>To</span>
                     {to.logo && (
-                      <img src={to.logo} alt="" style={{ width: 14, height: 14, objectFit: 'contain' }} />
+                      <Image src={to.logo} alt="" width={14} height={14} style={{ objectFit: 'contain' }} />
                     )}
                     <span style={{ fontWeight: 600, color: to.color }}>{to.name}</span>
                   </div>
@@ -304,7 +307,7 @@ export function ThreeTeamTradeBoard({
                   }}>
                     <span>From</span>
                     {from.logo && (
-                      <img src={from.logo} alt="" style={{ width: 14, height: 14, objectFit: 'contain' }} />
+                      <Image src={from.logo} alt="" width={14} height={14} style={{ objectFit: 'contain' }} />
                     )}
                     <span style={{ fontWeight: 600, color: from.color }}>{from.name}</span>
                   </div>
@@ -453,14 +456,14 @@ export function ThreeTeamTradeBoard({
                   }}
                 >
                   {from.logo && (
-                    <img src={from.logo} alt="" style={{ width: 16, height: 16, objectFit: 'contain' }} />
+                    <Image src={from.logo} alt="" width={16} height={16} style={{ objectFit: 'contain' }} />
                   )}
                   <span style={{ fontWeight: 600, color: from.color }}>{from.name.split(' ').pop()}</span>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={subText} strokeWidth="2">
                     <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                   {to.logo && (
-                    <img src={to.logo} alt="" style={{ width: 16, height: 16, objectFit: 'contain' }} />
+                    <Image src={to.logo} alt="" width={16} height={16} style={{ objectFit: 'contain' }} />
                   )}
                   <span style={{ fontWeight: 600, color: to.color }}>{to.name.split(' ').pop()}</span>
                   <span style={{
@@ -950,10 +953,14 @@ export function ThreeTeamTradeBoard({
                       border: `1px solid ${borderColor}`,
                       marginBottom: 12,
                     }}>
-                      <img
+                      <Image
                         src={generatedImageUrl}
                         alt="Trade grade"
-                        style={{ width: '100%', display: 'block' }}
+                        width={0}
+                        height={0}
+                        sizes="100%"
+                        style={{ width: '100%', height: 'auto', display: 'block' }}
+                        unoptimized
                       />
                     </div>
                     <button

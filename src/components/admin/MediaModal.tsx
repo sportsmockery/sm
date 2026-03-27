@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase'
 import { MediaItem } from '@/app/admin/media/page'
 import MediaUploader from './MediaUploader'
@@ -169,10 +170,11 @@ export default function MediaModal({ isOpen, onClose, onSelect, allowMultiple = 
                         }`}
                       >
                         {isImage ? (
-                          <img
+                          <Image
                             src={item.url}
                             alt={item.alt_text || item.name}
-                            className="w-full h-full object-cover"
+                            fill
+                            className="object-cover"
                           />
                         ) : (
                           <div className="w-full h-full bg-gray-800 flex items-center justify-center">

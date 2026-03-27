@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 
 
 // Chicago sports content creators by sport
@@ -361,9 +362,11 @@ export default function GameHighlights({
                       }`}
                       style={{ '--tw-ring-color': activeVideo === video.videoId ? teamColor : undefined } as React.CSSProperties}
                     >
-                      <img
+                      <Image
                         src={video.thumbnail}
                         alt={video.title}
+                        width={128}
+                        height={80}
                         className="w-32 h-20 object-cover"
                       />
                       {channel && (

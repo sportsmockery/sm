@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { Trash2, GripVertical, ChevronUp, ChevronDown } from 'lucide-react';
 import type { ContentBlock, SentimentMode, InteractionVariant, SocialPlatform } from './types';
 import { SENTIMENT_CONFIGS } from './types';
@@ -203,9 +204,8 @@ export function ImagePanel({ block, onChange, onDelete, onMoveUp, onMoveDown }: 
         <TextInput value={block.data.caption || ''} onChange={(caption) => onChange({ ...block, data: { ...block.data, caption } })} placeholder="Image caption" />
       </Field>
       {block.data.src && (
-        <div className="mt-2 rounded-lg overflow-hidden border border-white/10">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={block.data.src} alt={block.data.alt} className="w-full h-32 object-cover" />
+        <div className="mt-2 rounded-lg overflow-hidden border border-white/10 relative h-32">
+          <Image src={block.data.src} alt={block.data.alt} fill className="object-cover" />
         </div>
       )}
     </BlockShell>
@@ -376,11 +376,11 @@ export function PlayerComparisonPanel({ block, onChange, onDelete, onMoveUp, onM
             <div className="flex justify-center mb-3">
               {d[side].headshot ? (
                 <div className="relative w-16 h-16 rounded-full overflow-hidden" style={{ border: `2px solid ${i === 0 ? '#00D4FF' : '#BC0000'}` }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                  <Image
                     src={d[side].headshot}
                     alt={d[side].name || `Player ${i === 0 ? 'A' : 'B'}`}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
                     onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; (e.target as HTMLImageElement).parentElement!.style.backgroundColor = '#e2e8f0'; }}
                   />
                 </div>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 
 const TEAM_TABS = [
@@ -180,7 +181,7 @@ export default function DataPage() {
               className={`hm-team-tab ${activeTeam === t.name ? 'hm-team-tab-active' : ''}`}
               onClick={() => setActiveTeam(t.name)}
             >
-              <img src={t.logo} alt={t.name} width={20} height={20} style={{ borderRadius: '50%' }} />
+              <Image src={t.logo} alt={t.name} width={20} height={20} style={{ borderRadius: '50%' }} />
               {t.name}
             </button>
           ))}
@@ -232,7 +233,7 @@ export default function DataPage() {
               <span style={{ width: 24, fontSize: 14, fontWeight: 700, color: i === 0 ? '#ff4444' : '#55556a' }}>
                 {i + 1}
               </span>
-              <img src={p.headshot} alt={p.name} className="hm-player-headshot" width={40} height={40} />
+              <Image src={p.headshot} alt={p.name} className="hm-player-headshot" width={40} height={40} />
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 14, fontWeight: 600, color: '#fff' }}>{p.name}</div>
                 <div style={{ fontSize: 12, color: '#8a8a9a' }}>{p.stat}</div>
@@ -248,9 +249,9 @@ export default function DataPage() {
             {data.games.map((g) => (
               <div key={g.date} className="hm-game-card">
                 <div className="hm-game-teams">
-                  <img src={TEAM_TABS.find(t => t.name === activeTeam)!.logo} alt={activeTeam} width={28} height={28} />
+                  <Image src={TEAM_TABS.find(t => t.name === activeTeam)!.logo} alt={activeTeam} width={28} height={28} />
                   <span className="hm-game-vs">vs</span>
-                  <img src={g.logo} alt={g.vs} width={28} height={28} />
+                  <Image src={g.logo} alt={g.vs} width={28} height={28} />
                 </div>
                 <div style={{ fontSize: 16, fontWeight: 700, color: g.score.startsWith('W') ? '#00D4FF' : '#ff4444' }}>
                   {g.score}

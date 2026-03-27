@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import Image from 'next/image'
 
 export interface MentionUser {
   user_id: string
@@ -68,7 +69,7 @@ export default function MentionTypeahead({
           >
             <div className="mention-typeahead__avatar">
               {user.avatar_url ? (
-                <img src={user.avatar_url} alt="" />
+                <Image src={user.avatar_url} alt="" fill style={{ objectFit: 'cover' }} />
               ) : (
                 <span>{user.display_name.charAt(0).toUpperCase()}</span>
               )}
@@ -142,6 +143,7 @@ export default function MentionTypeahead({
           justify-content: center;
           overflow: hidden;
           flex-shrink: 0;
+          position: relative;
         }
 
         .mention-typeahead__avatar img {

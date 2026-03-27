@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import Image from 'next/image'
 import {
   ResponsiveContainer, ComposedChart, Area, Line, Bar, XAxis, YAxis,
   CartesianGrid, Tooltip as RTooltip, Legend, RadarChart, PolarGrid,
@@ -441,7 +442,7 @@ function WriterDrawerContent({ writer }: { writer: Data['writers'][0] }) {
       {/* Identity */}
       <div className="flex items-center gap-4">
         {writer.avatar
-          ? <img src={writer.avatar} alt="" className="w-14 h-14 rounded-full border-2" style={{ borderColor: 'var(--sm-border)' }} />
+          ? <Image src={writer.avatar} alt="" width={56} height={56} className="w-14 h-14 rounded-full border-2" style={{ borderColor: 'var(--sm-border)' }} />
           : <div className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold" style={{ background: C.blue + '20', color: C.blue }}>{writer.name.charAt(0)}</div>}
         <div>
           <p className="text-lg font-bold" style={{ color: 'var(--sm-text)' }}>{writer.name}</p>
@@ -943,7 +944,7 @@ Revenue: [
                 columns={[
                   { key: 'name', label: 'Writer', render: (v: string, r: any) => (
                     <div className="flex items-center gap-3">
-                      {r.avatar ? <img src={r.avatar} alt="" className="w-8 h-8 rounded-full" /> : <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold" style={{ background: C.blue + '20', color: C.blue }}>{v.charAt(0)}</div>}
+                      {r.avatar ? <Image src={r.avatar} alt="" width={32} height={32} className="w-8 h-8 rounded-full" /> : <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold" style={{ background: C.blue + '20', color: C.blue }}>{v.charAt(0)}</div>}
                       <div>
                         <span className="font-semibold">{v}</span>
                         <span className="text-xs ml-2 capitalize" style={{ color: 'var(--sm-text-dim)' }}>{r.role || 'author'}</span>
@@ -999,7 +1000,7 @@ Revenue: [
                 <SortableTable
                   columns={[
                     { key: 'name', label: 'Channel', render: (v: string, r: any) => (
-                      <div className="flex items-center gap-3">{r.thumbnail ? <img src={r.thumbnail} alt="" className="w-8 h-8 rounded-full" /> : <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: '#BC000020', color: '#BC0000' }}><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" /></svg></div>}<span className="font-semibold">{v}</span></div>
+                      <div className="flex items-center gap-3">{r.thumbnail ? <Image src={r.thumbnail} alt="" width={32} height={32} className="w-8 h-8 rounded-full" /> : <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: '#BC000020', color: '#BC0000' }}><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" /></svg></div>}<span className="font-semibold">{v}</span></div>
                     )},
                     { key: 'subscribers', label: 'Subscribers', align: 'right', render: (v: number) => <span className="font-bold tabular-nums" style={{ color: '#BC0000' }}>{fN(v)}</span> },
                     { key: 'totalViews', label: 'Views', align: 'right', render: (v: number) => <span className="font-bold tabular-nums" style={{ color: C.purple }}>{fN(v)}</span> },

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { useTheme } from '@/contexts/ThemeContext';
 
 interface ScoreBreakdown {
@@ -335,8 +336,8 @@ export default function TwitterAutoPostsPage() {
 
                   {/* Media */}
                   {p.media_url ? (
-                    <div style={{ aspectRatio: '16/9', backgroundColor: bgCardAlt }}>
-                      <img src={p.media_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <div style={{ aspectRatio: '16/9', backgroundColor: bgCardAlt, position: 'relative' }}>
+                      <Image src={p.media_url} alt="" fill style={{ objectFit: 'cover' }} />
                     </div>
                   ) : (
                     <div style={{

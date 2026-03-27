@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect, useMemo, useCallback } from 'react'
+import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from '@/contexts/ThemeContext'
 
@@ -178,10 +179,12 @@ export function OpponentTeamPicker({ open, onClose, onSelect, sport, chicagoTeam
                             }}
                           >
                             {(t.logo_url && !failedLogos.has(t.team_key)) ? (
-                              <img
+                              <Image
                                 src={t.logo_url}
                                 alt={t.team_name}
-                                style={{ width: 32, height: 32, objectFit: 'contain' }}
+                                width={32}
+                                height={32}
+                                style={{ objectFit: 'contain' }}
                                 onError={() => handleLogoError(t.team_key)}
                               />
                             ) : (

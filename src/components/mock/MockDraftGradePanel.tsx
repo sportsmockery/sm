@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import Image from 'next/image'
 import { useTheme } from '@/contexts/ThemeContext'
 import { toPng } from 'html-to-image'
 
@@ -386,10 +387,13 @@ export default function MockDraftGradePanel({ grade, teamColor, teamName, draftY
                   border: `1px solid ${borderColor}`,
                   marginBottom: 12,
                 }}>
-                  <img
+                  <Image
                     src={generatedImageUrl}
                     alt="Draft Grade"
-                    style={{ width: '100%', display: 'block' }}
+                    width={800}
+                    height={600}
+                    style={{ width: '100%', height: 'auto', display: 'block' }}
+                    unoptimized
                   />
                 </div>
                 <button
