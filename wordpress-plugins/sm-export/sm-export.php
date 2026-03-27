@@ -34,6 +34,13 @@ add_action('rest_api_init', function () {
         'callback' => 'sm_export_get_posts',
         'permission_callback' => '__return_true',
     ));
+
+    // Post views endpoint
+    register_rest_route('sm-export/v1', '/post-views', array(
+        'methods'  => 'GET',
+        'callback' => 'sm_export_get_post_views',
+        'permission_callback' => '__return_true',
+    ));
 });
 
 /**
@@ -83,6 +90,49 @@ function sm_export_get_categories() {
     }
 
     return rest_ensure_response($result);
+}
+
+/**
+ * Get per-post view counts from postmeta
+ */
+function sm_export_get_post_views($request) {
+    global $wpdb;
+
+    $year     = intval($request->get_param('year') ?: date('Y'));
+    $page     = max(1, intval($request->get_param('page') ?: 1));
+    $per_page = min(1000, max(1, intval($request->get_param('per_page') ?: 500)));
+    $offset   = ($page - 1) * $per_page;
+
+    $start_date = "$year-01-01";
+    $end_date   = ($year + 1) . "-01-01";
+
+    // Count total
+    $total = $wpdb->get_var($wpdb->prepare(
+        "SELECT COUNT(*) FROM {$wpdb->posts}
+         WHERE post_type = 'post' AND post_status = 'publish'
+         AND post_date >= %s AND post_date < %s",
+        $start_date, $end_date
+    ));
+
+    // Get posts with view counts
+    $results = $wpdb->get_results($wpdb->prepare(
+        "SELECT p.ID as id, COALESCE(CAST(pm.meta_value AS UNSIGNED), 0) as views
+         FROM {$wpdb->posts} p
+         LEFT JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id AND pm.meta_key = 'post_views_count'
+         WHERE p.post_type = 'post' AND p.post_status = 'publish'
+         AND p.post_date >= %s AND p.post_date < %s
+         ORDER BY p.post_date DESC
+         LIMIT %d OFFSET %d",
+        $start_date, $end_date, $per_page, $offset
+    ));
+
+    return rest_ensure_response(array(
+        'views'       => $results,
+        'total'       => (int) $total,
+        'total_pages' => ceil($total / $per_page),
+        'page'        => $page,
+        'year'        => $year,
+    ));
 }
 
 /**

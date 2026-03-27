@@ -63,6 +63,10 @@
       "schedule": "0 5 * * *"
     },
     {
+      "path": "/api/cron/sync-article-views",
+      "schedule": "0 8,20 * * *"
+    },
+    {
       "path": "/api/cron/scout-prompts",
       "schedule": "0 6 * * *"
     }
