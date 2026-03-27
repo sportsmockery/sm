@@ -6,6 +6,7 @@ import ForgotPasswordForm from '@/components/auth/ForgotPasswordForm'
 export const metadata: Metadata = {
   title: 'Forgot Password | Sports Mockery',
   description: 'Reset your Sports Mockery password',
+  robots: { index: false, follow: false },
 }
 
 export default function ForgotPasswordPage() {

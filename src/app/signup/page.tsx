@@ -6,6 +6,7 @@ import SignupForm from '@/components/auth/SignupForm'
 export const metadata: Metadata = {
   title: 'Sign Up | Sports Mockery',
   description: 'Create your Sports Mockery account',
+  robots: { index: false, follow: false },
 }
 
 export default function SignupPage() {

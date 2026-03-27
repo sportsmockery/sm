@@ -115,6 +115,7 @@ export default function RootLayout({
     <html lang="en" className="scroll-smooth dark" data-theme="dark" style={{ colorScheme: 'dark' }} suppressHydrationWarning>
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="alternate" type="application/rss+xml" title="Sports Mockery RSS" href="https://sportsmockery.com/api/rss" />
         <link rel="dns-prefetch" href="https://izwhcuccuwvlqqhpprbb.supabase.co" />
         <link rel="preconnect" href="https://izwhcuccuwvlqqhpprbb.supabase.co" />
         <link rel="dns-prefetch" href="https://a.espncdn.com" />
@@ -122,7 +123,44 @@ export default function RootLayout({
         <link rel="prefetch" href="/chicago-bears" />
         <link rel="prefetch" href="/scout-ai" />
         <link rel="prefetch" href="/gm" />
-        {/* Light mode forced — no theme-switching script needed */}
+        {/* Organization + WebSite JSON-LD */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "NewsMediaOrganization",
+              "name": "Sports Mockery",
+              "url": "https://sportsmockery.com",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://sportsmockery.com/logo.png"
+              },
+              "sameAs": [
+                "https://twitter.com/sportsmockery",
+                "https://www.youtube.com/@sportsmockery",
+                "https://www.facebook.com/sportsmockery"
+              ],
+              "description": "Chicago's premier sports coverage — Bears, Bulls, Cubs, White Sox, and Blackhawks"
+            }),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              "name": "Sports Mockery",
+              "url": "https://sportsmockery.com",
+              "potentialAction": {
+                "@type": "SearchAction",
+                "target": "https://sportsmockery.com/search?q={search_term_string}",
+                "query-input": "required name=search_term_string"
+              }
+            }),
+          }}
+        />
       </head>
       <body
         className={`${spaceGrotesk.variable} font-sans antialiased`}

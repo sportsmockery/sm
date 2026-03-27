@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { getBearsSchedule, getAvailableSeasons, getPlayoffRoundName, getBearsSeparatedRecord, type BearsGame } from '@/lib/bearsData'
 import { TeamHubLayout } from '@/components/team'
 import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
+import SportsEventSchema, { type SportsEventGame } from '@/components/seo/SportsEventSchema'
 
 // Bears logo URL
 const BEARS_LOGO = 'https://a.espncdn.com/i/teamlogos/nfl/500/chi.png'
@@ -74,6 +75,19 @@ export default async function BearsSchedulePage() {
   // Find next scheduled game (any type)
   const nextScheduledGame = schedule.find(g => g.status === 'scheduled')
 
+  // Map schedule data to SportsEvent schema format
+  const sportsEvents: SportsEventGame[] = schedule.map(g => ({
+    gameId: g.gameId,
+    date: g.date,
+    time: g.time,
+    homeTeam: g.homeAway === 'home' ? 'Chicago Bears' : (g.opponentFullName || g.opponent),
+    awayTeam: g.homeAway === 'away' ? 'Chicago Bears' : (g.opponentFullName || g.opponent),
+    homeScore: g.homeAway === 'home' ? g.bearsScore : g.oppScore,
+    awayScore: g.homeAway === 'away' ? g.bearsScore : g.oppScore,
+    venue: g.venue,
+    status: g.status,
+  }))
+
   return (
     <TeamHubLayout
       team={team}
@@ -81,6 +95,7 @@ export default async function BearsSchedulePage() {
       nextGame={nextGame}
       activeTab="schedule"
     >
+      <SportsEventSchema games={sportsEvents} />
       {/* Schedule Content */}
       <div className="pb-12">
         {/* Next Game Highlight - Compact */}
