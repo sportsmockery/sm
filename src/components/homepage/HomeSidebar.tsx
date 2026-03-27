@@ -6,7 +6,18 @@ import Image from "next/image"
 import { ArrowRightLeft, ClipboardPen, MessageSquare, BarChart3, Video, Volume2, Tv, MoreVertical, Sun, Moon } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
 import { useTheme } from "@/contexts/ThemeContext"
+import { supabase } from "@/lib/supabase"
 import type { Role } from "@/lib/roles"
+
+interface TopArticle {
+  id: number
+  title: string
+  slug: string
+  featured_image: string | null
+  published_at: string
+  views: number
+  category: { slug: string } | null
+}
 
 function ReportCardIcon({ className }: { className?: string }) {
   return (
@@ -23,14 +34,29 @@ interface HomeSidebarProps {
 }
 
 const edgeTools: { icon: React.ComponentType<{ className?: string }>; label: string; desc?: string; href: string; liveOnly?: boolean }[] = [
+  { icon: MessageSquare, label: 'Fan Chat', desc: 'Skip the comments and argue it out live.', href: '/fan-chat' },
   { icon: Tv, label: 'Game Center', desc: 'Live play-by-play with the numbers behind it.', href: '/live', liveOnly: true },
   { icon: ClipboardPen, label: 'War Room', desc: 'Play GM — simulate trades, run mock drafts, and compete against other SM users.', href: '/gm' },
-  { icon: MessageSquare, label: 'Fan Chat', desc: 'Skip the comments and argue it out live.', href: '/fan-chat' },
   { icon: BarChart3, label: 'Team Stats', desc: 'The numbers that explain the wins… and the excuses.', href: '/chicago-bears' },
   { icon: Video, label: 'Vision Theater', desc: 'All videos, no digging. Just press play.', href: '/vision-theater' },
   { icon: Volume2, label: 'Hands-Free Audio', desc: 'Sit back, choose a voice, and press play.', href: '/audio' },
   { icon: ReportCardIcon, label: 'GM Report Cards', desc: 'Transparent, data-backed grades on every Chicago ownership group.', href: '/owner' },
 ]
+
+function getTimeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime()
+  const hours = Math.floor(diff / 3600000)
+  if (hours < 1) return 'Just now'
+  if (hours < 24) return `${hours}h ago`
+  const days = Math.floor(hours / 24)
+  return `${days}d ago`
+}
+
+function formatViews(views: number): string {
+  if (views >= 1000000) return `${(views / 1000000).toFixed(1)}M`
+  if (views >= 1000) return `${(views / 1000).toFixed(1)}K`
+  return String(views)
+}
 
 export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarProps) {
   const [hoveredTeam, setHoveredTeam] = useState<string | null>(null)
@@ -40,6 +66,23 @@ export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarP
   const [profileMenuOpen, setProfileMenuOpen] = useState(false)
   const [userRole, setUserRole] = useState<Role | null>(null)
   const profileMenuRef = useRef<HTMLDivElement>(null)
+
+  const [topArticles, setTopArticles] = useState<TopArticle[]>([])
+
+  // Fetch top 5 articles from last 72 hours
+  useEffect(() => {
+    const cutoff = new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString()
+    supabase
+      .from('sm_posts')
+      .select('id,title,slug,featured_image,published_at,views,category:sm_categories!category_id(slug)')
+      .eq('status', 'published')
+      .gte('published_at', cutoff)
+      .order('views', { ascending: false })
+      .limit(5)
+      .then(({ data }: { data: any }) => {
+        if (data) setTopArticles(data as TopArticle[])
+      })
+  }, [])
 
   // Poll for live games to show/hide Game Center
   useEffect(() => {
@@ -172,6 +215,76 @@ export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarP
           })}
         </nav>
 
+        {/* Top 5 Articles — shown when For You is selected */}
+        {(!selectedTeam || selectedTeam === 'all') && topArticles.length > 0 && (
+          <div style={{ marginTop: 8, borderTop: '1px solid var(--hp-border)', paddingTop: 8 }}>
+            <div style={{ padding: '4px 16px', fontSize: 14, fontWeight: 700, letterSpacing: '-0.01em' }}>
+              <span style={{ color: '#00D4FF' }}>EDGE</span> <span style={{ color: '#BC0000' }}>&#x2736;</span> <span style={{ color: '#00D4FF' }}>Top Stories</span>
+            </div>
+            {topArticles.map((article, i) => {
+              const categorySlug = Array.isArray(article.category) ? article.category[0]?.slug : article.category?.slug
+              const href = categorySlug ? `/${categorySlug}/${article.slug}` : `/${article.slug}`
+              const timeAgo = getTimeAgo(article.published_at)
+              const viewsStr = formatViews(article.views || 0)
+
+              return (
+                <Link
+                  key={article.id}
+                  href={href}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: 10,
+                    padding: '8px 16px',
+                    borderRadius: 10,
+                    textDecoration: 'none',
+                    transition: 'background 0.15s',
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hp-muted)' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
+                >
+                  {/* Featured image */}
+                  <div style={{ width: 44, height: 44, borderRadius: 8, overflow: 'hidden', flexShrink: 0, background: 'var(--hp-muted)' }}>
+                    {article.featured_image ? (
+                      <Image
+                        src={article.featured_image}
+                        alt=""
+                        width={44}
+                        height={44}
+                        style={{ width: 44, height: 44, objectFit: 'cover' }}
+                        unoptimized
+                      />
+                    ) : (
+                      <div style={{ width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--hp-muted-foreground)', fontSize: 16, fontWeight: 700 }}>
+                        {i + 1}
+                      </div>
+                    )}
+                  </div>
+                  {/* Title + meta */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{
+                      margin: 0,
+                      fontSize: 13,
+                      fontWeight: 500,
+                      color: 'var(--hp-foreground)',
+                      lineHeight: 1.3,
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                    }}>
+                      {article.title}
+                    </p>
+                    <p style={{ margin: '3px 0 0', fontSize: 11, color: 'var(--hp-muted-foreground)' }}>
+                      {timeAgo} &middot; {viewsStr} views
+                    </p>
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+        )}
+
         {/* SM Edge Features — left sidebar only when a team is selected */}
         {selectedTeam && selectedTeam !== 'all' && (
           <div style={{ marginTop: 8, borderTop: '1px solid var(--hp-border)', paddingTop: 8 }}>
@@ -247,6 +360,8 @@ export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarP
             style={{
               borderRadius: 12,
               background: 'var(--hp-muted)',
+              border: '1px solid rgba(0, 212, 255, 0.3)',
+              boxShadow: '0 0 8px rgba(0, 212, 255, 0.1)',
               padding: '8px 10px',
               display: 'flex',
               alignItems: 'center',

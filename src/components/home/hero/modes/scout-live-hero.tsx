@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import Image from "next/image"
 import { HeroShell } from "../hero-shell"
+import { HeroStatsOrbs } from "@/components/homepage/HeroStatsOrbs"
 import type { ScoutLiveContext, LiveSignal, LiveSignalType, QuickAction } from "../types"
 import type { ReactNode } from "react"
 
@@ -25,7 +26,7 @@ const SIGNAL_COLORS: Record<LiveSignalType, { dot: string; label: string; bg: st
   update:    { dot: "#D6B05E", label: "#D6B05E", bg: "rgba(214, 176, 94, 0.06)" },
   stat:      { dot: "#00D4FF", label: "#00D4FF", bg: "rgba(0, 212, 255, 0.06)" },
   sentiment: { dot: "#BC0000", label: "#BC0000", bg: "rgba(188, 0, 0, 0.06)" },
-  news:      { dot: "#FAFAFB", label: "rgba(250, 250, 251, 0.6)", bg: "rgba(255, 255, 255, 0.04)" },
+  news:      { dot: "#00D4FF", label: "#00D4FF", bg: "rgba(0, 212, 255, 0.06)" },
 }
 
 const SIGNAL_LABELS: Record<LiveSignalType, string> = {
@@ -83,29 +84,20 @@ export function ScoutLiveHero({
       height="full"
       forceLight
       ariaLabel="Scout Live Feed"
-      background={
-        <div className="absolute inset-0" style={{ backgroundColor: "#070A0E" }}>
-          {/* Subtle radial depth — not a gradient, just focus */}
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                "radial-gradient(ellipse 80% 60% at 50% 40%, rgba(0, 212, 255, 0.03) 0%, transparent 70%)",
-            }}
-          />
-        </div>
-      }
+      background={<HeroStatsOrbs />}
     >
       <div className="mx-auto flex w-full max-w-3xl flex-col items-center text-center">
         {/* Scout Live badge */}
         <div className="mb-6 flex items-center gap-2">
-          <Image
-            src="/downloads/scout-v2.png"
-            alt="Scout"
-            width={28}
-            height={28}
-            className="rounded-full"
-          />
+          <div style={{ borderRadius: '50%', boxShadow: '0 0 14px rgba(0, 212, 255, 0.5), 0 0 6px rgba(0, 212, 255, 0.3)' }}>
+            <Image
+              src="/downloads/scout-v2.png"
+              alt="Scout"
+              width={28}
+              height={28}
+              className="rounded-full"
+            />
+          </div>
           <span
             className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium uppercase tracking-wider"
             style={{
@@ -144,6 +136,15 @@ export function ScoutLiveHero({
           </p>
         )}
 
+        {/* Chicago flag stars */}
+        <div className="mt-3 flex items-center justify-center gap-3">
+          {[0, 1, 2, 3].map((i) => (
+            <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill="#BC0000" aria-hidden="true">
+              <polygon points="12,0 14.1,8.5 23.5,9.2 16.2,14.8 18.5,24 12,19 5.5,24 7.8,14.8 0.5,9.2 9.9,8.5" />
+            </svg>
+          ))}
+        </div>
+
         {/* Signal stream */}
         <div className="mt-8 w-full max-w-xl">
           <div className="flex flex-col gap-2">
@@ -159,7 +160,7 @@ export function ScoutLiveHero({
             className="flex items-center gap-2 rounded-full px-4 py-2.5"
             style={{
               backgroundColor: "rgba(255, 255, 255, 0.05)",
-              border: "1px solid rgba(255, 255, 255, 0.08)",
+              border: "1px solid rgba(0, 212, 255, 0.35)",
             }}
           >
             <svg
@@ -191,7 +192,7 @@ export function ScoutLiveHero({
                 color: "#FAFAFB",
               }}
             >
-              Ask
+              Ask Scout
             </button>
           </div>
         </form>
@@ -214,7 +215,7 @@ export function ScoutLiveHero({
                 style={{
                   backgroundColor: "transparent",
                   color: "rgba(250, 250, 251, 0.5)",
-                  border: "1px solid rgba(255, 255, 255, 0.08)",
+                  border: "1px solid rgba(0, 212, 255, 0.3)",
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.borderColor = "rgba(0, 212, 255, 0.3)"
@@ -243,15 +244,15 @@ function SignalRow({ signal, index }: { signal: LiveSignal; index: number }) {
 
   const content = (
     <div
-      className="flex items-start gap-3 rounded-xl px-4 py-3 transition-colors duration-200"
+      className="flex items-center gap-3 rounded-xl px-4 py-0.5 transition-colors duration-200"
       style={{
         backgroundColor: colors.bg,
-        border: "1px solid rgba(255, 255, 255, 0.04)",
+        border: "1px solid rgba(0, 212, 255, 0.25)",
         animationDelay: `${index * 60}ms`,
       }}
     >
       {/* Type indicator */}
-      <div className="flex flex-shrink-0 items-center gap-2 pt-0.5">
+      <div className="flex flex-shrink-0 items-center gap-2">
         <span
           className="inline-block h-2 w-2 rounded-full"
           style={{ backgroundColor: colors.dot }}
@@ -266,14 +267,14 @@ function SignalRow({ signal, index }: { signal: LiveSignal; index: number }) {
 
       {/* Message */}
       <p
-        className="flex-1 text-sm leading-relaxed"
-        style={{ color: "rgba(250, 250, 251, 0.85)" }}
+        className="flex-1 text-sm text-center"
+        style={{ color: "rgba(250, 250, 251, 0.85)", margin: 0, lineHeight: 1.4 }}
       >
         {signal.message}
       </p>
 
       {/* Right side — value or timestamp */}
-      <div className="flex flex-shrink-0 flex-col items-end gap-0.5">
+      <div className="flex flex-shrink-0 items-center gap-2">
         {signal.value && (
           <span
             className="text-xs font-semibold"

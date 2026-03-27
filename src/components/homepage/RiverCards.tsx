@@ -89,8 +89,20 @@ export function TrendingContextLine({ context }: { context: string }) {
 
 // Team tag component — now renders team logo instead of pill
 function TeamTag({ team, teamHex }: { team: string; teamHex: string }) {
-  const meta = homepageTeams.find((t) => t.name.toLowerCase() === team.toLowerCase())
-  const logoSrc = meta?.logo
+  const n = team.toLowerCase().replace(/\s+/g, ' ').trim()
+  const meta = homepageTeams.find((t) => t.name.toLowerCase() === n)
+  let logoSrc = meta?.logo
+
+  // Handle non-team sources with their own logos
+  if (!logoSrc) {
+    if (isPinwheelsAndIvy(team)) {
+      logoSrc = '/youtubelogos/pi-logo.png'
+    } else if (isUntoldChicago(team)) {
+      logoSrc = '/downloads/untold-logo.png'
+    } else if (n.includes('sports mockery') || n.includes('sportsmockery') || n === 'sm') {
+      logoSrc = '/downloads/sm-logo-star.png'
+    }
+  }
 
   if (!logoSrc) {
     // Fallback: simple initial pill
@@ -104,7 +116,7 @@ function TeamTag({ team, teamHex }: { team: string; teamHex: string }) {
           fontWeight: 700,
           textTransform: 'uppercase',
           letterSpacing: '0.05em',
-          backgroundColor: teamHex,
+          backgroundColor: teamHex || 'var(--hp-muted)',
           color: '#FAFAFB',
         }}
       >
@@ -216,7 +228,7 @@ export function EngagementRow({
               }
             }}
             className="group flex items-center justify-center rounded-full transition-opacity hp-tap-target hover:opacity-70"
-            style={{ width: 30, height: 30, backgroundColor: 'var(--hp-muted)' }}
+            style={{ width: 32, height: 32, background: 'linear-gradient(135deg, rgba(0,212,255,0.12), rgba(0,212,255,0.04))', border: '1px solid rgba(0,212,255,0.4)', color: '#00D4FF', boxShadow: '0 0 8px rgba(0,212,255,0.15)' }}
             aria-label={isThisArticlePlaying ? 'Pause' : 'Listen to article'}
           >
             {isThisArticlePlaying ? (
@@ -993,7 +1005,7 @@ export function ScoutSummaryCard({ summary, bullets, topic, team, teamColor, tim
             type="button"
             onClick={handleScoutPlay}
             className="hp-tap-target flex items-center justify-center rounded-full transition-opacity hover:opacity-70"
-            style={{ width: 30, height: 30, backgroundColor: 'var(--hp-muted)' }}
+            style={{ width: 32, height: 32, background: 'linear-gradient(135deg, rgba(0,212,255,0.12), rgba(0,212,255,0.04))', border: '1px solid rgba(0,212,255,0.4)', color: '#00D4FF', boxShadow: '0 0 8px rgba(0,212,255,0.15)' }}
             aria-label="Play Scout Insight"
           >
             {isPlaying ? (
@@ -1229,7 +1241,7 @@ export function ScoutBriefingCard() {
           type="button"
           onClick={handleBriefingPlay}
           className="hp-tap-target flex items-center justify-center rounded-full transition-opacity hover:opacity-70"
-          style={{ width: 30, height: 30, backgroundColor: 'var(--hp-muted)' }}
+          style={{ width: 32, height: 32, background: 'linear-gradient(135deg, rgba(0,212,255,0.12), rgba(0,212,255,0.04))', border: '1px solid rgba(0,212,255,0.4)', color: '#00D4FF', boxShadow: '0 0 8px rgba(0,212,255,0.15)' }}
           aria-label="Play Scout Briefing"
         >
           {isPlaying ? (
@@ -1522,7 +1534,7 @@ export function FanReactionsCard() {
 
   return (
     <article className="hp-feed-card hp-card-enter">
-      <div className="flex items-center gap-2.5 mb-4">
+      <Link href="/fan-chat" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, cursor: 'pointer' }}>
         {/* Fan Chat icon */}
         <svg
           width="18"
@@ -1531,7 +1543,7 @@ export function FanReactionsCard() {
           fill="none"
           stroke="currentColor"
           strokeWidth="1.8"
-          style={{ color: '#D6B05E' }}
+          style={{ color: '#00D4FF' }}
           aria-hidden="true"
         >
           <path
@@ -1543,14 +1555,32 @@ export function FanReactionsCard() {
         <span style={{ fontSize: 14, fontWeight: 700, color: "var(--hp-foreground)" }}>
           What Fans Are Saying
         </span>
-      </div>
+        <span
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 5,
+            padding: '3px 8px',
+            borderRadius: 999,
+            fontSize: 10,
+            fontWeight: 700,
+            letterSpacing: '0.05em',
+            color: '#22c55e',
+            border: '1px solid rgba(34, 197, 94, 0.4)',
+            background: 'rgba(34, 197, 94, 0.12)',
+          }}
+        >
+          <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#22c55e' }} />
+          LIVE
+        </span>
+      </Link>
 
       <div className="space-y-3">
         {picks.map((r, i) => (
           <div
             key={i}
             className="rounded-xl p-3"
-            style={{ background: "var(--hp-muted)", border: "1px solid var(--hp-border)" }}
+            style={{ background: "var(--hp-muted)", border: "1px solid rgba(0, 212, 255, 0.3)" }}
           >
             <p style={{ fontSize: 14, lineHeight: 1.5, color: "var(--hp-foreground)", fontStyle: "italic" }}>
               &ldquo;{r.quote}&rdquo;

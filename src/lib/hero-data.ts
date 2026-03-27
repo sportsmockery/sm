@@ -536,10 +536,10 @@ async function fetchScoutLive(): Promise<ScoutLiveContext | null> {
     } else if (updateCount >= 2) {
       headline = `Multiple ${teamName} updates breaking now`
     } else {
-      headline = `${teamName} intelligence is active`
+      headline = `Chicago Sports Intelligence`
     }
 
-    const summary = `${signals.length} signals in the last 6 hours across Chicago sports. Scout is monitoring.`
+    const summary = ``
 
     return { headline, summary, signals: signals.slice(0, 6) }
   } catch (e) {
