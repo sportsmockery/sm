@@ -243,6 +243,11 @@ export function EngagementRow({
             )}
           </button>
         )}
+        {listenUrl && listenButtonStyle === "circle" && slug && headline && (
+          <span style={{ fontSize: 12, fontWeight: 600, color: '#00D4FF', letterSpacing: '0.02em' }}>
+            {isThisArticlePlaying ? 'Playing...' : 'Listen Now!'}
+          </span>
+        )}
         {listenUrl && listenButtonStyle === "pill" && (
           <Link
             href={listenUrl}
