@@ -71,9 +71,10 @@ export default function LeagueCompareTable({ grades }: { grades: GradeRow[] }) {
       border: '1px solid var(--sm-border)',
       background: 'var(--sm-card)',
       overflow: 'hidden',
+      position: 'relative',
     }}>
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 580 }}>
           <thead>
             <tr style={{ borderBottom: '1px solid var(--sm-border)' }}>
               <th style={{ padding: '10px 12px', fontSize: 11, fontWeight: 600, color: 'var(--sm-text-muted)', textTransform: 'uppercase', textAlign: 'left', letterSpacing: 0.5 }}>
@@ -123,6 +124,13 @@ export default function LeagueCompareTable({ grades }: { grades: GradeRow[] }) {
           </tbody>
         </table>
       </div>
+      {/* Mobile scroll hint gradient */}
+      <div
+        className="pointer-events-none absolute top-0 right-0 bottom-0 w-6 md:hidden"
+        style={{
+          background: 'linear-gradient(to right, transparent, var(--sm-card))',
+        }}
+      />
     </div>
   )
 }

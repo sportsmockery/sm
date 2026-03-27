@@ -463,12 +463,16 @@ export default function FanChatPage() {
                       <span className="text-2xl">{currentChannel.icon}</span>
                     </div>
                   )}
-                  <div>
+                  <div className="min-w-0">
                     <h2
                       className="font-bold"
                       style={{
                         fontFamily: 'var(--sm-font-heading)',
                         color: currentChannel.id === 'bears' ? '#CC5500' : 'white',
+                        fontSize: '1.25rem',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
                       }}
                     >
                       {currentChannel.name}
