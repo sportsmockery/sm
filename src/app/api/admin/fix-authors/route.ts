@@ -47,13 +47,15 @@ export async function GET(request: NextRequest) {
 
     console.log(`[Fix Authors] Loaded ${wpIdToSupabaseId.size} author wp_id mappings`)
 
-    // 2. Fetch all sm_posts with pagination
+    // 2. Fetch all sm_posts with pagination (Supabase caps at 1000 rows per request)
     const allPosts: { id: number; author_id: number | null; author_wp_id: number | null }[] = []
     let from = 0
+    let pageNum = 0
     while (true) {
       const { data: batch, error: batchError } = await supabaseAdmin
         .from('sm_posts')
         .select('id, author_id, author_wp_id')
+        .order('id', { ascending: true })
         .range(from, from + PAGE_SIZE - 1)
 
       if (batchError) {
@@ -61,6 +63,8 @@ export async function GET(request: NextRequest) {
       }
       if (!batch || batch.length === 0) break
       allPosts.push(...batch)
+      pageNum++
+      console.log(`[Fix Authors] Fetched page ${pageNum}: ${batch.length} rows (total: ${allPosts.length})`)
       if (batch.length < PAGE_SIZE) break
       from += PAGE_SIZE
     }
@@ -91,55 +95,60 @@ export async function GET(request: NextRequest) {
     const postsWithoutWpId = allPosts.filter(p => p.author_wp_id == null)
 
     // 3a. Posts that have author_wp_id set — resolve to Supabase ID
+    let processed = 0
     for (const post of postsWithWpId) {
       const resolvedId = wpIdToSupabaseId.get(post.author_wp_id!)
       if (!resolvedId) {
         unmappedWpIds.add(post.author_wp_id!)
         skippedCount++
-        continue
-      }
-      if (post.author_id === resolvedId) {
+      } else if (post.author_id === resolvedId) {
         skippedCount++
-        continue
-      }
-
-      const { error: updateError } = await supabaseAdmin
-        .from('sm_posts')
-        .update({ author_id: resolvedId })
-        .eq('id', post.id)
-
-      if (updateError) {
-        errors.push(`Post ${post.id}: ${updateError.message}`)
       } else {
-        updatedCount++
+        const { error: updateError } = await supabaseAdmin
+          .from('sm_posts')
+          .update({ author_id: resolvedId })
+          .eq('id', post.id)
+
+        if (updateError) {
+          errors.push(`Post ${post.id}: ${updateError.message}`)
+        } else {
+          updatedCount++
+        }
+      }
+      processed++
+      if (processed % 1000 === 0) {
+        console.log(`[Fix Authors] Processed ${processed}/${postsWithWpId.length} posts with wp_id (updated: ${updatedCount})`)
       }
     }
 
     // 3b. Posts without author_wp_id — check if author_id looks like a WP ID
     let fixedFromAuthorId = 0
+    processed = 0
     for (const post of postsWithoutWpId) {
       if (post.author_id == null) {
         skippedCount++
-        continue
-      }
-
-      const resolvedId = wpIdToSupabaseId.get(post.author_id)
-      if (!resolvedId) {
-        skippedCount++
-        continue
-      }
-
-      // author_id matches a WP author ID — fix it
-      const { error: updateError } = await supabaseAdmin
-        .from('sm_posts')
-        .update({ author_id: resolvedId, author_wp_id: post.author_id })
-        .eq('id', post.id)
-
-      if (updateError) {
-        errors.push(`Post ${post.id} (wp-in-author_id): ${updateError.message}`)
       } else {
-        updatedCount++
-        fixedFromAuthorId++
+        const resolvedId = wpIdToSupabaseId.get(post.author_id)
+        if (!resolvedId) {
+          skippedCount++
+        } else {
+          // author_id matches a WP author ID — fix it
+          const { error: updateError } = await supabaseAdmin
+            .from('sm_posts')
+            .update({ author_id: resolvedId, author_wp_id: post.author_id })
+            .eq('id', post.id)
+
+          if (updateError) {
+            errors.push(`Post ${post.id} (wp-in-author_id): ${updateError.message}`)
+          } else {
+            updatedCount++
+            fixedFromAuthorId++
+          }
+        }
+      }
+      processed++
+      if (processed % 1000 === 0) {
+        console.log(`[Fix Authors] Processed ${processed}/${postsWithoutWpId.length} posts without wp_id (fixed: ${fixedFromAuthorId})`)
       }
     }
 
