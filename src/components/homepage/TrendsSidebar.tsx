@@ -128,7 +128,7 @@ export default function TrendsSidebar({ selectedTeam }: TrendsSidebarProps) {
 
       {/* SM EDGE Features — right sidebar when For You is selected */}
       {isForYou && (
-        <div className="hp-sidebar-card overflow-hidden" style={{ padding: 0 }}>
+        <div className="hp-sidebar-card overflow-hidden" style={{ padding: 0, border: '1px solid rgba(0, 212, 255, 0.4)', boxShadow: '0 0 12px rgba(0, 212, 255, 0.15), 0 0 4px rgba(0, 212, 255, 0.1)' }}>
           <div style={{ padding: '12px 16px 8px', fontSize: 14, fontWeight: 700, letterSpacing: '-0.01em' }}>
             <span style={{ color: '#00D4FF' }}>SM</span> <span style={{ color: '#BC0000' }}>&#x2736;</span> <span style={{ color: '#00D4FF' }}>EDGE Features</span>
           </div>
