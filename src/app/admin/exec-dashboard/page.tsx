@@ -48,7 +48,7 @@ interface Data {
 // ═══════════════════════════════════════════════════════════════════════════════
 // CONSTANTS & UTILS
 // ═══════════════════════════════════════════════════════════════════════════════
-const TABS = ['Overview', 'Writers', 'Social', 'SEO', 'Content', 'Revenue', 'Payments'] as const
+const TABS = ['Overview', 'Writers', 'Social', 'SEO', 'Content', 'Revenue', 'Payments', 'Freestar'] as const
 const RANGES = [
   { key: 'today', label: 'Today' },
   { key: 'yesterday', label: 'Yesterday' },
@@ -870,15 +870,6 @@ Revenue: [
             {t}
           </button>
         ))}
-        <a href="/admin/freestar"
-          className="px-4 py-2.5 text-sm font-bold transition-colors"
-          style={{
-            color: 'var(--sm-text-dim)',
-            borderBottom: '2px solid transparent',
-            marginBottom: -1,
-          }}>
-          Freestar
-        </a>
       </div>
 
       {/* ── CONTENT ────────────────────────────────────────────── */}
@@ -1597,6 +1588,17 @@ Revenue: [
                 )
               })()}
             </Section>
+          </>}
+
+          {tab === 'Freestar' && <>
+            <div className="rounded-xl border overflow-hidden" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
+              <iframe
+                src="/admin/freestar"
+                className="w-full border-0"
+                style={{ height: 'calc(100vh - 220px)', minHeight: '700px' }}
+                title="Freestar Revenue Intelligence"
+              />
+            </div>
           </>}
         </div>
       )}
