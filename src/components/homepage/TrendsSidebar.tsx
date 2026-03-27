@@ -48,7 +48,8 @@ export default function TrendsSidebar({ selectedTeam }: TrendsSidebarProps) {
   }, [])
 
   return (
-    <aside className="sticky top-0 pl-6 hidden h-screen w-[350px] flex-col gap-4 pt-4 pb-3 lg:flex overflow-y-auto">
+    <aside className="sticky top-0 pl-6 hidden h-screen w-[350px] flex-col pt-4 pb-3 lg:flex">
+      <div className="flex flex-col gap-4 overflow-y-auto flex-1" style={{ scrollbarWidth: 'thin' }}>
       {/* Login prompt for non-authenticated users */}
       {!isAuthenticated && (
         <div className="hp-sidebar-card px-3 py-3">
@@ -171,8 +172,9 @@ export default function TrendsSidebar({ selectedTeam }: TrendsSidebarProps) {
         <FeedTeamSidebar selectedTeam={selectedTeam} />
       )}
 
+      </div>
       {/* Footer */}
-      <div className="px-4 mt-auto pb-4" style={{ fontSize: 11, color: 'var(--hp-muted-foreground)', whiteSpace: 'nowrap' }}>
+      <div className="px-4 pt-2 pb-4 flex-shrink-0" style={{ fontSize: 11, color: 'var(--hp-muted-foreground)', whiteSpace: 'nowrap' }}>
         <p className="flex items-center gap-x-1.5" style={{ margin: 0 }}>
           <span>&copy; 2026 Sports Mockery Inc.</span>
           <span>|</span>
