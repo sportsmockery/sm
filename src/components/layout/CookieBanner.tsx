@@ -28,7 +28,7 @@ export default function CookieBanner() {
   if (!isVisible) return null
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-[#1c1c1f] border-t border-gray-200 dark:border-[#27272a] shadow-lg">
+    <div className="fixed left-0 right-0 z-[1100] bg-white dark:bg-[#1c1c1f] border-t border-gray-200 dark:border-[#27272a] shadow-lg cookie-banner-position">
       <div className="max-w-[1800px] mx-auto px-3 sm:px-4 lg:px-8 py-3 sm:py-4">
         <div className="flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-4">
           <p className="text-sm sm:text-sm text-gray-600 dark:text-gray-300 text-center md:text-left">

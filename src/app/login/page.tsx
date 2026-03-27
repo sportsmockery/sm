@@ -51,7 +51,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
       {/* Left side - Form */}
-      <div style={{
+      <div className="login-form-panel" style={{
         flex: '1 1 0%',
         display: 'flex',
         flexDirection: 'column',

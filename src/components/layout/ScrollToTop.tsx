@@ -105,6 +105,7 @@ export default function ScrollToTop() {
   return (
     <div
       ref={containerRef}
+      className="scout-floating-container"
       style={{
         position: 'fixed',
         bottom: 24,

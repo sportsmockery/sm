@@ -115,6 +115,10 @@ export default function ScoutCommentary({ teamSlug, initialData }: ScoutCommenta
   }, [])
 
   useEffect(() => {
+    // On mobile (<=768px), don't auto-open the Scout overlay — it covers too much screen
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768
+    if (isMobile) return
+
     const timer = setTimeout(() => {
       setIsOpen(true)
       if (initialData) {
@@ -220,7 +224,7 @@ export default function ScoutCommentary({ teamSlug, initialData }: ScoutCommenta
   return (
     <>
       {/* Scout icon */}
-      <button onClick={handleToggle} style={{ position: 'fixed', bottom: 20, right: 20, width: 96, height: 96, borderRadius: '50%', border: '3px solid rgba(0,212,255,0.3)', backgroundColor: 'var(--sm-card)', cursor: 'pointer', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, boxShadow: '0 4px 24px rgba(0,0,0,0.3)', animation: (isTalking || playing) ? 'scout-bob 0.6s ease-in-out infinite' : 'none' }} aria-label="Scout Commentary">
+      <button onClick={handleToggle} className="scout-owner-btn" style={{ position: 'fixed', bottom: 20, right: 20, width: 96, height: 96, borderRadius: '50%', border: '3px solid rgba(0,212,255,0.3)', backgroundColor: 'var(--sm-card)', cursor: 'pointer', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, boxShadow: '0 4px 24px rgba(0,0,0,0.3)', animation: (isTalking || playing) ? 'scout-bob 0.6s ease-in-out infinite' : 'none' }} aria-label="Scout Commentary">
         <Image src="/downloads/scout-v2.png" alt="Scout AI" width={72} height={72} style={{ borderRadius: '50%', objectFit: 'contain', animation: (isTalking || playing) ? 'scout-talk 0.4s ease-in-out infinite alternate' : 'none' }} />
       </button>
 
@@ -267,7 +271,7 @@ export default function ScoutCommentary({ teamSlug, initialData }: ScoutCommenta
           )}
 
           {/* Footer */}
-          <div style={{ padding: '8px 14px', borderTop: '1px solid var(--sm-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+          <div style={{ padding: '10px 14px 12px', borderTop: '1px solid var(--sm-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               {isTalking && <button onClick={handleSkip} style={{ fontSize: 12, fontWeight: 500, color: 'var(--sm-text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0' }}>Skip to end</button>}
               {!playing && !audioLoading && audioProgress === 0 && data?.commentary && !loading && (
@@ -297,7 +301,9 @@ export default function ScoutCommentary({ teamSlug, initialData }: ScoutCommenta
         .scout-spin { animation: scout-spinner 1s linear infinite; }
         @keyframes scout-spinner { 100% { transform: rotate(360deg); } }
         @media (max-width: 640px) {
-          .scout-commentary-bubble { right: 12px !important; left: 12px !important; width: auto !important; bottom: 126px !important; border-radius: 16px !important; max-height: 45vh !important; }
+          .scout-commentary-bubble { right: 12px !important; left: 12px !important; width: auto !important; bottom: 140px !important; border-radius: 16px !important; max-height: 45vh !important; }
+          .scout-owner-btn { bottom: calc(70px + env(safe-area-inset-bottom, 0px)) !important; width: 64px !important; height: 64px !important; }
+          .scout-owner-btn img { width: 48px !important; height: 48px !important; }
         }
       `}</style>
     </>

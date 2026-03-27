@@ -51,7 +51,7 @@ export default function EmbedVideo({
 
   if (type === 'youtube') {
     return (
-      <div className={`relative overflow-hidden rounded-xl ${className}`}>
+      <div className={`relative overflow-hidden rounded-xl ${className}`} style={{ maxWidth: '100%' }}>
         {/* Loading placeholder */}
         {!isLoaded && (
           <div className="absolute inset-0 flex items-center justify-center bg-[var(--sm-surface)]">
