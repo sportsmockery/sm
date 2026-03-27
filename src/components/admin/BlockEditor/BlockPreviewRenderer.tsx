@@ -286,6 +286,8 @@ function RenderBlock({ block }: { block: ContentBlock }) {
           <TradeScenarioCard
             teamA={block.data.teamA}
             teamB={block.data.teamB}
+            teamALogo={block.data.teamALogo}
+            teamBLogo={block.data.teamBLogo}
             teamAReceives={block.data.teamAReceives}
             teamBReceives={block.data.teamBReceives}
           />

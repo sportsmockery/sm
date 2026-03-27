@@ -3,10 +3,12 @@
 import React, { useState } from 'react';
 import {
   Newspaper, BarChart, Radio, Flame, MessageCircle, Info, X,
-  Trophy, Play,
+  Trophy, Play, LayoutGrid, Type, Heading, ImageIcon, Quote,
+  Share2, Minus, Sparkles, Users, ArrowRightLeft, Thermometer,
+  List, Vote, Swords, Bell,
 } from 'lucide-react';
 import type { ContentBlock } from './types';
-import { createBlock } from './types';
+import { createBlock, BLOCK_CATEGORIES } from './types';
 
 interface TemplatePreset {
   id: string;
@@ -993,33 +995,164 @@ interface TemplateSelectorProps {
   onSelect: (blocks: ContentBlock[], templateId: string) => void;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const BLOCK_ICON_MAP: Record<string, any> = {
+  Type, Heading, Image: ImageIcon, Play, Minus,
+  Sparkles, Vote, BarChart, Users, ArrowRightLeft,
+  Thermometer, List, Swords, Flame, Bell, Quote, Share2,
+};
+
+const BLOCK_DESCRIPTIONS: Record<string, string> = {
+  'paragraph': 'Rich text body content with formatting toolbar. Supports bold, italic, headings, lists, links, and auto-embeds for YouTube, X/Twitter, Instagram, and TikTok URLs.',
+  'heading': 'Section heading (H2, H3, or H4) to break up your article into clear sections.',
+  'image': 'Full-width image with alt text and optional caption. Upload or paste an image URL.',
+  'video': 'Embedded video player. Paste a YouTube or other video embed URL.',
+  'quote': 'Styled blockquote with speaker attribution and optional team tag. Great for player/coach quotes.',
+  'social-embed': 'Embed posts from Twitter/X, YouTube, TikTok, or Instagram directly in your article.',
+  'divider': 'Horizontal line separator to visually break sections apart.',
+  'scout-insight': 'AI-powered Scout analysis block. Can auto-generate analysis when your article is published, or write your own.',
+  'stats-chart': 'Animated bar or line chart. Add data points with labels and values to visualize stats.',
+  'player-comparison': 'Side-by-side player stat matchup with headshots. Compare two players across multiple stats.',
+  'trade-scenario': 'Interactive trade card showing what each team receives. Select teams from real rosters with player photos and stats.',
+  'mock-draft': 'Draft pick cards showing pick number, team, player, position, and school.',
+  'sentiment-meter': 'Configurable gauge meter — Rumor Confidence, Heat Meter, Confidence Level, or Panic Meter with visual segments.',
+  'interaction': 'Fan engagement block — either a GM Pulse (Should the team do X?) or a Fan Poll (Yes/No vote) with GM Score reward.',
+  'debate': 'PRO vs CON debate block with cyan/red sides. Fans vote on which argument wins.',
+  'hot-take': 'Bold highlighted editorial take that stands out from regular paragraphs. Gold accent.',
+  'update': 'Timestamped breaking news update. Red accent with timestamp label.',
+};
+
+function BrowseBlocksModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={onClose}>
+      <div
+        className="mx-4 w-full max-w-3xl max-h-[80vh] overflow-hidden rounded-2xl shadow-2xl"
+        style={{ backgroundColor: '#ffffff' }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: 'rgba(0,0,0,0.08)' }}>
+          <div className="flex items-center gap-2">
+            <LayoutGrid size={18} style={{ color: '#00D4FF' }} />
+            <h2 className="text-lg font-bold" style={{ color: '#0B0F14' }}>Available Blocks</h2>
+          </div>
+          <button type="button" onClick={onClose} className="p-1 rounded-lg hover:bg-black/5">
+            <X size={18} style={{ color: '#6b7280' }} />
+          </button>
+        </div>
+        <div className="overflow-y-auto p-6" style={{ maxHeight: 'calc(80vh - 60px)' }}>
+          {BLOCK_CATEGORIES.map((cat) => (
+            <div key={cat.label} className="mb-6">
+              <h3
+                className="text-[10px] font-bold uppercase tracking-widest mb-3"
+                style={{ color: cat.label === 'Fan Interaction' ? '#BC0000' : '#00D4FF' }}
+              >
+                {cat.label}
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {cat.blocks.map((block) => {
+                  const Icon = BLOCK_ICON_MAP[block.icon] || Type;
+                  const isRed = ['sentiment-meter', 'hot-take', 'update', 'debate'].includes(block.type);
+                  const accent = isRed ? '#BC0000' : (block.type === 'mock-draft' ? '#D6B05E' : '#00D4FF');
+                  return (
+                    <div
+                      key={block.type}
+                      className="rounded-xl p-4"
+                      style={{ border: '1px solid rgba(0,0,0,0.08)', backgroundColor: '#fafbfc' }}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div
+                          className="flex items-center justify-center w-9 h-9 rounded-lg shrink-0 mt-0.5"
+                          style={{ backgroundColor: `${accent}15` }}
+                        >
+                          <Icon size={16} color={accent} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-bold mb-1" style={{ color: '#0B0F14' }}>{block.label}</div>
+                          <p className="text-[11px] leading-relaxed" style={{ color: '#6b7280' }}>
+                            {BLOCK_DESCRIPTIONS[block.type] || block.description}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function TemplateSelector({ onSelect }: TemplateSelectorProps) {
   const [infoPreset, setInfoPreset] = useState<TemplatePreset | null>(null);
+  const [showBlockBrowser, setShowBlockBrowser] = useState(false);
 
   return (
     <div
-      className="rounded-xl p-6"
+      className="rounded-xl p-6 bg-[#f8f9fa] dark:bg-[#0B0F14]"
       style={{
-        backgroundColor: '#f8f9fa',
-        border: '1px solid rgba(0,0,0,0.1)',
+        border: '1px solid rgba(0,212,255,0.35)',
+        boxShadow: '0 0 20px rgba(0,212,255,0.12), 0 0 60px rgba(0,212,255,0.06)',
       }}
     >
-      <h3 className="text-sm font-bold mb-1" style={{ color: '#0B0F14' }}>Choose an article template</h3>
-      <p className="text-xs mb-4" style={{ color: '#6b7280' }}>Select a composition or start blank</p>
+      <div style={{ marginBottom: 32 }}>
+        <h3 className="text-sm font-bold text-[#0B0F14] dark:text-[#FAFAFB]">Choose an article template to start.</h3>
+      </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {/* Blank option — first */}
+        <button
+          type="button"
+          onClick={() => onSelect([createBlock('paragraph')], 'blank')}
+          className="flex items-start gap-3 p-4 rounded-xl text-left transition-all bg-white dark:bg-[#161B22] hover:bg-[#f0f4f8] dark:hover:bg-[#1c2129]"
+          style={{
+            border: '1px dashed rgba(0,212,255,0.25)',
+          }}
+        >
+          <div
+            className="flex items-center justify-center w-10 h-10 rounded-lg shrink-0"
+            style={{ backgroundColor: 'rgba(0,212,255,0.08)' }}
+          >
+            <span style={{ color: '#00D4FF', fontSize: 18 }}>+</span>
+          </div>
+          <div>
+            <div className="text-sm font-bold text-[#0B0F14] dark:text-[#FAFAFB]">Blank</div>
+            <div className="text-[11px] text-[#6b7280] dark:text-[#9ca3af]">Start from scratch</div>
+          </div>
+        </button>
+
+        {/* Browse Blocks — second */}
+        <button
+          type="button"
+          onClick={() => setShowBlockBrowser(true)}
+          className="flex items-start gap-3 p-4 rounded-xl text-left transition-all bg-white dark:bg-[#161B22] hover:bg-[rgba(0,212,255,0.04)] dark:hover:bg-[#1c2129]"
+          style={{
+            border: '1px solid rgba(0,212,255,0.3)',
+          }}
+        >
+          <div
+            className="flex items-center justify-center w-10 h-10 rounded-lg shrink-0"
+            style={{ backgroundColor: 'rgba(0,212,255,0.1)' }}
+          >
+            <LayoutGrid size={18} color="#00D4FF" />
+          </div>
+          <div>
+            <div className="text-sm font-bold text-[#0B0F14] dark:text-[#FAFAFB]">Browse Blocks</div>
+            <div className="text-[11px] text-[#6b7280] dark:text-[#9ca3af]">See all available blocks and what they do</div>
+          </div>
+        </button>
+
         {TEMPLATE_PRESETS.map((preset) => {
           const Icon = preset.icon;
           return (
             <div
               key={preset.id}
-              className="relative rounded-xl transition-all"
+              className="relative rounded-xl transition-all bg-white dark:bg-[#161B22] hover:bg-[#f0f4f8] dark:hover:bg-[#1c2129]"
               style={{
-                border: '1px solid rgba(0,0,0,0.1)',
-                backgroundColor: '#ffffff',
+                border: '1px solid rgba(0,212,255,0.15)',
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#f0f4f8' }}
-              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#ffffff' }}
             >
               {/* Info icon - top right */}
               <button
@@ -1055,37 +1188,14 @@ export function TemplateSelector({ onSelect }: TemplateSelectorProps) {
                   {React.createElement(Icon, { size: 18, color: '#00D4FF' })}
                 </div>
                 <div className="pr-6">
-                  <div className="text-sm font-bold" style={{ color: '#0B0F14' }}>{preset.label}</div>
-                  <div className="text-[11px]" style={{ color: '#6b7280' }}>{preset.description}</div>
+                  <div className="text-sm font-bold text-[#0B0F14] dark:text-[#FAFAFB]">{preset.label}</div>
+                  <div className="text-[11px] text-[#6b7280] dark:text-[#9ca3af]">{preset.description}</div>
                 </div>
               </button>
             </div>
           );
         })}
 
-        {/* Blank option */}
-        <button
-          type="button"
-          onClick={() => onSelect([createBlock('paragraph')], 'blank')}
-          className="flex items-start gap-3 p-4 rounded-xl text-left transition-all"
-          style={{
-            border: '1px dashed rgba(0,0,0,0.2)',
-            backgroundColor: '#ffffff',
-          }}
-          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#f0f4f8' }}
-          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#ffffff' }}
-        >
-          <div
-            className="flex items-center justify-center w-10 h-10 rounded-lg shrink-0"
-            style={{ backgroundColor: 'rgba(0,0,0,0.05)' }}
-          >
-            <span style={{ color: '#6b7280', fontSize: 18 }}>+</span>
-          </div>
-          <div>
-            <div className="text-sm font-bold" style={{ color: '#0B0F14' }}>Blank</div>
-            <div className="text-[11px]" style={{ color: '#6b7280' }}>Start from scratch</div>
-          </div>
-        </button>
       </div>
 
       {/* Info Modal */}
@@ -1094,6 +1204,10 @@ export function TemplateSelector({ onSelect }: TemplateSelectorProps) {
           preset={infoPreset}
           onClose={() => setInfoPreset(null)}
         />
+      )}
+
+      {showBlockBrowser && (
+        <BrowseBlocksModal onClose={() => setShowBlockBrowser(false)} />
       )}
     </div>
   );

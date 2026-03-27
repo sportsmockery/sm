@@ -1,10 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
-import { Trash2, GripVertical, ChevronUp, ChevronDown } from 'lucide-react';
-import type { ContentBlock, SentimentMode, InteractionVariant, SocialPlatform } from './types';
+import { Trash2, GripVertical, ChevronUp, ChevronDown, Search, X } from 'lucide-react';
+import type { ContentBlock, SentimentMode, InteractionVariant, SocialPlatform, TradeItem } from './types';
 import { SENTIMENT_CONFIGS } from './types';
+import { RichTextArea } from './RichTextArea';
 
 // Shared wrapper for each block's edit panel
 function BlockShell({
@@ -160,11 +161,10 @@ export function ParagraphPanel({ block, onChange, onDelete, onMoveUp, onMoveDown
   if (block.type !== 'paragraph') return null;
   return (
     <BlockShell label="Paragraph" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
-      <TextArea
+      <RichTextArea
         value={block.data.html}
         onChange={(html) => onChange({ ...block, data: { html } })}
         placeholder="Write your paragraph..."
-        rows={4}
       />
     </BlockShell>
   );
@@ -424,19 +424,230 @@ export function PlayerComparisonPanel({ block, onChange, onDelete, onMoveUp, onM
   );
 }
 
+// ─── Team / Player Picker for Trade Scenario ───
+
+interface GMTeam {
+  team_key: string;
+  team_name: string;
+  abbreviation: string;
+  city: string;
+  logo_url: string;
+  sport: string;
+  conference: string;
+  division: string;
+}
+
+interface GMPlayer {
+  player_id: string;
+  full_name: string;
+  position: string;
+  headshot_url: string | null;
+  stat_line: string;
+  jersey_number: number | null;
+}
+
+function TeamPicker({ value, sport, onChange, label }: {
+  value: string;
+  sport?: string;
+  onChange: (team: GMTeam) => void;
+  label: string;
+}) {
+  const [teams, setTeams] = useState<GMTeam[]>([]);
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    fetch(`/api/gm/teams${sport ? `?sport=${sport}` : ''}`)
+      .then(r => r.json())
+      .then(d => setTeams(d.teams || []))
+      .catch(() => {});
+  }, [sport]);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    if (open) document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  const filtered = teams.filter(t =>
+    t.team_name.toLowerCase().includes(search.toLowerCase()) ||
+    t.city.toLowerCase().includes(search.toLowerCase()) ||
+    t.abbreviation.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const selected = teams.find(t => t.team_name === value);
+
+  return (
+    <div ref={ref} className="relative">
+      <Field label={label}>
+        <button
+          type="button"
+          onClick={() => setOpen(!open)}
+          className="w-full flex items-center gap-2 bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-left"
+        >
+          {selected?.logo_url && (
+            <div className="relative w-5 h-5 shrink-0">
+              <Image src={selected.logo_url} alt="" fill className="object-contain" />
+            </div>
+          )}
+          <span className={value ? 'text-[#0B0F14]' : 'text-slate-400'}>
+            {value || 'Select team...'}
+          </span>
+        </button>
+      </Field>
+      {open && (
+        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-xl border border-gray-200 max-h-[300px] overflow-hidden">
+          <div className="p-2 border-b border-gray-100">
+            <div className="flex items-center gap-2 px-2 py-1 bg-gray-50 rounded-lg">
+              <Search size={12} className="text-gray-400" />
+              <input
+                type="text"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Search teams..."
+                className="flex-1 bg-transparent text-sm outline-none"
+                autoFocus
+              />
+            </div>
+          </div>
+          <div className="max-h-[250px] overflow-y-auto">
+            {filtered.map(t => (
+              <button
+                key={t.team_key}
+                type="button"
+                onClick={() => { onChange(t); setOpen(false); setSearch(''); }}
+                className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50 text-left"
+              >
+                {t.logo_url && (
+                  <div className="relative w-5 h-5 shrink-0">
+                    <Image src={t.logo_url} alt="" fill className="object-contain" />
+                  </div>
+                )}
+                <span className="text-[#0B0F14]">{t.team_name}</span>
+                <span className="text-[10px] text-gray-400 ml-auto uppercase">{t.sport}</span>
+              </button>
+            ))}
+            {filtered.length === 0 && (
+              <div className="p-4 text-center text-sm text-gray-400">No teams found</div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PlayerPicker({ teamKey, sport, onSelect }: {
+  teamKey: string;
+  sport: string;
+  onSelect: (player: GMPlayer) => void;
+}) {
+  const [players, setPlayers] = useState<GMPlayer[]>([]);
+  const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!teamKey || !sport) return;
+    setLoading(true);
+    fetch(`/api/gm/roster?team_key=${teamKey}&sport=${sport}`)
+      .then(r => r.json())
+      .then(d => setPlayers(d.players || []))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [teamKey, sport]);
+
+  const filtered = players.filter(p =>
+    p.full_name.toLowerCase().includes(search.toLowerCase()) ||
+    p.position.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <div className="rounded-lg border border-gray-200 bg-white overflow-hidden">
+      <div className="p-2 border-b border-gray-100">
+        <div className="flex items-center gap-2 px-2 py-1 bg-gray-50 rounded-lg">
+          <Search size={12} className="text-gray-400" />
+          <input
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search players..."
+            className="flex-1 bg-transparent text-sm outline-none"
+            autoFocus
+          />
+        </div>
+      </div>
+      <div className="max-h-[200px] overflow-y-auto">
+        {loading ? (
+          <div className="p-4 text-center text-sm text-gray-400">Loading roster...</div>
+        ) : filtered.length === 0 ? (
+          <div className="p-4 text-center text-sm text-gray-400">No players found</div>
+        ) : filtered.map(p => (
+          <button
+            key={p.player_id}
+            type="button"
+            onClick={() => onSelect(p)}
+            className="w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-50 text-left"
+          >
+            {p.headshot_url ? (
+              <div className="relative w-8 h-8 rounded-full overflow-hidden shrink-0 border border-gray-200">
+                <Image src={p.headshot_url} alt={p.full_name} fill className="object-cover" />
+              </div>
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                <span className="text-[9px] text-gray-400 font-bold">{p.position}</span>
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <span className="text-sm font-medium text-[#0B0F14] block truncate">{p.full_name}</span>
+              {p.stat_line && <span className="text-[11px] text-gray-400 block truncate">{p.stat_line}</span>}
+            </div>
+            <span className="text-[10px] font-bold text-gray-400 uppercase shrink-0">{p.position}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function TradeScenarioPanel({ block, onChange, onDelete, onMoveUp, onMoveDown }: BlockPanelProps) {
   if (block.type !== 'trade-scenario') return null;
   const d = block.data;
+  const [addingPlayer, setAddingPlayer] = useState<{ side: 'teamAReceives' | 'teamBReceives' } | null>(null);
 
-  const addItem = (side: 'teamAReceives' | 'teamBReceives') => {
-    onChange({ ...block, data: { ...d, [side]: [...d[side], { type: 'player' as const, label: '' }] } });
+  const handleTeamChange = (sideKey: 'teamA' | 'teamB', team: GMTeam) => {
+    const logoKey = sideKey === 'teamA' ? 'teamALogo' : 'teamBLogo';
+    const sportKey = sideKey === 'teamA' ? 'teamASport' : 'teamBSport';
+    const keyKey = sideKey === 'teamA' ? 'teamAKey' : 'teamBKey';
+    onChange({ ...block, data: { ...d, [sideKey]: team.team_name, [logoKey]: team.logo_url, [sportKey]: team.sport, [keyKey]: team.team_key } });
   };
+
+  const addPlayer = (side: 'teamAReceives' | 'teamBReceives', player: GMPlayer) => {
+    const item: TradeItem = {
+      type: 'player',
+      label: player.full_name,
+      headshot_url: player.headshot_url || undefined,
+      stat_line: player.stat_line || undefined,
+      position: player.position,
+      player_id: player.player_id,
+    };
+    onChange({ ...block, data: { ...d, [side]: [...d[side], item] } });
+    setAddingPlayer(null);
+  };
+
+  const addPick = (side: 'teamAReceives' | 'teamBReceives') => {
+    onChange({ ...block, data: { ...d, [side]: [...d[side], { type: 'pick' as const, label: '' }] } });
+  };
+
   const removeItem = (side: 'teamAReceives' | 'teamBReceives', idx: number) => {
-    onChange({ ...block, data: { ...d, [side]: d[side].filter((_, i) => i !== idx) } });
+    onChange({ ...block, data: { ...d, [side]: d[side].filter((_: TradeItem, i: number) => i !== idx) } });
   };
-  const updateItem = (side: 'teamAReceives' | 'teamBReceives', idx: number, updates: Partial<{ type: 'player' | 'pick'; label: string }>) => {
+
+  const updatePickLabel = (side: 'teamAReceives' | 'teamBReceives', idx: number, label: string) => {
     const items = [...d[side]];
-    items[idx] = { ...items[idx], ...updates };
+    items[idx] = { ...items[idx], label };
     onChange({ ...block, data: { ...d, [side]: items } });
   };
 
@@ -445,20 +656,85 @@ export function TradeScenarioPanel({ block, onChange, onDelete, onMoveUp, onMove
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {(['teamAReceives', 'teamBReceives'] as const).map((side, sideIdx) => {
           const teamKey = sideIdx === 0 ? 'teamA' : 'teamB';
+          const otherTeamKey = sideIdx === 0 ? 'teamBKey' : 'teamAKey';
+          const otherTeamSport = sideIdx === 0 ? 'teamBSport' : 'teamASport';
+
           return (
             <div key={side}>
-              <Field label={`Team ${sideIdx === 0 ? 'A' : 'B'} Name`}>
-                <TextInput value={d[teamKey]} onChange={(v) => onChange({ ...block, data: { ...d, [teamKey]: v } })} placeholder="Chicago Bears" />
-              </Field>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 block">Receives</span>
-              {d[side].map((item, idx) => (
-                <div key={idx} className="flex gap-2 mb-2">
-                  <Select value={item.type} onChange={(v) => updateItem(side, idx, { type: v as 'player' | 'pick' })} options={[{ value: 'player', label: 'Player' }, { value: 'pick', label: 'Pick' }]} />
-                  <TextInput value={item.label} onChange={(v) => updateItem(side, idx, { label: v })} placeholder="Name / pick" />
-                  <button type="button" onClick={() => removeItem(side, idx)} className="text-slate-500 hover:text-[#BC0000] shrink-0"><Trash2 size={14} /></button>
+              <TeamPicker
+                value={d[teamKey]}
+                onChange={(team) => handleTeamChange(teamKey as 'teamA' | 'teamB', team)}
+                label={`Team ${sideIdx === 0 ? 'A' : 'B'}`}
+              />
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 block mt-3">Receives</span>
+
+              {/* Existing items */}
+              {d[side].map((item: TradeItem, idx: number) => (
+                <div key={idx} className="flex items-center gap-2 mb-2 rounded-lg px-2 py-1.5" style={{ backgroundColor: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.06)' }}>
+                  {item.type === 'player' && item.headshot_url ? (
+                    <div className="relative w-8 h-8 rounded-full overflow-hidden shrink-0 border border-gray-200">
+                      <Image src={item.headshot_url} alt={item.label} fill className="object-cover" />
+                    </div>
+                  ) : (
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: item.type === 'player' ? 'rgba(0,212,255,0.1)' : 'rgba(214,176,94,0.1)' }}>
+                      <span className="text-[8px] font-bold uppercase" style={{ color: item.type === 'player' ? '#00D4FF' : '#D6B05E' }}>{item.type === 'pick' ? 'PICK' : item.position || 'PLR'}</span>
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    {item.type === 'pick' ? (
+                      <input
+                        type="text"
+                        value={item.label}
+                        onChange={e => updatePickLabel(side, idx, e.target.value)}
+                        placeholder="e.g. 2026 1st Round Pick"
+                        className="w-full bg-transparent text-sm outline-none text-[#0B0F14]"
+                      />
+                    ) : (
+                      <>
+                        <span className="text-sm font-medium text-[#0B0F14] block truncate">{item.label}</span>
+                        {item.stat_line && <span className="text-[10px] text-gray-400 block truncate">{item.stat_line}</span>}
+                      </>
+                    )}
+                  </div>
+                  <button type="button" onClick={() => removeItem(side, idx)} className="text-slate-400 hover:text-[#BC0000] shrink-0 p-1">
+                    <X size={12} />
+                  </button>
                 </div>
               ))}
-              <button type="button" onClick={() => addItem(side)} className="text-xs text-[#00D4FF] hover:underline">+ Add item</button>
+
+              {/* Player picker dropdown */}
+              {addingPlayer?.side === side && d[otherTeamKey as keyof typeof d] && (
+                <div className="mb-2">
+                  <PlayerPicker
+                    teamKey={d[otherTeamKey as keyof typeof d] as string}
+                    sport={d[otherTeamSport as keyof typeof d] as string}
+                    onSelect={(player) => addPlayer(side, player)}
+                  />
+                  <button type="button" onClick={() => setAddingPlayer(null)} className="mt-1 text-xs text-gray-400 hover:text-gray-600">Cancel</button>
+                </div>
+              )}
+
+              {/* Add buttons */}
+              {addingPlayer?.side !== side && (
+                <div className="flex gap-3 mt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!d[otherTeamKey as keyof typeof d]) {
+                        alert('Select the other team first to pick from their roster.');
+                        return;
+                      }
+                      setAddingPlayer({ side });
+                    }}
+                    className="text-xs text-[#00D4FF] hover:underline"
+                  >
+                    + Add Player
+                  </button>
+                  <button type="button" onClick={() => addPick(side)} className="text-xs text-[#D6B05E] hover:underline">
+                    + Add Pick
+                  </button>
+                </div>
+              )}
             </div>
           );
         })}
@@ -613,7 +889,7 @@ export function HotTakePanel({ block, onChange, onDelete, onMoveUp, onMoveDown }
   return (
     <BlockShell label="Hot Take" accent="#BC0000" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
       <Field label="Hot Take Text">
-        <TextArea value={block.data.text} onChange={(text) => onChange({ ...block, data: { ...block.data, text } })} placeholder="Bold claim here..." rows={3} />
+        <RichTextArea value={block.data.text} onChange={(text) => onChange({ ...block, data: { ...block.data, text } })} placeholder="Bold claim here..." minHeight={80} />
       </Field>
     </BlockShell>
   );
@@ -627,7 +903,7 @@ export function UpdatePanel({ block, onChange, onDelete, onMoveUp, onMoveDown }:
         <TextInput value={block.data.timestamp} onChange={(timestamp) => onChange({ ...block, data: { ...block.data, timestamp } })} placeholder="e.g. 9:30 PM CT" />
       </Field>
       <Field label="Update Text">
-        <TextArea value={block.data.text} onChange={(text) => onChange({ ...block, data: { ...block.data, text } })} placeholder="Breaking update..." rows={2} />
+        <RichTextArea value={block.data.text} onChange={(text) => onChange({ ...block, data: { ...block.data, text } })} placeholder="Breaking update..." minHeight={60} />
       </Field>
     </BlockShell>
   );

@@ -104,13 +104,28 @@ export interface PlayerComparisonBlock extends BlockBase {
   };
 }
 
+export interface TradeItem {
+  type: 'player' | 'pick';
+  label: string;
+  headshot_url?: string;
+  stat_line?: string;
+  position?: string;
+  player_id?: string;
+}
+
 export interface TradeScenarioBlock extends BlockBase {
   type: 'trade-scenario';
   data: {
     teamA: string;
     teamB: string;
-    teamAReceives: { type: 'player' | 'pick'; label: string }[];
-    teamBReceives: { type: 'player' | 'pick'; label: string }[];
+    teamALogo?: string;
+    teamBLogo?: string;
+    teamASport?: string;
+    teamBSport?: string;
+    teamAKey?: string;
+    teamBKey?: string;
+    teamAReceives: TradeItem[];
+    teamBReceives: TradeItem[];
   };
 }
 

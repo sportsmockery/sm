@@ -5656,3 +5656,21 @@ a.glass-card-sm:active,
     flex-shrink: 0;
   }
 }
+
+/* Rich Text Editor (Block Editor paragraph toolbar) */
+.sm-richtext-editor:empty:before {
+  content: attr(data-placeholder);
+  color: #94a3b8;
+  pointer-events: none;
+}
+.sm-richtext-editor h2 { font-size: 1.25rem; font-weight: 600; margin: 0.5em 0; }
+.sm-richtext-editor h3 { font-size: 1.1rem; font-weight: 600; margin: 0.5em 0; }
+.sm-richtext-editor blockquote { border-left: 3px solid #00D4FF; padding-left: 12px; margin: 0.5em 0; color: #475569; }
+.sm-richtext-editor a { color: #00D4FF; text-decoration: underline; }
+.sm-richtext-editor ul, .sm-richtext-editor ol { padding-left: 1.5em; margin: 0.5em 0; }
+.sm-richtext-editor ul { list-style-type: disc; }
+.sm-richtext-editor ol { list-style-type: decimal; }
+.sm-richtext-editor table { width: 100%; border-collapse: collapse; margin: 0.5em 0; }
+.sm-richtext-editor td, .sm-richtext-editor th { border: 1px solid #d1d5db; padding: 6px 8px; }
+.sm-richtext-editor img { max-width: 100%; border-radius: 8px; margin: 0.5em 0; }
+.sm-richtext-editor hr { border: none; border-top: 1px solid #d1d5db; margin: 1em 0; }

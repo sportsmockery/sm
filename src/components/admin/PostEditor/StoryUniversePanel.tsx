@@ -174,10 +174,7 @@ export default function StoryUniversePanel({
     .filter((c) => !relatedIds.includes(c.id) && String(c.id) !== postId)
 
   return (
-    <div className="border-t border-[var(--border-default)] pt-4">
-      <h4 className="mb-3 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">
-        Homepage Features
-      </h4>
+    <div className="pt-0 -mt-1">
 
       {/* Auto-detection suggestion */}
       {!isStoryUniverse && detected && candidates.length >= 3 && (
@@ -210,22 +207,35 @@ export default function StoryUniversePanel({
       )}
 
       {/* Story Universe checkbox */}
-      <label className="flex items-center gap-2 cursor-pointer">
-        <input
-          type="checkbox"
-          checked={isStoryUniverse}
-          onChange={(e) => {
-            onIsStoryUniverseChange(e.target.checked)
-            if (!e.target.checked) {
-              onRelatedIdsChange([])
-            }
-          }}
-          className="h-4 w-4 rounded border-[var(--border-default)] text-[var(--accent-red)] focus:ring-[var(--accent-red)]"
-        />
-        <span className="text-sm font-medium text-[var(--text-primary)]">
-          Use in Story Universe
-        </span>
-      </label>
+      <div className="flex items-center justify-between">
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={isStoryUniverse}
+            onChange={(e) => {
+              onIsStoryUniverseChange(e.target.checked)
+              if (!e.target.checked) {
+                onRelatedIdsChange([])
+              }
+            }}
+            className="h-4 w-4 rounded border-[var(--border-default)] text-[var(--accent-red)] focus:ring-[var(--accent-red)]"
+          />
+          <span className="text-sm font-medium text-[var(--text-primary)]">
+            Use in Story Universe
+          </span>
+        </label>
+        <button
+          type="button"
+          onClick={() => window.open('/home2#story-universe', '_blank')}
+          className="flex h-5 w-5 items-center justify-center rounded-full transition-colors"
+          style={{ color: '#9ca3af' }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = '#00D4FF'; e.currentTarget.style.backgroundColor = 'rgba(0,212,255,0.1)' }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = '#9ca3af'; e.currentTarget.style.backgroundColor = 'transparent' }}
+          title="Story Universe groups 3 related articles into a cinematic hero section on the homepage. The main article takes center stage with 2 supporting stories alongside it."
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        </button>
+      </div>
       <p className="mt-1 text-xs text-[var(--text-muted)] ml-6">
         Creates a cinematic hero with this story and 2 related stories
       </p>

@@ -239,6 +239,20 @@ export default function Sidebar({ collapsed = false, onCollapse }: SidebarProps)
         isCollapsed ? 'w-16' : 'w-60'
       }`}
     >
+      {/* Edge Logo with animated background */}
+      <div className="relative border-b border-[rgba(0,212,255,0.1)] overflow-hidden" style={{ height: isCollapsed ? 48 : 80 }}>
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, #0B0F14 0%, #111820 40%, #0B0F14 100%)' }}>
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(90deg, transparent 0%, #00D4FF 50%, transparent 100%)', animation: 'adminTelemetry 6s linear infinite', opacity: 0.1 }} />
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(90deg, transparent 0%, #BC0000 50%, transparent 100%)', animation: 'adminTelemetry 8s linear infinite reverse', opacity: 0.06 }} />
+        </div>
+        <div className="absolute inset-0 flex items-center justify-center z-10 px-3">
+          <Link href="/" title="Back to homepage">
+            <Image src="/edge-logo-blue.png" alt="Edge" width={200} height={60} style={{ height: isCollapsed ? 28 : 40, width: 'auto' }} className="opacity-90 hover:opacity-100 transition-opacity" />
+          </Link>
+        </div>
+        <style>{`@keyframes adminTelemetry { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }`}</style>
+      </div>
+
       {/* Sidebar Header — User Profile */}
       <div className="flex h-14 items-center justify-between border-b border-[var(--border-default)] px-4">
         <Link href="/admin" className="flex items-center gap-3 min-w-0">

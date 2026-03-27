@@ -132,10 +132,8 @@ export default function AdvancedPostEditor({
   // Preview mode
   const [showPreview, setShowPreview] = useState(false)
 
-  // Editor mode: 'richtext' (TipTap) or 'blocks' (Block Editor)
-  const [editorMode, setEditorMode] = useState<'richtext' | 'blocks'>(
-    post?.content && isBlockContent(post.content) ? 'blocks' : 'richtext'
-  )
+  // Editor mode: always blocks
+  const editorMode = 'blocks' as const
   const [blockDoc, setBlockDoc] = useState<ArticleDocument | null>(
     post?.content && isBlockContent(post.content) ? parseDocument(post.content) : null
   )
@@ -1108,9 +1106,51 @@ export default function AdvancedPostEditor({
   }, [formData])
 
   return (
-    <div className="fixed top-[92px] left-0 right-0 bottom-0 z-[35] flex flex-col bg-[var(--bg-primary)] mt-2">
-      {/* Top Header Bar - minimal, below the red line */}
-      <header className="flex-shrink-0 flex h-12 items-center justify-between border-b border-[var(--border-default)] bg-[var(--bg-secondary)] px-4">
+    <div className="fixed top-0 left-0 right-0 bottom-0 z-[45] flex flex-col bg-[var(--bg-primary)]">
+      {/* Logo bar with background animation */}
+      <div className="flex-shrink-0 relative" style={{ height: 88 }}>
+        {/* Animated background with stars and lines */}
+        <div className="absolute inset-0" style={{ background: '#0B0F14', overflow: 'hidden' }}>
+          {/* Dot grid */}
+          <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle, rgba(0,212,255,0.08) 0.5px, transparent 0.5px)', backgroundSize: '14px 14px' }} />
+          {/* Red line sweep */}
+          <div className="absolute" style={{ top: '65%', left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, transparent, rgba(188,0,0,0.25), transparent)', backgroundSize: '200% 100%', animation: 'redPulse 7s ease-in-out infinite' }} />
+          {/* Small star particles */}
+          <div className="absolute" style={{ top: 12, left: '15%', width: 4, height: 4, background: '#00D4FF', borderRadius: '50%', opacity: 0.4, animation: 'starPulse 3s ease-in-out infinite' }} />
+          <div className="absolute" style={{ top: 28, left: '35%', width: 3, height: 3, background: '#BC0000', borderRadius: '50%', opacity: 0.35, animation: 'starPulse 4s ease-in-out infinite 1s' }} />
+          <div className="absolute" style={{ top: 18, left: '55%', width: 3, height: 3, background: '#00D4FF', borderRadius: '50%', opacity: 0.3, animation: 'starPulse 3.5s ease-in-out infinite 0.5s' }} />
+          <div className="absolute" style={{ top: 40, left: '70%', width: 4, height: 4, background: '#BC0000', borderRadius: '50%', opacity: 0.35, animation: 'starPulse 4.5s ease-in-out infinite 2s' }} />
+          <div className="absolute" style={{ top: 8, left: '85%', width: 3, height: 3, background: '#00D4FF', borderRadius: '50%', opacity: 0.3, animation: 'starPulse 3s ease-in-out infinite 1.5s' }} />
+          <div className="absolute" style={{ top: 50, left: '25%', width: 3, height: 3, background: '#00D4FF', borderRadius: '50%', opacity: 0.25, animation: 'starPulse 5s ease-in-out infinite 0.8s' }} />
+          <div className="absolute" style={{ top: 35, left: '92%', width: 3, height: 3, background: '#BC0000', borderRadius: '50%', opacity: 0.3, animation: 'starPulse 4s ease-in-out infinite 2.5s' }} />
+          <div className="absolute" style={{ top: 60, left: '48%', width: 3, height: 3, background: '#00D4FF', borderRadius: '50%', opacity: 0.25, animation: 'starPulse 3.5s ease-in-out infinite 1.2s' }} />
+        </div>
+        {/* Bottom border */}
+        <div className="absolute bottom-0 left-0 right-0 h-px" style={{ background: 'rgba(0,212,255,0.1)' }} />
+        {/* Logo */}
+        <div className="absolute left-4 top-0 bottom-0 flex items-center z-10">
+          <Link href="/" title="Back to homepage">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/edge-logo-blue.png" alt="Edge" style={{ height: 58, width: 'auto' }} className="opacity-90 hover:opacity-100 transition-opacity" />
+          </Link>
+        </div>
+        <style>{`
+          @keyframes cyanPulse {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+          }
+          @keyframes redPulse {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+          }
+          @keyframes starPulse {
+            0%, 100% { opacity: 0.15; transform: scale(0.8); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+          }
+        `}</style>
+      </div>
+      {/* Top Header Bar - breadcrumbs + actions */}
+      <header className="flex-shrink-0 flex h-12 items-center justify-between bg-[var(--bg-secondary)] px-4 relative">
         {/* Left: Expand arrow (when collapsed) + Breadcrumb */}
         <div className="flex items-center gap-3">
           {leftSidebarCollapsed && (
@@ -1203,6 +1243,18 @@ export default function AdvancedPostEditor({
             </div>
           </div>
 
+          <div className="flex items-center gap-1.5">
+            <div className="w-56">
+              <CategorySelect
+                options={categoryOptions}
+                value={formData.category_id}
+                onChange={(value) => updateField('category_id', value)}
+                placeholder="Category..."
+                compact
+              />
+            </div>
+          </div>
+
           <select
             value={formData.status}
             onChange={(e) => updateField('status', e.target.value)}
@@ -1237,6 +1289,8 @@ export default function AdvancedPostEditor({
             {saving ? 'Saving...' : isEditing ? 'Update' : 'Publish'}
           </button>
         </div>
+        {/* Cyan line with glow */}
+        <div className="absolute bottom-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, #00D4FF, transparent)', boxShadow: '0 0 8px rgba(0,212,255,0.4), 0 0 20px rgba(0,212,255,0.15)' }} />
       </header>
 
       {/* Main Content Area */}
@@ -1287,6 +1341,15 @@ export default function AdvancedPostEditor({
                 </svg>
                 Media
               </Link>
+              <Link
+                href="/admin/exec-dashboard"
+                className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                </svg>
+                Analytics
+              </Link>
             </nav>
 
             {/* AI Tools in Sidebar */}
@@ -1307,7 +1370,7 @@ export default function AdvancedPostEditor({
                   disabled={aiLoading === 'grammar' || !formData.content}
                   className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] disabled:opacity-50"
                 >
-                  <svg className="h-5 w-5 text-[#D6B05E]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <svg className="h-5 w-5 text-[#00D4FF]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   {aiLoading === 'grammar' ? 'Checking...' : 'Grammar Check'}
@@ -1318,7 +1381,7 @@ export default function AdvancedPostEditor({
                   disabled={aiLoading === 'headlines' || !formData.title || !formData.content}
                   className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] disabled:opacity-50"
                 >
-                  <svg className="h-5 w-5 text-[#D6B05E]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <svg className="h-5 w-5 text-[#00D4FF]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" />
                   </svg>
                   {aiLoading === 'headlines' ? 'Generating...' : 'Headlines'}
@@ -1329,7 +1392,7 @@ export default function AdvancedPostEditor({
                   disabled={formData.content.length < 200}
                   className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] disabled:opacity-50"
                 >
-                  <svg className="h-5 w-5 text-[#D6B05E]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <svg className="h-5 w-5 text-[#00D4FF]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
                   </svg>
                   Add Chart
@@ -1340,7 +1403,7 @@ export default function AdvancedPostEditor({
                   disabled={aiLoading === 'poll' || !formData.content}
                   className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] disabled:opacity-50"
                 >
-                  <svg className="h-5 w-5 text-[#D6B05E]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <svg className="h-5 w-5 text-[#00D4FF]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7.5 13.5h-3v-6h3v6zm4 0h-3v-9h3v9z" />
                   </svg>
                   {aiLoading === 'poll' ? 'Generating...' : 'Add Poll'}
@@ -1351,9 +1414,9 @@ export default function AdvancedPostEditor({
           </aside>
         )}
 
-        {/* Main Editor Column - responsive width */}
-        <main className="flex-1 overflow-y-auto">
-          <div className={`mx-auto px-6 py-6 ${leftSidebarCollapsed ? 'max-w-5xl' : 'max-w-4xl'}`}>
+        {/* Main Editor Column - 76% width centered with 12% padding each side */}
+        <main className="flex-1 overflow-y-auto" style={{ paddingTop: 0, marginTop: 0 }}>
+          <div className="mx-auto px-6" style={{ width: '76%', minWidth: 0, paddingTop: 15 }}>
             {/* Error - inline, dismisses automatically */}
             {error && (
               <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm text-[#BC0000]">
@@ -1428,87 +1491,14 @@ export default function AdvancedPostEditor({
               </div>
             )}
 
-            {/* Editor Mode Toggle + Auto-save */}
-            <div className="mb-3 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setEditorMode('richtext')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                    editorMode === 'richtext'
-                      ? 'bg-[#D6B05E]/15 text-[#D6B05E] border border-[#D6B05E]/30'
-                      : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] border border-transparent'
-                  }`}
-                >
-                  Rich Text
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setEditorMode('blocks')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                    editorMode === 'blocks'
-                      ? 'bg-[#00D4FF]/15 text-[#00D4FF] border border-[#00D4FF]/30'
-                      : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] border border-transparent'
-                  }`}
-                >
-                  Block Editor
-                </button>
-              </div>
-              <span className="inline-flex items-center gap-1.5 rounded-md bg-[var(--bg-tertiary)] px-2.5 py-1 text-xs text-[var(--text-muted)]">
-                {lastAutoSaved ? (
-                  <>
-                    <svg className="h-3 w-3" style={{ color: '#00D4FF' }} fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>Saved {lastAutoSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                    <span className="text-[var(--text-muted)]">·</span>
-                    <span>{Math.round((Date.now() - lastAutoSaved.getTime()) / 60000) < 1 ? 'just now' : `${Math.round((Date.now() - lastAutoSaved.getTime()) / 60000)}m ago`}</span>
-                  </>
-                ) : (
-                  <>
-                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span>Not yet saved</span>
-                  </>
-                )}
-              </span>
+            {/* Content Editor - Block Editor only */}
+            <div className="mb-6">
+              <BlockEditor
+                initialBlocks={blockDoc?.blocks}
+                initialTemplate={blockDoc?.template}
+                onChange={(doc) => setBlockDoc(doc)}
+              />
             </div>
-
-            {/* Content Editor - extends to fill space */}
-            {editorMode === 'richtext' ? (
-              <div
-                className={`mb-6 overflow-hidden rounded-lg border bg-white dark:bg-gray-900 ${
-                  highlightMode
-                    ? 'border-[#D6B05E] ring-2 ring-[#D6B05E]/20'
-                    : 'border-[var(--border-default)]'
-                }`}
-                onMouseUp={handleContentSelection}
-              >
-                {highlightMode && (
-                  <div className="bg-[#D6B05E]/10 border-b border-[#D6B05E]/30 px-4 py-2 text-sm text-[#D6B05E] dark:text-[#D6B05E] flex items-center gap-2">
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Select the text containing data you want to chart
-                  </div>
-                )}
-                <RichTextEditor
-                  ref={contentEditorRef}
-                  content={formData.content}
-                  onChange={(content) => updateField('content', content)}
-                  placeholder="Start writing your article..."
-                />
-              </div>
-            ) : (
-              <div className="mb-6">
-                <BlockEditor
-                  initialBlocks={blockDoc?.blocks}
-                  initialTemplate={blockDoc?.template}
-                  onChange={(doc) => setBlockDoc(doc)}
-                />
-              </div>
-            )}
 
             {/* SEO Section - Below Content */}
             <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-card)]">
@@ -1652,25 +1642,6 @@ export default function AdvancedPostEditor({
                 </div>
               )}
 
-              {/* Category */}
-              <div>
-                <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Category</label>
-                <CategorySelect
-                  options={categoryOptions}
-                  value={formData.category_id}
-                  onChange={(value) => updateField('category_id', value)}
-                  placeholder="Select category..."
-                />
-              </div>
-
-              {/* Tags */}
-              <TagInput selectedTags={selectedTags} onChange={setSelectedTags} />
-              <p className="mt-1.5 text-[11px] leading-relaxed text-[var(--text-muted)] flex items-center gap-1">
-                Add 3–6 tags, click the
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="inline-block"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-                for more info.
-              </p>
-
               {/* Featured Image */}
               <div>
                 <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Featured Image</label>
@@ -1726,100 +1697,43 @@ export default function AdvancedPostEditor({
                 )}
               </div>
 
-              {/* Push Notification */}
-              <div className="border-t border-[var(--border-default)] pt-4">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={sendPushNotification}
-                    onChange={(e) => {
-                      setSendPushNotification(e.target.checked)
-                      if (e.target.checked && formData.title && !pushTitle) {
-                        setPushTitle(formData.title.slice(0, 65))
-                      }
-                    }}
-                    className="h-4 w-4 rounded border-[var(--border-default)] text-[var(--accent-red)] focus:ring-[var(--accent-red)]"
-                  />
-                  <span className="text-sm font-medium text-[var(--text-primary)]">Send Push Notification</span>
-                </label>
-                <p className="mt-1 text-xs text-[var(--text-muted)] ml-6">SM App push notification will be sent upon publishing</p>
+              {/* Tags */}
+              <TagInput selectedTags={selectedTags} onChange={setSelectedTags} />
+              <p className="mt-1.5 text-[11px] leading-relaxed text-[var(--text-muted)] flex items-center gap-1">
+                Add 3–6 tags (8 tags max), click the
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="inline-block"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                for more info.
+              </p>
 
-                {sendPushNotification && (
-                  <div className="mt-4 space-y-4">
-                    {/* Push Title */}
-                    <div>
-                      <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Push Title</label>
-                      <input
-                        type="text"
-                        value={pushTitle}
-                        onChange={(e) => setPushTitle(e.target.value.slice(0, 65))}
-                        placeholder="Breaking News: ..."
-                        maxLength={65}
-                        className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[var(--accent-red)] focus:outline-none"
-                      />
-                      <p className={`mt-1 text-xs text-right ${pushTitle.length >= 60 ? 'text-amber-500' : 'text-[var(--text-muted)]'}`}>
-                        {pushTitle.length}/65
-                      </p>
-                    </div>
-
-                    {/* Push Message */}
-                    <div>
-                      <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Push Message</label>
-                      <textarea
-                        value={pushMessage}
-                        onChange={(e) => setPushMessage(e.target.value.slice(0, 240))}
-                        placeholder="Tap to read the full story..."
-                        maxLength={240}
-                        rows={3}
-                        className="w-full resize-none rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[var(--accent-red)] focus:outline-none"
-                      />
-                      <p className={`mt-1 text-xs text-right ${pushMessage.length >= 220 ? 'text-amber-500' : 'text-[var(--text-muted)]'}`}>
-                        {pushMessage.length}/240
-                      </p>
-                    </div>
-
-                    {/* Push Preview */}
-                    <div>
-                      <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Preview</label>
-                      <div className="rounded-xl bg-white p-3 shadow-lg dark:bg-gray-800">
-                        <div className="flex items-start gap-3">
-                          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-[#bc0000]">
-                            <span className="text-xs font-bold text-white">SM</span>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between">
-                              <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Sports Mockery</span>
-                              <span className="text-[10px] text-gray-400">now</span>
-                            </div>
-                            <p className="mt-0.5 truncate text-sm font-semibold text-gray-900 dark:text-white">
-                              {pushTitle || 'Notification Title'}
-                            </p>
-                            <p className="line-clamp-2 text-xs text-gray-600 dark:text-gray-300">
-                              {pushMessage || 'Your notification message will appear here...'}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Force Hero Featured */}
-              <div className="border-t border-[var(--border-default)] pt-4">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={forceHeroFeatured}
-                    onChange={(e) => setForceHeroFeatured(e.target.checked)}
-                    className="h-4 w-4 rounded border-[var(--border-default)] text-[var(--accent-red)] focus:ring-[var(--accent-red)]"
-                  />
-                  <span className="text-sm font-medium text-[var(--text-primary)]">Force Hero Featured</span>
-                </label>
+              {/* Homepage Features */}
+              <div className="border-t border-[var(--border-default)] pt-4 pb-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)] mb-2">Homepage Features</p>
+                <div className="h-px mb-3" style={{ background: 'linear-gradient(90deg, transparent, #00D4FF, transparent)', boxShadow: '0 0 6px rgba(0,212,255,0.3)' }} />
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={forceHeroFeatured}
+                      onChange={(e) => setForceHeroFeatured(e.target.checked)}
+                      className="h-4 w-4 rounded border-[var(--border-default)] text-[var(--accent-red)] focus:ring-[var(--accent-red)]"
+                    />
+                    <span className="text-sm font-medium text-[var(--text-primary)]">Force Hero Featured</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => window.open('/home2#hero', '_blank')}
+                    className="flex h-5 w-5 items-center justify-center rounded-full transition-colors"
+                    style={{ color: '#9ca3af' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.color = '#00D4FF'; e.currentTarget.style.backgroundColor = 'rgba(0,212,255,0.1)' }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = '#9ca3af'; e.currentTarget.style.backgroundColor = 'transparent' }}
+                    title="This forces the article into the homepage hero section, overriding the trending threshold. The hero is the full-screen section at the top of the homepage that users see first."
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                  </button>
+                </div>
                 <p className="mt-1 text-xs text-[var(--text-muted)] ml-6">Override trending threshold — this article will take over the homepage hero regardless of view count</p>
-              </div>
 
-              {/* Story Universe */}
+              {/* Story Universe — inside same div to avoid space-y-4 gap */}
               <StoryUniversePanel
                 postId={autoSavedPostId || post?.id || null}
                 categoryId={formData.category_id || null}
@@ -1831,9 +1745,12 @@ export default function AdvancedPostEditor({
                 onRelatedIdsChange={setStoryUniverseRelatedIds}
                 validationError={storyUniverseError}
               />
+              </div>
 
-              {/* Social Media Posting */}
-              <div className="border-t border-[var(--border-default)] pt-4">
+              {/* Social Media */}
+              <div className="-mt-2">
+                <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)] mb-2">Social Media & App</p>
+                <div className="h-px mb-3" style={{ background: 'linear-gradient(90deg, transparent, #00D4FF, transparent)', boxShadow: '0 0 6px rgba(0,212,255,0.3)' }} />
                 <label className={`flex items-center gap-2 ${socialAlreadyPosted ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}>
                   <input
                     type="checkbox"
@@ -1842,7 +1759,7 @@ export default function AdvancedPostEditor({
                     disabled={socialAlreadyPosted}
                     className="h-4 w-4 rounded border-[var(--border-default)] text-[var(--accent-red)] focus:ring-[var(--accent-red)] disabled:opacity-50"
                   />
-                  <span className="text-sm font-medium text-[var(--text-primary)]">Post to Social Media</span>
+                  <span className="text-sm font-medium text-[var(--text-primary)]">Post to FB and X</span>
                 </label>
                 {socialAlreadyPosted ? (
                   <p className="mt-1 text-xs text-amber-600 dark:text-amber-400 ml-6">
@@ -1966,11 +1883,82 @@ export default function AdvancedPostEditor({
                     </div>
                   </div>
                 )}
+              {/* Push Notification */}
+              <div className="pt-2">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={sendPushNotification}
+                    onChange={(e) => {
+                      setSendPushNotification(e.target.checked)
+                      if (e.target.checked && formData.title && !pushTitle) {
+                        setPushTitle(formData.title.slice(0, 65))
+                      }
+                    }}
+                    className="h-4 w-4 rounded border-[var(--border-default)] text-[var(--accent-red)] focus:ring-[var(--accent-red)]"
+                  />
+                  <span className="text-sm font-medium text-[var(--text-primary)]">Send Push Notification</span>
+                </label>
+                <p className="mt-1 text-xs text-[var(--text-muted)] ml-6">SM App push notification will be sent upon publishing</p>
+
+                {sendPushNotification && (
+                  <div className="mt-4 space-y-4">
+                    <div>
+                      <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Push Title</label>
+                      <input
+                        type="text"
+                        value={pushTitle}
+                        onChange={(e) => setPushTitle(e.target.value.slice(0, 65))}
+                        placeholder="Breaking News: ..."
+                        maxLength={65}
+                        className="w-full rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[var(--accent-red)] focus:outline-none"
+                      />
+                      <p className={`mt-1 text-xs text-right ${pushTitle.length >= 60 ? 'text-amber-500' : 'text-[var(--text-muted)]'}`}>
+                        {pushTitle.length}/65
+                      </p>
+                    </div>
+                    <div>
+                      <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Push Message</label>
+                      <textarea
+                        value={pushMessage}
+                        onChange={(e) => setPushMessage(e.target.value.slice(0, 240))}
+                        placeholder="Tap to read the full story..."
+                        maxLength={240}
+                        rows={3}
+                        className="w-full resize-none rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[var(--accent-red)] focus:outline-none"
+                      />
+                      <p className={`mt-1 text-xs text-right ${pushMessage.length >= 220 ? 'text-amber-500' : 'text-[var(--text-muted)]'}`}>
+                        {pushMessage.length}/240
+                      </p>
+                    </div>
+                    <div>
+                      <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Preview</label>
+                      <div className="rounded-xl bg-white p-3 shadow-lg dark:bg-gray-800">
+                        <div className="flex items-start gap-3">
+                          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-[#bc0000]">
+                            <span className="text-xs font-bold text-white">SM</span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">Sports Mockery</span>
+                              <span className="text-[10px] text-gray-400">now</span>
+                            </div>
+                            <p className="mt-0.5 truncate text-sm font-semibold text-gray-900 dark:text-white">
+                              {pushTitle || 'Notification Title'}
+                            </p>
+                            <p className="line-clamp-2 text-xs text-gray-600 dark:text-gray-300">
+                              {pushMessage || 'Your notification message will appear here...'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
               </div>
 
             </div>
-
-
 
             {/* Keyboard Shortcut */}
             <div className="mt-4 text-center">
