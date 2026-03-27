@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 
-export const maxDuration = 60
+export const maxDuration = 300
 export const dynamic = 'force-dynamic'
 
-const PAGE_SIZE = 5000
+const PAGE_SIZE = 1000
 
 /**
  * GET /api/admin/fix-authors
@@ -66,6 +66,19 @@ export async function GET(request: NextRequest) {
     }
 
     console.log(`[Fix Authors] Loaded ${allPosts.length} posts`)
+
+    // Debug: log a sample of 5 posts with their author mapping
+    const samplePosts = allPosts.slice(0, 5)
+    for (const post of samplePosts) {
+      const resolvedId = post.author_wp_id != null
+        ? wpIdToSupabaseId.get(post.author_wp_id)
+        : post.author_id != null
+          ? wpIdToSupabaseId.get(post.author_id)
+          : undefined
+      console.log(
+        `[Fix Authors] Sample post ${post.id}: author_id=${post.author_id}, author_wp_id=${post.author_wp_id}, resolved_supabase_id=${resolvedId ?? 'none'}`
+      )
+    }
 
     // 3. Process posts and collect updates
     let updatedCount = 0
