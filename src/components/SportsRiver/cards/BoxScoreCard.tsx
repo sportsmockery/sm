@@ -142,7 +142,7 @@ export const BoxScoreCard = React.memo(function BoxScoreCard({ card }: BoxScoreC
       )}
 
       {/* Footer */}
-      <CardActionButtons />
+      <CardActionButtons commentsCount={(liveData.comments_count as number) ?? 0} articleUrl={targetUrl} />
     </BaseGlassCard>
   );
 });

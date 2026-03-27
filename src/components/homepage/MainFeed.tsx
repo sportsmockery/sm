@@ -67,6 +67,7 @@ function RiverCard({ item }: { item: HomepageRiverItem }) {
           team={team}
           teamColor={teamColor}
           timestamp={timestamp}
+          commentsCount={data.commentsCount as number | undefined}
         />
       )
     case "chart":
@@ -91,6 +92,7 @@ function RiverCard({ item }: { item: HomepageRiverItem }) {
           team={team}
           teamColor={teamColor}
           timestamp={timestamp}
+          commentsCount={data.commentsCount as number | undefined}
         />
       )
     case "box_score":
@@ -104,6 +106,7 @@ function RiverCard({ item }: { item: HomepageRiverItem }) {
           team={team}
           teamColor={teamColor}
           timestamp={timestamp}
+          commentsCount={data.commentsCount as number | undefined}
         />
       )
     case "trade_proposal":
@@ -117,6 +120,7 @@ function RiverCard({ item }: { item: HomepageRiverItem }) {
           team={team}
           teamColor={teamColor}
           timestamp={timestamp}
+          commentsCount={data.commentsCount as number | undefined}
         />
       )
     case "scout_summary":
@@ -131,6 +135,7 @@ function RiverCard({ item }: { item: HomepageRiverItem }) {
           teamColor={teamColor}
           timestamp={timestamp}
           stats={data.stats as { views: string } | undefined}
+          commentsCount={data.commentsCount as number | undefined}
         />
       )
     case "trending_article":
@@ -157,6 +162,7 @@ function RiverCard({ item }: { item: HomepageRiverItem }) {
           team={team}
           teamColor={teamColor}
           timestamp={timestamp}
+          commentsCount={data.commentsCount as number | undefined}
         />
       )
     case "video":

@@ -96,7 +96,7 @@ export const TradeProposalCard = React.memo(function TradeProposalCard({ card }:
       </Link>
 
       {/* Footer */}
-      <CardActionButtons />
+      <CardActionButtons commentsCount={(c.comments_count as number) ?? 0} />
     </BaseGlassCard>
   );
 });

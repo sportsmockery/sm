@@ -152,7 +152,7 @@ export const ListenNowCard = React.memo(function ListenNowCard({ card, siblingAr
       )}
 
       {/* Footer */}
-      <CardActionButtons />
+      <CardActionButtons commentsCount={(c.comments_count as number) ?? 0} articleUrl={ctaUrl !== '#' ? ctaUrl : undefined} />
     </BaseGlassCard>
     </div>
   );

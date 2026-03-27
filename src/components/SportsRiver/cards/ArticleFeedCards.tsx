@@ -78,7 +78,7 @@ export const ArticleCard = React.memo(function ArticleCard({ item }: { item: Fee
         )}
       </div>
 
-      <CardActionButtons />
+      <CardActionButtons articleUrl={`/${item.meta.slug}`} />
     </BaseGlassCard>
   );
 });
@@ -193,7 +193,7 @@ export const AnalyticsCard = React.memo(function AnalyticsCard({ item }: { item:
       <FeedCardHeader label={item.label} accent={item.accent} />
       <AnalyticsCardContent block={item.block} />
       <ReadMoreLink slug={item.meta.slug} />
-      <CardActionButtons />
+      <CardActionButtons articleUrl={`/${item.meta.slug}`} />
     </BaseGlassCard>
   );
 });
@@ -218,7 +218,7 @@ export const DebateCard = React.memo(function DebateCard({ item }: { item: FeedI
           </p>
         </div>
         <ReadMoreLink slug={item.meta.slug} />
-        <CardActionButtons />
+        <CardActionButtons articleUrl={`/${item.meta.slug}`} />
       </BaseGlassCard>
     );
   }
@@ -242,7 +242,7 @@ export const DebateCard = React.memo(function DebateCard({ item }: { item: FeedI
       </div>
 
       <ReadMoreLink slug={item.meta.slug} />
-      <CardActionButtons />
+      <CardActionButtons articleUrl={`/${item.meta.slug}`} />
     </BaseGlassCard>
   );
 });
@@ -333,7 +333,7 @@ export const RumorCard = React.memo(function RumorCard({ item }: { item: FeedIte
       <FeedCardHeader label={item.label} accent={BRAND.red} />
       <RumorCardContent block={item.block} />
       <ReadMoreLink slug={item.meta.slug} />
-      <CardActionButtons />
+      <CardActionButtons articleUrl={`/${item.meta.slug}`} />
     </BaseGlassCard>
   );
 });
@@ -383,7 +383,7 @@ export const FeedPollCard = React.memo(function FeedPollCard({ item }: { item: F
       )}
 
       <ReadMoreLink slug={item.meta.slug} />
-      <CardActionButtons />
+      <CardActionButtons articleUrl={`/${item.meta.slug}`} />
     </BaseGlassCard>
   );
 });

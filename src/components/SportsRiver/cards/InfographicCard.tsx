@@ -73,7 +73,7 @@ export const InfographicCard = React.memo(function InfographicCard({ card }: Inf
       )}
 
       {/* Footer */}
-      <CardActionButtons />
+      <CardActionButtons commentsCount={(c.comments_count as number) ?? 0} articleUrl={ctaUrl} />
     </BaseGlassCard>
   );
 });

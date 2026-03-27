@@ -155,7 +155,7 @@ export const VisionTheaterCard = React.memo(function VisionTheaterCard({ card }:
         <p className="text-xs text-[#E6E8EC]/40 mt-1">{viewCount.toLocaleString()} views</p>
       )}
 
-      <CardActionButtons />
+      <CardActionButtons commentsCount={(c.comments_count as number) ?? 0} articleUrl={slug ? `/${slug}` : undefined} />
     </BaseGlassCard>
   );
 });

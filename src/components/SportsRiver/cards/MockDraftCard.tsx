@@ -57,7 +57,7 @@ export const MockDraftCard = React.memo(function MockDraftCard({ card }: MockDra
       </div>
 
       {/* Footer */}
-      <CardActionButtons />
+      <CardActionButtons commentsCount={(c.comments_count as number) ?? 0} articleUrl={ctaUrl} />
     </BaseGlassCard>
   );
 });

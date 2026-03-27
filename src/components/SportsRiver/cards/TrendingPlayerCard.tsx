@@ -61,7 +61,7 @@ export const TrendingPlayerCard = React.memo(function TrendingPlayerCard({ card 
       )}
 
       {/* Footer */}
-      <CardActionButtons />
+      <CardActionButtons commentsCount={(c.comments_count as number) ?? 0} articleUrl={ctaUrl} />
     </BaseGlassCard>
   );
 });

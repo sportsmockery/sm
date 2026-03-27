@@ -82,7 +82,7 @@ export const HubUpdateCard = React.memo(function HubUpdateCard({ card }: HubUpda
       )}
 
       {/* Footer */}
-      <CardActionButtons />
+      <CardActionButtons commentsCount={(c.comments_count as number) ?? 0} />
     </BaseGlassCard>
   );
 });

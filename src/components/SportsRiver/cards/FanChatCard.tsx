@@ -89,7 +89,7 @@ export const FanChatCard = React.memo(function FanChatCard({ card }: FanChatCard
       </Link>
 
       {/* Footer */}
-      <CardActionButtons />
+      <CardActionButtons commentsCount={(content.comments_count as number) ?? 0} articleUrl={roomId ? `/fan-chat/${roomId}` : undefined} />
     </BaseGlassCard>
   );
 });

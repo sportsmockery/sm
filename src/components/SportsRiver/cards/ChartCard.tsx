@@ -127,7 +127,7 @@ export const ChartCard = React.memo(function ChartCard({ card }: ChartCardProps)
       )}
 
       {/* Footer */}
-      <CardActionButtons />
+      <CardActionButtons commentsCount={(c.comments_count as number) ?? 0} articleUrl={ctaUrl} />
     </BaseGlassCard>
   );
 });

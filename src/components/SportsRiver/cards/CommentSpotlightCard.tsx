@@ -71,7 +71,7 @@ export const CommentSpotlightCard = React.memo(function CommentSpotlightCard({ c
       )}
 
       {/* Footer */}
-      <CardActionButtons />
+      <CardActionButtons commentsCount={(c.comments_count as number) ?? 0} articleUrl={ctaUrl} />
     </BaseGlassCard>
   );
 });

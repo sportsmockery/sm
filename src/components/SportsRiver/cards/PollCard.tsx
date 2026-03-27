@@ -155,7 +155,7 @@ export const PollCard = React.memo(function PollCard({ card }: PollCardProps) {
       )}
 
       {/* Footer */}
-      <CardActionButtons />
+      <CardActionButtons commentsCount={(c.comments_count as number) ?? 0} />
     </BaseGlassCard>
   );
 });

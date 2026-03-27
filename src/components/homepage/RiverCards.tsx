@@ -528,9 +528,10 @@ interface PollCardProps extends BaseCardProps {
   options: string[]
   totalVotes: number
   status: "LIVE" | "CLOSED"
+  commentsCount?: number
 }
 
-export function PollCard({ question, context, options, totalVotes, status, team, teamColor, timestamp }: PollCardProps) {
+export function PollCard({ question, context, options, totalVotes, status, team, teamColor, timestamp, commentsCount }: PollCardProps) {
   const [selectedOption, setSelectedOption] = useState<number | null>(null)
   const [votes] = useState(() => options.map(() => Math.floor(Math.random() * 40) + 10))
   const teamHex = teamColor
@@ -585,9 +586,15 @@ export function PollCard({ question, context, options, totalVotes, status, team,
 
       <div className="mt-4 flex items-center justify-between" style={{ fontSize: 14, color: 'var(--hp-muted-foreground)' }}>
         <span>{totalVotes.toLocaleString()} votes</span>
-        <div className="flex items-center gap-1">
-          <Clock className="h-4 w-4" />
-          <span>{status === "LIVE" ? "Live now" : "Poll closed"}</span>
+        <div className="flex items-center gap-3">
+          <span className="flex items-center gap-1 hp-tap-target" aria-label="Comments">
+            <MessageCircle className="h-4 w-4" />
+            <span style={{ fontSize: 12 }}>{commentsCount ?? 0}</span>
+          </span>
+          <div className="flex items-center gap-1">
+            <Clock className="h-4 w-4" />
+            <span>{status === "LIVE" ? "Live now" : "Poll closed"}</span>
+          </div>
         </div>
       </div>
     </article>
@@ -671,9 +678,10 @@ interface HubUpdateCardProps extends BaseCardProps {
   updateText: string
   takeaway: string
   status: "LIVE" | "NEW" | "UPDATED"
+  commentsCount?: number
 }
 
-export function HubUpdateCard({ updateText, takeaway, status, team, teamColor, timestamp }: HubUpdateCardProps) {
+export function HubUpdateCard({ updateText, takeaway, status, team, teamColor, timestamp, commentsCount }: HubUpdateCardProps) {
   const teamHex = teamColor
   const router = useRouter()
   const teamSlug = team.toLowerCase().replace(/\s+/g, "-").replace("chicago-", "")
@@ -693,10 +701,16 @@ export function HubUpdateCard({ updateText, takeaway, status, team, teamColor, t
       <p style={{ fontSize: 18, lineHeight: 1.25, fontWeight: 700, color: 'var(--hp-foreground)' }}>{updateText}</p>
       <p className="mt-2.5" style={{ fontSize: 15, lineHeight: 1.65, color: 'var(--hp-foreground)', opacity: 0.7 }}>{takeaway}</p>
 
-      <button onClick={() => router.push(teamHubUrl)} className="mt-4 flex items-center gap-1 transition-colors hp-tap-target hover:opacity-80" style={{ fontSize: 14, fontWeight: 600, color: '#00D4FF' }}>
-        <span>View full update</span>
-        <ChevronRight className="h-4 w-4" />
-      </button>
+      <div className="mt-4 flex items-center justify-between">
+        <button onClick={() => router.push(teamHubUrl)} className="flex items-center gap-1 transition-colors hp-tap-target hover:opacity-80" style={{ fontSize: 14, fontWeight: 600, color: '#00D4FF' }}>
+          <span>View full update</span>
+          <ChevronRight className="h-4 w-4" />
+        </button>
+        <span className="flex items-center gap-1 hp-tap-target" style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }} aria-label="Comments">
+          <MessageCircle className="h-4 w-4" />
+          <span>{commentsCount ?? 0}</span>
+        </span>
+      </div>
     </article>
   )
 }
@@ -711,9 +725,10 @@ interface BoxScoreCardProps extends BaseCardProps {
   status: "LIVE" | "FINAL"
   period: string
   keyPerformer: string
+  commentsCount?: number
 }
 
-export function BoxScoreCard({ homeTeam, awayTeam, status, period, keyPerformer, team, teamColor, timestamp }: BoxScoreCardProps) {
+export function BoxScoreCard({ homeTeam, awayTeam, status, period, keyPerformer, team, teamColor, timestamp, commentsCount }: BoxScoreCardProps) {
   const teamHex = teamColor
   const router = useRouter()
   const teamSlug = team.toLowerCase().replace(/\s+/g, "-").replace("chicago-", "")
@@ -757,10 +772,16 @@ export function BoxScoreCard({ homeTeam, awayTeam, status, period, keyPerformer,
         </div>
       </div>
 
-      <div className="mt-4 flex gap-4">
-        <button onClick={() => router.push(teamHubUrl)} className="hp-tap-target hover:opacity-80 transition-opacity" style={{ fontSize: 14, fontWeight: 500, color: '#00D4FF' }}>Recap</button>
-        <button onClick={() => router.push(`${teamHubUrl}/schedule`)} className="hp-tap-target hover:opacity-80 transition-opacity" style={{ fontSize: 14, fontWeight: 500, color: '#00D4FF' }}>Full box score</button>
-        <button onClick={() => router.push(`/scout-ai?q=${encodeURIComponent(`${awayTeam.name} vs ${homeTeam.name} reactions`)}`)} className="hp-tap-target hover:opacity-80 transition-opacity" style={{ fontSize: 14, fontWeight: 500, color: '#00D4FF' }}>Reactions</button>
+      <div className="mt-4 flex items-center justify-between">
+        <div className="flex gap-4">
+          <button onClick={() => router.push(teamHubUrl)} className="hp-tap-target hover:opacity-80 transition-opacity" style={{ fontSize: 14, fontWeight: 500, color: '#00D4FF' }}>Recap</button>
+          <button onClick={() => router.push(`${teamHubUrl}/schedule`)} className="hp-tap-target hover:opacity-80 transition-opacity" style={{ fontSize: 14, fontWeight: 500, color: '#00D4FF' }}>Full box score</button>
+          <button onClick={() => router.push(`/scout-ai?q=${encodeURIComponent(`${awayTeam.name} vs ${homeTeam.name} reactions`)}`)} className="hp-tap-target hover:opacity-80 transition-opacity" style={{ fontSize: 14, fontWeight: 500, color: '#00D4FF' }}>Reactions</button>
+        </div>
+        <span className="flex items-center gap-1 hp-tap-target" style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }} aria-label="Comments">
+          <MessageCircle className="h-4 w-4" />
+          <span>{commentsCount ?? 0}</span>
+        </span>
       </div>
     </article>
   )
@@ -776,9 +797,10 @@ interface TradeProposalCardProps extends BaseCardProps {
   otherTeamGets: { name: string; items: string[] }
   fairnessScore: number
   isEditorApproved: boolean
+  commentsCount?: number
 }
 
-export function TradeProposalCard({ proposer, teamGets, otherTeamGets, fairnessScore, isEditorApproved, team, teamColor, timestamp }: TradeProposalCardProps) {
+export function TradeProposalCard({ proposer, teamGets, otherTeamGets, fairnessScore, isEditorApproved, team, teamColor, timestamp, commentsCount }: TradeProposalCardProps) {
   const teamHex = teamColor
   const [userVote, setUserVote] = useState<"approve" | "reject" | null>(null)
 
@@ -875,6 +897,13 @@ export function TradeProposalCard({ proposer, teamGets, otherTeamGets, fairnessS
           </div>
         </div>
       </div>
+
+      <div className="mt-3 flex justify-end" style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }}>
+        <span className="flex items-center gap-1 hp-tap-target" aria-label="Comments">
+          <MessageCircle className="h-4 w-4" />
+          <span>{commentsCount ?? 0}</span>
+        </span>
+      </div>
     </article>
   )
 }
@@ -890,9 +919,10 @@ interface ScoutSummaryCardProps extends BaseCardProps {
   slug?: string
   categorySlug?: string
   stats?: { views: string }
+  commentsCount?: number
 }
 
-export function ScoutSummaryCard({ summary, bullets, topic, team, teamColor, timestamp, slug, categorySlug, stats }: ScoutSummaryCardProps) {
+export function ScoutSummaryCard({ summary, bullets, topic, team, teamColor, timestamp, slug, categorySlug, stats, commentsCount }: ScoutSummaryCardProps) {
   const teamHex = teamColor
   const router = useRouter()
   const audio = useAudioPlayer()
@@ -1033,9 +1063,22 @@ export function ScoutSummaryCard({ summary, bullets, topic, team, teamColor, tim
             <span>Ask Scout</span>
           </button>
         </div>
-        <div className="flex items-center gap-1" style={{ fontSize: 12 }} title="Views">
-          <Eye className="h-4 w-4" />
-          <span>{stats?.views && stats.views !== '0' ? stats.views : '0'}</span>
+        <div className="flex items-center gap-3" style={{ fontSize: 12 }}>
+          {articleHref ? (
+            <Link href={articleHref} className="flex items-center gap-1 transition-opacity hover:opacity-70 hp-tap-target" aria-label="Comments">
+              <MessageCircle className="h-4 w-4" />
+              <span>{commentsCount ?? 0}</span>
+            </Link>
+          ) : (
+            <span className="flex items-center gap-1 hp-tap-target" aria-label="Comments">
+              <MessageCircle className="h-4 w-4" />
+              <span>{commentsCount ?? 0}</span>
+            </span>
+          )}
+          <span className="flex items-center gap-1 hp-tap-target" title="Views">
+            <Eye className="h-4 w-4" />
+            <span>{stats?.views && stats.views !== '0' ? stats.views : '0'}</span>
+          </span>
         </div>
       </div>
     </article>
@@ -1083,9 +1126,22 @@ export function TrendingArticleCard({ headline, summary, trendMetric, team, team
       )}
       <p className="mt-3 line-clamp-3" style={{ fontSize: 15, lineHeight: 1.65, color: 'var(--hp-foreground)', opacity: 0.7 }}>{summary}</p>
 
-      <div className="mt-5 flex items-center justify-end gap-1" style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }} title="Views">
-        <Eye className="h-4 w-4" />
-        <span>{stats.views && stats.views !== '0' ? stats.views : '0'}</span>
+      <div className="mt-5 flex items-center justify-end gap-3" style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }}>
+        {articleUrl ? (
+          <Link href={articleUrl} className="flex items-center gap-1 transition-opacity hover:opacity-70 hp-tap-target" aria-label="Comments">
+            <MessageCircle className="h-4 w-4" />
+            <span>{stats.comments}</span>
+          </Link>
+        ) : (
+          <span className="flex items-center gap-1 hp-tap-target" aria-label="Comments">
+            <MessageCircle className="h-4 w-4" />
+            <span>{stats.comments}</span>
+          </span>
+        )}
+        <span className="flex items-center gap-1 hp-tap-target" title="Views">
+          <Eye className="h-4 w-4" />
+          <span>{stats.views && stats.views !== '0' ? stats.views : '0'}</span>
+        </span>
       </div>
     </article>
   )
@@ -1100,9 +1156,10 @@ interface DebateCardProps extends BaseCardProps {
   sideA: string
   sideB: string
   participantCount: number
+  commentsCount?: number
 }
 
-export function DebateCard({ prompt, sideA, sideB, participantCount, team, teamColor, timestamp }: DebateCardProps) {
+export function DebateCard({ prompt, sideA, sideB, participantCount, team, teamColor, timestamp, commentsCount }: DebateCardProps) {
   const teamHex = teamColor
   const router = useRouter()
   const [selectedSide, setSelectedSide] = useState<"a" | "b" | null>(null)
@@ -1161,9 +1218,15 @@ export function DebateCard({ prompt, sideA, sideB, participantCount, team, teamC
       </div>
 
       <div className="mt-4 flex items-center justify-between" style={{ fontSize: 14, color: 'var(--hp-muted-foreground)' }}>
-        <div className="flex items-center gap-1">
-          <Users className="h-4 w-4" />
-          <span>{participantCount.toLocaleString()} participating</span>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1">
+            <Users className="h-4 w-4" />
+            <span>{participantCount.toLocaleString()} participating</span>
+          </div>
+          <span className="flex items-center gap-1 hp-tap-target" style={{ fontSize: 12 }} aria-label="Comments">
+            <MessageCircle className="h-4 w-4" />
+            <span>{commentsCount ?? 0}</span>
+          </span>
         </div>
         <button onClick={() => router.push(`/scout-ai?q=${encodeURIComponent(prompt)}`)} className="font-medium hp-tap-target hover:opacity-80 transition-opacity" style={{ color: '#00D4FF' }}>Join discussion</button>
       </div>

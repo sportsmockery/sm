@@ -89,7 +89,7 @@ export const TrendingArticleCard = React.memo(function TrendingArticleCard({ car
         )}
       </div>
 
-      <CardActionButtons />
+      <CardActionButtons commentsCount={(c.comments_count as number) ?? 0} articleUrl={slug ? `/${slug}` : undefined} />
     </BaseGlassCard>
   );
 });

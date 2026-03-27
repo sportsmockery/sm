@@ -517,6 +517,7 @@ function candidateToRiverItem(candidate: RiverCandidate): HomepageRiverItem {
           slug: candidate.slug,
           categorySlug: candidate.categorySlug,
           postId: candidate.articleId,
+          commentsCount: candidate.commentsCount,
         },
       }
 
@@ -535,6 +536,7 @@ function candidateToRiverItem(candidate: RiverCandidate): HomepageRiverItem {
             bullets: candidate.payload.bullets,
             slug: candidate.slug,
             categorySlug: candidate.categorySlug,
+            commentsCount: candidate.commentsCount,
             stats: { views: candidate.views ? formatViewCount(candidate.views) : '0' },
           },
         }
@@ -552,6 +554,7 @@ function candidateToRiverItem(candidate: RiverCandidate): HomepageRiverItem {
             takeaway: '',
             chartData: candidate.payload.dataPoints || [],
             statSource: 'SM Edge Analytics',
+            commentsCount: candidate.commentsCount,
             stats: { comments: candidate.commentsCount, retweets: 0, likes: 0, views: candidate.views ? formatViewCount(candidate.views) : '0' },
             slug: candidate.slug,
             categorySlug: candidate.categorySlug,
@@ -572,6 +575,7 @@ function candidateToRiverItem(candidate: RiverCandidate): HomepageRiverItem {
             bullets: [candidate.payload.insight as string].filter(Boolean),
             slug: candidate.slug,
             categorySlug: candidate.categorySlug,
+            commentsCount: candidate.commentsCount,
             stats: { views: candidate.views ? formatViewCount(candidate.views) : '0' },
           },
         }
@@ -587,6 +591,7 @@ function candidateToRiverItem(candidate: RiverCandidate): HomepageRiverItem {
           headline: candidate.payload.topic || candidate.label,
           summary: candidate.payload.summary || '',
           trendMetric: 'Analysis',
+          commentsCount: candidate.commentsCount,
           stats: { comments: candidate.commentsCount, retweets: 0, likes: 0, views: candidate.views ? formatViewCount(candidate.views) : '0' },
           slug: candidate.slug,
           categorySlug: candidate.categorySlug,
@@ -605,6 +610,7 @@ function candidateToRiverItem(candidate: RiverCandidate): HomepageRiverItem {
           updateText: candidate.payload.text || candidate.label,
           takeaway: '',
           status: 'NEW',
+          commentsCount: candidate.commentsCount,
           slug: candidate.slug,
           categorySlug: candidate.categorySlug,
         },
@@ -624,6 +630,7 @@ function candidateToRiverItem(candidate: RiverCandidate): HomepageRiverItem {
           sideA: (candidate.payload.proArgument as string) || 'For',
           sideB: (candidate.payload.conArgument as string) || 'Against',
           participantCount: 0,
+          commentsCount: candidate.commentsCount,
           slug: candidate.slug,
           categorySlug: candidate.categorySlug,
         },
@@ -642,6 +649,7 @@ function candidateToRiverItem(candidate: RiverCandidate): HomepageRiverItem {
           options: (candidate.payload.options as string[]) || ['Yes', 'No'],
           totalVotes: 0,
           status: 'LIVE',
+          commentsCount: candidate.commentsCount,
           slug: candidate.slug,
           categorySlug: candidate.categorySlug,
         },

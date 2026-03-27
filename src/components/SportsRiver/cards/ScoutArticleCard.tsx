@@ -148,7 +148,7 @@ export const ScoutArticleCard = React.memo(function ScoutArticleCard({ card }: S
           )}
         </AnimatePresence>
 
-        <CardActionButtons />
+        <CardActionButtons commentsCount={(c.comments_count as number) ?? 0} articleUrl={slug ? `/${slug}` : undefined} />
       </div>
     </BaseGlassCard>
   );
