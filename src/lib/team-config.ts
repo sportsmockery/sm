@@ -179,11 +179,20 @@ export async function fetchTeamRecord(teamKey: string): Promise<TeamRecord | nul
       const currentSeason = getCurrentSeason(teamInfo.league)
 
       // CRITICAL: Use the authoritative _seasons table for record
-      const { data: seasonData, error } = await datalabClient
+      // For MLB teams, prefer the 'regular' game_type row when in regular season
+      // (spring_training and regular rows both exist for season 2026)
+      const isMLB = teamInfo.league === 'MLB'
+      const mlbPhase = isMLB ? getMLBSeasonPhase() : null
+      let query = datalabClient
         .from(seasonsConfig.table)
         .select('*')
         .eq('season', currentSeason)
-        .single()
+      if (isMLB && mlbPhase === 'regular') {
+        query = query.eq('game_type', 'regular')
+      } else if (isMLB && mlbPhase === 'spring-training') {
+        query = query.eq('game_type', 'spring_training')
+      }
+      const { data: seasonData, error } = await query.single()
 
       if (error || !seasonData) {
         console.error(`Error fetching ${teamKey} season record from ${seasonsConfig.table}:`, error)

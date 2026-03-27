@@ -9,6 +9,7 @@
 
 import { datalabAdmin } from './supabase-datalab'
 import { buildSafeFetch, safeDatalabQuery } from './build-safe-fetch'
+import { getMLBSeasonPhase } from './team-config'
 
 // =============================================================================
 // TYPE DEFINITIONS
@@ -711,11 +712,18 @@ async function getTeamStats(season: number): Promise<CubsTeamStats> {
 
   // CRITICAL: Get authoritative record from cubs_seasons table (recommended by Datalab)
   // This avoids issues with calculating record from games_master
-  const { data: seasonRecord } = await datalabAdmin
+  // Filter by game_type to avoid .single() failure when both spring_training and regular rows exist
+  const mlbPhase = getMLBSeasonPhase()
+  let seasonsQuery = datalabAdmin
     .from('cubs_seasons')
     .select('wins, losses')
     .eq('season', season)
-    .single()
+  if (mlbPhase === 'regular') {
+    seasonsQuery = seasonsQuery.eq('game_type', 'regular')
+  } else if (mlbPhase === 'spring-training') {
+    seasonsQuery = seasonsQuery.eq('game_type', 'spring_training')
+  }
+  const { data: seasonRecord } = await seasonsQuery.single()
 
   // Get completed games for runs calculation
   const { data: gamesData } = await datalabAdmin
@@ -998,11 +1006,18 @@ export async function getCubsRecord(season?: number): Promise<CubsRecord> {
   return buildSafeFetch(
     async () => {
       if (datalabAdmin) {
-        const { data: seasonRecord } = await datalabAdmin
+        // Filter by game_type for regular season to avoid .single() failure
+        const mlbPhase = getMLBSeasonPhase()
+        let query = datalabAdmin
           .from('cubs_seasons')
           .select('wins, losses')
           .eq('season', targetSeason)
-          .single()
+        if (mlbPhase === 'regular') {
+          query = query.eq('game_type', 'regular')
+        } else if (mlbPhase === 'spring-training') {
+          query = query.eq('game_type', 'spring_training')
+        }
+        const { data: seasonRecord } = await query.single()
 
         if (seasonRecord) {
           return {
@@ -1039,11 +1054,18 @@ export async function getCubsSeparatedRecord(season?: number): Promise<CubsSepar
       let divisionRank: string | null = null
 
       if (datalabAdmin) {
-        const { data: seasonRecord } = await datalabAdmin
+        // Filter by game_type for regular season to avoid .single() failure
+        const mlbPhase = getMLBSeasonPhase()
+        let query = datalabAdmin
           .from('cubs_seasons')
           .select('wins, losses, division_rank')
           .eq('season', targetSeason)
-          .single()
+        if (mlbPhase === 'regular') {
+          query = query.eq('game_type', 'regular')
+        } else if (mlbPhase === 'spring-training') {
+          query = query.eq('game_type', 'spring_training')
+        }
+        const { data: seasonRecord } = await query.single()
 
         if (seasonRecord) {
           regWins = seasonRecord.wins || 0
