@@ -7,6 +7,7 @@ import { ArrowRightLeft, ClipboardPen, MessageSquare, BarChart3, Video, Volume2,
 import { useAuth } from "@/contexts/AuthContext"
 import { useTheme } from "@/contexts/ThemeContext"
 import type { Role } from "@/lib/roles"
+import { formatNumber } from "@/lib/format"
 
 function ReportCardIcon({ className }: { className?: string }) {
   return (
@@ -40,6 +41,15 @@ export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarP
   const [profileMenuOpen, setProfileMenuOpen] = useState(false)
   const [userRole, setUserRole] = useState<Role | null>(null)
   const profileMenuRef = useRef<HTMLDivElement>(null)
+  const [topPosts, setTopPosts] = useState<{ id: number; title: string; slug: string; views: number; categorySlug: string }[]>([])
+
+  // Fetch top 5 posts by views
+  useEffect(() => {
+    fetch('/api/top-posts')
+      .then(r => r.ok ? r.json() : [])
+      .then(setTopPosts)
+      .catch(() => {})
+  }, [])
 
   // Poll for live games to show/hide Game Center
   useEffect(() => {
@@ -227,6 +237,68 @@ export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarP
                   </span>
                 )}
               </a>
+            ))}
+          </div>
+        )}
+
+        {/* Top 5 — Most Read Articles */}
+        {topPosts.length > 0 && (
+          <div style={{ marginTop: 8, borderTop: '1px solid var(--hp-border)', paddingTop: 8 }}>
+            <div style={{ padding: '4px 16px', fontSize: 14, fontWeight: 700, letterSpacing: '-0.01em' }}>
+              <span style={{ color: '#BC0000' }}>Top 5</span>{' '}
+              <span style={{ color: 'var(--hp-foreground)', opacity: 0.6 }}>Most Read</span>
+            </div>
+            {topPosts.slice(0, 5).map((post, i) => (
+              <Link
+                key={post.id}
+                href={`/${post.categorySlug}/${post.slug}`}
+                className="hp-tap-target"
+                style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: 10,
+                  borderRadius: 12,
+                  padding: '8px 16px',
+                  fontSize: 13,
+                  color: 'var(--hp-foreground)',
+                  textDecoration: 'none',
+                  transition: 'background 0.15s',
+                  lineHeight: 1.35,
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--hp-muted)' }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
+              >
+                <span
+                  style={{
+                    flexShrink: 0,
+                    width: 22,
+                    height: 22,
+                    borderRadius: 6,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 11,
+                    fontWeight: 700,
+                    background: i === 0 ? '#BC0000' : 'var(--hp-muted)',
+                    color: i === 0 ? '#fff' : 'var(--hp-foreground)',
+                    marginTop: 1,
+                  }}
+                >
+                  {i + 1}
+                </span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <span style={{ fontWeight: 500, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                    {post.title}
+                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2, fontSize: 11, opacity: 0.5 }}>
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                    {formatNumber(post.views)}
+                  </div>
+                </div>
+              </Link>
             ))}
           </div>
         )}
