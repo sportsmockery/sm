@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import OwnershipCard from '@/components/ownership/OwnershipCard'
 import GradeTimeline from '@/components/ownership/GradeTimeline'
@@ -135,11 +136,12 @@ export default function TeamDetail({ grade, history, scoutData }: { grade: Owner
           </p>
         </div>
         {TEAM_LOGOS[grade.team_slug] && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={TEAM_LOGOS[grade.team_slug]}
             alt={teamName}
-            style={{ width: 56, height: 56, objectFit: 'contain', flexShrink: 0, opacity: 0.9 }}
+            width={56}
+            height={56}
+            style={{ objectFit: 'contain', flexShrink: 0, opacity: 0.9 }}
           />
         )}
       </div>

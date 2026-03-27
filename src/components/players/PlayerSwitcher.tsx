@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import Image from 'next/image'
 
 interface Player {
   slug: string
@@ -75,9 +76,11 @@ export default function PlayerSwitcher({ players, currentSlug, teamPath }: Playe
                   }`}
                 >
                   {player.headshotUrl ? (
-                    <img
+                    <Image
                       src={player.headshotUrl}
                       alt={player.fullName}
+                      width={32}
+                      height={32}
                       className="w-8 h-8 rounded-full object-cover bg-zinc-800"
                     />
                   ) : (

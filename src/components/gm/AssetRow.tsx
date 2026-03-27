@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { useTheme } from '@/contexts/ThemeContext'
 import type { AssetType, DraftPick, MLBProspect, GMPlayerData, formatDraftPick, formatProspect, formatSalary, ASSET_ACCENT_COLORS } from '@/types/gm'
@@ -140,6 +141,7 @@ export function AssetRow({
     >
       {/* Left: Icon or Avatar */}
       <div style={{
+        position: 'relative',
         width: iconSize,
         height: iconSize,
         borderRadius: type === 'PLAYER' ? '50%' : compact ? 4 : 6,
@@ -151,10 +153,12 @@ export function AssetRow({
         flexShrink: 0,
       }}>
         {avatarUrl ? (
-          <img
+          <Image
             src={avatarUrl}
             alt=""
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            fill
+            sizes={`${iconSize}px`}
+            style={{ objectFit: 'cover' }}
             onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
           />
         ) : type === 'PLAYER' ? (

@@ -1,5 +1,7 @@
 'use client'
 
+import OptimizedImage from '@/components/ui/OptimizedImage'
+
 interface SEOFieldsProps {
   seoTitle: string
   seoDescription: string
@@ -75,9 +77,10 @@ export default function SEOFields({
         </label>
         {ogImage ? (
           <div className="relative">
-            <img
+            <OptimizedImage
               src={ogImage}
               alt="OG preview"
+              variant="card"
               className="w-full rounded-lg object-cover"
             />
             <button

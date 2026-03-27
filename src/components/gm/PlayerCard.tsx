@@ -1,4 +1,5 @@
 'use client'
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { useTheme } from '@/contexts/ThemeContext'
 import { PlayerTrendBadge, TrendDirection } from './PlayerTrendBadge'
@@ -66,10 +67,12 @@ export function PlayerCard({ player, selected = false, compact = false, teamColo
         }}
       >
         {player.headshot_url ? (
-          <img
+          <Image
             src={player.headshot_url}
             alt={player.full_name}
-            style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover' }}
+            width={28}
+            height={28}
+            style={{ borderRadius: '50%', objectFit: 'cover' }}
             onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
           />
         ) : (
@@ -153,10 +156,12 @@ export function PlayerCard({ player, selected = false, compact = false, teamColo
       {/* Headshot */}
       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8, marginTop: 4 }}>
         {player.headshot_url ? (
-          <img
+          <Image
             src={player.headshot_url}
             alt={player.full_name}
-            style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--sm-border)' }}
+            width={56}
+            height={56}
+            style={{ borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--sm-border)' }}
             onError={(e) => {
               const el = e.target as HTMLImageElement
               el.style.display = 'none'

@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from '@/contexts/ThemeContext'
 import type {
@@ -783,7 +784,7 @@ export function SimulationResults({
                                 <span style={{ fontSize: 11, color: subText }}>{g.gameNumber}</span>
                                 <span style={{ fontSize: 11, color: subText }}>{formatGameDate(g.date)}</span>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, overflow: 'hidden' }}>
-                                  <img src={g.opponentLogoUrl} alt="" style={{ width: 18, height: 18, objectFit: 'contain', flexShrink: 0 }}
+                                  <Image src={g.opponentLogoUrl} alt="" width={18} height={18} style={{ objectFit: 'contain', flexShrink: 0 }}
                                     onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
                                   <span style={{ fontSize: 12, color: textColor, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                     {g.opponentName}
@@ -911,10 +912,12 @@ export function SimulationResults({
                                 {team.conferenceRank}
                               </span>
                               <div style={{ display: 'flex', alignItems: 'center', gap: 6, overflow: 'hidden' }}>
-                                <img
+                                <Image
                                   src={team.logoUrl}
                                   alt=""
-                                  style={{ width: 20, height: 20, objectFit: 'contain', flexShrink: 0 }}
+                                  width={20}
+                                  height={20}
+                                  style={{ objectFit: 'contain', flexShrink: 0 }}
                                   onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
                                 />
                                 <span style={{ fontSize: 12, fontWeight: team.isUserTeam ? 700 : 500, color: team.isUserTeam ? teamColor : textColor, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -1028,7 +1031,7 @@ export function SimulationResults({
                                   }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                       <span style={{ fontSize: 10, color: subText, width: 16 }}>({match.homeTeam.seed})</span>
-                                      <img src={match.homeTeam.logoUrl} alt="" style={{ width: 18, height: 18, objectFit: 'contain' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                                      <Image src={match.homeTeam.logoUrl} alt="" width={18} height={18} style={{ objectFit: 'contain' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
                                       <span style={{ fontSize: 12, fontWeight: match.winner === 'home' ? 700 : 500 }}>
                                         {match.homeTeam.abbreviation}
                                       </span>
@@ -1047,7 +1050,7 @@ export function SimulationResults({
                                   }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                       <span style={{ fontSize: 10, color: subText, width: 16 }}>({match.awayTeam.seed})</span>
-                                      <img src={match.awayTeam.logoUrl} alt="" style={{ width: 18, height: 18, objectFit: 'contain' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                                      <Image src={match.awayTeam.logoUrl} alt="" width={18} height={18} style={{ objectFit: 'contain' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
                                       <span style={{ fontSize: 12, fontWeight: match.winner === 'away' ? 700 : 500 }}>
                                         {match.awayTeam.abbreviation}
                                       </span>
@@ -1079,7 +1082,7 @@ export function SimulationResults({
                           Champion
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
-                          <img src={championship.winner.logoUrl} alt="" style={{ width: 40, height: 40, objectFit: 'contain' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                          <Image src={championship.winner.logoUrl} alt="" width={40} height={40} style={{ objectFit: 'contain' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
                           <span style={{ fontSize: 20, fontWeight: 800, color: championship.winner.primaryColor }}>
                             {championship.winner.teamName}
                           </span>

@@ -46,8 +46,7 @@ const TEAM_ITEMS: NavItem[] = homepageTeams.map((team) => ({
   name: team.name,
   href: TEAM_ID_TO_ROUTE[team.id] || `/chicago-${team.id}`,
   icon: (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
+    <Image
       src={team.logo}
       alt={`${team.name} logo`}
       width={22}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 
 const TABS = ['NFL Trade', 'NBA Trade', 'MLB Trade', 'NHL Trade', 'Mock Draft']
@@ -129,7 +130,7 @@ export default function SimulatorsPage() {
           <div className="hm-trade-panel">
             <div className="hm-trade-panel-header">
               <div className="hm-trade-panel-logo">
-                <img src={trade.left.logo} alt={trade.left.name} width={24} height={24} />
+                <Image src={trade.left.logo} alt={trade.left.name} width={24} height={24} />
               </div>
               <div>
                 <div style={{ fontSize: 14, fontWeight: 600, color: '#fff' }}>{trade.left.name}</div>
@@ -160,7 +161,7 @@ export default function SimulatorsPage() {
           <div className="hm-trade-panel">
             <div className="hm-trade-panel-header">
               <div className="hm-trade-panel-logo">
-                <img src={trade.right.logo} alt={trade.right.name} width={24} height={24} />
+                <Image src={trade.right.logo} alt={trade.right.name} width={24} height={24} />
               </div>
               <div>
                 <div style={{ fontSize: 14, fontWeight: 600, color: '#fff' }}>{trade.right.name}</div>

@@ -5,6 +5,7 @@ import { useTheme } from '@/contexts/ThemeContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { AnimatePresence, motion } from 'framer-motion'
 
+import Image from 'next/image'
 import { TeamSelector, TEAMS } from '@/components/gm/TeamSelector'
 import { RosterPanel } from '@/components/gm/RosterPanel'
 import { TradeBoard } from '@/components/gm/TradeBoard'
@@ -1406,7 +1407,7 @@ export default function GMPage() {
                     transition: 'all 0.2s',
                   }}
                 >
-                  <img src={t.logo} alt="" style={{ width: 22, height: 22, objectFit: 'contain' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                  <Image src={t.logo} alt="" width={22} height={22} style={{ objectFit: 'contain' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
                   {t.label}
                 </button>
               )
@@ -1786,7 +1787,7 @@ export default function GMPage() {
                       </span>
                       {opponentTeam ? (
                         <>
-                          <img src={opponentTeam.logo_url} alt="" style={{ width: 24, height: 24, objectFit: 'contain' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                          <Image src={opponentTeam.logo_url} alt="" width={24} height={24} style={{ objectFit: 'contain' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
                           <span style={{ fontWeight: 700, fontSize: 13, color: opponentTeam.primary_color }}>{opponentTeam.team_name}</span>
                         </>
                       ) : (
@@ -1862,7 +1863,7 @@ export default function GMPage() {
                         </span>
                         {thirdTeam ? (
                           <>
-                            <img src={thirdTeam.logo_url} alt="" style={{ width: 24, height: 24, objectFit: 'contain' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                            <Image src={thirdTeam.logo_url} alt="" width={24} height={24} style={{ objectFit: 'contain' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
                             <span style={{ fontWeight: 700, fontSize: 13, color: thirdTeam.primary_color }}>{thirdTeam.team_name}</span>
                           </>
                         ) : (
@@ -2032,7 +2033,7 @@ export default function GMPage() {
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <img src={currentTeamConfig?.logo} alt="" style={{ width: 24, height: 24 }} />
+                    <Image src={currentTeamConfig?.logo || ''} alt="" width={24} height={24} />
                     <span style={{ fontWeight: 700, fontSize: 14, color: teamColor }}>{teamLabel} Roster</span>
                     {selectedPlayerIds.size > 0 && (
                       <span style={{ fontSize: 11, color: '#fff', backgroundColor: teamColor, padding: '2px 8px', borderRadius: 10 }}>
@@ -2093,7 +2094,7 @@ export default function GMPage() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     {opponentTeam ? (
                       <>
-                        <img src={opponentTeam.logo_url} alt="" style={{ width: 24, height: 24 }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                        <Image src={opponentTeam.logo_url} alt="" width={24} height={24} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
                         <span style={{ fontWeight: 700, fontSize: 14, color: opponentTeam.primary_color }}>{opponentTeam.team_name}</span>
                         {selectedOpponentIds.size > 0 && (
                           <span style={{ fontSize: 11, color: '#fff', backgroundColor: opponentTeam.primary_color, padding: '2px 8px', borderRadius: 10 }}>

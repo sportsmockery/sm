@@ -774,13 +774,15 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
                             justifyContent: 'center',
                             fontSize: '14px',
                             color: '#8a8a9a',
+                            position: 'relative',
                           }}
                         >
                           {c.user_avatar ? (
-                            <img
+                            <Image
                               src={c.user_avatar}
                               alt=""
-                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                              fill
+                              style={{ objectFit: 'cover' }}
                             />
                           ) : (
                             c.user_name[0]?.toUpperCase() ?? '?'
@@ -874,16 +876,11 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
               >
                 {/* Thumbnail */}
                 <div style={{ position: 'relative', paddingBottom: '56.25%', overflow: 'hidden' }}>
-                  <img
+                  <Image
                     src={video.thumbnailUrl}
                     alt={video.title}
-                    loading="lazy"
+                    fill
                     style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      height: '100%',
                       objectFit: 'cover',
                     }}
                   />
@@ -1053,16 +1050,11 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
               >
                 {/* Vertical thumbnail (9:16 aspect) */}
                 <div style={{ position: 'relative', paddingBottom: '177%', overflow: 'hidden' }}>
-                  <img
+                  <Image
                     src={video.thumbnailUrl}
                     alt={video.title}
-                    loading="lazy"
+                    fill
                     style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      height: '100%',
                       objectFit: 'cover',
                     }}
                   />

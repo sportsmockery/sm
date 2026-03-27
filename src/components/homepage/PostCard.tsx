@@ -4,6 +4,7 @@
 import { useRef, useCallback, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import OptimizedImage from '@/components/ui/OptimizedImage';
 import { differenceInHours, differenceInDays, format } from 'date-fns';
 import { useScoutConcierge } from '@/hooks/useScoutConcierge';
 import { ScoutConciergeOverlay } from './ScoutConciergeOverlay';
@@ -211,10 +212,12 @@ export function PostCard({ post, priority = false, cardSize = 'compact' }: PostC
           {isCollageType && post.featured_image ? (
             <div className="collage-thumbs">
               {(['center', 'top left', 'bottom right', 'top right'] as const).map((pos, i) => (
-                <img
+                <OptimizedImage
                   key={i}
                   src={post.featured_image!}
                   alt=""
+                  variant="card"
+                  fill
                   style={{ objectPosition: pos }}
                 />
               ))}

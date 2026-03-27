@@ -154,9 +154,11 @@ export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarP
             }}
           >
             <div className="flex h-6 w-6 items-center justify-center">
-              <img
+              <Image
                 src="/edge-dash.png"
                 alt="For You"
+                width={24}
+                height={24}
                 style={{
                   height: 24,
                   width: 24,
@@ -195,9 +197,11 @@ export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarP
                 }}
               >
                 <div className="flex h-6 w-6 items-center justify-center">
-                  <img
+                  <Image
                     src={team.logo}
                     alt={`${team.name} logo`}
+                    width={24}
+                    height={24}
                     style={{
                       height: 24,
                       width: 24,
@@ -207,6 +211,7 @@ export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarP
                       opacity: isSelected ? 1 : 0.6,
                     }}
                     crossOrigin="anonymous"
+                    unoptimized
                   />
                 </div>
                 <span style={{ color: 'var(--hp-foreground)' }}>{team.name}</span>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
+import NextImage from 'next/image'
 import { datalabClient } from '@/lib/supabase-datalab'
 
 interface StatCard {
@@ -184,10 +185,12 @@ function VideoPlayer({ videoUrl }: { videoUrl: string }) {
   return (
     <div style={{ position: 'relative', backgroundColor: '#000' }}>
       {/* Frame display */}
-      <img
+      <NextImage
         src={manifest.frames[currentFrame]?.png_url}
         alt={manifest.frames[currentFrame]?.label || `Frame ${currentFrame + 1}`}
-        style={{ width: '100%', display: 'block' }}
+        width={800}
+        height={450}
+        style={{ width: '100%', height: 'auto', display: 'block' }}
       />
 
       {/* Controls overlay */}
@@ -513,10 +516,11 @@ export default function DataCardsPage() {
                     {/* Thumbnail area */}
                     {card.thumbnail_url ? (
                       <div style={{ position: 'relative', height: 180, overflow: 'hidden', backgroundColor: '#0B162A' }}>
-                        <img
+                        <NextImage
                           src={card.thumbnail_url}
                           alt={card.headline || card.title}
-                          style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
+                          fill
+                          style={{ objectFit: 'contain' }}
                         />
                         {/* Video play overlay */}
                         {hasVideo && (
@@ -906,10 +910,12 @@ export default function DataCardsPage() {
               </div>
             ) : selectedCard.image_url ? (
               <div style={{ padding: 24, display: 'flex', justifyContent: 'center', backgroundColor: '#f9fafb' }}>
-                <img
+                <NextImage
                   src={selectedCard.image_url}
                   alt={selectedCard.headline || selectedCard.title}
-                  style={{ maxWidth: '100%', maxHeight: 600, borderRadius: 8 }}
+                  width={800}
+                  height={600}
+                  style={{ maxWidth: '100%', maxHeight: 600, borderRadius: 8, width: 'auto', height: 'auto' }}
                 />
               </div>
             ) : selectedCard.svg_content ? (

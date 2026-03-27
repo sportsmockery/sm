@@ -1,7 +1,9 @@
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import OptimizedImage from '@/components/ui/OptimizedImage'
 import { format } from 'date-fns'
 import { calculateReadTime, sanitizeWordPressContent } from '@/lib/content-utils'
 import { ArticleBlockContent } from '@/components/articles/ArticleBlockContent'
@@ -128,9 +130,10 @@ export default async function HomeArticlePage({ params }: ArticlePageProps) {
         {/* Featured Image */}
         {post.featured_image && (
           <div className="hm-article-image-wrap">
-            <img
+            <OptimizedImage
               src={post.featured_image}
               alt={post.title}
+              variant="hero"
               className="hm-article-image"
             />
           </div>
@@ -150,7 +153,7 @@ export default async function HomeArticlePage({ params }: ArticlePageProps) {
         {author && (
           <div className="hm-author-bio">
             {author.avatar_url ? (
-              <img src={author.avatar_url} alt={author.name} className="hm-author-avatar" style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover' }} />
+              <Image src={author.avatar_url} alt={author.name} width={56} height={56} className="hm-author-avatar" style={{ borderRadius: '50%', objectFit: 'cover' }} />
             ) : (
               <div className="hm-author-avatar" />
             )}
@@ -169,7 +172,7 @@ export default async function HomeArticlePage({ params }: ArticlePageProps) {
               {related.map((article) => (
                 <Link key={article.id} href={`/home/article/${article.slug}`} className="hm-related-card">
                   {article.featured_image && (
-                    <img src={article.featured_image} alt={article.title} className="hm-related-image" />
+                    <OptimizedImage src={article.featured_image} alt={article.title} variant="card" className="hm-related-image" />
                   )}
                   <div className="hm-related-body">
                     <h4>{article.title}</h4>

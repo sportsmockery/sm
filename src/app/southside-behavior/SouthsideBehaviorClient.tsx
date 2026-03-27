@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import Script from 'next/script';
 import type { TikTokEmbed } from '@/lib/tiktokTypes';
 import { formatDate, truncate } from '@/lib/formatters';
+import OptimizedImage from '@/components/ui/OptimizedImage';
 
 type Props = {
   latestEmbed: TikTokEmbed | null;
@@ -43,7 +44,7 @@ export function SouthsideBehaviorClient({ latestEmbed, previousEmbeds }: Props) 
           <div className="sm-container">
             <div className="sm-tiktok-hero-inner" style={{ justifyContent: 'center' }}>
               <div className="sm-hero-text" style={{ maxWidth: '400px', textAlign: 'center' }}>
-                <img src="/youtubelogos/ssb-logo.png" alt="Southside Behavior" style={{ marginBottom: '0.5rem', maxWidth: '320px', height: 'auto', display: 'block', marginLeft: 'auto', marginRight: 'auto' }} />
+                <OptimizedImage src="/youtubelogos/ssb-logo.png" alt="Southside Behavior" variant="card" style={{ marginBottom: '0.5rem', maxWidth: '320px', height: 'auto', display: 'block', marginLeft: 'auto', marginRight: 'auto' }} />
                 <span className="sm-tag" style={{ display: 'inline-flex', margin: '0 auto 8px' }}>Southside Behavior</span>
                 <h1 style={{ fontSize: '36px', fontWeight: 700, color: 'var(--sm-text)',  margin: '0 0 8px', textAlign: 'center' }}>
                   Videos temporarily unavailable
@@ -66,7 +67,7 @@ export function SouthsideBehaviorClient({ latestEmbed, previousEmbeds }: Props) 
         <div className="sm-container">
           <div className="sm-tiktok-hero-inner" style={{ justifyContent: 'center' }}>
             <div className="sm-hero-text" style={{ maxWidth: '400px', textAlign: 'center' }}>
-              <img src="/youtubelogos/ssb-logo.png" alt="Southside Behavior" style={{ marginBottom: '0.5rem', maxWidth: '320px', height: 'auto', display: 'block', marginLeft: 'auto', marginRight: 'auto' }} />
+              <OptimizedImage src="/youtubelogos/ssb-logo.png" alt="Southside Behavior" variant="card" style={{ marginBottom: '0.5rem', maxWidth: '320px', height: 'auto', display: 'block', marginLeft: 'auto', marginRight: 'auto' }} />
               <span className="sm-tag" style={{ display: 'inline-flex', margin: '0 auto 8px' }}>Southside Behavior</span>
               <h1 style={{ fontSize: '36px', fontWeight: 700, color: 'var(--sm-text)',  margin: '0 0 8px', textAlign: 'center' }}>
                 {truncate(latestEmbed.title, 120)}
@@ -96,7 +97,7 @@ export function SouthsideBehaviorClient({ latestEmbed, previousEmbeds }: Props) 
                 <article key={embed.url} className="sm-tiktok-card glass-card">
                   <a href={embed.url} target="_blank" rel="noopener noreferrer" className="sm-tiktok-card-link">
                     <div className="sm-tiktok-thumb">
-                      <img src={embed.thumbnailUrl} alt={embed.title} loading="lazy" />
+                      <OptimizedImage src={embed.thumbnailUrl} alt={embed.title} variant="thumbnail" />
                       <span className="sm-tiktok-play-icon">&#9654;</span>
                     </div>
                   </a>

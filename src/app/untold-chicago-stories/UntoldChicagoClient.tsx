@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import type { ShowVideo } from '@/lib/youtubeTypes';
 import { formatDate, truncate } from '@/lib/formatters';
+import OptimizedImage from '@/components/ui/OptimizedImage';
 
 type Props = {
   latestVideo: ShowVideo | null;
@@ -30,7 +31,7 @@ export function UntoldChicagoClient({ latestVideo, previousVideos }: Props) {
         <section className="sm-show-hero">
           <div className="sm-container sm-hero-inner">
             <div className="sm-hero-text">
-              <img src="/youtubelogos/untold-white.png" alt="Untold Chicago Stories" style={{ marginBottom: '0.5rem', maxWidth: '320px', height: 'auto', display: 'block', marginLeft: 'auto', marginRight: 'auto' }} />
+              <OptimizedImage src="/youtubelogos/untold-white.png" alt="Untold Chicago Stories" variant="card" style={{ marginBottom: '0.5rem', maxWidth: '320px', height: 'auto', display: 'block', marginLeft: 'auto', marginRight: 'auto' }} />
               <span className="sm-tag" style={{ display: 'inline-flex', margin: '0 auto 8px' }}>Untold Chicago Stories</span>
               <h1 style={{ fontSize: '36px', fontWeight: 700, color: 'var(--sm-text)',  margin: '0 0 8px', textAlign: 'center' }}>
                 Videos temporarily unavailable
@@ -53,7 +54,7 @@ export function UntoldChicagoClient({ latestVideo, previousVideos }: Props) {
       <section className="sm-show-hero">
         <div className="sm-container sm-hero-inner">
           <div className="sm-hero-text">
-            <img src="/youtubelogos/untold-white.png" alt="Untold Chicago Stories" style={{ marginBottom: '0.5rem', maxWidth: '320px', height: 'auto', display: 'block', marginLeft: 'auto', marginRight: 'auto' }} />
+            <OptimizedImage src="/youtubelogos/untold-white.png" alt="Untold Chicago Stories" variant="card" style={{ marginBottom: '0.5rem', maxWidth: '320px', height: 'auto', display: 'block', marginLeft: 'auto', marginRight: 'auto' }} />
             <span className="sm-tag" style={{ display: 'inline-flex', margin: '0 auto 8px' }}>Untold Chicago Stories</span>
             <h1 style={{ fontSize: '36px', fontWeight: 700, color: 'var(--sm-text)',  margin: '0 0 8px', textAlign: 'center' }}>
               {latestVideo.title}
@@ -87,7 +88,7 @@ export function UntoldChicagoClient({ latestVideo, previousVideos }: Props) {
               <article key={video.videoId} className="sm-video-card glass-card">
                 <button type="button" className="sm-video-thumb-button" onClick={() => setActiveVideoId(video.videoId)}>
                   <div className="sm-video-thumb">
-                    <img src={video.thumbnailUrl} alt={video.title} loading="lazy" />
+                    <OptimizedImage src={video.thumbnailUrl} alt={video.title} variant="thumbnail" />
                     <span className="sm-video-play-icon">&#9654;</span>
                   </div>
                 </button>

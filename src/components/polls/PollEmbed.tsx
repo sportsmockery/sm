@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import Image from 'next/image'
 import { motion, useInView, AnimatePresence } from 'framer-motion'
 import PollResults from './PollResults'
 import type { Poll, PollOption, ChicagoTeam, PollResults as PollResultsType } from '@/types/polls'
@@ -411,10 +412,12 @@ export default function PollEmbed({ id, poll: propPoll, className = '', compact 
                           )}
                         </div>
                         {option.option_image && (
-                          <img
+                          <Image
                             src={option.option_image}
                             alt={option.option_text}
-                            style={{ height: 32, width: 32, borderRadius: 4, objectFit: 'cover' }}
+                            width={32}
+                            height={32}
+                            style={{ borderRadius: 4, objectFit: 'cover' }}
                           />
                         )}
                         <span style={{ fontWeight: 600, color: 'var(--sm-text)' }}>
