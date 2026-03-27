@@ -832,6 +832,20 @@
   overflow: hidden;
 }
 
+/* Audio page article title: 3 lines on mobile, 2 on sm+ */
+.audio-title-clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@media (min-width: 640px) {
+  .audio-title-clamp {
+    -webkit-line-clamp: 2;
+  }
+}
+
 .sr-only {
   position: absolute;
   width: 1px;

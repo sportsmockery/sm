@@ -224,7 +224,7 @@ export default function HandsFreeAudioClient({
                   <div className="text-sm font-semibold" style={{ color: isSelected ? '#BC0000' : 'var(--hp-foreground)' }}>
                     {article.team_name.replace('Chicago ', '')}
                   </div>
-                  <div className="text-xs mt-1" style={{ color: 'var(--hp-muted-foreground)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                  <div className="text-xs mt-1 audio-title-clamp" style={{ color: 'var(--hp-muted-foreground)' }}>
                     {article.title}
                   </div>
                 </button>
