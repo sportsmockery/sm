@@ -126,6 +126,14 @@ function sm_export_get_post_views($request) {
         $start_date, $end_date, $per_page, $offset
     ));
 
+    // Cast to integers (wpdb returns strings)
+    $results = array_map(function($row) {
+        return array(
+            'id'    => (int) $row->id,
+            'views' => (int) $row->views,
+        );
+    }, $results);
+
     return rest_ensure_response(array(
         'views'       => $results,
         'total'       => (int) $total,
