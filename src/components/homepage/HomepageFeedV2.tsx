@@ -103,8 +103,8 @@ export default function HomepageFeedV2({
         </div>
       </div>
 
-      {/* Mobile Bottom Navigation */}
-      <nav className="hp-bottom-nav hp-glass md:hidden">
+      {/* Mobile Bottom Navigation — hidden; using global MobileBottomNav instead */}
+      <nav className="hp-bottom-nav hp-glass hidden">
         <div className="flex items-center justify-around">
           <button
             onClick={() => setActiveNavItem("home")}

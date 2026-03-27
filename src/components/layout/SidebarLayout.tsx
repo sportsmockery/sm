@@ -16,7 +16,18 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
     || pathname.startsWith('/admin') || pathname.startsWith('/studio')
 
   if (isFullWidth) {
-    return <>{children}</>
+    return (
+      <>
+        {children}
+        <style>{`
+          @media (max-width: 1023px) {
+            .homepage-v2, .fan-chat-page {
+              padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+            }
+          }
+        `}</style>
+      </>
+    )
   }
 
   return (

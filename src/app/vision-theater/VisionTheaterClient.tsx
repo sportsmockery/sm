@@ -451,8 +451,8 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
           {/* Title — Barlow with red glow, matching SM 2.0 hero */}
           <h1
             style={{
-             
-              fontSize: 'clamp(4rem, 9vw, 7.5rem)',
+
+              fontSize: 'clamp(2.5rem, 9vw, 7.5rem)',
               fontWeight: 400,
               lineHeight: 0.95,
               letterSpacing: '0.01em',
@@ -503,7 +503,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
           }}
         >
           {/* Channel filter buttons */}
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <div className="vt-filter-scroll" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             {CHANNEL_FILTERS.map((f) => (
               <button
                 key={f.slug}

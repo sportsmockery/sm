@@ -13,6 +13,7 @@ import { TeamRecordProvider } from "@/contexts/TeamRecordContext";
 import SidebarLayout from "@/components/layout/SidebarLayout";
 import SkipToContent from "@/components/layout/SkipToContent";
 import ScrollToTop from "@/components/layout/ScrollToTop";
+import BackToTop from "@/components/layout/BackToTop";
 import CookieBanner from "@/components/layout/CookieBanner";
 import TeamChatPanel from "@/components/chat/TeamChatPanel";
 import MotionProvider from "@/components/motion/MotionProvider";
@@ -157,6 +158,7 @@ export default function RootLayout({
               <MobileBottomNav />
               {/* ParticleBg removed — replaced by Chicago star canvas in hero */}
               <ScrollToTop />
+              <BackToTop />
               <CookieBanner />
               <TeamChatPanel teamSlug="bears" teamName="Bears" />
               {/* Floating buttons disabled - users access AI and Fan Chat via header buttons */}

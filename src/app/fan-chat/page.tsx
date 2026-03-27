@@ -321,12 +321,10 @@ export default function FanChatPage() {
           {/* Channel List - Sidebar */}
           <div className={`${showChannels ? 'block' : 'hidden lg:block'}`} style={{ alignSelf: 'start', marginTop: 0, paddingTop: 0 }}>
             <div
-              className="glass-card glass-card-static overflow-hidden sticky"
+              className="glass-card glass-card-static overflow-hidden sticky lg:h-[calc(100vh-48px)] lg:min-h-[calc(100vh-48px)]"
               style={{
                 top: 0,
                 padding: 0,
-                height: 'calc(100vh - 48px)',
-                minHeight: 'calc(100vh - 48px)',
                 display: 'flex',
                 flexDirection: 'column',
                 marginTop: 0,
@@ -435,13 +433,18 @@ export default function FanChatPage() {
                 style={{ borderBottom: '1px solid var(--sm-border)', backgroundColor: currentChannel.color }}
               >
                 <div className="flex items-center gap-3">
-                  {/* Mobile channel toggle */}
+                  {/* Mobile channel toggle — shows room name + chevron for discoverability */}
                   <button
                     onClick={() => setShowChannels(!showChannels)}
-                    className="lg:hidden p-2 -ml-2 text-white/80 hover:text-white min-w-[44px] min-h-[44px] flex items-center justify-center"
+                    className="lg:hidden -ml-2 text-white/90 hover:text-white min-h-[44px] flex items-center gap-1.5 px-2 rounded-lg"
+                    style={{ background: 'rgba(255,255,255,0.12)' }}
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                    <span className="text-xs font-semibold whitespace-nowrap">Rooms</span>
+                    <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ transform: showChannels ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
                   </button>
 
