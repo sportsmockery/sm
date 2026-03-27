@@ -8,6 +8,23 @@ import { GameDayHero } from "@/components/home/hero/modes/game-day-hero"
 import { TeamPulseHero } from "@/components/home/hero/modes/team-pulse-hero"
 import { DebateHero } from "@/components/home/hero/modes/debate-hero"
 import { EdgeHero } from "@/components/home/edge-hero"
+import {
+  EditorialCard,
+  PollCard,
+  ChartCard,
+  HubUpdateCard,
+  BoxScoreCard,
+  TradeProposalCard,
+  ScoutSummaryCard,
+  TrendingArticleCard,
+  DebateCard,
+  ScoutBriefingCard,
+  ScoutAnalysisCard,
+  VideoCard,
+  FanReactionsCard,
+  ScoutPredictionCard,
+  GameModeCard,
+} from "@/components/homepage/RiverCards"
 import type {
   FeaturedStory,
   GameContext,
@@ -152,6 +169,13 @@ const sampleQuickActions: QuickAction[] = [
 ]
 
 /* ------------------------------------------------------------------ */
+/*  Shared card sample data                                            */
+/* ------------------------------------------------------------------ */
+
+const cardBase = { team: "Chicago Bears", teamColor: "#C83803", timestamp: "2h" }
+const sampleStats = { comments: 42, retweets: 18, likes: 156, views: "3.2K" }
+
+/* ------------------------------------------------------------------ */
 /*  Section divider between heroes                                     */
 /* ------------------------------------------------------------------ */
 
@@ -209,6 +233,39 @@ function Divider({ title, description }: { title: string; description: string })
       >
         {description}
       </p>
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/*  Card label wrapper — renders a card with its name                  */
+/* ------------------------------------------------------------------ */
+
+function CardShowcase({ name, id, children }: { name: string; id: string; children: React.ReactNode }) {
+  return (
+    <div id={id} style={{ scrollMarginTop: 80 }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          padding: "32px 0 12px",
+        }}
+      >
+        <div style={{ height: 1, width: 24, background: "#00D4FF" }} />
+        <span
+          style={{
+            fontSize: 13,
+            fontWeight: 700,
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            color: "#00D4FF",
+          }}
+        >
+          {name}
+        </span>
+      </div>
+      {children}
     </div>
   )
 }
@@ -313,8 +370,261 @@ export default function Home2Page() {
         quickActions={sampleQuickActions}
       />
 
-      {/* Footer spacer */}
-      <div style={{ height: 80 }} />
+      {/* ================================================================ */}
+      {/*  HOMEPAGE CARD TYPES — Feed Cards Reference                       */}
+      {/* ================================================================ */}
+
+      <div
+        style={{
+          padding: "64px 24px 24px",
+          textAlign: "center",
+          background: "var(--hp-background, #FAFAFB)",
+          color: "var(--hp-foreground, #0B0F14)",
+        }}
+      >
+        <div style={{ maxWidth: 900, margin: "0 auto" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 16,
+              marginBottom: 16,
+              justifyContent: "center",
+            }}
+          >
+            <div
+              style={{
+                height: 2,
+                width: 60,
+                background: "linear-gradient(to right, transparent, #D6B05E)",
+              }}
+            />
+            <h2
+              style={{
+                fontSize: 20,
+                fontWeight: 700,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                color: "#D6B05E",
+              }}
+            >
+              Homepage Card Types
+            </h2>
+            <div
+              style={{
+                height: 2,
+                width: 60,
+                background: "linear-gradient(to left, transparent, #D6B05E)",
+              }}
+            />
+          </div>
+          <p style={{ fontSize: 14, color: "var(--hp-muted-foreground, #888)", maxWidth: 600, margin: "0 auto 24px" }}>
+            All feed card types rendered with sample data. Reference these by name when requesting changes.
+          </p>
+
+          {/* Quick-jump index */}
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 8,
+              justifyContent: "center",
+              marginBottom: 32,
+            }}
+          >
+            {[
+              { label: "EditorialCard", id: "card-editorial" },
+              { label: "PollCard", id: "card-poll" },
+              { label: "ChartCard", id: "card-chart" },
+              { label: "HubUpdateCard", id: "card-hub-update" },
+              { label: "BoxScoreCard", id: "card-box-score" },
+              { label: "TradeProposalCard", id: "card-trade-proposal" },
+              { label: "ScoutSummaryCard", id: "card-scout-summary" },
+              { label: "TrendingArticleCard", id: "card-trending-article" },
+              { label: "DebateCard", id: "card-debate" },
+              { label: "ScoutBriefingCard", id: "card-scout-briefing" },
+              { label: "ScoutAnalysisCard", id: "card-scout-analysis" },
+              { label: "VideoCard", id: "card-video" },
+              { label: "FanReactionsCard", id: "card-fan-reactions" },
+              { label: "ScoutPredictionCard", id: "card-scout-prediction" },
+              { label: "GameModeCard", id: "card-game-mode" },
+            ].map((item) => (
+              <a
+                key={item.id}
+                href={`#${item.id}`}
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  padding: "6px 14px",
+                  borderRadius: 999,
+                  border: "1px solid rgba(0,212,255,0.3)",
+                  color: "#00D4FF",
+                  textDecoration: "none",
+                  transition: "background 0.15s",
+                }}
+              >
+                {item.label}
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Card renders */}
+      <div style={{ maxWidth: 640, margin: "0 auto", padding: "0 16px 80px" }}>
+
+        <CardShowcase name="EditorialCard" id="card-editorial">
+          <EditorialCard
+            author={{ name: "Mike Davis", handle: "@mdavis", avatar: "", verified: true }}
+            headline="Bears Land Top Pass Rusher in Blockbuster Trade"
+            summary="Chicago's front office pulls off a stunning deal to address the team's biggest need heading into the 2026 season."
+            insight="Scout sees this as a franchise-altering move. The Bears defense jumps from bottom-5 to top-12 projected."
+            author_name="Mike Davis"
+            breakingIndicator="BREAKING"
+            stats={sampleStats}
+            {...cardBase}
+          />
+        </CardShowcase>
+
+        <CardShowcase name="PollCard" id="card-poll">
+          <PollCard
+            question="Who should the Bears target in the first round?"
+            context="2026 NFL Draft"
+            options={["Edge Rusher", "Offensive Line", "Wide Receiver"]}
+            totalVotes={2520}
+            status="LIVE"
+            {...cardBase}
+          />
+        </CardShowcase>
+
+        <CardShowcase name="ChartCard" id="card-chart">
+          <ChartCard
+            headline="Bears Pass Rush Pressure Rate (2025 Season)"
+            takeaway="Pressure rate spiked in weeks 14-17, coinciding with the playoff push."
+            chartData={[
+              { label: "W1", value: 22 },
+              { label: "W5", value: 28 },
+              { label: "W9", value: 25 },
+              { label: "W13", value: 31 },
+              { label: "W17", value: 38 },
+            ]}
+            statSource="ESPN Next Gen Stats"
+            stats={sampleStats}
+            {...cardBase}
+          />
+        </CardShowcase>
+
+        <CardShowcase name="HubUpdateCard" id="card-hub-update">
+          <HubUpdateCard
+            updateText="Bears officially sign veteran edge rusher to 3-year, $54M deal. Physical scheduled for tomorrow."
+            takeaway="This fills the Bears' biggest roster hole heading into 2026."
+            status="NEW"
+            {...cardBase}
+          />
+        </CardShowcase>
+
+        <CardShowcase name="BoxScoreCard" id="card-box-score">
+          <BoxScoreCard
+            homeTeam={{ name: "Bears", score: 27, logo: "https://a.espncdn.com/i/teamlogos/nfl/500/chi.png" }}
+            awayTeam={{ name: "Packers", score: 24, logo: "https://a.espncdn.com/i/teamlogos/nfl/500/gb.png" }}
+            status="FINAL"
+            period="4th"
+            keyPerformer="Caleb Williams — 28/34, 342 yds, 3 TD"
+            {...cardBase}
+          />
+        </CardShowcase>
+
+        <CardShowcase name="TradeProposalCard" id="card-trade-proposal">
+          <TradeProposalCard
+            proposer={{ name: "BearsGM_Fan", handle: "@BearsGM_Fan" }}
+            teamGets={{ name: "Bears", items: ["Veteran Edge Rusher", "2027 5th Round Pick"] }}
+            otherTeamGets={{ name: "Vikings", items: ["2026 2nd Round Pick", "Backup LB"] }}
+            fairnessScore={74}
+            isEditorApproved={false}
+            {...cardBase}
+          />
+        </CardShowcase>
+
+        <CardShowcase name="ScoutSummaryCard" id="card-scout-summary">
+          <ScoutSummaryCard
+            summary="Scout's daily analysis of the Bears defense shows improvement in coverage metrics but continued struggles generating pressure."
+            bullets={[
+              "Coverage grade improved to 72.4 (up from 64.1 last month)",
+              "Pass rush win rate still bottom-5 in NFL at 28.3%",
+              "Secondary playing more zone — 67% of snaps vs 52% earlier",
+            ]}
+            topic="Bears Defense"
+            stats={sampleStats}
+            {...cardBase}
+          />
+        </CardShowcase>
+
+        <CardShowcase name="TrendingArticleCard" id="card-trending-article">
+          <TrendingArticleCard
+            headline="Why the Bears' Draft Strategy Just Changed Everything"
+            summary="A deep dive into how Chicago's latest moves reshape their approach to the 2026 NFL Draft."
+            trendMetric="4.8K views in 3 hours"
+            stats={sampleStats}
+            {...cardBase}
+          />
+        </CardShowcase>
+
+        <CardShowcase name="DebateCard" id="card-debate">
+          <DebateCard
+            prompt="Is Caleb Williams a top-5 QB right now?"
+            sideA="Yes — He's elite"
+            sideB="No — Not yet"
+            participantCount={1840}
+            {...cardBase}
+          />
+        </CardShowcase>
+
+        <CardShowcase name="ScoutBriefingCard" id="card-scout-briefing">
+          <ScoutBriefingCard />
+        </CardShowcase>
+
+        <CardShowcase name="ScoutAnalysisCard" id="card-scout-analysis">
+          <ScoutAnalysisCard
+            analysis="The Bears' defensive line investment is paying off in ways the raw stats don't show. While sack numbers are modest, the interior pressure rate has jumped 12% since the trade, forcing quarterbacks into quicker throws and lower air yards."
+          />
+        </CardShowcase>
+
+        <CardShowcase name="VideoCard" id="card-video">
+          <VideoCard
+            title="Film Breakdown: How the Bears Defense Stopped the Run"
+            duration="12:34"
+            source="Sports Mockery"
+            teaser="Breaking down the key plays that shut down the league's top rushing attack."
+            thumbnailUrl="/placeholder.jpg"
+            stats={sampleStats}
+            {...cardBase}
+          />
+        </CardShowcase>
+
+        <CardShowcase name="FanReactionsCard" id="card-fan-reactions">
+          <FanReactionsCard />
+        </CardShowcase>
+
+        <CardShowcase name="ScoutPredictionCard" id="card-scout-prediction">
+          <ScoutPredictionCard
+            homeTeam="Bears"
+            awayTeam="Lions"
+            homeScore={24}
+            awayScore={21}
+            winProbability={56}
+          />
+        </CardShowcase>
+
+        <CardShowcase name="GameModeCard" id="card-game-mode">
+          <GameModeCard
+            homeTeam="Chicago Bears"
+            awayTeam="Green Bay Packers"
+            kickoff="6:30 PM CT"
+            scoutNote="Bears are 3-1 in their last 4 home games against the Packers."
+          />
+        </CardShowcase>
+
+      </div>
     </main>
   )
 }

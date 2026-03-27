@@ -12,7 +12,7 @@ export default function SidebarLayout({ children }: { children: React.ReactNode 
   const pathname = usePathname()
 
   // Pages that should NOT have the sidebar
-  const isFullWidth = pathname === '/' || pathname === '/feed'
+  const isFullWidth = pathname === '/' || pathname === '/feed' || pathname === '/home2'
     || pathname.startsWith('/admin') || pathname.startsWith('/studio')
 
   if (isFullWidth) {
