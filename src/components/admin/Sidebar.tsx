@@ -229,7 +229,7 @@ export default function Sidebar({ collapsed = false, onCollapse }: SidebarProps)
 
   return (
     <aside
-      className={`fixed left-0 top-[92px] z-40 h-[calc(100vh-92px)] border-r border-[var(--border-default)] bg-[var(--bg-secondary)] transition-all duration-300 ${
+      className={`fixed left-0 top-0 z-40 h-screen border-r border-[var(--border-default)] bg-[var(--bg-secondary)] transition-all duration-300 ${
         isCollapsed ? 'w-16' : 'w-60'
       }`}
     >
@@ -358,12 +358,12 @@ export function MobileSidebar({
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 top-[92px] z-[55] bg-black/50 backdrop-blur-sm lg:hidden"
+        className="fixed inset-0 top-0 z-[55] bg-black/50 backdrop-blur-sm lg:hidden"
         onClick={onClose}
       />
 
       {/* Sidebar */}
-      <aside className="fixed left-0 top-[92px] z-[60] h-[calc(100vh-92px)] w-72 bg-[var(--bg-secondary)] shadow-2xl lg:hidden animate-in slide-in-from-left duration-300">
+      <aside className="fixed left-0 top-0 z-[60] h-screen w-72 bg-[var(--bg-secondary)] shadow-2xl lg:hidden animate-in slide-in-from-left duration-300">
         {/* Header */}
         <div className="flex h-14 items-center justify-between border-b border-[var(--border-default)] px-4">
           <Link href="/admin" className="flex items-center gap-3 min-w-0" onClick={onClose}>

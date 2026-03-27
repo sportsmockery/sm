@@ -36,7 +36,7 @@ export default function AdminShell({
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] pt-[92px]">
+    <div className="min-h-screen bg-[var(--bg-primary)]">
       {/* Desktop Sidebar - hidden on mobile, positioned below global header */}
       <div className="hidden lg:block">
         <Sidebar />
