@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
     // 2. Build a map of wp_id -> views
     const viewsMap = new Map<number, number>()
     for (const item of allViews) {
-      viewsMap.set(item.id, item.views)
+      viewsMap.set(Number(item.id), Number(item.views))
     }
 
     // 3. Load sm_posts wp_id + current views for matching
