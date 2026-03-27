@@ -17,7 +17,7 @@ interface ChatMessage {
   personality?: string
 }
 
-// DB message shape returned by the API
+// DB message shape returned by the API (includes joined chat_users fields)
 interface DBMessage {
   id: string
   room_id: string
@@ -27,6 +27,8 @@ interface DBMessage {
   created_at: string
   is_deleted: boolean
   moderation_status: string
+  display_name: string
+  badge: string
 }
 
 // Team channels with AI personality info
@@ -102,39 +104,6 @@ const CHANNEL_FAN_LABEL: Record<string, string> = {
   blackhawks: 'Blackhawks',
 }
 
-// AI user_id prefixes used when persisting AI messages
-const AI_USER_ID_PREFIXES = ['ai-']
-
-// Map AI user_id values to display names
-const AI_USER_DISPLAY_NAMES: Record<string, string> = {
-  'ai-bears-benny': 'BearDownBenny',
-  'ai-bulls-hoops': 'WindyCityHoops',
-  'ai-cubs-will': 'WrigleyWill',
-  'ai-sox-sarah': 'SouthSideSoxSarah',
-  'ai-hawks-mike': 'MadhouseMike',
-  'ai-BearDownBenny': 'BearDownBenny',
-  'ai-WindyCityHoops': 'WindyCityHoops',
-  'ai-WrigleyWill': 'WrigleyWill',
-  'ai-SouthSideSoxSarah': 'SouthSideSoxSarah',
-  'ai-MadhouseMike': 'MadhouseMike',
-  'ai-default': 'AI Fan',
-}
-
-function isAIUserId(userId: string): boolean {
-  return AI_USER_ID_PREFIXES.some(prefix => userId.startsWith(prefix))
-}
-
-function getDisplayName(userId: string): string {
-  if (isAIUserId(userId)) {
-    return AI_USER_DISPLAY_NAMES[userId] || userId.replace('ai-', '')
-  }
-  // User messages: strip "guest-" prefix
-  if (userId.startsWith('guest-')) {
-    return userId.replace('guest-', '')
-  }
-  return userId
-}
-
 // Format a timestamp to a relative time string
 function formatRelativeTime(isoString: string): string {
   const date = new Date(isoString)
@@ -154,17 +123,17 @@ function formatRelativeTime(isoString: string): string {
 
 // Convert a DB message to our ChatMessage format
 function dbMessageToChatMessage(msg: DBMessage, currentUserId: string | null): ChatMessage {
-  const isAI = isAIUserId(msg.user_id)
+  const isAI = msg.badge === 'ai'
   const isOwn = !isAI && msg.user_id === currentUserId
 
   return {
     id: msg.id,
-    user: isOwn ? 'You' : getDisplayName(msg.user_id),
+    user: isOwn ? 'You' : msg.display_name,
     content: msg.content,
     time: formatRelativeTime(msg.created_at),
     isOwn,
     isAI,
-    personality: isAI ? msg.user_id.replace('ai-', '') : undefined,
+    personality: isAI ? msg.display_name : undefined,
   }
 }
 
@@ -253,17 +222,35 @@ export default function FanChatPage() {
   const [isTyping, setIsTyping] = useState(false)
   const [isLoadingMessages, setIsLoadingMessages] = useState(true)
 
-  // Stable user ID for the session (persisted in sessionStorage so it survives navigation)
+  // Stable user ID (chat_users UUID) for the session
   const userIdRef = useRef<string>('')
+  const displayNameRef = useRef<string>('')
   useEffect(() => {
-    const stored = sessionStorage.getItem('fan-chat-user-id')
-    if (stored) {
-      userIdRef.current = stored
-    } else {
-      const id = `guest-Fan${Math.floor(Math.random() * 9000) + 1000}`
-      sessionStorage.setItem('fan-chat-user-id', id)
-      userIdRef.current = id
+    const storedId = sessionStorage.getItem('fan-chat-user-uuid')
+    const storedName = sessionStorage.getItem('fan-chat-display-name')
+    if (storedId && storedName) {
+      userIdRef.current = storedId
+      displayNameRef.current = storedName
+      return
     }
+
+    // Register a guest chat_user via the API
+    const guestName = `Fan${Math.floor(Math.random() * 9000) + 1000}`
+    displayNameRef.current = guestName
+    fetch('/api/fan-chat/user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ displayName: guestName }),
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.id) {
+          userIdRef.current = data.id
+          sessionStorage.setItem('fan-chat-user-uuid', data.id)
+          sessionStorage.setItem('fan-chat-display-name', guestName)
+        }
+      })
+      .catch(err => console.error('Failed to register guest user:', err))
   }, [])
 
   // Cache of per-channel messages and room IDs so switching rooms preserves history
@@ -309,6 +296,9 @@ export default function FanChatPage() {
           content,
           displayName,
           isAI,
+          // For non-AI messages, pass the chat_users UUID directly
+          userId: !isAI ? userIdRef.current : undefined,
+          // For AI messages, pass the personality display name (resolved server-side)
           personality: personalityId || displayName,
         }),
       })
@@ -416,8 +406,43 @@ export default function FanChatPage() {
           filter: `room_id=eq.${currentRoomId}`,
         },
         (payload: { new: Record<string, unknown> }) => {
-          const newMsg = payload.new as unknown as DBMessage
-          if (newMsg.moderation_status !== 'approved' || newMsg.is_deleted) return
+          const raw = payload.new as Record<string, unknown>
+          if (raw.moderation_status !== 'approved' || raw.is_deleted) return
+
+          // Realtime payloads don't include the join — fetch display_name from API
+          // For messages from us, we already know the display name
+          const isOwnMessage = raw.user_id === userIdRef.current
+
+          const newMsg: DBMessage = {
+            id: raw.id as string,
+            room_id: raw.room_id as string,
+            user_id: raw.user_id as string,
+            content: raw.content as string,
+            content_type: raw.content_type as string,
+            created_at: raw.created_at as string,
+            is_deleted: raw.is_deleted as boolean,
+            moderation_status: raw.moderation_status as string,
+            display_name: isOwnMessage ? displayNameRef.current : 'Unknown',
+            badge: 'fan',
+          }
+
+          // If it's not our own message, resolve the display_name asynchronously
+          if (!isOwnMessage) {
+            fetch(`/api/fan-chat/user?userId=${raw.user_id}`)
+              .then(res => res.ok ? res.json() : null)
+              .catch(() => null)
+              .then(userData => {
+                if (userData?.displayName) {
+                  setMessages(prev =>
+                    prev.map(m =>
+                      m.id === newMsg.id
+                        ? { ...m, user: userData.displayName, isAI: userData.badge === 'ai', personality: userData.badge === 'ai' ? userData.displayName : undefined }
+                        : m
+                    )
+                  )
+                }
+              })
+          }
 
           const chatMsg = dbMessageToChatMessage(newMsg, userIdRef.current)
 
@@ -477,7 +502,7 @@ export default function FanChatPage() {
     setMessage('')
 
     // Persist to Supabase (realtime subscription will add it to messages)
-    persistMessage(content, userIdRef.current.replace('guest-', ''), false)
+    persistMessage(content, displayNameRef.current, false)
 
     // Optimistic update: add the message to local state immediately
     const optimisticMsg: ChatMessage = {

@@ -29,8 +29,52 @@ async function getRoomId(channelSlug: string): Promise<string | null> {
 }
 
 /**
+ * Resolve a display_name to a chat_users.id UUID.
+ * Looks up an existing chat_user; creates one if not found.
+ */
+async function getOrCreateChatUser(
+  displayName: string,
+  isAI: boolean
+): Promise<string | null> {
+  // Look up existing
+  const { data: existing } = await supabaseAdmin
+    .from('chat_users')
+    .select('id')
+    .eq('display_name', displayName)
+    .limit(1)
+    .maybeSingle()
+
+  if (existing) return existing.id
+
+  // Create new
+  const { data: created, error } = await supabaseAdmin
+    .from('chat_users')
+    .insert({
+      display_name: displayName,
+      badge: isAI ? 'ai' : 'fan',
+    })
+    .select('id')
+    .single()
+
+  if (error) {
+    // Race condition: retry lookup
+    const { data: retry } = await supabaseAdmin
+      .from('chat_users')
+      .select('id')
+      .eq('display_name', displayName)
+      .limit(1)
+      .maybeSingle()
+
+    return retry?.id ?? null
+  }
+
+  return created.id
+}
+
+/**
  * GET /api/fan-chat/messages?channel=bears&limit=50&before=<iso>
  * Fetches persisted messages for a fan-chat channel.
+ * Joins with chat_users to include display_name and badge.
  */
 export async function GET(request: NextRequest) {
   try {
@@ -50,7 +94,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabaseAdmin
       .from('chat_messages')
-      .select('*')
+      .select('id, room_id, user_id, content, content_type, created_at, is_deleted, moderation_status, chat_users!inner(display_name, badge)')
       .eq('room_id', roomId)
       .eq('moderation_status', 'approved')
       .eq('is_deleted', false)
@@ -68,8 +112,25 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ messages: [], roomId })
     }
 
+    // Flatten the joined data so each message has display_name and badge at top level
+    const flattened = (messages || []).map((msg: Record<string, unknown>) => {
+      const chatUser = msg.chat_users as { display_name: string; badge: string } | null
+      return {
+        id: msg.id,
+        room_id: msg.room_id,
+        user_id: msg.user_id,
+        content: msg.content,
+        content_type: msg.content_type,
+        created_at: msg.created_at,
+        is_deleted: msg.is_deleted,
+        moderation_status: msg.moderation_status,
+        display_name: chatUser?.display_name ?? 'Unknown',
+        badge: chatUser?.badge ?? 'fan',
+      }
+    })
+
     return NextResponse.json({
-      messages: (messages || []).reverse(),
+      messages: flattened.reverse(),
       roomId,
       hasMore: (messages?.length ?? 0) === limit,
     })
@@ -82,12 +143,15 @@ export async function GET(request: NextRequest) {
 /**
  * POST /api/fan-chat/messages
  * Persists a fan-chat message. Accepts both user and AI messages.
- * Body: { channel, content, displayName, isAI?, personality? }
+ * Body: { channel, content, userId?, displayName, isAI?, personality? }
+ *
+ * userId: the chat_users.id UUID (preferred, used by frontend after registration)
+ * displayName: fallback — will be resolved to a chat_users.id via lookup/create
  */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { channel, content, displayName, isAI, personality } = body
+    const { channel, content, userId, displayName, isAI, personality } = body
 
     if (!channel || !content) {
       return NextResponse.json({ error: 'channel and content required' }, { status: 400 })
@@ -98,23 +162,33 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid channel' }, { status: 400 })
     }
 
-    // For AI messages, use a deterministic UUID based on personality name
-    // For user messages, use a guest identifier
-    const userId = isAI
-      ? `ai-${personality || 'default'}`
-      : `guest-${displayName || 'anonymous'}`
+    // Resolve the chat_users UUID
+    let chatUserId: string | null = null
+
+    if (userId) {
+      // Frontend already has the UUID from user registration
+      chatUserId = userId
+    } else {
+      // Fallback: resolve by display_name (lookup or create)
+      const name = isAI ? (personality || 'AI Fan') : (displayName || 'Anonymous')
+      chatUserId = await getOrCreateChatUser(name, !!isAI)
+    }
+
+    if (!chatUserId) {
+      return NextResponse.json({ error: 'Failed to resolve user' }, { status: 500 })
+    }
 
     const { data: message, error } = await supabaseAdmin
       .from('chat_messages')
       .insert({
         room_id: roomId,
-        user_id: userId,
+        user_id: chatUserId,
         content,
         content_type: 'text',
         moderation_status: 'approved',
         moderation_score: 0,
       })
-      .select('*')
+      .select('id, room_id, user_id, content, content_type, created_at, is_deleted, moderation_status')
       .single()
 
     if (error) {
