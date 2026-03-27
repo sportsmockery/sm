@@ -137,6 +137,19 @@ export default function TeamHubLayout({
     return pathname?.startsWith(fullPath)
   })?.id || 'overview'
 
+  // Known team sub-page paths (everything after /{team-slug}/)
+  const knownSubPaths = new Set(
+    tabs.map(t => t.path).filter(Boolean).map(p => p.replace(/^\//, ''))
+  )
+  // Also include non-tab sub-pages
+  const extraSubPaths = ['cap-tracker', 'depth-chart', 'draft-tracker', 'game-center', 'news', 'trade-rumors']
+  extraSubPaths.forEach(p => knownSubPaths.add(p))
+
+  // Detect if we're on an article detail page (a path segment after team slug that isn't a known sub-page)
+  const pathAfterTeam = pathname?.replace(basePath, '').replace(/^\//, '') || ''
+  const firstSegment = pathAfterTeam.split('/')[0]
+  const isArticlePage = firstSegment !== '' && !knownSubPaths.has(firstSegment)
+
   const MAIN_HEADER_HEIGHT = 140
 
   useEffect(() => {
@@ -171,7 +184,7 @@ export default function TeamHubLayout({
       {/* ===== STICKY SUBNAV ===== */}
       <div
         ref={navRef}
-        className={isSticky ? 'sticky' : ''}
+        className={`${isSticky ? 'sticky' : ''}${isArticlePage ? ' team-subnav-article-hide' : ''}`}
         style={{
           ...(isSticky ? { top: 'var(--sm-nav-height, 72px)', zIndex: 40, boxShadow: '0 4px 12px rgba(0,0,0,0.3)' } : {}),
           background: 'var(--sm-surface)',
