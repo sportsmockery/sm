@@ -396,11 +396,12 @@ export function EditorialCard({
       {/* Featured image above headline with prominent fade into headline (like article pages) */}
       {featuredImage && featuredImage.length > 0 && (
         <div className="relative mb-4 rounded-xl overflow-hidden" style={{ aspectRatio: '16/9' }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src={featuredImage}
             alt=""
-            className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
+            fill
+            sizes="(max-width: 600px) 100vw, 560px"
+            className="object-cover group-hover:scale-[1.02] transition-transform duration-500"
           />
           {/* Strong gradient fade down into headline area — more prominent than article page */}
           <div
@@ -1561,10 +1562,12 @@ export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team,
               onClick={() => embedUrl ? setPlaying(true) : undefined}
               aria-label={`Play ${title}`}
             >
-              <img
+              <Image
                 src={thumbnailUrl}
                 alt={title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
+                fill
+                sizes="(max-width: 600px) 100vw, 560px"
+                className="object-cover group-hover:scale-105 transition-all duration-300"
                 style={{ opacity: 0.9 }}
               />
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.6), transparent, transparent)' }} />

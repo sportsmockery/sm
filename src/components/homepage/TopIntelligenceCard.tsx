@@ -1,6 +1,7 @@
 "use client"
 
 import { ChevronRight } from "lucide-react"
+import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { homepageTeams } from "@/lib/homepage-team-data"
@@ -71,13 +72,16 @@ export default function TopIntelligenceCard({
         transition: 'all 0.3s',
       }}
     >
-      {/* Image */}
+      {/* Image — uses Next.js Image for automatic optimization and lazy loading */}
       {imageUrl && imageUrl.length > 0 && (
         <Link href={articleUrl || '#'} className="block relative overflow-hidden" style={{ aspectRatio: '16/9' }}>
-          <img
+          <Image
             src={imageUrl}
             alt={headline}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            fill
+            sizes="(max-width: 600px) 100vw, 600px"
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
+            priority
           />
           <div
             className="absolute inset-0"

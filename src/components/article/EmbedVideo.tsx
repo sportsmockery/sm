@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
+import Image from 'next/image'
 
 interface EmbedVideoProps {
   url: string
@@ -33,8 +34,12 @@ export default function EmbedVideo({
   title = 'Embedded Video',
   className = '',
 }: EmbedVideoProps) {
-  const [isLoaded, setIsLoaded] = useState(false)
+  const [activated, setActivated] = useState(false)
   const { type, id } = parseVideoUrl(url)
+
+  const handlePlay = useCallback(() => {
+    setActivated(true)
+  }, [])
 
   if (type === 'unknown') {
     return (
@@ -50,30 +55,49 @@ export default function EmbedVideo({
   }
 
   if (type === 'youtube') {
+    const thumbnail = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`
+
     return (
       <div className={`relative overflow-hidden rounded-xl ${className}`} style={{ maxWidth: '100%' }}>
-        {/* Loading placeholder */}
-        {!isLoaded && (
-          <div className="absolute inset-0 flex items-center justify-center bg-[var(--sm-surface)]">
-            <div className="flex flex-col items-center gap-3">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--sm-border)] border-t-[#8B0000]" />
-              <p className="text-sm text-[var(--sm-text-muted)]">
-                Loading video...
-              </p>
-            </div>
-          </div>
-        )}
-
         {/* Responsive container */}
         <div className="relative aspect-video w-full">
-          <iframe
-            src={`https://www.youtube.com/embed/${id}?rel=0&modestbranding=1`}
-            title={title}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            className="absolute inset-0 h-full w-full"
-            onLoad={() => setIsLoaded(true)}
-          />
+          {activated ? (
+            <iframe
+              src={`https://www.youtube.com/embed/${id}?autoplay=1&rel=0&modestbranding=1`}
+              title={title}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="absolute inset-0 h-full w-full"
+            />
+          ) : (
+            <button
+              type="button"
+              className="absolute inset-0 w-full h-full cursor-pointer group"
+              onClick={handlePlay}
+              aria-label={`Play ${title}`}
+            >
+              <Image
+                src={thumbnail}
+                alt={title}
+                fill
+                className="object-cover group-hover:scale-105 transition-transform duration-300"
+                sizes="(max-width: 768px) 100vw, 640px"
+              />
+              {/* Hover overlay */}
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+              {/* Play button */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div
+                  className="h-16 w-16 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform"
+                  style={{ background: 'rgba(255,255,255,0.95)', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}
+                >
+                  <svg width="24" height="28" viewBox="0 0 20 24" fill="none" className="ml-1" aria-hidden="true">
+                    <path d="M2 1L18 12L2 23V1Z" fill="#0B0F14" />
+                  </svg>
+                </div>
+              </div>
+            </button>
+          )}
         </div>
 
         {/* YouTube attribution */}

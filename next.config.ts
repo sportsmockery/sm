@@ -1,4 +1,9 @@
 import type { NextConfig } from "next";
+import withBundleAnalyzer from "@next/bundle-analyzer";
+
+const withAnalyzer = withBundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+});
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
@@ -51,8 +56,16 @@ const nextConfig: NextConfig = {
 
   // Enable production build optimizations
   experimental: {
-    // Optimize package imports
-    optimizePackageImports: ['date-fns', '@supabase/supabase-js'],
+    // Optimize package imports — reduces bundle by tree-shaking barrel exports
+    optimizePackageImports: [
+      'date-fns',
+      '@supabase/supabase-js',
+      'lucide-react',
+      'recharts',
+      'framer-motion',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-dropdown-menu',
+    ],
   },
 
   // Redirects for legacy WordPress routes
@@ -108,4 +121,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withAnalyzer(nextConfig);
