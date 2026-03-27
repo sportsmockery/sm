@@ -6,8 +6,14 @@ import { TeamHubLayout } from '@/components/team'
 import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
 
 export const metadata: Metadata = {
-  title: 'Chicago Bears Roster 2025 | SportsMockery',
-  description: 'Complete 2025 Chicago Bears roster with player profiles, positions, measurements, and stats. View all players by position group.',
+  title: '2025 Chicago Bears Roster & Players',
+  description: 'Complete 2025-26 Chicago Bears roster with player profiles, positions, measurements, contract details, and stats. View all players by position group.',
+  alternates: { canonical: '/chicago-bears/roster' },
+  openGraph: {
+    title: '2025 Chicago Bears Roster | Sports Mockery',
+    description: 'Full Bears roster with player profiles, positions, measurements, and stats.',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+  },
 }
 
 // Revalidate every hour

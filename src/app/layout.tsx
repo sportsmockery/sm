@@ -97,9 +97,8 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-  alternates: {
-    canonical: "https://sportsmockery.com",
-  },
+  // Note: canonical is NOT set at root level — each page sets its own
+  // via alternates.canonical in its page-level metadata export
   category: "sports",
   icons: {
     icon: "/favicon.ico",

@@ -5,7 +5,8 @@ import HomeFooter from '@/components/home/HomeFooter'
 
 export const metadata: Metadata = {
   title: {
-    absolute: 'Sports Mockery | 2.0',
+    template: '%s | Sports Mockery',
+    default: 'Sports Mockery',
   },
 }
 

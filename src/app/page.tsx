@@ -7,7 +7,8 @@ import { getHeroData } from '@/lib/hero-data';
 export const metadata: Metadata = {
   title: { absolute: 'Sports Mockery | Where Chicago Fans Come First' },
   description:
-    'Your personalized Chicago sports feed. Live scores, breaking news, Scout AI analysis, and fan community — all in one stream.',
+    'Your personalized Chicago sports feed. Live scores, breaking news, Scout AI analysis, trade simulators, and fan community for Bears, Bulls, Cubs, Sox, and Hawks.',
+  alternates: { canonical: '/' },
 };
 
 export const dynamic = 'force-dynamic';

@@ -13,8 +13,14 @@ const BEARS_LOGO = 'https://a.espncdn.com/i/teamlogos/nfl/500/chi.png'
 const BYE_WEEK = 5
 
 export const metadata: Metadata = {
-  title: 'Chicago Bears Schedule 2025 | Game Dates & Results | SportsMockery',
-  description: 'Complete Chicago Bears 2025 schedule with game dates, times, opponents, scores, and results. View upcoming games and past results.',
+  title: '2025 Chicago Bears Schedule & Results',
+  description: 'Full 2025 Chicago Bears schedule with game dates, times, opponents, TV channels, scores, and results. Track upcoming matchups and past game outcomes.',
+  alternates: { canonical: '/chicago-bears/schedule' },
+  openGraph: {
+    title: '2025 Chicago Bears Schedule | Sports Mockery',
+    description: 'Complete Bears schedule with dates, times, opponents, and results for the 2025 season.',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+  },
 }
 
 export const dynamic = 'force-dynamic'
