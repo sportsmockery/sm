@@ -56,7 +56,6 @@ const nextConfig: NextConfig = {
   },
 
   // Redirects for legacy WordPress routes
-  // NOTE: Do NOT redirect /home — it's the first-time visitor marketing page used by middleware
   async redirects() {
     return [
       { source: '/category/chicago-bears/:path*', destination: '/chicago-bears', permanent: true },

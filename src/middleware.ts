@@ -54,14 +54,6 @@ const publicPaths = [
   '/owner',      // Ownership report cards
 ]
 
-// Paths that should never trigger the first-time visitor redirect
-const SKIP_VISITOR_REDIRECT = [
-  '/login',
-  '/signup',
-  '/forgot-password',
-  '/reset-password',
-  '/api/auth/callback',
-]
 
 function createSupabaseMiddlewareClient(request: NextRequest) {
   let response = NextResponse.next({ request: { headers: request.headers } })
@@ -122,31 +114,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // 5. First-time visitor redirect — only for "app" pages (e.g., /gm, /scout-ai, /fan-chat)
-  const hasVisited = request.cookies.get('sm_visited')?.value
-  const isAuthPage = SKIP_VISITOR_REDIRECT.includes(pathname)
-
-  if (!hasVisited && !isAuthPage && pathname !== '/') {
-    const response = NextResponse.redirect(new URL('/home', request.url))
-
-    response.cookies.set('sm_visited', 'true', {
-      maxAge: 60 * 60 * 24 * 10, // 10 days
-      path: '/',
-      sameSite: 'lax',
-    })
-
-    if (pathname.startsWith('/') && !pathname.startsWith('//')) {
-      response.cookies.set('sm_intended_destination', pathname, {
-        maxAge: 60 * 60 * 24, // 24 hours
-        path: '/',
-        sameSite: 'lax',
-      })
-    }
-
-    return response
-  }
-
-  // 6. Allow Freestar dashboard (static SPA at /admin/freestar)
+  // 5. Allow Freestar dashboard (static SPA at /admin/freestar)
   if (pathname === '/admin/freestar' || pathname === '/admin/freestar/') {
     return NextResponse.next()
   }
