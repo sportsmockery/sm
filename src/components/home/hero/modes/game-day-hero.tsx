@@ -97,16 +97,16 @@ export function GameDayHero({ games: initialGames, logo }: GameDayHeroProps) {
         <span
           className="mb-5 inline-flex items-center rounded-full px-4 py-1.5 text-xs font-medium uppercase tracking-wider"
           style={{
-            backgroundColor: "rgba(34, 197, 94, 0.08)",
-            color: "#22C55E",
-            border: "1px solid rgba(34, 197, 94, 0.15)",
+            backgroundColor: isLive ? "rgba(0, 212, 255, 0.08)" : "rgba(34, 197, 94, 0.08)",
+            color: isLive ? "#00D4FF" : "#22C55E",
+            border: isLive ? "1px solid rgba(0, 212, 255, 0.25)" : "1px solid rgba(34, 197, 94, 0.15)",
           }}
         >
           <span
             className="mr-2 inline-block h-2 w-2 rounded-full animate-pulse"
-            style={{ backgroundColor: "#22C55E" }}
+            style={{ backgroundColor: isLive ? "#00D4FF" : "#22C55E" }}
           />
-          Game Day
+          {isLive ? "LIVE" : "Game Day"}
         </span>
 
         {/* Rotating content — fade transition */}

@@ -236,7 +236,7 @@ export default function LiveGamesTopBar({ teamFilter, isHomepage = false }: Live
   }
 
   return (
-    <div style={{ background: '#00D4FF', borderBottom: '1px solid rgba(0,180,220,0.6)' }}>
+    <div style={{ background: '#0B0F14', borderBottom: '2px solid #00D4FF', boxShadow: '0 2px 12px rgba(0, 212, 255, 0.5)' }}>
       <div className="max-w-[1200px] mx-auto px-4">
         {/* Scrollable container for multiple games */}
         <div className="flex items-center justify-center overflow-x-auto hide-scrollbar py-1.5 gap-2">
@@ -249,7 +249,7 @@ export default function LiveGamesTopBar({ teamFilter, isHomepage = false }: Live
                 key={game.game_id}
                 href={getLivePageUrl(game)}
                 className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-1.5 my-1 mx-1 transition-colors min-w-fit"
-                style={{ background: 'rgba(255,255,255,0.15)', borderRadius: 999, color: '#0B0F14' }}
+                style={{ background: 'rgba(0, 212, 255, 0.08)', border: '1px solid rgba(0, 212, 255, 0.4)', borderRadius: 999, color: '#FAFAFB' }}
               >
                 {/* Live/Starting Badge */}
                 <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -302,27 +302,27 @@ export default function LiveGamesTopBar({ teamFilter, isHomepage = false }: Live
 
                 {/* Score + opponent name */}
                 <div className="flex flex-col items-start sm:items-center justify-center flex-shrink-0 leading-tight">
-                  <div className="flex items-center gap-1 font-bold text-sm sm:text-base" style={{ color: '#0B0F14' }}>
+                  <div className="flex items-center gap-1 font-bold text-sm sm:text-base" style={{ color: '#FAFAFB' }}>
                     <span className={score.chicagoScore > score.opponentScore ? 'text-[#16a34a]' : ''}>
                       {score.chicagoAbbr} {score.chicagoScore}
                     </span>
-                    <span style={{ color: '#999' }}>–</span>
+                    <span style={{ color: 'rgba(255,255,255,0.3)' }}>–</span>
                     <span className={score.opponentScore > score.chicagoScore ? 'text-[#BC0000]' : ''}>
                       {score.opponentScore} {score.opponentAbbr}
                     </span>
                   </div>
-                  <div className="text-[10px] sm:text-xs text-left sm:text-center whitespace-nowrap" style={{ color: '#333' }}>
+                  <div className="text-[10px] sm:text-xs text-left sm:text-center whitespace-nowrap" style={{ color: 'rgba(255,255,255,0.5)' }}>
                     vs {getOpponentName(game)}
                   </div>
                 </div>
 
                 {/* Period/Clock */}
-                <div className="text-xs sm:text-sm flex-shrink-0" style={{ color: '#666' }}>
+                <div className="text-xs sm:text-sm flex-shrink-0" style={{ color: 'rgba(255,255,255,0.4)' }}>
                   {getStatusText(game)}
                 </div>
 
                 {/* Arrow indicator */}
-                <svg className="w-3 h-3 flex-shrink-0 hidden sm:block" style={{ color: '#999' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3 h-3 flex-shrink-0 hidden sm:block" style={{ color: 'rgba(255,255,255,0.3)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </Link>
