@@ -1,5 +1,7 @@
 'use client'
 
+import Image from 'next/image'
+
 
 
 // Stadium configurations for each team
@@ -110,9 +112,11 @@ export default function ARQuickLookButton({ team, className = '' }: ARQuickLookB
         </span>
 
         {/* Fallback image for non-AR browsers */}
-        <img
+        <Image
           src={config.fallbackImage}
           alt={`${config.name} preview`}
+          width={400}
+          height={225}
           className="hidden"
           aria-hidden="true"
         />

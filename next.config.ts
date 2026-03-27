@@ -38,12 +38,30 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'secure.gravatar.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'cdn.espn.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.wp.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'test.sportsmockery.com',
+      },
     ],
     // Enable modern image formats
     formats: ['image/avif', 'image/webp'],
     // Optimize device sizes for mobile-first
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    // Cache optimized images for 1 year — they rarely change
+    minimumCacheTTL: 31536000,
+    // Allow SVG for team logos
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'inline',
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
 
   // Compression

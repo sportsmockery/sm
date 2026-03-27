@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 import { useAuth } from '@/contexts/AuthContext'
+import Image from 'next/image'
 import Link from 'next/link'
 
 interface MockDraft {
@@ -398,7 +399,7 @@ export default function MyGMScorePage() {
                         }}
                       >
                         {teamInfo && (
-                          <img src={teamInfo.logo} alt={teamInfo.name} style={{ width: 36, height: 36, objectFit: 'contain' }} />
+                          <Image src={teamInfo.logo} alt={teamInfo.name} width={36} height={36} style={{ objectFit: 'contain' }} />
                         )}
                         <div style={{ flex: 1, minWidth: 140 }}>
                           <div style={{ fontWeight: 600, fontSize: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -541,7 +542,7 @@ export default function MyGMScorePage() {
                             }}
                           >
                             {teamInfo && (
-                              <img src={teamInfo.logo} alt={teamInfo.name} style={{ width: 32, height: 32, objectFit: 'contain' }} />
+                              <Image src={teamInfo.logo} alt={teamInfo.name} width={32} height={32} style={{ objectFit: 'contain' }} />
                             )}
                             <div style={{ flex: 1 }}>
                               <div style={{ fontWeight: 600, fontSize: 14 }}>

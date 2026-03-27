@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import Link from 'next/link'
 
 interface Notification {
@@ -199,10 +200,10 @@ export default function NotificationsPage() {
                     {/* Avatar */}
                     <div style={{
                       width: 40, height: 40, borderRadius: '50%', background: '#bc0000',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0, position: 'relative',
                     }}>
                       {notification.from_user?.avatar_url ? (
-                        <img src={notification.from_user.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <Image src={notification.from_user.avatar_url} alt="" fill style={{ objectFit: 'cover' }} />
                       ) : (
                         <span style={{ color: '#fff', fontWeight: 600, fontSize: '16px' }}>
                           {notification.from_user?.display_name?.charAt(0).toUpperCase() || '?'}

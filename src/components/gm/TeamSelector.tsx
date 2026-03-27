@@ -1,4 +1,5 @@
 'use client'
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { useTheme } from '@/contexts/ThemeContext'
 
@@ -51,10 +52,12 @@ export function TeamSelector({ selected, onSelect }: TeamSelectorProps) {
               transition: 'background-color 0.2s',
             }}
           >
-            <img
+            <Image
               src={t.logo}
               alt={t.label}
-              style={{ width: 32, height: 32, objectFit: 'contain' }}
+              width={32}
+              height={32}
+              style={{ objectFit: 'contain' }}
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
             />
             <span style={{

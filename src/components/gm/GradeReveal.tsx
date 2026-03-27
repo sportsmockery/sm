@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState, useRef } from 'react'
+import Image from 'next/image'
 import { motion, AnimatePresence, useSpring, useTransform } from 'framer-motion'
 import { useTheme } from '@/contexts/ThemeContext'
 import { WhatIfPanel } from './WhatIfPanel'
@@ -345,10 +346,12 @@ export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails, s
                   borderBottom: '1px solid var(--sm-border)',
                 }}>
                   {tradeDetails.chicagoLogo && (
-                    <img
+                    <Image
                       src={tradeDetails.chicagoLogo}
                       alt=""
-                      style={{ width: 20, height: 20, objectFit: 'contain' }}
+                      width={20}
+                      height={20}
+                      style={{ objectFit: 'contain' }}
                     />
                   )}
                   <span style={{ fontSize: '12px', fontWeight: 700, color: tradeDetails.chicagoColor || textColor, textTransform: 'uppercase' }}>
@@ -358,10 +361,12 @@ export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails, s
                 {tradeDetails.playersSent.map((player, idx) => (
                   <div key={`sent-${idx}`} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                     {player.headshot_url ? (
-                      <img
+                      <Image
                         src={player.headshot_url}
                         alt=""
-                        style={{ width: 32, height: 32, borderRadius: 16, objectFit: 'cover' }}
+                        width={32}
+                        height={32}
+                        style={{ borderRadius: 16, objectFit: 'cover' }}
                         onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
                       />
                     ) : (
@@ -420,10 +425,12 @@ export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails, s
                   borderBottom: '1px solid var(--sm-border)',
                 }}>
                   {tradeDetails.opponentLogo && (
-                    <img
+                    <Image
                       src={tradeDetails.opponentLogo}
                       alt=""
-                      style={{ width: 20, height: 20, objectFit: 'contain' }}
+                      width={20}
+                      height={20}
+                      style={{ objectFit: 'contain' }}
                       onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
                     />
                   )}
@@ -437,10 +444,12 @@ export function GradeReveal({ result, show, onClose, onNewTrade, tradeDetails, s
                   return (
                     <div key={`recv-${idx}`} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                       {isFullPlayer && playerData.headshot_url ? (
-                        <img
+                        <Image
                           src={playerData.headshot_url}
                           alt=""
-                          style={{ width: 32, height: 32, borderRadius: 16, objectFit: 'cover' }}
+                          width={32}
+                          height={32}
+                          style={{ borderRadius: 16, objectFit: 'cover' }}
                           onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
                         />
                       ) : (

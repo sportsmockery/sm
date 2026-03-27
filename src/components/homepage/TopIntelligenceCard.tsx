@@ -1,6 +1,8 @@
 "use client"
 
 import { ChevronRight } from "lucide-react"
+import Image from "next/image"
+import OptimizedImage from "@/components/ui/OptimizedImage"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { homepageTeams } from "@/lib/homepage-team-data"
@@ -74,9 +76,11 @@ export default function TopIntelligenceCard({
       {/* Image */}
       {imageUrl && imageUrl.length > 0 && (
         <Link href={articleUrl || '#'} className="block relative overflow-hidden" style={{ aspectRatio: '16/9' }}>
-          <img
+          <OptimizedImage
             src={imageUrl}
             alt={headline}
+            variant="card"
+            fill
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
           <div
@@ -96,14 +100,14 @@ export default function TopIntelligenceCard({
             <span style={{ fontSize: 11, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
           </div>
           {teamLogoSrc ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={teamLogoSrc}
               alt={team}
               width={28}
               height={28}
               style={{ width: 28, height: 28, objectFit: 'contain' }}
               crossOrigin="anonymous"
+              unoptimized
             />
           ) : (
             <span

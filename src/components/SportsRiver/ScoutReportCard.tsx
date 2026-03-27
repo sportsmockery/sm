@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import Image from 'next/image';
 
 type ScoutItem = {
   team: string;
@@ -122,9 +123,11 @@ export default function ScoutReportCard({
             <div className="flex min-w-0 items-start gap-4 md:gap-5">
               <div className="shrink-0">
                 <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-[#0B0F14] shadow-[0_8px_24px_rgba(0,0,0,0.35)] md:h-20 md:w-20">
-                  <img
+                  <Image
                     src={avatarSrc}
                     alt="Scout"
+                    width={64}
+                    height={64}
                     className="h-14 w-14 object-contain md:h-16 md:w-16"
                   />
                 </div>

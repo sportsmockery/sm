@@ -1,4 +1,5 @@
 'use client'
+import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from '@/contexts/ThemeContext'
 
@@ -94,7 +95,7 @@ export function DestinationPicker({
             }}>
               <span style={{ fontSize: 11, color: subText, fontWeight: 600, textTransform: 'uppercase' }}>From:</span>
               {fromTeam.logo && (
-                <img src={fromTeam.logo} alt="" style={{ width: 24, height: 24, objectFit: 'contain' }} />
+                <Image src={fromTeam.logo} alt="" width={24} height={24} style={{ objectFit: 'contain' }} />
               )}
               <span style={{ fontWeight: 600, fontSize: 13, color: fromTeam.color }}>{fromTeam.name}</span>
             </div>
@@ -129,7 +130,7 @@ export function DestinationPicker({
                     }}
                   >
                     {team.logo ? (
-                      <img src={team.logo} alt="" style={{ width: 36, height: 36, objectFit: 'contain' }} />
+                      <Image src={team.logo} alt="" width={36} height={36} style={{ objectFit: 'contain' }} />
                     ) : (
                       <div style={{
                         width: 36, height: 36, borderRadius: 18,

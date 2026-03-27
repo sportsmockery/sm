@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useTheme } from '@/contexts/ThemeContext'
 
@@ -108,7 +109,7 @@ export default function SharePage() {
       }}>
         <div style={{ maxWidth: 800, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
-            <img src="/sm-icon.png" alt="SportsMockery" style={{ width: 32, height: 32 }} />
+            <Image src="/sm-icon.png" alt="SportsMockery" width={32} height={32} />
             <span style={{ fontWeight: 800, fontSize: 18, color: 'var(--sm-red)' }}>SportsMockery</span>
           </Link>
           <Link href="/gm" className="btn btn-primary btn-sm">
@@ -155,10 +156,12 @@ export default function SharePage() {
             {/* Teams */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <img
+                <Image
                   src={chicagoConfig.logo || trade.chicago_team_logo}
                   alt={chicagoConfig.name}
-                  style={{ width: 48, height: 48, objectFit: 'contain' }}
+                  width={48}
+                  height={48}
+                  style={{ objectFit: 'contain' }}
                   onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
                 />
                 <div>
@@ -180,10 +183,12 @@ export default function SharePage() {
                   <div style={{ fontSize: 12, color: 'var(--sm-text-muted)' }}>Sends</div>
                 </div>
                 {trade.partner_team_logo && (
-                  <img
+                  <Image
                     src={trade.partner_team_logo}
                     alt={trade.trade_partner}
-                    style={{ width: 48, height: 48, objectFit: 'contain' }}
+                    width={48}
+                    height={48}
+                    style={{ objectFit: 'contain' }}
                     onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
                   />
                 )}

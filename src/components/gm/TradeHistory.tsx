@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from '@/contexts/ThemeContext'
 import { ExportModal } from './ExportModal'
@@ -96,12 +97,12 @@ export function TradeHistory({ trades, page, totalPages, onPageChange }: TradeHi
                   {/* Team logos */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
                     {t.chicago_team_logo && (
-                      <img src={t.chicago_team_logo} alt="" style={{ width: 24, height: 24, objectFit: 'contain' }}
+                      <Image src={t.chicago_team_logo} alt="" width={24} height={24} style={{ objectFit: 'contain' }}
                         onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
                     )}
                     <span style={{ fontSize: '11px', color: subText }}>&#x2194;</span>
                     {t.partner_team_logo && (
-                      <img src={t.partner_team_logo} alt="" style={{ width: 24, height: 24, objectFit: 'contain' }}
+                      <Image src={t.partner_team_logo} alt="" width={24} height={24} style={{ objectFit: 'contain' }}
                         onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
                     )}
                   </div>

@@ -101,11 +101,13 @@ export default function GifPicker({ onSelect, onClose }: GifPickerProps) {
                 className="gif-picker__gif"
                 onClick={() => onSelect(gif.url)}
               >
-                <img
+                <Image
                   src={gif.preview}
                   alt="GIF"
-                  loading="lazy"
+                  width={gif.width}
+                  height={gif.height}
                   className="gif-picker__gif-img"
+                  unoptimized
                 />
               </button>
             ))}

@@ -1,5 +1,6 @@
 'use client'
 import { useState, useCallback, useRef } from 'react'
+import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
 import { PlayerData } from './PlayerCard'
 import { AssetRow } from './AssetRow'
@@ -233,7 +234,7 @@ export function TradeBoard({
           borderBottom: mobile ? 'none' : `1px solid ${borderColor}`,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-            <img src={chicagoLogo} alt={displayLabel} style={{ width: 28, height: 28, objectFit: 'contain' }}
+            <Image src={chicagoLogo} alt={displayLabel} width={28} height={28} style={{ objectFit: 'contain' }}
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
             <span style={{ fontWeight: 700, fontSize: '14px', color: readableChicagoColor }}>
               {displayLabel} Send
@@ -313,7 +314,7 @@ export function TradeBoard({
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
             {opponentLogo && (
-              <img src={opponentLogo} alt={opponentName} style={{ width: 28, height: 28, objectFit: 'contain' }}
+              <Image src={opponentLogo} alt={opponentName} width={28} height={28} style={{ objectFit: 'contain' }}
                 onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
             )}
             <span style={{ fontWeight: 700, fontSize: '14px', color: readableOpponentColor }}>
@@ -1111,10 +1112,14 @@ export function TradeBoard({
                         border: `1px solid ${borderColor}`,
                         marginBottom: 12,
                       }}>
-                        <img
+                        <Image
                           src={generatedImageUrl}
                           alt="Trade Grade"
-                          style={{ width: '100%', display: 'block' }}
+                          width={0}
+                          height={0}
+                          sizes="100%"
+                          style={{ width: '100%', height: 'auto', display: 'block' }}
+                          unoptimized
                         />
                       </div>
                       <button

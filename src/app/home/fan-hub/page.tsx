@@ -56,7 +56,7 @@ export default function FanHubPage() {
             <h4 style={{ fontSize: 12, fontWeight: 600, color: '#8a8a9a', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 16 }}>Chat Rooms</h4>
             {ROOMS.map((room) => (
               <div key={room.name} className={`hm-room-item ${room.active ? 'hm-room-active' : ''}`}>
-                <img src={room.logo} alt={room.name} className="hm-room-logo" width={32} height={32} />
+                <Image src={room.logo} alt={room.name} className="hm-room-logo" width={32} height={32} />
                 <div style={{ flex: 1 }}>
                   <div className="hm-room-name">{room.name}</div>
                   <div className="hm-room-online">{room.online} online</div>
@@ -71,7 +71,7 @@ export default function FanHubPage() {
           {/* Chat Window */}
           <div className="hm-fan-chat">
             <div className="hm-chat-header">
-              <img src="https://a.espncdn.com/i/teamlogos/nfl/500/chi.png" alt="Bears" width={24} height={24} style={{ borderRadius: '50%' }} />
+              <Image src="https://a.espncdn.com/i/teamlogos/nfl/500/chi.png" alt="Bears" width={24} height={24} style={{ borderRadius: '50%' }} />
               <span>Bears Den</span>
               <span className="hm-chat-model">342 online</span>
             </div>

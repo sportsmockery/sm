@@ -148,7 +148,7 @@ export default function HomePage() {
           <div className="hm-hero-teams hm-hero-stagger hm-stagger-6">
             {TEAMS.map((team, i) => (
               <Link key={team.name} href={team.href} className="hm-hero-team hm-team-pop" style={{ animationDelay: `${1.4 + i * 0.08}s` }}>
-                <img src={team.logo} alt={team.name} width={28} height={28} />
+                <Image src={team.logo} alt={team.name} width={28} height={28} />
               </Link>
             ))}
           </div>
@@ -165,7 +165,7 @@ export default function HomePage() {
         <div className="hm-ticker">
           {[...TICKER_ITEMS, ...TICKER_ITEMS].map((item, i) => (
             <div key={i} className="hm-ticker-item">
-              <img src={item.logo} alt={item.team} width={16} height={16} style={{ borderRadius: '50%' }} />
+              <Image src={item.logo} alt={item.team} width={16} height={16} style={{ borderRadius: '50%' }} />
               <span className="hm-ticker-team">{item.team}</span> {item.text}
             </div>
           ))}
@@ -272,7 +272,7 @@ export default function HomePage() {
                 <div className="preview-trade">
                   <div className="trade-side">
                     <div className="team-header">
-                      <img src="https://a.espncdn.com/i/teamlogos/nfl/500/chi.png" alt="Bears" className="preview-team-logo" />
+                      <Image src="https://a.espncdn.com/i/teamlogos/nfl/500/chi.png" alt="Bears" width={24} height={24} className="preview-team-logo" />
                       <span>Bears Send</span>
                     </div>
                     <div className="trade-asset">DJ Moore <span className="pos">WR</span></div>
@@ -281,7 +281,7 @@ export default function HomePage() {
                   <div className="trade-arrow">⇄</div>
                   <div className="trade-side">
                     <div className="team-header">
-                      <img src="https://a.espncdn.com/i/teamlogos/nfl/500/gb.png" alt="Packers" className="preview-team-logo" />
+                      <Image src="https://a.espncdn.com/i/teamlogos/nfl/500/gb.png" alt="Packers" width={24} height={24} className="preview-team-logo" />
                       <span>Packers Send</span>
                     </div>
                     <div className="trade-asset">Rashan Gary <span className="pos">EDGE</span></div>

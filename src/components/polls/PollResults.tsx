@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 import type { PollOption, ChicagoTeam, PollType } from '@/types/polls'
 import { getTeamColors, getRandomMicrocopy } from '@/types/polls'
 
@@ -219,10 +220,12 @@ export default function PollResults({
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 {option.option_image && (
-                  <img
+                  <Image
                     src={option.option_image}
                     alt={option.option_text}
-                    style={{ height: 24, width: 24, borderRadius: 4, objectFit: 'cover' }}
+                    width={24}
+                    height={24}
+                    style={{ borderRadius: 4, objectFit: 'cover' }}
                   />
                 )}
                 <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--sm-text)' }}>
