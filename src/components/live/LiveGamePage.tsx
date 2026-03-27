@@ -32,7 +32,7 @@ export default function LiveGamePage({ sport, gameId }: LiveGamePageProps) {
   // Loading state
   if (isLoading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FAFAFB' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0B0F14' }}>
         <div style={{ width: 32, height: 32, border: '3px solid #BC0000', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin-2030 1s linear infinite' }} />
       </div>
     )
@@ -41,7 +41,7 @@ export default function LiveGamePage({ sport, gameId }: LiveGamePageProps) {
   // Error state
   if (error || !game) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FAFAFB' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0B0F14' }}>
         <div className="glass-card" style={{ textAlign: 'center', maxWidth: 400, position: 'relative', zIndex: 1 }}>
           <h1 style={{ fontFamily: 'var(--sm-font-heading)', fontSize: 24, fontWeight: 700, color: 'var(--sm-text)', marginBottom: 8 }}>
             {error || 'Game not found'}
@@ -76,12 +76,12 @@ export default function LiveGamePage({ sport, gameId }: LiveGamePageProps) {
   const tabLabels = { plays: 'Play-by-Play', boxscore: 'Box Score', stats: 'Team Stats' }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#FAFAFB' }}>
+    <div style={{ minHeight: '100vh', background: '#0B0F14' }}>
       {/* Score Header (always shown) */}
       <ScoreHeader game={game} />
 
       {/* Game Info bar inside header */}
-      <div className="sticky top-[130px] sm:top-[140px] z-40" style={{ background: 'var(--sm-surface)', borderBottom: '1px solid var(--sm-border)', backdropFilter: 'blur(12px)' }}>
+      <div className="sticky top-[130px] sm:top-[140px] z-40" style={{ background: 'linear-gradient(to right, #111827, #1f2937, #111827)', borderBottom: '2px solid #00D4FF', backdropFilter: 'blur(12px)' }}>
         <div className="max-w-[1200px] mx-auto px-4">
           <GameInfo game={game} />
         </div>
