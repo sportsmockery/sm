@@ -885,7 +885,6 @@ body,
 /* ========== BASE STYLES (2030) ========== */
 html {
   scroll-behavior: smooth;
-  overflow-x: hidden;
 }
 
 *, *::before, *::after {
