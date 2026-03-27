@@ -239,12 +239,14 @@ export function PostCard({ post, priority = false, cardSize = 'compact' }: PostC
 
           {/* Stat orbs */}
           <div className="stat-orb stat-orb--views">{viewsLabel}</div>
-          <div className="stat-orb stat-orb--comments" title={`${commentsCount} comments`}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-            </svg>
-            <span>{commentsLabel}</span>
-          </div>
+          {commentsCount > 0 && (
+            <div className="stat-orb stat-orb--comments" title={`${commentsCount} comments`}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              </svg>
+              <span>{commentsLabel}</span>
+            </div>
+          )}
           <div className="stat-orb stat-orb--read">{minRead} min</div>
 
           {/* Neon team label replaces old pill */}

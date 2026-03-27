@@ -32,7 +32,7 @@ export function CardActionButtons({ commentsCount, articleUrl }: CardActionButto
         />
         <span>Like</span>
       </button>
-      {articleUrl ? (
+      {count > 0 && (articleUrl ? (
         <a
           href={articleUrl}
           className="flex items-center gap-2 transition-colors min-h-[44px]"
@@ -72,7 +72,7 @@ export function CardActionButtons({ commentsCount, articleUrl }: CardActionButto
           />
           <span>{count}</span>
         </span>
-      )}
+      ))}
       <button
         type="button"
         className="flex items-center gap-2 transition-colors min-h-[44px] share-btn"

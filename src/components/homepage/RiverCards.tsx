@@ -275,7 +275,7 @@ export function EngagementRow({
             <span style={{ fontSize: 12, fontWeight: reactions[key] ? 600 : 400 }}>{count}</span>
           </button>
         ))}
-        {articleUrl ? (
+        {stats.comments > 0 && (articleUrl ? (
           <Link href={articleUrl} className="group flex items-center gap-1 transition-opacity hover:opacity-70 hp-tap-target" aria-label="Comments">
             <MessageCircle className="h-4 w-4" />
             <span style={{ fontSize: 12 }}>{stats.comments}</span>
@@ -285,7 +285,7 @@ export function EngagementRow({
             <MessageCircle className="h-4 w-4" />
             <span style={{ fontSize: 12 }}>{stats.comments}</span>
           </span>
-        )}
+        ))}
         <span className="flex items-center gap-1 hp-tap-target" style={{ fontSize: 12 }} title="Views">
           <Eye className="h-4 w-4" />
           {stats.views && stats.views !== '0' ? stats.views : '0'}
@@ -587,10 +587,12 @@ export function PollCard({ question, context, options, totalVotes, status, team,
       <div className="mt-4 flex items-center justify-between" style={{ fontSize: 14, color: 'var(--hp-muted-foreground)' }}>
         <span>{totalVotes.toLocaleString()} votes</span>
         <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1 hp-tap-target" aria-label="Comments">
-            <MessageCircle className="h-4 w-4" />
-            <span style={{ fontSize: 12 }}>{commentsCount ?? 0}</span>
-          </span>
+          {(commentsCount ?? 0) > 0 && (
+            <span className="flex items-center gap-1 hp-tap-target" aria-label="Comments">
+              <MessageCircle className="h-4 w-4" />
+              <span style={{ fontSize: 12 }}>{commentsCount}</span>
+            </span>
+          )}
           <div className="flex items-center gap-1">
             <Clock className="h-4 w-4" />
             <span>{status === "LIVE" ? "Live now" : "Poll closed"}</span>
@@ -706,10 +708,12 @@ export function HubUpdateCard({ updateText, takeaway, status, team, teamColor, t
           <span>View full update</span>
           <ChevronRight className="h-4 w-4" />
         </button>
-        <span className="flex items-center gap-1 hp-tap-target" style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }} aria-label="Comments">
-          <MessageCircle className="h-4 w-4" />
-          <span>{commentsCount ?? 0}</span>
-        </span>
+        {(commentsCount ?? 0) > 0 && (
+          <span className="flex items-center gap-1 hp-tap-target" style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }} aria-label="Comments">
+            <MessageCircle className="h-4 w-4" />
+            <span>{commentsCount}</span>
+          </span>
+        )}
       </div>
     </article>
   )
@@ -778,10 +782,12 @@ export function BoxScoreCard({ homeTeam, awayTeam, status, period, keyPerformer,
           <button onClick={() => router.push(`${teamHubUrl}/schedule`)} className="hp-tap-target hover:opacity-80 transition-opacity" style={{ fontSize: 14, fontWeight: 500, color: '#00D4FF' }}>Full box score</button>
           <button onClick={() => router.push(`/scout-ai?q=${encodeURIComponent(`${awayTeam.name} vs ${homeTeam.name} reactions`)}`)} className="hp-tap-target hover:opacity-80 transition-opacity" style={{ fontSize: 14, fontWeight: 500, color: '#00D4FF' }}>Reactions</button>
         </div>
-        <span className="flex items-center gap-1 hp-tap-target" style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }} aria-label="Comments">
-          <MessageCircle className="h-4 w-4" />
-          <span>{commentsCount ?? 0}</span>
-        </span>
+        {(commentsCount ?? 0) > 0 && (
+          <span className="flex items-center gap-1 hp-tap-target" style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }} aria-label="Comments">
+            <MessageCircle className="h-4 w-4" />
+            <span>{commentsCount}</span>
+          </span>
+        )}
       </div>
     </article>
   )
@@ -899,10 +905,12 @@ export function TradeProposalCard({ proposer, teamGets, otherTeamGets, fairnessS
       </div>
 
       <div className="mt-3 flex justify-end" style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }}>
-        <span className="flex items-center gap-1 hp-tap-target" aria-label="Comments">
-          <MessageCircle className="h-4 w-4" />
-          <span>{commentsCount ?? 0}</span>
-        </span>
+        {(commentsCount ?? 0) > 0 && (
+          <span className="flex items-center gap-1 hp-tap-target" aria-label="Comments">
+            <MessageCircle className="h-4 w-4" />
+            <span>{commentsCount}</span>
+          </span>
+        )}
       </div>
     </article>
   )
@@ -1064,17 +1072,17 @@ export function ScoutSummaryCard({ summary, bullets, topic, team, teamColor, tim
           </button>
         </div>
         <div className="flex items-center gap-3" style={{ fontSize: 12 }}>
-          {articleHref ? (
+          {(commentsCount ?? 0) > 0 && (articleHref ? (
             <Link href={articleHref} className="flex items-center gap-1 transition-opacity hover:opacity-70 hp-tap-target" aria-label="Comments">
               <MessageCircle className="h-4 w-4" />
-              <span>{commentsCount ?? 0}</span>
+              <span>{commentsCount}</span>
             </Link>
           ) : (
             <span className="flex items-center gap-1 hp-tap-target" aria-label="Comments">
               <MessageCircle className="h-4 w-4" />
-              <span>{commentsCount ?? 0}</span>
+              <span>{commentsCount}</span>
             </span>
-          )}
+          ))}
           <span className="flex items-center gap-1 hp-tap-target" title="Views">
             <Eye className="h-4 w-4" />
             <span>{stats?.views && stats.views !== '0' ? stats.views : '0'}</span>
@@ -1127,7 +1135,7 @@ export function TrendingArticleCard({ headline, summary, trendMetric, team, team
       <p className="mt-3 line-clamp-3" style={{ fontSize: 15, lineHeight: 1.65, color: 'var(--hp-foreground)', opacity: 0.7 }}>{summary}</p>
 
       <div className="mt-5 flex items-center justify-end gap-3" style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }}>
-        {articleUrl ? (
+        {stats.comments > 0 && (articleUrl ? (
           <Link href={articleUrl} className="flex items-center gap-1 transition-opacity hover:opacity-70 hp-tap-target" aria-label="Comments">
             <MessageCircle className="h-4 w-4" />
             <span>{stats.comments}</span>
@@ -1137,7 +1145,7 @@ export function TrendingArticleCard({ headline, summary, trendMetric, team, team
             <MessageCircle className="h-4 w-4" />
             <span>{stats.comments}</span>
           </span>
-        )}
+        ))}
         <span className="flex items-center gap-1 hp-tap-target" title="Views">
           <Eye className="h-4 w-4" />
           <span>{stats.views && stats.views !== '0' ? stats.views : '0'}</span>
@@ -1223,10 +1231,12 @@ export function DebateCard({ prompt, sideA, sideB, participantCount, team, teamC
             <Users className="h-4 w-4" />
             <span>{participantCount.toLocaleString()} participating</span>
           </div>
-          <span className="flex items-center gap-1 hp-tap-target" style={{ fontSize: 12 }} aria-label="Comments">
-            <MessageCircle className="h-4 w-4" />
-            <span>{commentsCount ?? 0}</span>
-          </span>
+          {(commentsCount ?? 0) > 0 && (
+            <span className="flex items-center gap-1 hp-tap-target" style={{ fontSize: 12 }} aria-label="Comments">
+              <MessageCircle className="h-4 w-4" />
+              <span>{commentsCount}</span>
+            </span>
+          )}
         </div>
         <button onClick={() => router.push(`/scout-ai?q=${encodeURIComponent(prompt)}`)} className="font-medium hp-tap-target hover:opacity-80 transition-opacity" style={{ color: '#00D4FF' }}>Join discussion</button>
       </div>
