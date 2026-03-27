@@ -164,6 +164,7 @@ async function fetchPosts(): Promise<Post[]> {
       excerpt,
       featured_image,
       published_at,
+      comments_count,
       category_id,
       author_id,
       sm_categories(name, slug),

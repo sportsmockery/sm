@@ -98,6 +98,7 @@ export const POST_SUMMARY_SELECT = `
   featured_image,
   published_at,
   views,
+  comments_count,
   author:sm_authors!author_id (
     id,
     display_name,

@@ -2,8 +2,8 @@
 /**
  * Plugin Name: SM Export
  * Plugin URI: https://sportsmockery.com
- * Description: REST API endpoints for exporting WordPress content to the Next.js frontend. Exposes /authors, /categories, and /posts endpoints.
- * Version: 1.1.0
+ * Description: REST API endpoints for exporting WordPress content to the Next.js frontend. Exposes /authors, /categories, /posts, /post-views, and /post-comments endpoints.
+ * Version: 1.3.0
  * Author: SportsMockery
  * Author URI: https://sportsmockery.com
  * License: GPL-2.0+
@@ -39,6 +39,13 @@ add_action('rest_api_init', function () {
     register_rest_route('sm-export/v1', '/post-views', array(
         'methods'  => 'GET',
         'callback' => 'sm_export_get_post_views',
+        'permission_callback' => '__return_true',
+    ));
+
+    // Post comments endpoint
+    register_rest_route('sm-export/v1', '/post-comments', array(
+        'methods'  => 'GET',
+        'callback' => 'sm_export_get_post_comments',
         'permission_callback' => '__return_true',
     ));
 });
@@ -136,6 +143,65 @@ function sm_export_get_post_views($request) {
 
     return rest_ensure_response(array(
         'views'       => $results,
+        'total'       => (int) $total,
+        'total_pages' => ceil($total / $per_page),
+        'page'        => $page,
+        'year'        => $year,
+    ));
+}
+
+/**
+ * Get per-post approved comment counts from wp_posts.comment_count
+ *
+ * Uses the same pagination/year-filtering pattern as /post-views.
+ * WordPress keeps comment_count on wp_posts as a cached count of
+ * approved comments, so no JOIN is needed.
+ *
+ * Query params:
+ *   year     - Filter to posts published in this year (default: current year)
+ *   page     - Page number (default: 1)
+ *   per_page - Results per page (default: 500, max: 1000)
+ */
+function sm_export_get_post_comments($request) {
+    global $wpdb;
+
+    $year     = intval($request->get_param('year') ?: date('Y'));
+    $page     = max(1, intval($request->get_param('page') ?: 1));
+    $per_page = min(1000, max(1, intval($request->get_param('per_page') ?: 500)));
+    $offset   = ($page - 1) * $per_page;
+
+    $start_date = "$year-01-01";
+    $end_date   = ($year + 1) . "-01-01";
+
+    // Count total posts in year
+    $total = $wpdb->get_var($wpdb->prepare(
+        "SELECT COUNT(*) FROM {$wpdb->posts}
+         WHERE post_type = 'post' AND post_status = 'publish'
+         AND post_date >= %s AND post_date < %s",
+        $start_date, $end_date
+    ));
+
+    // Get posts with comment counts (native column on wp_posts)
+    $results = $wpdb->get_results($wpdb->prepare(
+        "SELECT ID as id, comment_count as comments
+         FROM {$wpdb->posts}
+         WHERE post_type = 'post' AND post_status = 'publish'
+         AND post_date >= %s AND post_date < %s
+         ORDER BY post_date DESC
+         LIMIT %d OFFSET %d",
+        $start_date, $end_date, $per_page, $offset
+    ));
+
+    // Cast to integers (wpdb returns strings)
+    $results = array_map(function($row) {
+        return array(
+            'id'       => (int) $row->id,
+            'comments' => (int) $row->comments,
+        );
+    }, $results);
+
+    return rest_ensure_response(array(
+        'comments'    => $results,
         'total'       => (int) $total,
         'total_pages' => ceil($total / $per_page),
         'page'        => $page,

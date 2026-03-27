@@ -48,6 +48,7 @@ export interface Post {
   publishedAt: string
   status: 'draft' | 'published'
   views: number
+  commentsCount: number
   importanceScore: number
   author: Author
   team: TeamSlug
@@ -68,6 +69,7 @@ export interface PostSummary {
   featuredImage: string | null
   publishedAt: string
   views: number
+  commentsCount: number
   author: {
     id: number
     displayName: string

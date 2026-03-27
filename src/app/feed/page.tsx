@@ -59,7 +59,7 @@ async function getFeedData() {
   // 2) Editor picks - use top posts by importance_score as a proxy
   const { data: editorPicksRaw = [] } = await supabase
     .from('sm_posts')
-    .select('id, title, slug, featured_image, author:sm_authors!author_id(display_name, avatar_url), category:sm_categories!category_id(slug)')
+    .select('id, title, slug, featured_image, comments_count, author:sm_authors!author_id(display_name, avatar_url), category:sm_categories!category_id(slug)')
     .eq('status', 'published')
     .order('importance_score', { ascending: false })
     .limit(6)
@@ -83,7 +83,7 @@ async function getFeedData() {
 
   const { data: trendingPostsRaw = [] } = await supabase
     .from('sm_posts')
-    .select('id, title, slug, views, published_at, importance_score, content_type, primary_topic, author:sm_authors!author_id(display_name, avatar_url), category:sm_categories!category_id(slug)')
+    .select('id, title, slug, views, comments_count, published_at, importance_score, content_type, primary_topic, author:sm_authors!author_id(display_name, avatar_url), category:sm_categories!category_id(slug)')
     .eq('status', 'published')
     .gte('published_at', sevenDaysAgo.toISOString())
     .order('views', { ascending: false })
@@ -110,7 +110,7 @@ async function getFeedData() {
     .select(`
       id, title, slug, excerpt, featured_image,
       published_at, importance_score, content_type, primary_topic,
-      views,
+      views, comments_count,
       author:sm_authors!author_id(display_name, avatar_url),
       category:sm_categories!category_id(slug)
     `)

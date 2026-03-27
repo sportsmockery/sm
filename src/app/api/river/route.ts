@@ -392,7 +392,7 @@ export async function GET(req: NextRequest) {
         try {
           let query = supabaseAdmin
             .from('sm_posts')
-            .select('id, title, slug, featured_image, excerpt, scout_summary, engagement_velocity, published_at, category_id, views, category:sm_categories!category_id(slug)')
+            .select('id, title, slug, featured_image, excerpt, scout_summary, engagement_velocity, published_at, category_id, views, comments_count, category:sm_categories!category_id(slug)')
             .eq('status', 'published')
             .order('published_at', { ascending: false })
             .limit(60);
@@ -496,7 +496,7 @@ export async function GET(req: NextRequest) {
         try {
           return await supabaseAdmin
             .from('sm_posts')
-            .select('id, title, slug, featured_image, excerpt, published_at, views')
+            .select('id, title, slug, featured_image, excerpt, published_at, views, comments_count')
             .eq('status', 'published')
             .eq('content_type', 'video')
             .order('published_at', { ascending: false })

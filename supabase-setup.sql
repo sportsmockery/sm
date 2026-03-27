@@ -75,6 +75,11 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'sm_posts' AND column_name = 'updated_at') THEN
     ALTER TABLE sm_posts ADD COLUMN updated_at TIMESTAMPTZ;
   END IF;
+
+  -- Add comments_count column if not exists
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'sm_posts' AND column_name = 'comments_count') THEN
+    ALTER TABLE sm_posts ADD COLUMN comments_count INTEGER DEFAULT 0;
+  END IF;
 END $$;
 
 -- Add slug column to sm_authors if not exists
