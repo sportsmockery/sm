@@ -51,3 +51,7 @@ FRONTEND_Chart_UI_Tester.py
 
 # Figma sync outputs (large JSON, regenerated on demand)
 /figma/file.json
+
+# IDE and tools
+.claude/worktrees/
+.vscode/
