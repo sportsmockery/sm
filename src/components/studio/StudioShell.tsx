@@ -63,9 +63,58 @@ const icons: Record<string, React.ReactNode> = {
   ),
 }
 
+function StudioSidebarContent({ pathname, onLinkClick }: { pathname: string; onLinkClick?: () => void }) {
+  return (
+    <>
+      {/* Edge Logo with animated background */}
+      <div className="relative border-b border-[rgba(0,212,255,0.1)] overflow-hidden" style={{ height: 80 }}>
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, #0B0F14 0%, #111820 40%, #0B0F14 100%)' }}>
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(90deg, transparent 0%, #00D4FF 50%, transparent 100%)', animation: 'studioTelemetry 6s linear infinite', opacity: 0.1 }} />
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(90deg, transparent 0%, #BC0000 50%, transparent 100%)', animation: 'studioTelemetry 8s linear infinite reverse', opacity: 0.06 }} />
+        </div>
+        <div className="absolute inset-0 flex items-center justify-center z-10 px-3">
+          <Link href="/" title="Back to homepage" onClick={onLinkClick}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/edge-logo-blue.png" alt="Edge" style={{ height: 40, width: 'auto' }} className="opacity-90 hover:opacity-100 transition-opacity" />
+          </Link>
+        </div>
+        <style>{`@keyframes studioTelemetry { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }`}</style>
+      </div>
+
+      {/* Sidebar Header */}
+      <div className="flex h-14 items-center justify-between border-b border-[var(--border-default)] px-4">
+        <Link href="/studio/posts" className="flex items-center gap-2" onClick={onLinkClick}>
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--accent-red)] text-white font-bold text-sm">
+            SM
+          </div>
+          <span className="text-base font-bold text-[var(--text-primary)]">Studio</span>
+        </Link>
+      </div>
+      <nav className="p-4 space-y-1">
+        {navItems.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            onClick={onLinkClick}
+            className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+              pathname.startsWith(item.href)
+                ? 'bg-[var(--accent-red-muted)] text-[var(--accent-red)]'
+                : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]'
+            }`}
+          >
+            {icons[item.icon]}
+            {item.label}
+          </Link>
+        ))}
+      </nav>
+    </>
+  )
+}
+
 export default function StudioShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
 
   // Full-screen editor pages render without StudioShell chrome
   const isFullScreen = isFullScreenRoute(pathname)
@@ -76,67 +125,68 @@ export default function StudioShell({ children }: { children: React.ReactNode })
 
   return (
     <div className="min-h-screen bg-[var(--bg-primary)] pt-[92px]">
+      {/* Mobile Header - visible below lg breakpoint */}
+      <div className="sticky top-0 z-50 flex items-center gap-3 border-b border-[var(--border-default)] bg-[var(--bg-primary)] px-4 py-3 lg:hidden">
+        <button
+          onClick={() => setIsMobileSidebarOpen(true)}
+          className="flex h-10 w-10 items-center justify-center rounded-lg text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors"
+          aria-label="Open navigation menu"
+        >
+          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+          </svg>
+        </button>
+        <span className="text-base font-bold text-[var(--text-primary)]">Studio</span>
+      </div>
+
+      {/* Mobile Sidebar Overlay - visible below lg breakpoint */}
+      {isMobileSidebarOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-[55] bg-black/50 backdrop-blur-sm lg:hidden"
+            onClick={() => setIsMobileSidebarOpen(false)}
+          />
+          <aside className="fixed left-0 top-0 z-[60] h-screen w-72 bg-[var(--bg-secondary)] shadow-2xl lg:hidden animate-in slide-in-from-left duration-300">
+            <div className="flex h-14 items-center justify-end border-b border-[var(--border-default)] px-4">
+              <button
+                onClick={() => setIsMobileSidebarOpen(false)}
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]"
+                aria-label="Close navigation menu"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <StudioSidebarContent pathname={pathname} onLinkClick={() => setIsMobileSidebarOpen(false)} />
+          </aside>
+        </>
+      )}
+
       <div className="flex">
-        {/* Sidebar - positioned below global header */}
+        {/* Desktop Sidebar - hidden on mobile, positioned below global header */}
         <aside
-          className={`fixed left-0 top-[92px] bottom-0 z-40 border-r border-[var(--border-default)] bg-[var(--bg-secondary)] transition-all duration-300 ${
+          className={`hidden lg:block fixed left-0 top-[92px] bottom-0 z-40 border-r border-[var(--border-default)] bg-[var(--bg-secondary)] transition-all duration-300 ${
             sidebarCollapsed ? 'w-0 -translate-x-full' : 'w-60'
           }`}
         >
-          {/* Edge Logo with animated background */}
-          <div className="relative border-b border-[rgba(0,212,255,0.1)] overflow-hidden" style={{ height: 80 }}>
-            <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, #0B0F14 0%, #111820 40%, #0B0F14 100%)' }}>
-              <div className="absolute inset-0" style={{ background: 'linear-gradient(90deg, transparent 0%, #00D4FF 50%, transparent 100%)', animation: 'studioTelemetry 6s linear infinite', opacity: 0.1 }} />
-              <div className="absolute inset-0" style={{ background: 'linear-gradient(90deg, transparent 0%, #BC0000 50%, transparent 100%)', animation: 'studioTelemetry 8s linear infinite reverse', opacity: 0.06 }} />
-            </div>
-            <div className="absolute inset-0 flex items-center justify-center z-10 px-3">
-              <Link href="/" title="Back to homepage">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/edge-logo-blue.png" alt="Edge" style={{ height: 40, width: 'auto' }} className="opacity-90 hover:opacity-100 transition-opacity" />
-              </Link>
-            </div>
-            <style>{`@keyframes studioTelemetry { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }`}</style>
-          </div>
-
-          {/* Sidebar Header with collapse toggle */}
-          <div className="flex h-14 items-center justify-between border-b border-[var(--border-default)] px-4">
-            <Link href="/studio/posts" className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--accent-red)] text-white font-bold text-sm">
-                SM
-              </div>
-              <span className="text-base font-bold text-[var(--text-primary)]">Studio</span>
-            </Link>
-            <button
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] transition-colors"
-            >
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-              </svg>
-            </button>
-          </div>
-          <nav className="p-4 space-y-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                  pathname.startsWith(item.href)
-                    ? 'bg-[var(--accent-red-muted)] text-[var(--accent-red)]'
-                    : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)]'
-                }`}
-              >
-                {icons[item.icon]}
-                {item.label}
-              </Link>
-            ))}
-          </nav>
+          <StudioSidebarContent pathname={pathname} />
+          {/* Desktop collapse toggle */}
+          <button
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className="absolute top-[108px] right-2 flex h-8 w-8 items-center justify-center rounded-lg text-[var(--text-muted)] hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] transition-colors"
+            aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
+          </button>
         </aside>
 
         {/* Main Content */}
         <main
           className={`flex-1 min-h-[calc(100vh-92px)] transition-all duration-300 ${
-            sidebarCollapsed ? 'ml-0' : 'ml-60'
+            sidebarCollapsed ? 'lg:ml-0' : 'lg:ml-60'
           }`}
         >
           <div className="p-4 md:p-6 lg:p-8">

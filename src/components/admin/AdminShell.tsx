@@ -37,6 +37,20 @@ export default function AdminShell({
 
   return (
     <div className="min-h-screen bg-[var(--bg-primary)]">
+      {/* Mobile Header - visible below lg breakpoint */}
+      <div className="sticky top-0 z-50 flex items-center gap-3 border-b border-[var(--border-default)] bg-[var(--bg-primary)] px-4 py-3 lg:hidden">
+        <button
+          onClick={() => setIsMobileSidebarOpen(true)}
+          className="flex h-10 w-10 items-center justify-center rounded-lg text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors"
+          aria-label="Open navigation menu"
+        >
+          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+          </svg>
+        </button>
+        <span className="text-base font-bold text-[var(--text-primary)]">Admin</span>
+      </div>
+
       {/* Desktop Sidebar - hidden on mobile, positioned below global header */}
       <div className="hidden lg:block">
         <Sidebar />
