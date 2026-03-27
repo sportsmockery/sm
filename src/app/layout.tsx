@@ -14,8 +14,9 @@ import SidebarLayout from "@/components/layout/SidebarLayout";
 import SkipToContent from "@/components/layout/SkipToContent";
 import ScrollToTop from "@/components/layout/ScrollToTop";
 import BackToTop from "@/components/layout/BackToTop";
-import CookieBanner from "@/components/layout/CookieBanner";
-import TeamChatPanel from "@/components/chat/TeamChatPanel";
+import dynamic from "next/dynamic";
+const CookieBanner = dynamic(() => import("@/components/layout/CookieBanner"));
+const TeamChatPanel = dynamic(() => import("@/components/chat/TeamChatPanel"));
 import MotionProvider from "@/components/motion/MotionProvider";
 import NavigationProgress from "@/components/layout/NavigationProgress";
 import Breadcrumb from "@/components/layout/Breadcrumb";
@@ -119,6 +120,8 @@ export default function RootLayout({
         <link rel="preconnect" href="https://izwhcuccuwvlqqhpprbb.supabase.co" />
         <link rel="dns-prefetch" href="https://a.espncdn.com" />
         <link rel="preconnect" href="https://a.espncdn.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://i.ytimg.com" />
+        <link rel="preconnect" href="https://i.ytimg.com" crossOrigin="anonymous" />
         <link rel="prefetch" href="/chicago-bears" />
         <link rel="prefetch" href="/scout-ai" />
         <link rel="prefetch" href="/gm" />

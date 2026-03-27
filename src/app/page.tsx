@@ -10,7 +10,8 @@ export const metadata: Metadata = {
     'Your personalized Chicago sports feed. Live scores, breaking news, Scout AI analysis, and fan community — all in one stream.',
 };
 
-export const dynamic = 'force-dynamic';
+// ISR: revalidate every 60 seconds for fresh content with fast static serving
+export const revalidate = 60;
 
 // ---------------------------------------------------------------------------
 // Detect authenticated user for personalized greeting + hero data
