@@ -142,7 +142,7 @@ export async function GET(request: NextRequest) {
 
       for (let j = 0; j < results.length; j++) {
         if (results[j].error) {
-          console.error(`[Comments Sync] Failed to update post ${batch[j].id}:`, results[j].error.message)
+          console.error(`[Comments Sync] Failed to update post ${batch[j].id}:`, results[j].error?.message)
           errorCount++
         } else {
           updatedCount++
