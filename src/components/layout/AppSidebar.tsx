@@ -260,7 +260,25 @@ export default function AppSidebar() {
             <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--sm-text)', margin: 0, lineHeight: 1.2 }}>Ask Scout</p>
             <p style={{ fontSize: 10, color: 'var(--sm-text-muted)', margin: 0, lineHeight: 1.2 }}>AI sports analysis</p>
           </div>
-          <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#16a34a', flexShrink: 0 }} title="Online" />
+          <span
+            style={{
+              flexShrink: 0,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+              padding: '2px 6px',
+              borderRadius: 'var(--sm-radius-pill)',
+              fontSize: 9,
+              fontWeight: 700,
+              letterSpacing: '0.03em',
+              color: '#22c55e',
+              border: '1px solid rgba(34, 197, 94, 0.4)',
+              background: 'rgba(34, 197, 94, 0.12)',
+            }}
+          >
+            <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#22c55e' }} />
+            LIVE
+          </span>
         </Link>
       </div>
 
