@@ -870,6 +870,15 @@ Revenue: [
             {t}
           </button>
         ))}
+        <a href="/admin/freestar"
+          className="px-4 py-2.5 text-sm font-bold transition-colors"
+          style={{
+            color: 'var(--sm-text-dim)',
+            borderBottom: '2px solid transparent',
+            marginBottom: -1,
+          }}>
+          Freestar
+        </a>
       </div>
 
       {/* ── CONTENT ────────────────────────────────────────────── */}
