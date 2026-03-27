@@ -80,6 +80,7 @@ export interface RiverCandidate {
   // Scoring inputs
   importanceScore: number
   views: number
+  commentsCount: number
   forceHeroFeatured: boolean
 
   // Computed scores (filled during scoring)
@@ -203,6 +204,7 @@ export function extractCandidates(posts: any[]): RiverCandidate[] {
       publishedAt: post.published_at || '',
       importanceScore: post.importance_score || 50,
       views: post.views || 0,
+      commentsCount: post.comments_count || 0,
       forceHeroFeatured: post.force_hero_featured || false,
       // Scores filled later
       freshnessScore: 0,
@@ -230,7 +232,7 @@ export function extractCandidates(posts: any[]): RiverCandidate[] {
         author: { name: authorName || 'Sports Mockery', handle: 'SportsMockery', avatar: 'SM', verified: true },
         breakingIndicator: post.importance_score >= 80 ? 'BREAKING' : 'REPORT',
         featuredImage: post.featured_image || '',
-        stats: { comments: 0, retweets: 0, likes: 0, views: post.views ? formatViewCount(post.views) : '0' },
+        stats: { comments: post.comments_count || 0, retweets: 0, likes: 0, views: post.views ? formatViewCount(post.views) : '0' },
       },
     })
 
@@ -533,6 +535,7 @@ function candidateToRiverItem(candidate: RiverCandidate): HomepageRiverItem {
             bullets: candidate.payload.bullets,
             slug: candidate.slug,
             categorySlug: candidate.categorySlug,
+            stats: { views: candidate.views ? formatViewCount(candidate.views) : '0' },
           },
         }
       }
@@ -549,7 +552,7 @@ function candidateToRiverItem(candidate: RiverCandidate): HomepageRiverItem {
             takeaway: '',
             chartData: candidate.payload.dataPoints || [],
             statSource: 'SM Edge Analytics',
-            stats: { comments: 0, retweets: 0, likes: 0, views: '0' },
+            stats: { comments: candidate.commentsCount, retweets: 0, likes: 0, views: candidate.views ? formatViewCount(candidate.views) : '0' },
             slug: candidate.slug,
             categorySlug: candidate.categorySlug,
           },
@@ -569,6 +572,7 @@ function candidateToRiverItem(candidate: RiverCandidate): HomepageRiverItem {
             bullets: [candidate.payload.insight as string].filter(Boolean),
             slug: candidate.slug,
             categorySlug: candidate.categorySlug,
+            stats: { views: candidate.views ? formatViewCount(candidate.views) : '0' },
           },
         }
       }
@@ -583,7 +587,7 @@ function candidateToRiverItem(candidate: RiverCandidate): HomepageRiverItem {
           headline: candidate.payload.topic || candidate.label,
           summary: candidate.payload.summary || '',
           trendMetric: 'Analysis',
-          stats: { comments: 0, retweets: 0, likes: 0, views: '0' },
+          stats: { comments: candidate.commentsCount, retweets: 0, likes: 0, views: candidate.views ? formatViewCount(candidate.views) : '0' },
           slug: candidate.slug,
           categorySlug: candidate.categorySlug,
         },

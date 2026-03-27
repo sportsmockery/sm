@@ -32,6 +32,8 @@ export interface Post {
   evergreen?: boolean
   engagement_score?: number
   readTime?: number
+  views?: number
+  comments_count?: number
 }
 
 export interface Game {
@@ -164,6 +166,7 @@ async function fetchPosts(): Promise<Post[]> {
       excerpt,
       featured_image,
       published_at,
+      views,
       comments_count,
       category_id,
       author_id,
@@ -193,6 +196,8 @@ async function fetchPosts(): Promise<Post[]> {
     } : { name: 'Sports Mockery Staff' },
     team: categoryToTeam(post.sm_categories?.slug),
     readTime: Math.ceil((post.excerpt?.length || 500) / 200),
+    views: post.views || 0,
+    comments_count: post.comments_count || 0,
   }))
 }
 
