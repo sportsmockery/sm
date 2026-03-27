@@ -37,14 +37,14 @@ export function HeroShell({
 
   return (
     <section
-      className={`relative flex ${heightClass} flex-col overflow-hidden ${className}`}
+      className={`relative flex ${heightClass} flex-col ${className}`}
       style={{
         background: forceLight ? "#0B0F14" : "var(--hp-background)",
         color: forceLight ? "#FAFAFB" : "var(--hp-foreground)",
       }}
       aria-label={ariaLabel}
     >
-      {background}
+      <div className="absolute inset-0 overflow-hidden">{background}</div>
 
       <div className="relative z-10 mx-auto w-full max-w-7xl px-4 pt-5 sm:px-6 lg:px-8 lg:pt-6">
         <div

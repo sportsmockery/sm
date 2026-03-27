@@ -334,7 +334,7 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
       />
 
       {/* 2030 Hero Header */}
-      <header style={{ padding: '40px 0 32px', minHeight: 0, position: 'relative', background: 'var(--sm-dark)' }}>
+      <header className="article-header-2030" style={{ paddingTop: 'calc(var(--sm-nav-height, 72px) + 16px)', paddingBottom: 32, minHeight: 0, position: 'relative', background: 'var(--sm-dark)' }}>
         <div style={{ position: 'relative', zIndex: 1, maxWidth: 1236, margin: '0 auto', padding: '0 24px' }}>
           {/* Featured image with headline overlay */}
           {post.featured_image ? (
