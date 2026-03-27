@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic'
 const DISQUS_API_URL = 'https://disqus.com/api/3.0/threads/list.json'
 const DISQUS_FORUM = 'sportsmockery'
 const DISQUS_API_KEY = 'E8Uh5l5fHZ6gD8U3KycjAIAk46f68Zw7C6eW8WSjZvCLXebZ7p0r1yrYDrLilk2F'
-const MAX_PAGES = 50
+const MAX_PAGES = 10
 
 interface DisqusThread {
   posts: number
@@ -111,29 +111,42 @@ export async function GET(request: NextRequest) {
 
     console.log(`[Comments Sync] Found ${existingPosts.length} matching posts in Supabase`)
 
-    // 3. Update comments_count for each post (only if changed)
+    // 3. Update comments_count for each post (only if changed), batched
     let updatedCount = 0
     let skippedCount = 0
     let errorCount = 0
 
-    for (const post of existingPosts) {
+    const postsToUpdate = existingPosts.filter(post => {
       const disqusComments = commentsMap.get(post.wp_id) || 0
-
       if (post.comments_count === disqusComments) {
         skippedCount++
-        continue
+        return false
       }
+      return true
+    })
 
-      const { error } = await supabaseAdmin
-        .from('sm_posts')
-        .update({ comments_count: disqusComments, updated_at: new Date().toISOString() })
-        .eq('id', post.id)
+    const BATCH_SIZE = 50
+    for (let i = 0; i < postsToUpdate.length; i += BATCH_SIZE) {
+      const batch = postsToUpdate.slice(i, i + BATCH_SIZE)
+      const now = new Date().toISOString()
 
-      if (error) {
-        console.error(`[Comments Sync] Failed to update post ${post.id}:`, error.message)
-        errorCount++
-      } else {
-        updatedCount++
+      const results = await Promise.all(
+        batch.map(post => {
+          const disqusComments = commentsMap.get(post.wp_id) || 0
+          return supabaseAdmin
+            .from('sm_posts')
+            .update({ comments_count: disqusComments, updated_at: now })
+            .eq('id', post.id)
+        })
+      )
+
+      for (let j = 0; j < results.length; j++) {
+        if (results[j].error) {
+          console.error(`[Comments Sync] Failed to update post ${batch[j].id}:`, results[j].error.message)
+          errorCount++
+        } else {
+          updatedCount++
+        }
       }
     }
 
