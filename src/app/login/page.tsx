@@ -9,6 +9,7 @@ import LoginForm from '@/components/auth/LoginForm'
 export const metadata: Metadata = {
   title: 'Sign In | Sports Mockery',
   description: 'Sign in to your Sports Mockery account',
+  robots: { index: false, follow: false },
 }
 
 interface LoginPageProps {

@@ -9,6 +9,10 @@ const BASE_URL = 'https://sportsmockery.com'
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Static pages
+  // Team slugs for sub-page generation
+  const teams = ['chicago-bears', 'chicago-bulls', 'chicago-cubs', 'chicago-white-sox', 'chicago-blackhawks']
+  const teamSubPages = ['schedule', 'scores', 'stats', 'roster']
+
   const staticPages: MetadataRoute.Sitemap = [
     {
       url: BASE_URL,
@@ -51,6 +55,71 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.8,
+    },
+    // Team sub-pages (schedule, scores, stats, roster)
+    ...teams.flatMap(team =>
+      teamSubPages.map(sub => ({
+        url: `${BASE_URL}/${team}/${sub}`,
+        lastModified: new Date(),
+        changeFrequency: 'daily' as const,
+        priority: 0.7,
+      }))
+    ),
+    // Feature pages
+    {
+      url: `${BASE_URL}/gm`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    },
+    {
+      url: `${BASE_URL}/home/simulators`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    },
+    {
+      url: `${BASE_URL}/home/fan-hub`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.6,
+    },
+    {
+      url: `${BASE_URL}/home/data`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.6,
+    },
+    // Podcast pages
+    {
+      url: `${BASE_URL}/bears-film-room`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.6,
+    },
+    {
+      url: `${BASE_URL}/pinwheels-and-ivy`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.6,
+    },
+    {
+      url: `${BASE_URL}/vision-theater`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.6,
+    },
+    {
+      url: `${BASE_URL}/southside-behavior`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.6,
+    },
+    {
+      url: `${BASE_URL}/untold-chicago-stories`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.6,
     },
     {
       url: `${BASE_URL}/about`,
