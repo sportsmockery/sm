@@ -20,6 +20,7 @@ interface Post {
   is_trending: boolean;
   is_evergreen: boolean;
   views: number | null;
+  comments_count: number | null;
 }
 
 interface StorylineBlockProps {

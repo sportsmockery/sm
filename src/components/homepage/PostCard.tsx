@@ -23,6 +23,7 @@ interface Post {
   is_trending: boolean;
   is_evergreen: boolean;
   views: number | null;
+  comments_count: number | null;
 }
 
 type CardSize = 'xl' | 'm' | 'compact';
@@ -148,6 +149,10 @@ export function PostCard({ post, priority = false, cardSize = 'compact' }: PostC
     : views > 999
       ? `${(views / 1000).toFixed(1)}k`
       : String(views);
+  const commentsCount = post.comments_count || 0;
+  const commentsLabel = commentsCount > 999
+    ? `${(commentsCount / 1000).toFixed(1)}k`
+    : String(commentsCount);
   const wordCount = post.excerpt ? post.excerpt.split(/\s+/).length : 0;
   const minRead = Math.max(1, Math.floor(wordCount / 160));
 
@@ -234,6 +239,14 @@ export function PostCard({ post, priority = false, cardSize = 'compact' }: PostC
 
           {/* Stat orbs */}
           <div className="stat-orb stat-orb--views">{viewsLabel}</div>
+          {commentsCount > 0 && (
+            <div className="stat-orb stat-orb--comments" title={`${commentsCount} comments`}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              </svg>
+              <span>{commentsLabel}</span>
+            </div>
+          )}
           <div className="stat-orb stat-orb--read">{minRead} min</div>
 
           {/* Neon team label replaces old pill */}

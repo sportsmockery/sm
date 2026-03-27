@@ -65,6 +65,33 @@ export default function ViewCounter({
   )
 }
 
+// Compact comment count for article pages
+export function CommentCountCompact({
+  count,
+  className = '',
+  variant,
+}: {
+  count: number
+  className?: string
+  variant?: 'default' | 'overlay'
+}) {
+  if (count <= 0) return null
+  const colorStyle = variant === 'overlay' ? { color: 'rgba(255,255,255,0.9)' } : { color: 'var(--sm-text-muted)' }
+  return (
+    <span className={`flex items-center gap-1 text-xs ${className}`} style={colorStyle}>
+      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+        />
+      </svg>
+      {formatNumber(count)}
+    </span>
+  )
+}
+
 // Compact version for cards
 export function ViewCounterCompact({
   views,

@@ -10,7 +10,7 @@ import RelatedArticles from '@/components/article/RelatedArticles'
 import NextPrevArticle from '@/components/article/NextPrevArticle'
 import ArticleTags from '@/components/article/ArticleTags'
 import ArticleViewTracker from '@/components/ArticleViewTracker'
-import { ViewCounterCompact } from '@/components/ViewCounter'
+import { ViewCounterCompact, CommentCountCompact } from '@/components/ViewCounter'
 import ReadingProgressBar from '@/components/article/ReadingProgressBar'
 import ArticleActions from '@/components/article/ArticleActions'
 import ArticleSchema from '@/components/article/ArticleSchema'
@@ -47,7 +47,7 @@ async function getPost(slug: string) {
   try {
     const { data: post, error } = await supabaseAdmin
       .from('sm_posts')
-      .select('id, title, content, excerpt, featured_image, published_at, updated_at, seo_title, seo_description, author_id, category_id, views, toc')
+      .select('id, title, content, excerpt, featured_image, published_at, updated_at, seo_title, seo_description, author_id, category_id, views, comments_count, toc')
       .eq('slug', slug)
       .eq('status', 'published')
       .single()
@@ -383,6 +383,12 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
               <span>{readingTime} min read</span>
               <span style={{ color: 'var(--sm-text-dim)' }}>·</span>
               <ViewCounterCompact views={post.views || 0} />
+              {(post.comments_count || 0) > 0 && (
+                <>
+                  <span style={{ color: 'var(--sm-text-dim)' }}>·</span>
+                  <CommentCountCompact count={post.comments_count || 0} />
+                </>
+              )}
             </div>
           </div>
 

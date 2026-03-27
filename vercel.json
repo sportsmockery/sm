@@ -67,6 +67,10 @@
       "schedule": "0 * * * *"
     },
     {
+      "path": "/api/cron/sync-article-comments",
+      "schedule": "0 * * * *"
+    },
+    {
       "path": "/api/cron/scout-prompts",
       "schedule": "0 6 * * *"
     }

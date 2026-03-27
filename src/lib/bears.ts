@@ -419,6 +419,7 @@ function mapToPostSummary(row: any): PostSummary {
     featuredImage: row.featured_image,
     publishedAt: row.published_at,
     views: row.views || 0,
+    commentsCount: row.comments_count || 0,
     author: {
       id: author.id || 0,
       displayName: author.display_name || 'Staff',

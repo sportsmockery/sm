@@ -14,7 +14,7 @@ import { getYouTubeFeedVideos, type YouTubeFeedVideo } from '@/lib/getYouTubeFee
 import { composeAdaptiveRiver } from '@/lib/river-composer'
 
 // Column names match actual sm_posts table schema
-const POST_SELECT = 'id,title,slug,excerpt,featured_image,category_id,author_id,importance_score,published_at,views,template_version,content,author:sm_authors!author_id(display_name),category:sm_categories!category_id(slug,name)'
+const POST_SELECT = 'id,title,slug,excerpt,featured_image,category_id,author_id,importance_score,published_at,views,comments_count,template_version,content,author:sm_authors!author_id(display_name),category:sm_categories!category_id(slug,name)'
 
 export async function POST(request: NextRequest) {
   try {
@@ -254,7 +254,7 @@ function mapPostToRiverItem(post: any): HomepageRiverItem {
       author_name: displayAuthor,
       breakingIndicator: 'REPORT' as const,
       stats: {
-        comments: 0,
+        comments: post.comments_count || 0,
         retweets: 0,
         likes: 0,
         views: post.views ? formatViewCount(post.views) : '0',
@@ -263,6 +263,7 @@ function mapPostToRiverItem(post: any): HomepageRiverItem {
       postId: post.id,
       featuredImage: post.featured_image || '',
       categorySlug: (Array.isArray(post.category) ? post.category[0]?.slug : post.category?.slug) || '',
+      commentsCount: post.comments_count || 0,
     },
   }
 }
