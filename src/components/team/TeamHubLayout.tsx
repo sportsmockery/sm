@@ -129,10 +129,12 @@ export default function TeamHubLayout({
   const tabs = team.league === 'NFL' ? NFL_TABS : TEAM_TABS
   const basePath = `/${team.slug}`
 
+  const isHubOverview = pathname === basePath || pathname === basePath + '/'
+
   const currentTab = activeTab || tabs.find(tab => {
     const fullPath = basePath + tab.path
     if (tab.path === '') {
-      return pathname === basePath || pathname === basePath + '/'
+      return isHubOverview
     }
     return pathname?.startsWith(fullPath)
   })?.id || 'overview'
@@ -181,7 +183,7 @@ export default function TeamHubLayout({
       >
         <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '0 24px' }}>
           {/* Tabs — horizontally scrollable on mobile, centered on desktop */}
-          <nav className="team-subnav-mobile" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', overflowX: 'auto', padding: '4px 0', scrollbarWidth: 'none' }}>
+          <nav className={`team-subnav-mobile${!isHubOverview ? ' team-subnav-subpage' : ''}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', overflowX: 'auto', padding: '4px 0', scrollbarWidth: 'none' }}>
             {tabs.map((tab: typeof tabs[number]) => {
               const isActive = tab.id === currentTab
               const href = tab.external
