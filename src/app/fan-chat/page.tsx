@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import { useAIChatPersonality } from '@/hooks/useAIChatPersonality'
-import { AI_PERSONALITIES } from '@/lib/ai-personalities'
+import { getBrowserClient } from '@/lib/supabase-browser'
 
 // Message type
 interface ChatMessage {
@@ -15,6 +15,20 @@ interface ChatMessage {
   isOwn: boolean
   isAI?: boolean
   personality?: string
+}
+
+// DB message shape returned by the API (includes joined chat_users fields)
+interface DBMessage {
+  id: string
+  room_id: string
+  user_id: string
+  content: string
+  content_type: string
+  created_at: string
+  is_deleted: boolean
+  moderation_status: string
+  display_name: string
+  badge: string
 }
 
 // Team channels with AI personality info
@@ -90,10 +104,41 @@ const CHANNEL_FAN_LABEL: Record<string, string> = {
   blackhawks: 'Blackhawks',
 }
 
-// Get initial welcome messages for a channel
-function getWelcomeMessages(channelId: string): ChatMessage[] {
-  const personality = AI_PERSONALITIES[channelId] || AI_PERSONALITIES.bears
+// Format a timestamp to a relative time string
+function formatRelativeTime(isoString: string): string {
+  const date = new Date(isoString)
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffSec = Math.floor(diffMs / 1000)
+  const diffMin = Math.floor(diffSec / 60)
+  const diffHour = Math.floor(diffMin / 60)
+  const diffDay = Math.floor(diffHour / 24)
 
+  if (diffSec < 60) return 'Just now'
+  if (diffMin < 60) return `${diffMin} min ago`
+  if (diffHour < 24) return `${diffHour}h ago`
+  if (diffDay < 7) return `${diffDay}d ago`
+  return date.toLocaleDateString()
+}
+
+// Convert a DB message to our ChatMessage format
+function dbMessageToChatMessage(msg: DBMessage, currentUserId: string | null): ChatMessage {
+  const isAI = msg.badge === 'ai'
+  const isOwn = !isAI && msg.user_id === currentUserId
+
+  return {
+    id: msg.id,
+    user: isOwn ? 'You' : msg.display_name,
+    content: msg.content,
+    time: formatRelativeTime(msg.created_at),
+    isOwn,
+    isAI,
+    personality: isAI ? msg.display_name : undefined,
+  }
+}
+
+// Get initial welcome messages for a channel (shown only if no history)
+function getWelcomeMessages(channelId: string): ChatMessage[] {
   const welcomeMessages: Record<string, ChatMessage[]> = {
     bears: [
       {
@@ -173,34 +218,101 @@ export default function FanChatPage() {
   const [activeChannel, setActiveChannel] = useState(initialChannel)
   const [message, setMessage] = useState('')
   const [showChannels, setShowChannels] = useState(false)
-  const [messages, setMessages] = useState<ChatMessage[]>(() => getWelcomeMessages(initialChannel))
+  const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isTyping, setIsTyping] = useState(false)
-  const [hasUserInteracted, setHasUserInteracted] = useState(false)
+  const [isLoadingMessages, setIsLoadingMessages] = useState(true)
+
+  // Stable user ID (chat_users UUID) for the session
+  const userIdRef = useRef<string>('')
+  const displayNameRef = useRef<string>('')
+  useEffect(() => {
+    const storedId = sessionStorage.getItem('fan-chat-user-uuid')
+    const storedName = sessionStorage.getItem('fan-chat-display-name')
+    if (storedId && storedName) {
+      userIdRef.current = storedId
+      displayNameRef.current = storedName
+      return
+    }
+
+    // Register a guest chat_user via the API
+    const guestName = `Fan${Math.floor(Math.random() * 9000) + 1000}`
+    displayNameRef.current = guestName
+    fetch('/api/fan-chat/user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ displayName: guestName }),
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.id) {
+          userIdRef.current = data.id
+          sessionStorage.setItem('fan-chat-user-uuid', data.id)
+          sessionStorage.setItem('fan-chat-display-name', guestName)
+        }
+      })
+      .catch(err => console.error('Failed to register guest user:', err))
+  }, [])
+
+  // Cache of per-channel messages and room IDs so switching rooms preserves history
+  const channelCacheRef = useRef<Record<string, { messages: ChatMessage[]; roomId: string | null }>>({})
+  // Track the current room ID for the active channel (needed for realtime subscription)
+  const [currentRoomId, setCurrentRoomId] = useState<string | null>(null)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const currentChannel = channels.find(c => c.id === activeChannel) || channels[1]
 
+  // Supabase client for realtime subscriptions
+  const supabaseRef = useRef(getBrowserClient())
+  const realtimeChannelRef = useRef<ReturnType<typeof supabaseRef.current.channel> | null>(null)
+
   // AI Personality hook
   const {
-    personality,
     isLoading: aiLoading,
     requestAIResponse
   } = useAIChatPersonality({
     channelId: activeChannel,
     enabled: true,
     onAIMessage: (aiMessage) => {
-      setMessages(prev => [...prev, aiMessage])
+      // Persist the AI message to Supabase
+      persistMessage(aiMessage.content, aiMessage.user, true, aiMessage.personality)
       setIsTyping(false)
     }
   })
 
+  // Persist a message to Supabase via our API
+  const persistMessage = useCallback(async (
+    content: string,
+    displayName: string,
+    isAI: boolean,
+    personalityId?: string
+  ) => {
+    try {
+      await fetch('/api/fan-chat/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          channel: activeChannel,
+          content,
+          displayName,
+          isAI,
+          // For non-AI messages, pass the chat_users UUID directly
+          userId: !isAI ? userIdRef.current : undefined,
+          // For AI messages, pass the personality display name (resolved server-side)
+          personality: personalityId || displayName,
+        }),
+      })
+    } catch (err) {
+      console.error('Failed to persist message:', err)
+    }
+  }, [activeChannel])
+
   // Scroll to bottom within container only (not the whole page)
-  const scrollToBottom = useCallback(() => {
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
     if (messagesContainerRef.current) {
       messagesContainerRef.current.scrollTo({
         top: messagesContainerRef.current.scrollHeight,
-        behavior: 'smooth'
+        behavior,
       })
     }
   }, [])
@@ -210,26 +322,158 @@ export default function FanChatPage() {
     if ('scrollRestoration' in history) {
       history.scrollRestoration = 'manual'
     }
-    // Scroll to top on mount
     window.scrollTo(0, 0)
   }, [])
 
-  // Scroll to bottom when messages change (only after user has interacted)
+  // Scroll to bottom when messages change
   useEffect(() => {
-    if (messages.length > 0 && hasUserInteracted) {
+    if (messages.length > 0) {
       scrollToBottom()
     }
-  }, [messages, hasUserInteracted, scrollToBottom])
+  }, [messages, scrollToBottom])
 
-  // Reset messages when channel changes
+  // Fetch messages for the active channel and set up realtime subscription
   useEffect(() => {
-    setMessages(getWelcomeMessages(activeChannel))
+    let cancelled = false
+
+    const loadMessages = async () => {
+      setIsLoadingMessages(true)
+
+      // Check cache first
+      const cached = channelCacheRef.current[activeChannel]
+      if (cached) {
+        setMessages(cached.messages)
+        setCurrentRoomId(cached.roomId)
+        setIsLoadingMessages(false)
+        // Still refresh in background
+      }
+
+      try {
+        const res = await fetch(`/api/fan-chat/messages?channel=${activeChannel}&limit=50`)
+        if (!res.ok) throw new Error('Failed to fetch messages')
+        const data = await res.json()
+
+        if (cancelled) return
+
+        const roomId: string | null = data.roomId
+        setCurrentRoomId(roomId)
+
+        if (data.messages && data.messages.length > 0) {
+          const converted = data.messages.map((m: DBMessage) =>
+            dbMessageToChatMessage(m, userIdRef.current)
+          )
+          setMessages(converted)
+          channelCacheRef.current[activeChannel] = { messages: converted, roomId }
+        } else if (!cached) {
+          // No persisted messages and no cache — show welcome messages
+          const welcome = getWelcomeMessages(activeChannel)
+          setMessages(welcome)
+          channelCacheRef.current[activeChannel] = { messages: welcome, roomId }
+        }
+      } catch (err) {
+        console.error('Failed to load messages:', err)
+        if (!cached && !cancelled) {
+          setMessages(getWelcomeMessages(activeChannel))
+        }
+      } finally {
+        if (!cancelled) setIsLoadingMessages(false)
+      }
+    }
+
+    loadMessages()
+
+    return () => { cancelled = true }
   }, [activeChannel])
 
-  // Track number of authenticated users online
-  const [authenticatedUsersOnline, setAuthenticatedUsersOnline] = useState(1)
+  // Set up Supabase realtime subscription when roomId changes
+  useEffect(() => {
+    if (!currentRoomId) return
 
-  // Per-channel online counts for left sidebar ("X Bears Fans Online"). Start at 1 so text is always visible (AI + you).
+    // Clean up previous subscription
+    if (realtimeChannelRef.current) {
+      supabaseRef.current.removeChannel(realtimeChannelRef.current)
+      realtimeChannelRef.current = null
+    }
+
+    const channel = supabaseRef.current
+      .channel(`fan-chat:${currentRoomId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'chat_messages',
+          filter: `room_id=eq.${currentRoomId}`,
+        },
+        (payload: { new: Record<string, unknown> }) => {
+          const raw = payload.new as Record<string, unknown>
+          if (raw.moderation_status !== 'approved' || raw.is_deleted) return
+
+          // Realtime payloads don't include the join — fetch display_name from API
+          // For messages from us, we already know the display name
+          const isOwnMessage = raw.user_id === userIdRef.current
+
+          const newMsg: DBMessage = {
+            id: raw.id as string,
+            room_id: raw.room_id as string,
+            user_id: raw.user_id as string,
+            content: raw.content as string,
+            content_type: raw.content_type as string,
+            created_at: raw.created_at as string,
+            is_deleted: raw.is_deleted as boolean,
+            moderation_status: raw.moderation_status as string,
+            display_name: isOwnMessage ? displayNameRef.current : 'Unknown',
+            badge: 'fan',
+          }
+
+          // If it's not our own message, resolve the display_name asynchronously
+          if (!isOwnMessage) {
+            fetch(`/api/fan-chat/user?userId=${raw.user_id}`)
+              .then(res => res.ok ? res.json() : null)
+              .catch(() => null)
+              .then(userData => {
+                if (userData?.displayName) {
+                  setMessages(prev =>
+                    prev.map(m =>
+                      m.id === newMsg.id
+                        ? { ...m, user: userData.displayName, isAI: userData.badge === 'ai', personality: userData.badge === 'ai' ? userData.displayName : undefined }
+                        : m
+                    )
+                  )
+                }
+              })
+          }
+
+          const chatMsg = dbMessageToChatMessage(newMsg, userIdRef.current)
+
+          setMessages(prev => {
+            // Avoid duplicates (message may already be in state from optimistic update or cache)
+            if (prev.some(m => m.id === chatMsg.id)) return prev
+            const updated = [...prev, chatMsg]
+            // Update cache
+            channelCacheRef.current[activeChannel] = {
+              messages: updated,
+              roomId: currentRoomId,
+            }
+            return updated
+          })
+        }
+      )
+      .subscribe()
+
+    realtimeChannelRef.current = channel
+    const supabase = supabaseRef.current
+
+    return () => {
+      supabase.removeChannel(channel)
+      realtimeChannelRef.current = null
+    }
+  }, [currentRoomId, activeChannel])
+
+  // Track number of authenticated users online
+  const [authenticatedUsersOnline] = useState(1)
+
+  // Per-channel online counts for left sidebar
   const [onlineCounts, setOnlineCounts] = useState<Record<string, number>>(() => ({
     global: 1, bears: 1, bulls: 1, cubs: 1, whitesox: 1, blackhawks: 1,
   }))
@@ -254,29 +498,32 @@ export default function FanChatPage() {
   const handleSendMessage = useCallback(async () => {
     if (!message.trim()) return
 
-    const newMessage: ChatMessage = {
-      id: `user-${Date.now()}`,
+    const content = message.trim()
+    setMessage('')
+
+    // Persist to Supabase (realtime subscription will add it to messages)
+    persistMessage(content, displayNameRef.current, false)
+
+    // Optimistic update: add the message to local state immediately
+    const optimisticMsg: ChatMessage = {
+      id: `optimistic-${Date.now()}`,
       user: 'You',
-      content: message.trim(),
+      content,
       time: 'Just now',
       isOwn: true,
-      isAI: false
+      isAI: false,
     }
+    setMessages(prev => [...prev, optimisticMsg])
 
-    setMessages(prev => [...prev, newMessage])
-    setMessage('')
-    setHasUserInteracted(true) // Enable scrolling after first user interaction
-
-    // Trigger AI response after a small delay (simulates typing)
-    // AI will only respond if:
-    // 1. User is alone (authenticatedUsersOnline <= 1), OR
-    // 2. User directly mentions the AI (@BearDownBenny, etc.)
+    // Trigger AI response after a small delay
     setIsTyping(true)
+    const currentMessages = [...messages, optimisticMsg]
     setTimeout(async () => {
-      const updatedMessages = [...messages, newMessage]
-      await requestAIResponse(updatedMessages, authenticatedUsersOnline, 'no_users_online')
-    }, 1500 + Math.random() * 2000) // 1.5-3.5 second delay
-  }, [message, messages, requestAIResponse, authenticatedUsersOnline])
+      await requestAIResponse(currentMessages, authenticatedUsersOnline, 'no_users_online')
+      // If AI didn't respond, clear typing indicator
+      setIsTyping(false)
+    }, 1500 + Math.random() * 2000)
+  }, [message, messages, requestAIResponse, authenticatedUsersOnline, persistMessage])
 
   // Handle Enter key
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -290,7 +537,6 @@ export default function FanChatPage() {
   const [aiSuggestions, setAiSuggestions] = useState<string[]>([])
 
   useEffect(() => {
-    // Simple contextual suggestions based on channel
     const channelSuggestions: Record<string, string[]> = {
       bears: ["What about the draft?", "Caleb looks solid!", "Defense needs work"],
       bulls: ["Trade rumors?", "Rebuild is working", "Need a center badly"],
@@ -498,6 +744,18 @@ export default function FanChatPage() {
                   </h3>
                 </div>
 
+                {/* Loading indicator */}
+                {isLoadingMessages && messages.length === 0 && (
+                  <div className="flex justify-center py-8">
+                    <div className="flex items-center gap-2" style={{ color: 'var(--sm-text-muted)' }}>
+                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                      <span className="text-sm ml-2">Loading messages...</span>
+                    </div>
+                  </div>
+                )}
+
                 {/* Messages */}
                 <div className="space-y-4">
                   {messages.map((msg) => (
@@ -610,7 +868,7 @@ export default function FanChatPage() {
                           background: 'rgba(255, 255, 255, 0.04)',
                           border: '1px solid rgba(255, 255, 255, 0.08)',
                           color: 'var(--sm-text-muted)',
-                         
+
                           fontSize: 12,
                           cursor: 'pointer',
                           transition: 'all 0.15s',
