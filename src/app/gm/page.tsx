@@ -939,81 +939,66 @@ export default function GMPage() {
         const partner1Key = opponentTeam!.team_key
         const partner2Key = thirdTeam.team_key
 
-        // Helper to format asset as string for three_team_details
-        const formatAsset = (player?: { full_name: string }, pick?: DraftPick, prospect?: MLBProspect): string => {
-          if (player) return player.full_name
-          if (prospect) return `${prospect.name} (PROSPECT)`
-          if (pick) return `${pick.year} R${pick.round}${pick.pickNumber ? ` #${pick.pickNumber}` : ''}`
-          return ''
-        }
+        // Build structured players and draft_picks arrays for the API
+        const threeTeamPlayers: any[] = []
+        const threeTeamPicks: any[] = []
 
-        // Initialize three_team_details arrays
-        const threeTeamDetails: Record<string, string[]> = {
-          chicago_sends_to_partner_1: [],
-          chicago_sends_to_partner_2: [],
-          chicago_receives_from_partner_1: [],
-          chicago_receives_from_partner_2: [],
-          partner_1_sends_to_chicago: [],
-          partner_1_receives_from_chicago: [],
-          partner_1_sends_to_partner_2: [],
-          partner_1_receives_from_partner_2: [],
-          partner_2_sends_to_chicago: [],
-          partner_2_sends_to_partner_1: [],
-          partner_2_receives_from_chicago: [],
-          partner_2_receives_from_partner_1: [],
-        }
-
-        // Map flows to three_team_details
         for (const flow of tradeFlows) {
-          const assets: string[] = []
-
-          // Collect all assets in this flow
           for (const player of flow.players) {
-            assets.push(formatAsset(player))
+            threeTeamPlayers.push({
+              player_name: player.full_name,
+              name: player.full_name,
+              position: player.position,
+              from_team: flow.from,
+              to_team: flow.to,
+              stat_line: player.stat_line,
+              age: player.age,
+              jersey_number: player.jersey_number,
+              headshot_url: player.headshot_url,
+              espn_id: player.espn_id,
+              cap_hit: player.cap_hit,
+              contract_years: player.contract_years,
+            })
           }
           if (flow.prospects) {
             for (const prospect of flow.prospects) {
-              assets.push(formatAsset(undefined, undefined, prospect))
+              threeTeamPlayers.push({
+                player_name: prospect.name,
+                name: prospect.name,
+                position: prospect.position,
+                from_team: flow.from,
+                to_team: flow.to,
+                is_prospect: true,
+                player_type: 'prospect' as const,
+                prospect_grade: prospect.prospect_grade_numeric || 50,
+                trade_value: prospect.trade_value || 0,
+                org_rank: prospect.org_rank,
+                current_level: prospect.current_level || prospect.level || 'MiLB',
+              })
             }
           }
           for (const pick of flow.picks) {
-            assets.push(formatAsset(undefined, pick))
-          }
-
-          // Determine which array to populate based on from/to
-          if (flow.from === chicagoKey && flow.to === partner1Key) {
-            threeTeamDetails.chicago_sends_to_partner_1.push(...assets)
-            threeTeamDetails.partner_1_receives_from_chicago.push(...assets)
-          } else if (flow.from === chicagoKey && flow.to === partner2Key) {
-            threeTeamDetails.chicago_sends_to_partner_2.push(...assets)
-            threeTeamDetails.partner_2_receives_from_chicago.push(...assets)
-          } else if (flow.from === partner1Key && flow.to === chicagoKey) {
-            threeTeamDetails.partner_1_sends_to_chicago.push(...assets)
-            threeTeamDetails.chicago_receives_from_partner_1.push(...assets)
-          } else if (flow.from === partner1Key && flow.to === partner2Key) {
-            threeTeamDetails.partner_1_sends_to_partner_2.push(...assets)
-            threeTeamDetails.partner_2_receives_from_partner_1.push(...assets)
-          } else if (flow.from === partner2Key && flow.to === chicagoKey) {
-            threeTeamDetails.partner_2_sends_to_chicago.push(...assets)
-            threeTeamDetails.chicago_receives_from_partner_2.push(...assets)
-          } else if (flow.from === partner2Key && flow.to === partner1Key) {
-            threeTeamDetails.partner_2_sends_to_partner_1.push(...assets)
-            threeTeamDetails.partner_1_receives_from_partner_2.push(...assets)
+            threeTeamPicks.push({
+              year: pick.year,
+              round: pick.round,
+              from_team: flow.from,
+              to_team: flow.to,
+              condition: pick.condition || null,
+            })
           }
         }
 
-        console.log('[gradeTrade] 3-team threeTeamDetails:', threeTeamDetails)
+        console.log('[gradeTrade] 3-team players:', threeTeamPlayers, 'picks:', threeTeamPicks)
 
         requestBody = {
           chicago_team: selectedTeam,
-          trade_partner: opponentTeam!.team_name,
-          partner_team_key: partner1Key,
-          is_three_team: true,
-          partner_2: thirdTeam.team_name,
-          partner_2_key: partner2Key,
+          trade_partner_1: partner1Key,
+          trade_partner_2: partner2Key,
+          players: threeTeamPlayers,
+          draft_picks: threeTeamPicks,
           sport: sport,
-          three_team_details: threeTeamDetails,
           session_id: activeSession?.id,
+          partner_team_key: partner1Key,
         }
       } else {
         // 2-Team Trade format (original)

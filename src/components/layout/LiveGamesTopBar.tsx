@@ -236,7 +236,7 @@ export default function LiveGamesTopBar({ teamFilter, isHomepage = false }: Live
   }
 
   return (
-    <div style={{ background: '#0B0F14', borderBottom: '2px solid #00D4FF', boxShadow: '0 2px 12px rgba(0, 212, 255, 0.5)' }}>
+    <div style={{ background: '#00D4FF', borderBottom: 'none', boxShadow: '0 2px 12px rgba(0, 212, 255, 0.5)' }}>
       <div className="max-w-[1200px] mx-auto px-4">
         {/* Scrollable container for multiple games */}
         <div className="flex items-center justify-center overflow-x-auto hide-scrollbar py-1.5 gap-2">
@@ -249,7 +249,7 @@ export default function LiveGamesTopBar({ teamFilter, isHomepage = false }: Live
                 key={game.game_id}
                 href={getLivePageUrl(game)}
                 className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-1.5 my-1 mx-1 transition-colors min-w-fit"
-                style={{ background: 'rgba(0, 212, 255, 0.08)', border: '1px solid rgba(0, 212, 255, 0.4)', borderRadius: 999, color: '#FAFAFB' }}
+                style={{ background: 'rgba(11, 15, 20, 0.85)', border: '1px solid rgba(11, 15, 20, 0.6)', borderRadius: 999, color: '#FAFAFB' }}
               >
                 {/* Live/Starting Badge */}
                 <div className="flex items-center gap-1.5 flex-shrink-0">

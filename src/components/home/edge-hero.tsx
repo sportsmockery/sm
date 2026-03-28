@@ -172,14 +172,12 @@ export function EdgeHero({
 
             <div className="min-w-0 text-left" style={{ transform: 'translateY(9px)' }}>
               <div
-                className="text-base font-semibold leading-tight sm:text-lg"
-                style={{ color: "var(--hp-foreground)" }}
+                className="text-base font-semibold leading-tight sm:text-lg text-[#0B0F14] dark:text-[#FAFAFB]"
               >
                 {greeting}
               </div>
               <p
-                className="text-sm leading-snug sm:text-[15px]"
-                style={{ color: "var(--hp-muted-foreground)" }}
+                className="text-sm leading-snug sm:text-[15px] text-[#737373] dark:text-[#999]"
               >
                 {welcomeMessage ?? (
                   <>Welcome to <span style={{ color: '#00D4FF' }}>SM</span><span style={{ color: '#BC0000' }}>&#x2736;</span><span style={{ color: '#00D4FF' }}>EDGE</span>, our <strong>NEW</strong> AI-powered platform.</>
@@ -192,9 +190,8 @@ export function EdgeHero({
           <div className="w-full">
             <h1
               id="edge-hero-heading"
-              className="text-balance font-bold tracking-tight md:whitespace-nowrap md:-ml-[45px]"
+              className="text-balance font-bold tracking-tight md:whitespace-nowrap md:-ml-[45px] text-[#0B0F14] dark:text-[#FAFAFB]"
               style={{
-                color: "var(--hp-foreground)",
                 fontSize: "clamp(48px, 5vw, 72px)",
                 lineHeight: 1.1,
               }}
@@ -239,8 +236,7 @@ export function EdgeHero({
                   placeholder={activePlaceholder}
                   aria-describedby={helperId}
                   disabled={isLoading}
-                  className={`h-14 w-full bg-transparent px-5 pr-20 text-base outline-none sm:h-16 sm:text-[15px] placeholder:transition-opacity placeholder:duration-200 ${isFading ? "placeholder:opacity-0" : "placeholder:opacity-50"}`}
-                  style={{ color: "var(--hp-foreground)" }}
+                  className={`h-14 w-full bg-transparent px-5 pr-20 text-base outline-none sm:h-16 sm:text-[15px] text-[#0B0F14] dark:text-[#FAFAFB] placeholder:transition-opacity placeholder:duration-200 ${isFading ? "placeholder:opacity-0" : "placeholder:opacity-50"}`}
                 />
 
                 <button

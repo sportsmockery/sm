@@ -6,8 +6,8 @@ import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
 import { getBullsStats, getBullsRecord, type BullsStats, type LeaderboardEntry, type BullsPlayer } from '@/lib/bullsData'
 
 export const metadata: Metadata = {
-  title: 'Chicago Bulls Stats 2024-25 | Team & Player Statistics | SportsMockery',
-  description: 'Chicago Bulls 2024-25 team and player statistics. View scoring, rebounding, assists, and defensive leaderboards.',
+  title: 'Chicago Bulls Stats 2025-26 | Team & Player Statistics | SportsMockery',
+  description: 'Chicago Bulls 2025-26 team and player statistics. View scoring, rebounding, assists, and defensive leaderboards.',
 }
 
 export const dynamic = 'force-dynamic'

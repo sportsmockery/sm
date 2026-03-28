@@ -158,7 +158,7 @@ export default async function BullsPlayerPage({ params }: PlayerPageProps) {
               <div className="w-full md:w-auto md:min-w-[280px]">
                 <div className="bg-white/10 backdrop-blur rounded-2xl p-5">
                   <h3 className="text-white/70 text-sm font-semibold uppercase tracking-wider mb-4">
-                    2024-25 Season
+                    2025-26 Season
                   </h3>
                   <div className="grid grid-cols-3 gap-3">
                     <div className="text-center">
@@ -189,7 +189,7 @@ export default async function BullsPlayerPage({ params }: PlayerPageProps) {
             {profile.currentSeason && (
               <section className="glass-card glass-card-static">
                 <h2 className="text-xl font-bold mb-6" style={{ color: 'var(--sm-text)' }}>
-                  2024-25 Season Stats
+                  2025-26 Season Stats
                 </h2>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   <StatCard label="PPG" value={profile.currentSeason.ppg?.toFixed(1) || '—'} />

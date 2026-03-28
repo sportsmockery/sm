@@ -6,8 +6,8 @@ import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
 import { getBlackhawksRosterGrouped, getBlackhawksRecord, POSITION_GROUP_NAMES, type BlackhawksPlayer, type PositionGroup } from '@/lib/blackhawksData'
 
 export const metadata: Metadata = {
-  title: 'Chicago Blackhawks Roster 2024-25 | SportsMockery',
-  description: 'Complete 2024-25 Chicago Blackhawks roster with player profiles, positions, measurements, and stats.',
+  title: 'Chicago Blackhawks Roster 2025-26 | SportsMockery',
+  description: 'Complete 2025-26 Chicago Blackhawks roster with player profiles, positions, measurements, and stats.',
 }
 
 export const dynamic = 'force-dynamic'

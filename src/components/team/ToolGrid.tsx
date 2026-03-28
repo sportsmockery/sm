@@ -127,6 +127,8 @@ export default function ToolGrid({ teamSlug, accentColor, secondaryColor, compac
                   display: 'flex',
                   flexDirection: 'column',
                   position: 'relative',
+                  border: '1px solid rgba(0, 212, 255, 0.3)',
+                  background: 'rgba(0, 212, 255, 0.04)',
                 }}
               >
                 {tool.topRightBadge && (
@@ -143,9 +145,9 @@ export default function ToolGrid({ teamSlug, accentColor, secondaryColor, compac
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      background: `linear-gradient(135deg, ${secondaryColor}40, ${accentColor}20)`,
-                      border: `1px solid ${accentColor}30`,
-                      color: accentColor,
+                      background: 'rgba(0, 212, 255, 0.08)',
+                      border: '1px solid rgba(0, 212, 255, 0.25)',
+                      color: '#00D4FF',
                       flexShrink: 0,
                     }}
                   >
@@ -153,7 +155,7 @@ export default function ToolGrid({ teamSlug, accentColor, secondaryColor, compac
                   </div>
                   <h3
                     style={{
-                      color: 'var(--sm-text)',
+                      color: '#FAFAFB',
                       fontSize,
                       fontWeight: 700,
                       letterSpacing: '-0.3px',

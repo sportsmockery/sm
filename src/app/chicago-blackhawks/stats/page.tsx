@@ -6,8 +6,8 @@ import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
 import { getBlackhawksStats, getBlackhawksRecord, type BlackhawksStats, type LeaderboardEntry, type BlackhawksPlayer } from '@/lib/blackhawksData'
 
 export const metadata: Metadata = {
-  title: 'Chicago Blackhawks Stats 2024-25 | Team & Player Statistics | SportsMockery',
-  description: 'Chicago Blackhawks 2024-25 team and player statistics. View goals, assists, points, and goaltending leaderboards.',
+  title: 'Chicago Blackhawks Stats 2025-26 | Team & Player Statistics | SportsMockery',
+  description: 'Chicago Blackhawks 2025-26 team and player statistics. View goals, assists, points, and goaltending leaderboards.',
 }
 
 export const dynamic = 'force-dynamic'

@@ -35,7 +35,7 @@ export default function TeamSeasonCard({
   return (
     <div
       className={`rounded-xl overflow-hidden ${className}`}
-      style={{ background: `${info.primaryColor}`, color: '#FAFAFB' }}
+      style={{ background: '#0B0F14', color: '#FAFAFB', border: '1px solid #00D4FF' }}
     >
       {/* Header */}
       <div className="px-5 py-3 border-b border-white/10">

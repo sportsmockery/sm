@@ -16,10 +16,8 @@ export default function TeamHeader({ team, rightSlot }: TeamHeaderProps) {
       className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-5"
       style={{
         position: 'relative',
-        borderBottom: '1px solid rgba(11,15,20,0.07)',
-        background:
-          'radial-gradient(circle at 0% 0%, rgba(200,56,3,0.08) 0, transparent 42%) ,' +
-          'linear-gradient(to bottom, #f7f7f9, #f2f3f6)',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        background: 'transparent',
         padding: '16px 24px 14px',
         minHeight: 176,
       }}
@@ -31,12 +29,12 @@ export default function TeamHeader({ team, rightSlot }: TeamHeaderProps) {
             width: 64,
             height: 64,
             borderRadius: 16,
-            background: '#FAFAFB',
-            border: '1px solid rgba(11,15,20,0.06)',
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.08)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 10px 20px rgba(0,0,0,0.03)',
+            boxShadow: '0 10px 20px rgba(0,0,0,0.15)',
             flexShrink: 0,
           }}
         >
@@ -58,7 +56,7 @@ export default function TeamHeader({ team, rightSlot }: TeamHeaderProps) {
                 fontWeight: 700,
                 letterSpacing: -0.3,
                 margin: 0,
-                color: '#0B0F14',
+                color: '#FAFAFB',
                 whiteSpace: 'nowrap',
               }}
             >
@@ -72,9 +70,9 @@ export default function TeamHeader({ team, rightSlot }: TeamHeaderProps) {
                 fontWeight: 600,
                 letterSpacing: '0.06em',
                 textTransform: 'uppercase',
-                color: 'rgba(11,15,20,0.7)',
-                border: '1px solid rgba(11,15,20,0.08)',
-                background: '#F8F8FA',
+                color: 'rgba(255,255,255,0.6)',
+                border: '1px solid rgba(255,255,255,0.12)',
+                background: 'rgba(255,255,255,0.05)',
               }}
             >
               {`${new Date().getFullYear()} Season`}
@@ -84,7 +82,7 @@ export default function TeamHeader({ team, rightSlot }: TeamHeaderProps) {
             style={{
               fontSize: 13,
               margin: 0,
-              color: 'rgba(11,15,20,0.65)',
+              color: 'rgba(255,255,255,0.5)',
               maxWidth: 360,
               whiteSpace: 'nowrap',
               textOverflow: 'ellipsis',

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import TeamHeader from './TeamHeader'
 import ToolGrid from './ToolGrid'
+import { HeroStatsOrbs } from '@/components/homepage/HeroStatsOrbs'
 
 /**
  * Team Hub Layout Component
@@ -154,9 +155,14 @@ export default function TeamHubLayout({
   }, [])
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--sm-dark)' }}>
+    <div style={{ minHeight: '100vh', background: '#0B0F14', position: 'relative', overflow: 'hidden' }}>
+      {/* ===== Animated Chicago Stars Background ===== */}
+      <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
+        <HeroStatsOrbs />
+      </div>
+
       {/* ===== COMPACT TEAM HEADER ===== */}
-      <div ref={headerRef} style={{ maxWidth: '1320px', margin: '0 auto' }}>
+      <div ref={headerRef} style={{ maxWidth: '1320px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
         <TeamHeader
           team={team}
           rightSlot={
@@ -176,9 +182,13 @@ export default function TeamHubLayout({
         className={isSticky ? 'sticky' : ''}
         style={{
           ...(isSticky ? { top: 'var(--sm-nav-height, 72px)', zIndex: 40, boxShadow: '0 4px 12px rgba(0,0,0,0.3)' } : {}),
-          background: 'var(--sm-surface)',
-          borderBottom: '1px solid var(--sm-border)',
+          background: 'rgba(11,15,20,0.85)',
+          backdropFilter: 'blur(12px)',
+          borderTop: '1px solid #00D4FF',
+          borderBottom: '1px solid #00D4FF',
           transition: 'box-shadow 0.2s ease',
+          position: 'relative',
+          zIndex: 1,
         }}
       >
         <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '0 24px' }}>
@@ -206,6 +216,9 @@ export default function TeamHubLayout({
                     transition: 'color 0.2s',
                   }}
                 >
+                  {isEdgeTab && (
+                    <span style={{ color: '#BC0000', marginRight: '4px', fontSize: '14px' }}>&#x2736;</span>
+                  )}
                   {tab.label}
                   {isActive && (
                     <span
@@ -234,7 +247,8 @@ export default function TeamHubLayout({
           maxWidth: '1320px',
           margin: '0 auto',
           padding: '32px 24px 48px',
-          background: 'var(--sm-dark)',
+          position: 'relative',
+          zIndex: 1,
         }}
       >
         {children}

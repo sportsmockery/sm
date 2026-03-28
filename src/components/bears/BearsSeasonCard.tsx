@@ -28,8 +28,9 @@ export default function BearsSeasonCard({
     <div
       className={`rounded-xl overflow-hidden ${className}`}
       style={{
-        background: `linear-gradient(135deg, ${bearsInfo.primaryColor} 0%, #1a2940 100%)`,
+        background: '#0B0F14',
         color: '#FAFAFB',
+        border: '1px solid #00D4FF',
       }}
     >
       {/* Header */}
