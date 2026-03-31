@@ -18,10 +18,12 @@ import { PreferencesModal, GMPreferences } from '@/components/gm/PreferencesModa
 import { TradeModePicker } from '@/components/gm/TradeModePicker'
 import { SimulationTrigger } from '@/components/gm/SimulationTrigger'
 import { SimulationResults } from '@/components/gm/SimulationResults'
+import { SeasonImpactPanel } from '@/components/gm/SeasonImpactPanel'
 import { DestinationPicker } from '@/components/gm/DestinationPicker'
 import type { PlayerData } from '@/components/gm/PlayerCard'
 import type { ValidationState } from '@/components/gm/ValidationIndicator'
-import type { TradeMode, MLBProspect, SimulationResult, TradeFlow, SimulationPhase } from '@/types/gm'
+import type { TradeMode, MLBProspect, SimulationResult, TradeFlow, SimulationPhase, SeasonSimulation } from '@/types/gm'
+import { FEATURE_FLAGS } from '@/lib/feature-flags'
 
 const DEFAULT_PREFERENCES: GMPreferences = {
   risk_tolerance: 'moderate',
@@ -128,6 +130,11 @@ export default function GMPage() {
   const [grading, setGrading] = useState(false)
   const [gradeResult, setGradeResult] = useState<GradeResult | null>(null)
   const [gradeError, setGradeError] = useState<string | null>(null)
+
+  // Season Impact (feature-flagged)
+  const [seasonSimulation, setSeasonSimulation] = useState<SeasonSimulation | null>(null)
+  const [seasonLoading, setSeasonLoading] = useState(false)
+  const [seasonError, setSeasonError] = useState<string | null>(null)
 
   // Validation
   const [validation, setValidation] = useState<ValidationState>({ status: 'idle', issues: [] })
@@ -1111,6 +1118,18 @@ export default function GMPage() {
           suggestedTradeType: data.suggested_trade?.type ?? 'none',
         })
         setGradeResult(data)
+
+        // Handle Season Impact data (feature-flagged)
+        if (FEATURE_FLAGS.SHOW_SEASON_IMPACT) {
+          if (data.season_simulation && data.status === 'accepted') {
+            setSeasonSimulation(data.season_simulation)
+            setSeasonError(null)
+          } else {
+            setSeasonSimulation(null)
+            setSeasonError(null)
+          }
+        }
+
         fetchTrades()
         fetchLeaderboard()
         fetchSessions()
@@ -1119,6 +1138,10 @@ export default function GMPage() {
         const err = await res.json().catch(() => ({ error: 'Unknown error' }))
         console.log('[gradeTrade] Error response:', err)
         setGradeError(err.error || 'Failed to grade trade')
+        if (FEATURE_FLAGS.SHOW_SEASON_IMPACT) {
+          setSeasonSimulation(null)
+          setSeasonError(null)
+        }
       }
     } catch (e) {
       console.error('[gradeTrade] Network error:', e)
@@ -1146,6 +1169,9 @@ export default function GMPage() {
     setDraftPicksTeam3Sent([])
     setDraftPicksTeam3Received([])
     setSelectedThirdTeamProspectIds(new Set())
+    // Clear season impact
+    setSeasonSimulation(null)
+    setSeasonError(null)
   }
 
   function editTrade() {
@@ -1154,6 +1180,9 @@ export default function GMPage() {
     setGradeResult(null)
     setGradeError(null)
     setValidation({ status: 'idle', issues: [] })
+    // Clear season impact
+    setSeasonSimulation(null)
+    setSeasonError(null)
   }
 
   async function clearAllTrades() {
@@ -1710,6 +1739,20 @@ export default function GMPage() {
                     cashReceived={cashReceived}
                     onCashSentChange={setCashSent}
                     onCashReceivedChange={setCashReceived}
+                  />
+                )}
+
+                {/* Season Impact Panel — appears below trade grade for accepted trades */}
+                {FEATURE_FLAGS.SHOW_SEASON_IMPACT && (
+                  <SeasonImpactPanel
+                    simulation={seasonSimulation}
+                    isLoading={seasonLoading}
+                    error={seasonError}
+                    sport={sport}
+                    onSimulateAgain={seasonSimulation ? () => {
+                      // Re-submit the trade to get fresh simulation
+                      gradeTrade()
+                    } : undefined}
                   />
                 )}
 

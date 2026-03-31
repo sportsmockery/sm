@@ -704,3 +704,133 @@ export interface ValidationIssue {
   player_name?: string
   resolution?: string
 }
+
+// ─── Mock Model Types ───────────────────────────────────────────────
+
+export interface MockPickGrade {
+  overall_pick: number
+  prospect_name: string
+  position: string
+  grade: number
+  grade_letter: string
+  reach_steal: number          // -100 (major reach) to +100 (major steal)
+  reach_steal_label: string    // 'Major Steal' | 'Steal' | 'Good Value' | 'Fair Value' | 'Slight Reach' | 'Reach' | 'Major Reach'
+  commentary: string
+}
+
+export interface MockChicagoAnalysis {
+  team_id: string
+  team_name: string
+  grade: number
+  grade_letter: string
+  detailed_summary: string
+  scheme_fit_analysis: string
+  pick_grades: MockPickGrade[]
+  roster_impact: string
+  window_impact: {
+    one_year: string
+    three_year: string
+    five_year: string
+  }
+  recommendation: string
+}
+
+export interface MockTeamGrade {
+  grade: number
+  grade_letter: string
+  identity: string
+  best_pick: string | null
+  worst_pick: string | null
+  summary: string
+}
+
+export interface MockGrades {
+  overall_grade: number
+  overall_grade_letter: string    // 'A+' through 'F'
+  realism_score: number
+  grade_reasoning: string
+  team_grades: Record<string, MockTeamGrade>
+  chicago_analysis: MockChicagoAnalysis | null
+}
+
+export interface MockGradeResponse {
+  success: true
+  mock_id: string
+  cached: boolean
+  mock: {
+    id: string
+    league: 'NFL' | 'NBA' | 'NHL' | 'MLB'
+    draft_year: number
+    completed: boolean
+    completed_at: string
+  }
+  picks_count: number
+  grades: MockGrades
+  response_time_ms: number
+}
+
+export interface MockValidateResponse {
+  valid: true
+  pick: {
+    overall_pick: number
+    prospect_id: string
+    prospect_name: string
+    position: string
+    board_rank: number | null
+    pick_delta: number | null
+    reach_steal_label: string
+    reach_steal_score: number
+    need_fit: 'critical' | 'high' | 'moderate' | 'low' | 'unknown'
+    instant_feedback: string
+  }
+}
+
+export interface PickFeedback {
+  label: string
+  message: string
+  score: number
+  needFit: 'critical' | 'high' | 'moderate' | 'low' | 'unknown'
+}
+
+// ─── Season Model Types ──────────────────────────────────────────────
+
+export interface SeasonSimulation {
+  success: boolean
+  simulation_version: string
+  projectedRecord: { wins: number; losses: number }
+  recordChange: number
+  playoffProbability: number
+  projectedSeed: number | null
+  gmScore: number
+  seasonNarrative: {
+    headline: string
+    analysis: string
+    keyMatchups: Array<{ opponent: string; impact: string }>
+    playoffOutlook: string
+  } | null
+  rosterAssessment: {
+    strengthsGained: string[]
+    weaknessesCreated: string[]
+    overallChange: 'improved' | 'declined' | 'lateral'
+    identityShift: string
+  } | null
+  keyPlayerImpacts: Array<{
+    playerName: string
+    direction: 'added' | 'removed'
+    impact: string
+  }> | null
+  baseline: {
+    wins: number
+    losses: number
+    madePlayoffs: boolean
+    playoffSeed: number | null
+  }
+  modified: {
+    wins: number
+    losses: number
+    madePlayoffs: boolean
+    playoffSeed: number | null
+  }
+  aiModel: 'gemini-2.5-flash' | null
+  durationMs: number
+}

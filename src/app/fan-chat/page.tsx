@@ -349,7 +349,7 @@ export default function FanChatPage() {
       }
 
       try {
-        const res = await fetch(`/api/fan-chat/messages?channel=${activeChannel}&limit=50`)
+        const res = await fetch(`/api/fan-chat/messages?channel=${activeChannel}&limit=200`)
         if (!res.ok) throw new Error('Failed to fetch messages')
         const data = await res.json()
 
@@ -493,6 +493,53 @@ export default function FanChatPage() {
     const interval = setInterval(fetchCounts, 30_000)
     return () => clearInterval(interval)
   }, [])
+
+  // Presence heartbeat — notify DataLab we are in this room
+  useEffect(() => {
+    if (!userIdRef.current) return
+
+    const sendHeartbeat = () => {
+      fetch('/api/fan-chat/presence', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          channel: activeChannel,
+          userId: userIdRef.current,
+          displayName: displayNameRef.current,
+        }),
+      }).catch(() => {})
+    }
+
+    sendHeartbeat()
+    const interval = setInterval(sendHeartbeat, 30_000)
+
+    // Leave room on channel switch or page unload
+    const leaveRoom = () => {
+      // Use sendBeacon for reliability on unload
+      const body = JSON.stringify({
+        channel: activeChannel,
+        userId: userIdRef.current,
+      })
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon('/api/fan-chat/presence?_method=DELETE', body)
+      } else {
+        fetch('/api/fan-chat/presence', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body,
+          keepalive: true,
+        }).catch(() => {})
+      }
+    }
+
+    window.addEventListener('beforeunload', leaveRoom)
+
+    return () => {
+      clearInterval(interval)
+      window.removeEventListener('beforeunload', leaveRoom)
+      leaveRoom()
+    }
+  }, [activeChannel])
 
   // Handle sending a message
   const handleSendMessage = useCallback(async () => {

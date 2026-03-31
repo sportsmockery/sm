@@ -5,6 +5,11 @@ import { useTheme } from '@/contexts/ThemeContext'
 import { useAuth } from '@/contexts/AuthContext'
 import Image from 'next/image'
 import MockDraftGradePanel from '@/components/mock/MockDraftGradePanel'
+import { MockGradePanel } from '@/components/mock/MockGradePanel'
+import { PickValidationBadge } from '@/components/mock/PickValidationBadge'
+import { FEATURE_FLAGS } from '@/lib/feature-flags'
+import { MOCK_API_URL } from '@/lib/api-config'
+import type { MockGradeResponse, MockValidateResponse, PickFeedback } from '@/types/gm'
 
 // Types
 interface Prospect {
@@ -124,6 +129,10 @@ export default function MockDraftPage() {
   const [eligibility, setEligibility] = useState<Record<string, TeamEligibility>>({})
   const [eligibilityLoading, setEligibilityLoading] = useState(true)
   const [gmScore, setGmScore] = useState(0)
+
+  // Mock model state (feature-flagged)
+  const [mockGradeData, setMockGradeData] = useState<MockGradeResponse | null>(null)
+  const [pickFeedback, setPickFeedback] = useState<Record<number, PickFeedback>>({})
 
   // Computed
   const currentTeamConfig = CHICAGO_TEAMS.find(t => t.key === selectedTeam)
@@ -345,6 +354,33 @@ export default function MockDraftPage() {
     }
   }
 
+  // Validate a pick via the Mock model (non-blocking, fire-and-forget)
+  async function validatePick(
+    mockId: string,
+    overallPick: number,
+    prospectId: string,
+    teamId: string
+  ): Promise<MockValidateResponse['pick'] | null> {
+    try {
+      const response = await fetch(`${MOCK_API_URL}/validate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          mock_id: mockId,
+          overall_pick: overallPick,
+          prospect_id: prospectId,
+          team_id: teamId,
+        }),
+      })
+      if (!response.ok) return null
+      const data: MockValidateResponse = await response.json()
+      return data.pick
+    } catch {
+      return null // Validation failure is non-blocking
+    }
+  }
+
   // Submit a pick
   async function submitPick(prospect: Prospect) {
     if (!activeDraft || !currentPick || !isUserPick) return
@@ -384,6 +420,28 @@ export default function MockDraftPage() {
       requestAnimationFrame(() => {
         window.scrollTo(0, scrollY)
       })
+
+      // Fire pick validation asynchronously (non-blocking)
+      if (FEATURE_FLAGS.USE_MOCK_MODEL && activeDraft?.id) {
+        validatePick(
+          activeDraft.id,
+          currentPick.pick_number,
+          prospect.id,
+          activeDraft.chicago_team
+        ).then(validation => {
+          if (validation) {
+            setPickFeedback(prev => ({
+              ...prev,
+              [currentPick!.pick_number]: {
+                label: validation.reach_steal_label,
+                message: validation.instant_feedback,
+                score: validation.reach_steal_score,
+                needFit: validation.need_fit,
+              },
+            }))
+          }
+        })
+      }
 
       // If draft is not complete and next pick is not ours, auto-advance
       if (data.draft?.status === 'in_progress') {
@@ -471,9 +529,15 @@ export default function MockDraftPage() {
     setError(null)
 
     try {
-      const res = await fetch('/api/gm/draft/grade', {
+      // Use new Mock model endpoint when feature flag is on
+      const gradeEndpoint = FEATURE_FLAGS.USE_MOCK_MODEL
+        ? `${MOCK_API_URL}/grade`
+        : '/api/gm/draft/grade'
+
+      const res = await fetch(gradeEndpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ mock_id: activeDraft.id }),
       })
 
@@ -485,7 +549,41 @@ export default function MockDraftPage() {
         return
       }
 
-      setGradeResult(data.grade)
+      if (FEATURE_FLAGS.USE_MOCK_MODEL && data.grades) {
+        // New Mock model response — store the rich grade data
+        setMockGradeData(data as MockGradeResponse)
+        // Also set legacy gradeResult for backward compatibility
+        setGradeResult({
+          overall_grade: data.grades.overall_grade,
+          letter_grade: data.grades.overall_grade_letter,
+          analysis: data.grades.grade_reasoning,
+          pick_grades: data.grades.chicago_analysis?.pick_grades?.map((p: { overall_pick: number; prospect_name: string; grade: number; commentary: string }) => ({
+            pick_number: p.overall_pick,
+            prospect_name: p.prospect_name,
+            grade: p.grade,
+            analysis: p.commentary,
+          })) || [],
+          strengths: [],
+          weaknesses: [],
+        })
+
+        // Call score endpoint to update GM score
+        fetch(`${MOCK_API_URL}/score`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ mock_id: activeDraft.id }),
+        })
+          .then(() => {
+            // Re-fetch GM score after scoring
+            fetch('/api/gm/analytics').then(r => r.json()).then(d => setGmScore(d.total_gm_score || 0)).catch(() => {})
+          })
+          .catch(() => {})
+      } else {
+        // Legacy grade response
+        setGradeResult(data.grade)
+      }
+
       setShowGradeModal(true)
       setActiveDraft(prev => prev ? { ...prev, status: 'graded' } : null)
       fetchHistory()
@@ -1049,6 +1147,9 @@ export default function MockDraftPage() {
                               {pick.selected_prospect!.position} • {pick.selected_prospect!.school}
                             </div>
                           </div>
+                          {pickFeedback[pick.pick_number] && (
+                            <PickValidationBadge feedback={pickFeedback[pick.pick_number]} />
+                          )}
                         </div>
                       ))}
                   </div>
@@ -1056,7 +1157,9 @@ export default function MockDraftPage() {
               )}
 
               {/* Draft Grade Panel - shows after grading */}
-              {gradeResult && (
+              {FEATURE_FLAGS.USE_MOCK_MODEL && mockGradeData ? (
+                <MockGradePanel gradeData={mockGradeData} />
+              ) : gradeResult ? (
                 <MockDraftGradePanel
                   grade={gradeResult}
                   teamColor={teamColor}
@@ -1065,7 +1168,7 @@ export default function MockDraftPage() {
                   mockId={activeDraft?.id}
                   onViewDetails={() => setShowGradeModal(true)}
                 />
-              )}
+              ) : null}
             </div>
 
             {/* Right Column - Your Pick Status & Your Picks */}

@@ -1,47 +1,45 @@
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase-server'
 
-const CHANNEL_IDS = ['global', 'bears', 'bulls', 'cubs', 'whitesox', 'blackhawks']
+const DATALAB_BASE = 'https://datalab.sportsmockery.com'
+
+const DEFAULT_COUNTS: Record<string, number> = {
+  global: 1, bears: 1, bulls: 1, cubs: 1, whitesox: 1, blackhawks: 1,
+}
 
 /**
  * GET /api/fan-chat/online-counts
- * Returns count of users currently online per channel (room).
- * Uses chat_presence when available; falls back to placeholder counts.
+ * Returns count of users currently online per channel.
+ * Proxies to DataLab GET /api/fan-chat (rooms listing) and extracts online counts.
  */
 export async function GET() {
   try {
-    const counts: Record<string, number> = {}
+    const res = await fetch(`${DATALAB_BASE}/api/fan-chat`, {
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store',
+    })
 
-    try {
-      const { data, error } = await supabaseAdmin
-        .from('chat_presence')
-        .select('room_id')
-        .eq('is_online', true)
+    if (!res.ok) {
+      return NextResponse.json(DEFAULT_COUNTS)
+    }
 
-      if (!error && data) {
-        for (const row of data) {
-          const roomId = row.room_id as string
-          if (roomId) {
-            counts[roomId] = (counts[roomId] ?? 0) + 1
-          }
+    const data = await res.json()
+
+    // DataLab returns a rooms array — extract online_count per team slug
+    const counts: Record<string, number> = { ...DEFAULT_COUNTS }
+
+    if (Array.isArray(data.rooms || data)) {
+      const rooms = data.rooms || data
+      for (const room of rooms) {
+        const slug = room.team_slug || room.team || room.channel
+        if (slug && slug in counts) {
+          counts[slug] = Math.max(room.online_count ?? room.onlineCount ?? 1, 1)
         }
       }
-    } catch {
-      // chat_presence may not exist or be unavailable
     }
 
-    // Ensure every channel has a count (use real from presence or 1 as fallback)
-    const result: Record<string, number> = {}
-    for (const id of CHANNEL_IDS) {
-      result[id] = counts[id] ?? 1
-    }
-
-    return NextResponse.json(result)
+    return NextResponse.json(counts)
   } catch (err) {
     console.error('[fan-chat/online-counts]', err)
-    return NextResponse.json(
-      { global: 1, bears: 1, bulls: 1, cubs: 1, whitesox: 1, blackhawks: 1 },
-      { status: 200 }
-    )
+    return NextResponse.json(DEFAULT_COUNTS)
   }
 }
