@@ -3,10 +3,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
-import { useAIChatPersonality } from '@/hooks/useAIChatPersonality'
-import { getBrowserClient } from '@/lib/supabase-browser'
+import { createClient } from '@supabase/supabase-js'
 
-// Message type
+// DataLab Supabase for realtime on fan_chat_messages
+const DATALAB_URL = 'https://siwoqfzzcxmngnseyzpv.supabase.co'
+const DATALAB_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpd29xZnp6Y3htbmduc2V5enB2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc2NDk0ODAsImV4cCI6MjA4MzIyNTQ4MH0.PzeJ6OG2ofjLWSpJ2UmI-1aXVrHnh3ar6eTgph4uJgc'
+
+// Message type for display
 interface ChatMessage {
   id: string
   user: string
@@ -14,34 +17,20 @@ interface ChatMessage {
   time: string
   isOwn: boolean
   isAI?: boolean
-  personality?: string
 }
 
-// DB message shape returned by the API (includes joined chat_users fields)
-interface DBMessage {
+// Normalized message shape from our API
+interface APIMessage {
   id: string
-  room_id: string
   user_id: string
   content: string
-  content_type: string
   created_at: string
-  is_deleted: boolean
-  moderation_status: string
   display_name: string
   badge: string
 }
 
-// Team channels with AI personality info
+// Team channels (no global — DataLab only has 5 team rooms)
 const channels = [
-  {
-    id: 'global',
-    name: 'Chicago Lounge',
-    description: 'All Chicago sports talk',
-    icon: '🏙️',
-    color: '#bc0000',
-    unread: 5,
-    aiPersonality: 'BearDownBenny', // Default to Bears in global
-  },
   {
     id: 'bears',
     name: 'Bears Den',
@@ -49,9 +38,6 @@ const channels = [
     icon: null,
     logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/chi.png',
     color: '#0B162A',
-    unread: 12,
-    isLive: true,
-    aiPersonality: 'BearDownBenny',
   },
   {
     id: 'bulls',
@@ -60,8 +46,6 @@ const channels = [
     icon: null,
     logo: 'https://a.espncdn.com/i/teamlogos/nba/500/chi.png',
     color: '#CE1141',
-    unread: 3,
-    aiPersonality: 'WindyCityHoops',
   },
   {
     id: 'cubs',
@@ -70,8 +54,6 @@ const channels = [
     icon: null,
     logo: 'https://a.espncdn.com/i/teamlogos/mlb/500/chc.png',
     color: '#0E3386',
-    unread: 0,
-    aiPersonality: 'WrigleyWill',
   },
   {
     id: 'whitesox',
@@ -80,8 +62,6 @@ const channels = [
     icon: null,
     logo: 'https://a.espncdn.com/i/teamlogos/mlb/500/chw.png',
     color: '#27251F',
-    unread: 2,
-    aiPersonality: 'SouthSideSoxSarah',
   },
   {
     id: 'blackhawks',
@@ -90,13 +70,10 @@ const channels = [
     icon: null,
     logo: 'https://a.espncdn.com/i/teamlogos/nhl/500/chi.png',
     color: '#CF0A2C',
-    unread: 0,
-    aiPersonality: 'MadhouseMike',
   },
 ]
 
 const CHANNEL_FAN_LABEL: Record<string, string> = {
-  global: 'Chicago',
   bears: 'Bears',
   bulls: 'Bulls',
   cubs: 'Cubs',
@@ -121,10 +98,10 @@ function formatRelativeTime(isoString: string): string {
   return date.toLocaleDateString()
 }
 
-// Convert a DB message to our ChatMessage format
-function dbMessageToChatMessage(msg: DBMessage, currentUserId: string | null): ChatMessage {
+// Convert API message to display ChatMessage
+function apiMessageToChatMessage(msg: APIMessage, currentUserId: string | null): ChatMessage {
   const isAI = msg.badge === 'ai'
-  const isOwn = !isAI && msg.user_id === currentUserId
+  const isOwn = !isAI && !!currentUserId && msg.user_id === currentUserId
 
   return {
     id: msg.id,
@@ -133,96 +110,44 @@ function dbMessageToChatMessage(msg: DBMessage, currentUserId: string | null): C
     time: formatRelativeTime(msg.created_at),
     isOwn,
     isAI,
-    personality: isAI ? msg.display_name : undefined,
   }
 }
 
-// Get initial welcome messages for a channel (shown only if no history)
+// Welcome messages shown only when a room has zero history
 function getWelcomeMessages(channelId: string): ChatMessage[] {
-  const welcomeMessages: Record<string, ChatMessage[]> = {
-    bears: [
-      {
-        id: 'welcome-1',
-        user: 'BearDownBenny',
-        content: "What's up Bears fans! Ready to talk some football? What did youse think of the last game?",
-        time: '5 min ago',
-        isOwn: false,
-        isAI: true,
-        personality: 'bears-benny'
-      }
-    ],
-    bulls: [
-      {
-        id: 'welcome-1',
-        user: 'WindyCityHoops',
-        content: "Bulls Nation! Good to see you. Who's your pick for most improved player this season?",
-        time: '5 min ago',
-        isOwn: false,
-        isAI: true,
-        personality: 'bulls-hoops'
-      }
-    ],
-    cubs: [
-      {
-        id: 'welcome-1',
-        user: 'WrigleyWill',
-        content: "Hey Cubbies fans! Beautiful day for baseball talk. What's your favorite Wrigley memory?",
-        time: '5 min ago',
-        isOwn: false,
-        isAI: true,
-        personality: 'cubs-will'
-      }
-    ],
-    whitesox: [
-      {
-        id: 'welcome-1',
-        user: 'SouthSideSoxSarah',
-        content: "South Side represent! Who do you think is the most underrated player on the Sox right now?",
-        time: '5 min ago',
-        isOwn: false,
-        isAI: true,
-        personality: 'sox-sarah'
-      }
-    ],
-    blackhawks: [
-      {
-        id: 'welcome-1',
-        user: 'MadhouseMike',
-        content: "Hawks fans! Ready to talk some hockey? Who's looking sharp in the rebuild so far?",
-        time: '5 min ago',
-        isOwn: false,
-        isAI: true,
-        personality: 'hawks-mike'
-      }
-    ],
-    global: [
-      {
-        id: 'welcome-1',
-        user: 'BearDownBenny',
-        content: "Welcome to the Chicago Lounge! All Chicago sports talk welcome. What's on your mind?",
-        time: '5 min ago',
-        isOwn: false,
-        isAI: true,
-        personality: 'bears-benny'
-      }
-    ]
+  const map: Record<string, { user: string; content: string }> = {
+    bears: { user: 'Da Coach', content: "What's up Bears fans! Ready to talk some football? What did youse think of the last game?" },
+    bulls: { user: 'AI Bot', content: "Bulls Nation! Good to see you. Who's your pick for most improved player this season?" },
+    cubs: { user: 'AI Bot', content: "Hey Cubbies fans! Beautiful day for baseball talk. What's your favorite Wrigley memory?" },
+    whitesox: { user: 'AI Bot', content: "South Side represent! Who do you think is the most underrated player on the Sox right now?" },
+    blackhawks: { user: 'AI Bot', content: "Hawks fans! Ready to talk some hockey? Who's looking sharp in the rebuild so far?" },
   }
 
-  return welcomeMessages[channelId] || welcomeMessages.bears
+  const entry = map[channelId] || map.bears
+  return [{
+    id: 'welcome-1',
+    user: entry.user,
+    content: entry.content,
+    time: '',
+    isOwn: false,
+    isAI: true,
+  }]
 }
 
 export default function FanChatPage() {
   const searchParams = useSearchParams()
   const initialChannel = searchParams.get('channel') || 'bears'
+  // Ensure initial channel is valid (no global)
+  const validInitial = channels.some(c => c.id === initialChannel) ? initialChannel : 'bears'
 
-  const [activeChannel, setActiveChannel] = useState(initialChannel)
+  const [activeChannel, setActiveChannel] = useState(validInitial)
   const [message, setMessage] = useState('')
   const [showChannels, setShowChannels] = useState(false)
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isTyping, setIsTyping] = useState(false)
   const [isLoadingMessages, setIsLoadingMessages] = useState(true)
 
-  // Stable user ID (chat_users UUID) for the session
+  // Stable user ID for the session
   const userIdRef = useRef<string>('')
   const displayNameRef = useRef<string>('')
   useEffect(() => {
@@ -234,80 +159,31 @@ export default function FanChatPage() {
       return
     }
 
-    // Register a guest chat_user via the API
+    // Generate a guest identity
     const guestName = `Fan${Math.floor(Math.random() * 9000) + 1000}`
+    const guestId = `guest-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+    userIdRef.current = guestId
     displayNameRef.current = guestName
-    fetch('/api/fan-chat/user', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ displayName: guestName }),
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.id) {
-          userIdRef.current = data.id
-          sessionStorage.setItem('fan-chat-user-uuid', data.id)
-          sessionStorage.setItem('fan-chat-display-name', guestName)
-        }
-      })
-      .catch(err => console.error('Failed to register guest user:', err))
+    sessionStorage.setItem('fan-chat-user-uuid', guestId)
+    sessionStorage.setItem('fan-chat-display-name', guestName)
   }, [])
 
-  // Cache of per-channel messages and room IDs so switching rooms preserves history
-  const channelCacheRef = useRef<Record<string, { messages: ChatMessage[]; roomId: string | null }>>({})
-  // Track the current room ID for the active channel (needed for realtime subscription)
-  const [currentRoomId, setCurrentRoomId] = useState<string | null>(null)
+  // Cache of per-channel messages so switching rooms preserves history
+  const channelCacheRef = useRef<Record<string, ChatMessage[]>>({})
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
-  const currentChannel = channels.find(c => c.id === activeChannel) || channels[1]
+  const currentChannel = channels.find(c => c.id === activeChannel) || channels[0]
 
-  // Supabase client for realtime subscriptions
-  const supabaseRef = useRef(getBrowserClient())
-  const realtimeChannelRef = useRef<ReturnType<typeof supabaseRef.current.channel> | null>(null)
+  // DataLab Supabase client for realtime on fan_chat_messages
+  const datalabClientRef = useRef(
+    createClient(DATALAB_URL, DATALAB_ANON_KEY, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    })
+  )
+  const realtimeChannelRef = useRef<ReturnType<typeof datalabClientRef.current.channel> | null>(null)
 
-  // AI Personality hook
-  const {
-    isLoading: aiLoading,
-    requestAIResponse
-  } = useAIChatPersonality({
-    channelId: activeChannel,
-    enabled: true,
-    onAIMessage: (aiMessage) => {
-      // Persist the AI message to Supabase
-      persistMessage(aiMessage.content, aiMessage.user, true, aiMessage.personality)
-      setIsTyping(false)
-    }
-  })
-
-  // Persist a message to Supabase via our API
-  const persistMessage = useCallback(async (
-    content: string,
-    displayName: string,
-    isAI: boolean,
-    personalityId?: string
-  ) => {
-    try {
-      await fetch('/api/fan-chat/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          channel: activeChannel,
-          content,
-          displayName,
-          isAI,
-          // For non-AI messages, pass the chat_users UUID directly
-          userId: !isAI ? userIdRef.current : undefined,
-          // For AI messages, pass the personality display name (resolved server-side)
-          personality: personalityId || displayName,
-        }),
-      })
-    } catch (err) {
-      console.error('Failed to persist message:', err)
-    }
-  }, [activeChannel])
-
-  // Scroll to bottom within container only (not the whole page)
+  // Scroll to bottom within container only
   const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
     if (messagesContainerRef.current) {
       messagesContainerRef.current.scrollTo({
@@ -332,20 +208,18 @@ export default function FanChatPage() {
     }
   }, [messages, scrollToBottom])
 
-  // Fetch messages for the active channel and set up realtime subscription
+  // Fetch messages for the active channel
   useEffect(() => {
     let cancelled = false
 
     const loadMessages = async () => {
       setIsLoadingMessages(true)
 
-      // Check cache first
+      // Show cache immediately while refreshing
       const cached = channelCacheRef.current[activeChannel]
-      if (cached) {
-        setMessages(cached.messages)
-        setCurrentRoomId(cached.roomId)
+      if (cached && cached.length > 0) {
+        setMessages(cached)
         setIsLoadingMessages(false)
-        // Still refresh in background
       }
 
       try {
@@ -355,24 +229,21 @@ export default function FanChatPage() {
 
         if (cancelled) return
 
-        const roomId: string | null = data.roomId
-        setCurrentRoomId(roomId)
-
         if (data.messages && data.messages.length > 0) {
-          const converted = data.messages.map((m: DBMessage) =>
-            dbMessageToChatMessage(m, userIdRef.current)
+          const converted = data.messages.map((m: APIMessage) =>
+            apiMessageToChatMessage(m, userIdRef.current)
           )
           setMessages(converted)
-          channelCacheRef.current[activeChannel] = { messages: converted, roomId }
-        } else if (!cached) {
-          // No persisted messages and no cache — show welcome messages
+          channelCacheRef.current[activeChannel] = converted
+        } else if (!cached || cached.length === 0) {
+          // No messages at all — show welcome
           const welcome = getWelcomeMessages(activeChannel)
           setMessages(welcome)
-          channelCacheRef.current[activeChannel] = { messages: welcome, roomId }
+          channelCacheRef.current[activeChannel] = welcome
         }
       } catch (err) {
         console.error('Failed to load messages:', err)
-        if (!cached && !cancelled) {
+        if ((!cached || cached.length === 0) && !cancelled) {
           setMessages(getWelcomeMessages(activeChannel))
         }
       } finally {
@@ -381,80 +252,47 @@ export default function FanChatPage() {
     }
 
     loadMessages()
-
     return () => { cancelled = true }
   }, [activeChannel])
 
-  // Set up Supabase realtime subscription when roomId changes
+  // Set up DataLab Supabase realtime subscription for fan_chat_messages
   useEffect(() => {
-    if (!currentRoomId) return
-
     // Clean up previous subscription
     if (realtimeChannelRef.current) {
-      supabaseRef.current.removeChannel(realtimeChannelRef.current)
+      datalabClientRef.current.removeChannel(realtimeChannelRef.current)
       realtimeChannelRef.current = null
     }
 
-    const channel = supabaseRef.current
-      .channel(`fan-chat:${currentRoomId}`)
+    const channel = datalabClientRef.current
+      .channel(`fan-chat-${activeChannel}`)
       .on(
         'postgres_changes',
         {
           event: 'INSERT',
           schema: 'public',
-          table: 'chat_messages',
-          filter: `room_id=eq.${currentRoomId}`,
+          table: 'fan_chat_messages',
+          filter: `team_key=eq.${activeChannel}`,
         },
         (payload: { new: Record<string, unknown> }) => {
           const raw = payload.new as Record<string, unknown>
-          if (raw.moderation_status !== 'approved' || raw.is_deleted) return
 
-          // Realtime payloads don't include the join — fetch display_name from API
-          // For messages from us, we already know the display name
-          const isOwnMessage = raw.user_id === userIdRef.current
+          const isOwnMessage = raw.sender_id === userIdRef.current
+          const isAI = raw.sender_type === 'ai'
 
-          const newMsg: DBMessage = {
-            id: raw.id as string,
-            room_id: raw.room_id as string,
-            user_id: raw.user_id as string,
-            content: raw.content as string,
-            content_type: raw.content_type as string,
-            created_at: raw.created_at as string,
-            is_deleted: raw.is_deleted as boolean,
-            moderation_status: raw.moderation_status as string,
-            display_name: isOwnMessage ? displayNameRef.current : 'Unknown',
-            badge: 'fan',
+          const newMsg: ChatMessage = {
+            id: String(raw.id),
+            user: isOwnMessage ? 'You' : (raw.sender_name as string) || 'Fan',
+            content: (raw.message as string) || '',
+            time: formatRelativeTime(raw.created_at as string),
+            isOwn: isOwnMessage,
+            isAI,
           }
-
-          // If it's not our own message, resolve the display_name asynchronously
-          if (!isOwnMessage) {
-            fetch(`/api/fan-chat/user?userId=${raw.user_id}`)
-              .then(res => res.ok ? res.json() : null)
-              .catch(() => null)
-              .then(userData => {
-                if (userData?.displayName) {
-                  setMessages(prev =>
-                    prev.map(m =>
-                      m.id === newMsg.id
-                        ? { ...m, user: userData.displayName, isAI: userData.badge === 'ai', personality: userData.badge === 'ai' ? userData.displayName : undefined }
-                        : m
-                    )
-                  )
-                }
-              })
-          }
-
-          const chatMsg = dbMessageToChatMessage(newMsg, userIdRef.current)
 
           setMessages(prev => {
-            // Avoid duplicates (message may already be in state from optimistic update or cache)
-            if (prev.some(m => m.id === chatMsg.id)) return prev
-            const updated = [...prev, chatMsg]
-            // Update cache
-            channelCacheRef.current[activeChannel] = {
-              messages: updated,
-              roomId: currentRoomId,
-            }
+            // Avoid duplicates
+            if (prev.some(m => m.id === newMsg.id)) return prev
+            const updated = [...prev, newMsg]
+            channelCacheRef.current[activeChannel] = updated
             return updated
           })
         }
@@ -462,20 +300,17 @@ export default function FanChatPage() {
       .subscribe()
 
     realtimeChannelRef.current = channel
-    const supabase = supabaseRef.current
+    const client = datalabClientRef.current
 
     return () => {
-      supabase.removeChannel(channel)
+      client.removeChannel(channel)
       realtimeChannelRef.current = null
     }
-  }, [currentRoomId, activeChannel])
+  }, [activeChannel])
 
-  // Track number of authenticated users online
-  const [authenticatedUsersOnline] = useState(1)
-
-  // Per-channel online counts for left sidebar
+  // Per-channel online counts for sidebar
   const [onlineCounts, setOnlineCounts] = useState<Record<string, number>>(() => ({
-    global: 1, bears: 1, bulls: 1, cubs: 1, whitesox: 1, blackhawks: 1,
+    bears: 1, bulls: 1, cubs: 1, whitesox: 1, blackhawks: 1,
   }))
   useEffect(() => {
     const fetchCounts = async () => {
@@ -486,7 +321,7 @@ export default function FanChatPage() {
           setOnlineCounts(data)
         }
       } catch {
-        // Keep existing (at least 1 per channel)
+        // Keep existing
       }
     }
     fetchCounts()
@@ -494,7 +329,7 @@ export default function FanChatPage() {
     return () => clearInterval(interval)
   }, [])
 
-  // Presence heartbeat — notify DataLab we are in this room
+  // Presence heartbeat
   useEffect(() => {
     if (!userIdRef.current) return
 
@@ -513,9 +348,7 @@ export default function FanChatPage() {
     sendHeartbeat()
     const interval = setInterval(sendHeartbeat, 30_000)
 
-    // Leave room on channel switch or page unload
     const leaveRoom = () => {
-      // Use sendBeacon for reliability on unload
       const body = JSON.stringify({
         channel: activeChannel,
         userId: userIdRef.current,
@@ -548,10 +381,7 @@ export default function FanChatPage() {
     const content = message.trim()
     setMessage('')
 
-    // Persist to Supabase (realtime subscription will add it to messages)
-    persistMessage(content, displayNameRef.current, false)
-
-    // Optimistic update: add the message to local state immediately
+    // Optimistic update
     const optimisticMsg: ChatMessage = {
       id: `optimistic-${Date.now()}`,
       user: 'You',
@@ -562,15 +392,47 @@ export default function FanChatPage() {
     }
     setMessages(prev => [...prev, optimisticMsg])
 
-    // Trigger AI response after a small delay
+    // Show typing indicator while waiting for AI response
     setIsTyping(true)
-    const currentMessages = [...messages, optimisticMsg]
-    setTimeout(async () => {
-      await requestAIResponse(currentMessages, authenticatedUsersOnline, 'no_users_online')
-      // If AI didn't respond, clear typing indicator
+
+    try {
+      const res = await fetch('/api/fan-chat/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          channel: activeChannel,
+          content,
+          userId: userIdRef.current,
+          displayName: displayNameRef.current,
+        }),
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+
+        // Replace optimistic message with real one from server
+        if (data.userMessage) {
+          const realMsg = apiMessageToChatMessage(data.userMessage as APIMessage, userIdRef.current)
+          setMessages(prev =>
+            prev.map(m => m.id === optimisticMsg.id ? realMsg : m)
+          )
+        }
+
+        // Add AI auto-response if DataLab sent one
+        if (data.aiResponse) {
+          const aiMsg = apiMessageToChatMessage(data.aiResponse as APIMessage, userIdRef.current)
+          setMessages(prev => {
+            if (prev.some(m => m.id === aiMsg.id)) return prev
+            return [...prev, aiMsg]
+          })
+        }
+      }
+    } catch (err) {
+      console.error('Failed to send message:', err)
+    } finally {
       setIsTyping(false)
-    }, 1500 + Math.random() * 2000)
-  }, [message, messages, requestAIResponse, authenticatedUsersOnline, persistMessage])
+    }
+  }, [message, activeChannel])
 
   // Handle Enter key
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -580,9 +442,8 @@ export default function FanChatPage() {
     }
   }
 
-  // Generate AI suggested replies based on last few messages
+  // AI suggested replies
   const [aiSuggestions, setAiSuggestions] = useState<string[]>([])
-
   useEffect(() => {
     const channelSuggestions: Record<string, string[]> = {
       bears: ["What about the draft?", "Caleb looks solid!", "Defense needs work"],
@@ -590,9 +451,8 @@ export default function FanChatPage() {
       cubs: ["Pitching looks good", "Wrigley is beautiful", "Who's the closer?"],
       whitesox: ["Rebuild takes time", "Any prospects?", "South side pride"],
       blackhawks: ["Bedard is special", "When do we compete?", "Hockey town!"],
-      global: ["Hot take time!", "Best Chicago team?", "Who wins it all?"],
     }
-    setAiSuggestions(channelSuggestions[activeChannel] || channelSuggestions.global)
+    setAiSuggestions(channelSuggestions[activeChannel] || channelSuggestions.bears)
   }, [activeChannel])
 
   const handleSuggestionClick = (suggestion: string) => {
@@ -679,7 +539,7 @@ export default function FanChatPage() {
                       )}
                     </div>
 
-                    {/* Info - channel name + fans online */}
+                    {/* Info */}
                     <div className="flex-1 text-left min-w-0">
                       <span
                         className="font-semibold text-sm truncate block"
@@ -692,7 +552,7 @@ export default function FanChatPage() {
                       </p>
                     </div>
 
-                    {/* Green dot + LIVE for all channels */}
+                    {/* Green dot + LIVE */}
                     <span className="flex items-center gap-1.5 flex-shrink-0" style={{ color: 'var(--sm-success)', fontSize: 11, fontWeight: 500 }}>
                       <span className="w-2 h-2 bg-green-500 rounded-full" title="Live" />
                       LIVE
@@ -701,7 +561,7 @@ export default function FanChatPage() {
                 ))}
               </div>
 
-              {/* AI Info - pushed to bottom when card is tall */}
+              {/* AI Info */}
               <div className="px-5 py-4 flex-shrink-0 mt-auto" style={{ borderTop: '1px solid var(--sm-border)' }}>
                 <p className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>
                   Our superfans are always online and ready to chat about Chicago sports
@@ -726,7 +586,7 @@ export default function FanChatPage() {
                 style={{ borderBottom: '1px solid var(--sm-border)', backgroundColor: currentChannel.color }}
               >
                 <div className="flex items-center gap-3">
-                  {/* Mobile channel toggle — shows room name + chevron for discoverability */}
+                  {/* Mobile channel toggle */}
                   <button
                     onClick={() => setShowChannels(!showChannels)}
                     className="lg:hidden -ml-2 text-white/90 hover:text-white min-h-[44px] flex items-center gap-1.5 px-2 rounded-lg"
@@ -779,7 +639,7 @@ export default function FanChatPage() {
                 </span>
               </div>
 
-              {/* Messages Area - content at top, no icon */}
+              {/* Messages Area */}
               <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-5">
                 {/* Compact welcome at top */}
                 <div className="pb-4 mb-4" style={{ borderBottom: '1px solid var(--sm-border)' }}>
@@ -816,7 +676,6 @@ export default function FanChatPage() {
                         style={{ backgroundColor: msg.isOwn ? '#bc0000' : currentChannel.color }}
                       >
                         {msg.user.charAt(0)}
-                        {/* Online indicator for AI personalities */}
                         {msg.isAI && (
                           <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full" style={{ border: '2px solid var(--sm-card)' }} />
                         )}
@@ -858,13 +717,13 @@ export default function FanChatPage() {
                         className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-white text-sm font-bold relative"
                         style={{ backgroundColor: currentChannel.color }}
                       >
-                        {currentChannel.aiPersonality?.charAt(0) || 'A'}
+                        A
                         <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full" style={{ border: '2px solid var(--sm-card)' }} />
                       </div>
                       <div className="max-w-[75%]">
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-sm font-semibold" style={{ color: currentChannel.color }}>
-                            {currentChannel.aiPersonality}
+                            AI
                           </span>
                         </div>
                         <div
@@ -894,7 +753,7 @@ export default function FanChatPage() {
                     <span>Fan Consensus</span>
                   </div>
                   <p className="echo-text">
-                    The chat is buzzing about {currentChannel.name}! Fans are engaging with {currentChannel.aiPersonality} about the latest developments.
+                    The chat is buzzing about {currentChannel.name}! Fans are engaging about the latest developments.
                   </p>
                   <span className="echo-meta">AI summary based on {messages.length} messages</span>
                 </div>
@@ -915,7 +774,6 @@ export default function FanChatPage() {
                           background: 'rgba(255, 255, 255, 0.04)',
                           border: '1px solid rgba(255, 255, 255, 0.08)',
                           color: 'var(--sm-text-muted)',
-
                           fontSize: 12,
                           cursor: 'pointer',
                           transition: 'all 0.15s',
@@ -969,14 +827,14 @@ export default function FanChatPage() {
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder={`Message ${currentChannel.aiPersonality}...`}
+                    placeholder={`Message ${currentChannel.name}...`}
                     className="sm-input flex-1"
                   />
 
                   {/* Send Button */}
                   <button
                     onClick={handleSendMessage}
-                    disabled={!message.trim() || aiLoading}
+                    disabled={!message.trim()}
                     className="btn btn-primary btn-md"
                     style={{ borderRadius: 'var(--sm-radius-pill)', minHeight: 44, paddingLeft: 20, paddingRight: 20, color: '#FAFAFB' }}
                   >

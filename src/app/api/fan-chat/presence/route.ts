@@ -5,27 +5,33 @@ const DATALAB_BASE = 'https://datalab.sportsmockery.com'
 /**
  * POST /api/fan-chat/presence
  * Heartbeat — tells DataLab the user is still in a chat room.
- * Body: { channel, userId, displayName }
+ * Frontend sends: { channel, userId, displayName }
+ * DataLab expects: { team, user_id, user_name }
  *
- * Also handles sendBeacon leave-room requests when `?_method=DELETE` is present
- * (sendBeacon can only POST, so the frontend uses this query param workaround).
+ * Also handles sendBeacon leave-room requests when `?_method=DELETE` is present.
  */
 export async function POST(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const methodOverride = searchParams.get('_method')
 
-    // sendBeacon workaround — redirect to DELETE logic
     if (methodOverride === 'DELETE') {
       return handleDelete(request)
     }
 
     const body = await request.json()
 
+    // Translate to DataLab's expected format
+    const datalabBody = {
+      team: body.channel,
+      user_id: body.userId,
+      user_name: body.displayName,
+    }
+
     const res = await fetch(`${DATALAB_BASE}/api/fan-chat/presence`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
+      body: JSON.stringify(datalabBody),
     })
 
     if (!res.ok) {
@@ -44,19 +50,19 @@ export async function POST(request: NextRequest) {
   }
 }
 
-/**
- * DELETE /api/fan-chat/presence
- * Leave room — tells DataLab the user left the chat room.
- * Body: { channel, userId }
- */
 async function handleDelete(request: NextRequest) {
   try {
     const body = await request.json()
 
+    const datalabBody = {
+      team: body.channel,
+      user_id: body.userId,
+    }
+
     const res = await fetch(`${DATALAB_BASE}/api/fan-chat/presence`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
+      body: JSON.stringify(datalabBody),
     })
 
     if (!res.ok) {
