@@ -132,9 +132,12 @@ export async function GET(request: NextRequest) {
   }
 
   // MLB prospects - query directly from Datalab Supabase
-  // Normalize team key to Datalab format
+  // Normalize team key to Datalab format — must be in whitelist
   const normalizedKey = teamKey.toLowerCase()
-  const datalabKey = TEAM_KEY_TO_ABBREV[normalizedKey] || normalizedKey
+  const datalabKey = TEAM_KEY_TO_ABBREV[normalizedKey]
+  if (!datalabKey) {
+    return NextResponse.json({ error: 'Invalid team_key' }, { status: 400 })
+  }
 
   try {
     // Query directly from Datalab Supabase (gm_mlb_prospects table)

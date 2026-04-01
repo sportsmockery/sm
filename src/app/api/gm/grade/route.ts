@@ -92,6 +92,10 @@ async function getDataFreshness(teamKey: string, sport: string): Promise<{
 
     // Fallback: calculate from team-specific tables
     const now = new Date()
+    const VALID_TEAM_KEYS = ['bears', 'bulls', 'blackhawks', 'cubs', 'whitesox']
+    if (!VALID_TEAM_KEYS.includes(teamKey)) {
+      return null // Invalid team key, skip fallback
+    }
     const playerTable = `${teamKey}_players`
 
     // Get most recent player update

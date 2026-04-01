@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { requireAdmin } from '@/lib/admin-auth'
 
 const ONESIGNAL_APP_ID = process.env.ONESIGNAL_APP_ID
 const ONESIGNAL_REST_API_KEY = process.env.ONESIGNAL_REST_API_KEY
@@ -10,6 +11,12 @@ const ONESIGNAL_REST_API_KEY = process.env.ONESIGNAL_REST_API_KEY
  */
 export async function POST(request: NextRequest) {
   try {
+    // Require admin authentication
+    const auth = await requireAdmin(request)
+    if (auth.error) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status })
+    }
+
     const body = await request.json()
 
     // Validate required fields
@@ -106,7 +113,7 @@ export async function POST(request: NextRequest) {
         article_title: articleTitle,
         onesignal_id: onesignalData.id,
         recipient_count: onesignalData.recipients || null,
-        sent_by: 'admin', // TODO: Get actual user from session
+        sent_by: auth.user.id,
       })
 
     if (historyError) {

@@ -12,8 +12,10 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50')
     const search = searchParams.get('search') || ''
     const type = searchParams.get('type') || ''
-    const sortBy = searchParams.get('sortBy') || 'created_at'
-    const sortOrder = searchParams.get('sortOrder') || 'desc'
+    const ALLOWED_SORT_FIELDS = ['created_at', 'name', 'type', 'size', 'updated_at']
+    const rawSortBy = searchParams.get('sortBy') || 'created_at'
+    const sortBy = ALLOWED_SORT_FIELDS.includes(rawSortBy) ? rawSortBy : 'created_at'
+    const sortOrder = searchParams.get('sortOrder') === 'asc' ? 'asc' : 'desc'
 
     const offset = (page - 1) * limit
 
