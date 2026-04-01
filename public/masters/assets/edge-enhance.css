@@ -89,6 +89,13 @@
   .edge-briefing-strip {
     grid-template-columns: 1fr;
   }
+  .edge-briefing-strip .ebs-label { font-size: 12px !important; }
+  .edge-briefing-strip .ebs-detail { font-size: 12px !important; }
+  .edge-briefing-strip .ebs-value { font-size: 12px !important; }
+  .edge-conviction-tag { font-size: 12px !important; }
+  .edge-mini-metric { font-size: 12px !important; }
+  .edge-mini-metric .mm-label { font-size: 12px !important; }
+  .edge-metric-explainer { font-size: 12px !important; }
 }
 
 /* ---------- Focus Mode Toggle ---------- */

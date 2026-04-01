@@ -411,7 +411,7 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
 
       {/* 2030 Article Body Area */}
       <div style={{ backgroundColor: 'var(--sm-dark)' }}>
-        <div style={{ maxWidth: 1460, margin: '0 auto', padding: '16px 24px 48px', display: 'flex', gap: 24 }}>
+        <div className="article-body-wrapper" style={{ maxWidth: 1460, margin: '0 auto', padding: '16px 24px 48px', display: 'flex', gap: 24 }}>
           {/* Left TOC Sidebar (Desktop only) */}
           <aside className="hidden xl:block" style={{ width: 260, flexShrink: 0 }}>
             <div style={{ position: 'sticky', top: 96 }}>

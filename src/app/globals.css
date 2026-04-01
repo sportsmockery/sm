@@ -4418,6 +4418,14 @@ main, .page-content, [role="main"] {
   .article-body-2030 blockquote { padding: 20px 24px; font-size: 17px; margin: 28px 0; }
 }
 
+/* Article body wrapper — wider desktop margins (15% each side) */
+@media (min-width: 1280px) {
+  .article-body-wrapper {
+    padding-left: 15% !important;
+    padding-right: 15% !important;
+  }
+}
+
 /* ========== FINAL POLISH: Upgrade 1 — Haptic Micro-Interactions ========== */
 
 /* A) Button press — scale down on :active */

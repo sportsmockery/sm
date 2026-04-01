@@ -237,9 +237,9 @@ main .text-\[22px\] {
   font-size: 24px !important;
 }
 
-/* Mobile: scale text bumps down to avoid overflow */
+/* Mobile: enforce minimum 12px text, scale bumps down to avoid overflow */
 @media (max-width: 640px) {
-  main .text-\[10px\] { font-size: 11px !important; }
+  main .text-\[10px\] { font-size: 12px !important; }
   main .text-\[11px\] { font-size: 12px !important; }
   main .text-\[12px\] { font-size: 13px !important; }
   main .text-\[13px\] { font-size: 14px !important; }
@@ -248,7 +248,16 @@ main .text-\[22px\] {
   main .text-\[16px\] { font-size: 17px !important; }
   main .text-\[20px\],
   main .text-\[22px\] { font-size: 20px !important; }
-  main td, main th { font-size: max(13px, inherit) !important; }
+  main td, main th { font-size: max(12px, inherit) !important; }
+  /* Global minimum — no text below 12px on mobile */
+  main * { min-font-size: 12px; }
+  main .ebs-label,
+  main .edge-conviction-tag,
+  main .edge-mini-metric,
+  main .edge-mini-metric .mm-label,
+  main .edge-metric-explainer {
+    font-size: max(12px, inherit) !important;
+  }
 }
 
 /* === Mobile optimization === */

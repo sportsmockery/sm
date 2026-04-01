@@ -8,14 +8,33 @@
     <link rel="icon" type="image/x-icon" href="/masters/favicon.ico" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:wght@400;500;600&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap" rel="stylesheet">
     <script type="module" crossorigin src="/masters/assets/index-9mNnDLEv.js"></script>
     <link rel="stylesheet" crossorigin href="/masters/assets/index-YKKsWlzD.css">
     <link rel="stylesheet" href="/masters/assets/masters-theme.css">
     <link rel="stylesheet" href="/masters/assets/edge-enhance.css">
     <style>
-      /* Edge logo — centered top, fades on scroll */
+      /* Hero background — Augusta National */
+      .masters-hero-bg {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        background: url('/masters/assets/masters-bg.png') center center / cover no-repeat;
+      }
+      .masters-hero-bg::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          180deg,
+          rgba(0, 12, 6, 0.82) 0%,
+          rgba(0, 12, 6, 0.75) 40%,
+          rgba(0, 12, 6, 0.88) 100%
+        );
+      }
+
+      /* Edge logo — centered top, 30% size, fades fast on scroll */
       .edge-top-logo {
         position: fixed;
         top: 14px;
@@ -27,32 +46,64 @@
         flex-direction: column;
         align-items: center;
         gap: 0px;
-        transition: opacity 0.3s ease;
+        transition: opacity 0.15s ease;
       }
       .edge-top-logo img {
         height: auto;
-        width: 400px;
-        max-width: 400px;
-        animation: masters-glow 4s ease-in-out infinite;
+        width: 120px;
+        max-width: 120px;
+        position: relative;
       }
+      /* Green light sweep over Edge logo letters */
+      .edge-logo-sweep {
+        position: relative;
+        display: inline-block;
+        overflow: hidden;
+      }
+      .edge-logo-sweep::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 60%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent 0%,
+          rgba(0, 86, 59, 0.5) 30%,
+          rgba(0, 166, 81, 0.7) 50%,
+          rgba(0, 86, 59, 0.5) 70%,
+          transparent 100%
+        );
+        animation: green-sweep 5s ease-in-out infinite;
+        pointer-events: none;
+      }
+      @keyframes green-sweep {
+        0% { left: -60%; opacity: 0; }
+        10% { opacity: 1; }
+        50% { left: 100%; opacity: 1; }
+        60% { opacity: 0; }
+        100% { left: 100%; opacity: 0; }
+      }
+
       .edge-top-logo .edge-subtitle {
-        font-family: 'Inter', system-ui, sans-serif;
-        font-size: 15px;
-        font-weight: 600;
-        letter-spacing: 0.22em;
-        text-transform: uppercase;
-        color: rgba(255, 255, 255, 0.55);
+        font-family: 'Libre Baskerville', 'Hoefler Text', 'Baskerville', 'Georgia', serif;
+        font-size: 22px;
+        font-weight: 400;
+        font-style: italic;
+        letter-spacing: 0.08em;
+        color: rgba(255, 255, 255, 0.7);
         white-space: nowrap;
-        margin-top: 4px;
+        margin-top: 6px;
       }
       .edge-top-logo.scrolled {
         opacity: 0;
         pointer-events: none;
       }
       @media (max-width: 640px) {
-        .edge-top-logo img { height: auto; width: 280px; max-width: 280px; }
+        .edge-top-logo img { height: auto; width: 90px; max-width: 90px; }
         .edge-top-logo { top: 6px; }
-        .edge-top-logo .edge-subtitle { font-size: 10px; }
+        .edge-top-logo .edge-subtitle { font-size: 16px; }
       }
       /* Only show on briefing/home page, hide on dashboard */
       body.on-dashboard .edge-top-logo {
@@ -61,13 +112,13 @@
 
       /* Push briefing hero content down so it doesn't overlap with logo */
       body:not(.on-dashboard) section[class*="min-h-screen"][class*="justify-center"] {
-        padding-top: 220px !important;
+        padding-top: 180px !important;
         justify-content: flex-start !important;
         padding-bottom: 60px !important;
       }
       @media (max-width: 640px) {
         body:not(.on-dashboard) section[class*="min-h-screen"][class*="justify-center"] {
-          padding-top: 160px !important;
+          padding-top: 140px !important;
         }
       }
 
@@ -131,7 +182,7 @@
       }
       @media (prefers-reduced-motion: reduce) {
         .comet { animation: none; opacity: 0; }
-        .edge-top-logo img { animation: none; }
+        .edge-logo-sweep::after { animation: none; }
       }
 
       /* Ensure app content sits above comets */
@@ -139,9 +190,14 @@
     </style>
   </head>
   <body>
+    <!-- Augusta National hero background -->
+    <div class="masters-hero-bg"></div>
+
     <!-- Edge logo centered top with Masters subtitle -->
     <div class="edge-top-logo">
-      <img src="/masters/assets/edge-logo-new.png" alt="Edge Intelligence" />
+      <div class="edge-logo-sweep">
+        <img src="/masters/assets/edge-logo-new.png" alt="Edge Intelligence" />
+      </div>
       <span class="edge-subtitle">Masters 2026 Intelligence</span>
     </div>
 
@@ -208,7 +264,7 @@
           if (spaContainer && spaContainer.scrollTop > scrollTop) {
             scrollTop = spaContainer.scrollTop;
           }
-          if (scrollTop > 200) {
+          if (scrollTop > 80) {
             logo.classList.add('scrolled');
           } else {
             logo.classList.remove('scrolled');
