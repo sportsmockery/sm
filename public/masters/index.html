@@ -13,8 +13,145 @@
     <script type="module" crossorigin src="/masters/assets/index-9mNnDLEv.js"></script>
     <link rel="stylesheet" crossorigin href="/masters/assets/index-YKKsWlzD.css">
     <link rel="stylesheet" href="/masters/assets/masters-theme.css">
+    <style>
+      /* Edge logo — centered top */
+      .edge-top-logo {
+        position: fixed;
+        top: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 9999;
+        pointer-events: none;
+      }
+      .edge-top-logo img {
+        height: 36px;
+        width: auto;
+        opacity: 0.92;
+        filter: drop-shadow(0 1px 4px rgba(0,0,0,0.3));
+      }
+      @media (max-width: 640px) {
+        .edge-top-logo img { height: 28px; }
+        .edge-top-logo { top: 8px; }
+      }
+
+      /* Comet background animation */
+      .bg-comets {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        overflow: hidden;
+        pointer-events: none;
+      }
+      .comet {
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        border-radius: 50%;
+        background: hsl(187 85% 55%);
+        box-shadow:
+          0 0 4px 1px hsla(187, 85%, 55%, 0.6),
+          0 0 12px 2px hsla(187, 85%, 55%, 0.3);
+        left: var(--start-x);
+        top: var(--start-y);
+        opacity: 0;
+        animation: comet-fly var(--duration) var(--delay) linear infinite;
+      }
+      .comet::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        right: 0;
+        transform: translateY(-50%) rotate(var(--angle));
+        transform-origin: right center;
+        width: 60px;
+        height: 1px;
+        background: linear-gradient(to left, hsla(187, 85%, 55%, 0.5), transparent);
+      }
+      .comet.gold {
+        background: hsl(51 100% 50%);
+        box-shadow:
+          0 0 4px 1px hsla(51, 100%, 50%, 0.6),
+          0 0 12px 2px hsla(51, 100%, 50%, 0.3);
+      }
+      .comet.gold::after {
+        background: linear-gradient(to left, hsla(51, 100%, 50%, 0.4), transparent);
+      }
+      @keyframes comet-fly {
+        0% {
+          opacity: 0;
+          transform: translate(0, 0);
+        }
+        5% {
+          opacity: 0.8;
+        }
+        70% {
+          opacity: 0.6;
+        }
+        100% {
+          opacity: 0;
+          transform: translate(var(--travel-x), var(--travel-y));
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .comet { animation: none; opacity: 0; }
+      }
+
+      /* Ensure app content sits above comets */
+      #root { position: relative; z-index: 1; }
+    </style>
   </head>
   <body>
+    <!-- Edge logo centered top -->
+    <div class="edge-top-logo">
+      <img src="/masters/assets/edge-logo-D_DeVSbv.png" alt="Edge Intelligence" />
+    </div>
+
+    <!-- Comet background animation -->
+    <div class="bg-comets" id="comets"></div>
+
     <div id="root"></div>
+
+    <script>
+      // Generate comet particles — 40 cyan + 10 gold (Masters)
+      (function() {
+        var container = document.getElementById('comets');
+        var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (prefersReduced || !container) return;
+
+        // Cyan comets
+        for (var i = 0; i < 40; i++) {
+          var angle = -30 - 30 * Math.random();
+          var rad = angle * Math.PI / 180;
+          var travel = 120 + 80 * Math.random();
+          var el = document.createElement('div');
+          el.className = 'comet';
+          el.style.setProperty('--duration', (8 + 12 * Math.random()) + 's');
+          el.style.setProperty('--delay', (30 * Math.random()) + 's');
+          el.style.setProperty('--start-x', (70 * Math.random()) + '%');
+          el.style.setProperty('--start-y', (50 + 50 * Math.random()) + '%');
+          el.style.setProperty('--angle', angle + 'deg');
+          el.style.setProperty('--travel-x', (Math.cos(rad) * travel) + 'vw');
+          el.style.setProperty('--travel-y', (Math.sin(rad) * travel) + 'vh');
+          container.appendChild(el);
+        }
+
+        // Gold comets (replacing red from StockIQ → cyan for Masters)
+        for (var j = 0; j < 10; j++) {
+          var angle2 = -20 - 140 * Math.random();
+          var rad2 = angle2 * Math.PI / 180;
+          var travel2 = 100 + 100 * Math.random();
+          var el2 = document.createElement('div');
+          el2.className = 'comet gold';
+          el2.style.setProperty('--duration', (10 + 10 * Math.random()) + 's');
+          el2.style.setProperty('--delay', (35 * Math.random()) + 's');
+          el2.style.setProperty('--start-x', (80 * Math.random()) + '%');
+          el2.style.setProperty('--start-y', (100 * Math.random()) + '%');
+          el2.style.setProperty('--angle', angle2 + 'deg');
+          el2.style.setProperty('--travel-x', (Math.cos(rad2) * travel2) + 'vw');
+          el2.style.setProperty('--travel-y', (Math.sin(rad2) * travel2) + 'vh');
+          container.appendChild(el2);
+        }
+      })();
+    </script>
   </body>
 </html>
