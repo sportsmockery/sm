@@ -95,7 +95,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               Welcome back
             </h2>
             <p style={{ marginTop: '8px', fontSize: '15px', color: 'var(--sm-text-muted)' }}>
-              Sign in to access your dashboard and manage content
+              Sign in to unlock your personalized Chicago sports experience
             </p>
           </div>
 

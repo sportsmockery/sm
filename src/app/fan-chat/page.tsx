@@ -223,7 +223,15 @@ export default function FanChatPage() {
       }
 
       try {
-        const res = await fetch(`/api/fan-chat/messages?channel=${activeChannel}&limit=200`)
+        // Add timeout to prevent infinite loading state
+        const controller = new AbortController()
+        const timeout = setTimeout(() => controller.abort(), 8000)
+
+        const res = await fetch(`/api/fan-chat/messages?channel=${activeChannel}&limit=200`, {
+          signal: controller.signal,
+        })
+        clearTimeout(timeout)
+
         if (!res.ok) throw new Error('Failed to fetch messages')
         const data = await res.json()
 
@@ -243,8 +251,11 @@ export default function FanChatPage() {
         }
       } catch (err) {
         console.error('Failed to load messages:', err)
-        if ((!cached || cached.length === 0) && !cancelled) {
-          setMessages(getWelcomeMessages(activeChannel))
+        if (!cancelled) {
+          // Always show welcome messages on error so the UI is never stuck
+          if (messages.length === 0) {
+            setMessages(getWelcomeMessages(activeChannel))
+          }
         }
       } finally {
         if (!cancelled) setIsLoadingMessages(false)

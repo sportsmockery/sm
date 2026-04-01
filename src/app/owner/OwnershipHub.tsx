@@ -28,7 +28,7 @@ export default function OwnershipHub({ grades, scoutData }: { grades: OwnershipG
   return (
     <div style={{
       minHeight: '100vh',
-      padding: 'calc(var(--sm-nav-height, 72px)) 24px 64px',
+      padding: 'calc(var(--sm-nav-height, 72px)) 16px 64px',
       maxWidth: 'var(--sm-max-width, 1200px)',
       margin: '0 auto',
     }}>
@@ -111,7 +111,7 @@ export default function OwnershipHub({ grades, scoutData }: { grades: OwnershipG
         </h2>
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(340px, 100%), 1fr))',
           gap: 20,
         }}>
           {grades.map(grade => (

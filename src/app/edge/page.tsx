@@ -410,7 +410,7 @@ function EdgeModeButton(props: {
           <div className="text-xs uppercase tracking-[0.18em] mb-1" style={{ color: '#787890' }}>
             Mode
           </div>
-          <div className="text-lg font-semibold">{props.title}</div>
+          <div className="text-lg font-semibold" style={{ color: '#FAFAFB' }}>{props.title}</div>
           <div className="text-sm mt-1" style={{ color: '#a0a0b8' }}>
             {props.subtitle}
           </div>
@@ -579,5 +579,7 @@ async function callScout(prompt: string): Promise<string> {
   });
   if (!res.ok) throw new Error('Scout request failed');
   const data = await res.json();
-  return data.answer ?? '';
+  const answer = (data.answer ?? '').trim();
+  if (!answer) throw new Error('No response from Scout');
+  return answer;
 }

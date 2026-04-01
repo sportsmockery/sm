@@ -108,11 +108,11 @@ const FEATURED_PLAYERS = [
     color: '#CE1141',
   },
   {
-    name: 'Cody Bellinger',
+    name: 'Pete Crow-Armstrong',
     team: 'Cubs',
-    position: 'OF',
-    image: 'https://a.espncdn.com/combiner/i?img=/i/headshots/mlb/players/full/33912.png&w=350&h=254',
-    stats: { label: 'HR', value: '18' },
+    position: 'CF',
+    image: 'https://a.espncdn.com/combiner/i?img=/i/headshots/mlb/players/full/4872364.png&w=350&h=254',
+    stats: { label: 'HR', value: '30' },
     color: '#0E3386',
   },
   {

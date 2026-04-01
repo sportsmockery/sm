@@ -89,13 +89,7 @@ export default function TeamHeader({ team, rightSlot }: TeamHeaderProps) {
               overflow: 'hidden',
             }}
           >
-            {team.league === 'NFL'
-              ? 'Chicago • NFC North'
-              : team.league === 'NBA'
-              ? 'Chicago • Central Division'
-              : team.league === 'NHL'
-              ? 'Chicago • Central Division'
-              : 'Chicago • American League'}
+            {`Chicago • ${team.division || (team.league === 'NFL' ? 'NFC North' : team.league === 'NBA' ? 'Eastern Conference' : team.league === 'NHL' ? 'Central Division' : 'MLB')}`}
           </p>
         </div>
       </div>

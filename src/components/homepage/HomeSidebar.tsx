@@ -69,20 +69,38 @@ export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarP
 
   const [topArticles, setTopArticles] = useState<TopArticle[]>([])
 
-  // Fetch top 5 articles from last 72 hours
+  // Map team IDs to their category slug patterns for filtering
+  const TEAM_CATEGORY_MAP: Record<string, string[]> = {
+    bears: ['chicago-bears', 'bears'],
+    bulls: ['chicago-bulls', 'bulls'],
+    cubs: ['chicago-cubs', 'cubs'],
+    blackhawks: ['chicago-blackhawks', 'blackhawks'],
+    whitesox: ['chicago-white-sox', 'white-sox', 'whitesox'],
+  }
+
+  // Fetch top 5 articles from last 72 hours, filtered by team when selected
   useEffect(() => {
     const cutoff = new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString()
-    supabase
+    let query = supabase
       .from('sm_posts')
       .select('id,title,slug,featured_image,published_at,views,category:sm_categories!category_id(slug)')
       .eq('status', 'published')
       .gte('published_at', cutoff)
       .order('views', { ascending: false })
       .limit(5)
-      .then(({ data }: { data: any }) => {
-        if (data) setTopArticles(data as TopArticle[])
-      })
-  }, [])
+
+    // Filter by team category when a specific team is selected
+    if (selectedTeam && selectedTeam !== 'all') {
+      const categorySlugs = TEAM_CATEGORY_MAP[selectedTeam]
+      if (categorySlugs) {
+        query = query.in('sm_categories.slug', categorySlugs) as any
+      }
+    }
+
+    query.then(({ data }: { data: any }) => {
+      if (data) setTopArticles(data as TopArticle[])
+    })
+  }, [selectedTeam])
 
   // Poll for live games to show/hide Game Center
   useEffect(() => {
@@ -220,8 +238,8 @@ export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarP
           })}
         </nav>
 
-        {/* Top 5 Articles — shown when For You is selected */}
-        {(!selectedTeam || selectedTeam === 'all') && topArticles.length > 0 && (
+        {/* Top 5 Articles — shown for all teams, filtered by team when selected */}
+        {topArticles.length > 0 && (
           <div style={{ marginTop: 8, borderTop: '1px solid var(--hp-border)', paddingTop: 8 }}>
             <div style={{ padding: '4px 16px', fontSize: 14, fontWeight: 700, letterSpacing: '-0.01em' }}>
               <span style={{ color: '#00D4FF' }}>EDGE</span> <span style={{ color: '#BC0000' }}>&#x2736;</span> <span style={{ color: '#00D4FF' }}>Top Stories</span>

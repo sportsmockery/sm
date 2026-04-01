@@ -83,6 +83,7 @@ const nextConfig: NextConfig = {
       { source: '/category/chicago-blackhawks/:path*', destination: '/chicago-blackhawks', permanent: true },
       { source: '/category/:path*', destination: '/', permanent: true },
       { source: '/chat', destination: '/fan-chat', permanent: true },
+      { source: '/war-room', destination: '/gm', permanent: false },
     ]
   },
 

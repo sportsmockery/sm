@@ -325,7 +325,7 @@ export default function AskAIPage() {
             </Link>
             <p style={{ fontSize: 12, marginTop: 16, color: 'var(--sm-text-muted)' }}>
               Don&apos;t have an account?{' '}
-              <Link href="/login?next=/scout-ai" style={{ color: 'var(--sm-red)' }}>Sign up free</Link>
+              <Link href="/signup" style={{ color: 'var(--sm-red)' }}>Sign up free</Link>
             </p>
           </div>
         </div>

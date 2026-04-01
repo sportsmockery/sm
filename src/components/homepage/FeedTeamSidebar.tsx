@@ -86,10 +86,19 @@ export default function FeedTeamSidebar({ selectedTeam }: FeedTeamSidebarProps) 
     )
   }
 
-  if (!data) return null
-
   const info = getTeamInfo(teamInfo.slug)
   if (!info) return null
+
+  // If no data loaded, show empty state instead of rendering nothing
+  if (!data) {
+    return (
+      <div className="hp-sidebar-card px-3 py-4 text-center">
+        <p style={{ fontSize: 13, color: 'var(--hp-muted-foreground)', margin: 0 }}>
+          Team data is loading...
+        </p>
+      </div>
+    )
+  }
 
   const { season, players, trends } = data
 

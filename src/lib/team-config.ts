@@ -183,16 +183,31 @@ export async function fetchTeamRecord(teamKey: string): Promise<TeamRecord | nul
       // (spring_training and regular rows both exist for season 2026)
       const isMLB = teamInfo.league === 'MLB'
       const mlbPhase = isMLB ? getMLBSeasonPhase() : null
-      let query = datalabClient
-        .from(seasonsConfig.table)
-        .select('*')
-        .eq('season', currentSeason)
-      if (isMLB && mlbPhase === 'regular') {
-        query = query.eq('game_type', 'regular')
-      } else if (isMLB && mlbPhase === 'spring-training') {
-        query = query.eq('game_type', 'spring_training')
+
+      // Helper to query a specific season
+      const querySeason = async (season: number) => {
+        let query = datalabClient
+          .from(seasonsConfig.table)
+          .select('*')
+          .eq('season', season)
+        if (isMLB && mlbPhase === 'regular') {
+          query = query.eq('game_type', 'regular')
+        } else if (isMLB && mlbPhase === 'spring-training') {
+          query = query.eq('game_type', 'spring_training')
+        }
+        return query.single()
       }
-      const { data: seasonData, error } = await query.single()
+
+      let { data: seasonData, error } = await querySeason(currentSeason)
+
+      // If no data for current season, fall back to previous season
+      // This handles offseasons where the new season hasn't started yet
+      if (error || !seasonData) {
+        const previousSeason = currentSeason - 1
+        const fallback = await querySeason(previousSeason)
+        seasonData = fallback.data
+        error = fallback.error
+      }
 
       if (error || !seasonData) {
         console.error(`Error fetching ${teamKey} season record from ${seasonsConfig.table}:`, error)
