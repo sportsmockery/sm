@@ -52,12 +52,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
     }
 
-    // Support viewing another user's analytics via ?target_user_id=
-    const targetUserId = request.nextUrl.searchParams.get('target_user_id') || user.id
+    // Only allow users to view their own analytics
+    const targetUserId = user.id
 
     // Try Data Lab first
     try {
-      const res = await fetch(`${DATALAB_URL}/api/gm/analytics?user_id=${targetUserId}`, {
+      const res = await fetch(`${DATALAB_URL}/api/gm/analytics?user_id=${encodeURIComponent(targetUserId)}`, {
         headers: {
           'Content-Type': 'application/json',
           'X-Source': 'sportsmockery.com',

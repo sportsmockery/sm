@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { requireAdmin } from '@/lib/admin-auth'
 
 /**
  * Ad Placements API
@@ -39,8 +40,13 @@ export interface AdPlacement {
 }
 
 // GET - List all ad placements
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const auth = await requireAdmin(request)
+    if (auth.error) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status })
+    }
+
     const { data: ads, error } = await supabaseAdmin
       .from('sm_ad_placements')
       .select('*')
@@ -65,6 +71,11 @@ export async function GET() {
 // POST - Create new ad placement
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireAdmin(request)
+    if (auth.error) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status })
+    }
+
     const body = await request.json()
 
     const { name, placement_type, html_code, css_code, is_active, priority, conditions } = body
@@ -102,6 +113,11 @@ export async function POST(request: NextRequest) {
 // PUT - Update ad placement
 export async function PUT(request: NextRequest) {
   try {
+    const auth = await requireAdmin(request)
+    if (auth.error) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status })
+    }
+
     const body = await request.json()
 
     const { id, ...updates } = body
@@ -132,6 +148,11 @@ export async function PUT(request: NextRequest) {
 // DELETE - Delete ad placement
 export async function DELETE(request: NextRequest) {
   try {
+    const auth = await requireAdmin(request)
+    if (auth.error) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status })
+    }
+
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
 
