@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
         article_title: articleTitle,
         onesignal_id: onesignalData.id,
         recipient_count: onesignalData.recipients || null,
-        sent_by: auth.user.id,
+        sent_by: auth.user!.id,
       })
 
     if (historyError) {
