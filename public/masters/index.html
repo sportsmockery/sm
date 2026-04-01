@@ -14,24 +14,37 @@
     <link rel="stylesheet" crossorigin href="/masters/assets/index-YKKsWlzD.css">
     <link rel="stylesheet" href="/masters/assets/masters-theme.css">
     <style>
-      /* Edge logo — centered top */
+      /* Edge logo — centered top with subtitle */
       .edge-top-logo {
         position: fixed;
-        top: 12px;
+        top: 10px;
         left: 50%;
         transform: translateX(-50%);
         z-index: 9999;
         pointer-events: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
       }
       .edge-top-logo img {
-        height: 36px;
+        height: 52px;
         width: auto;
-        opacity: 0.92;
-        filter: drop-shadow(0 1px 4px rgba(0,0,0,0.3));
+        animation: masters-glow 4s ease-in-out infinite;
+      }
+      .edge-top-logo .edge-subtitle {
+        font-family: 'Inter', system-ui, sans-serif;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.55);
+        white-space: nowrap;
       }
       @media (max-width: 640px) {
-        .edge-top-logo img { height: 28px; }
-        .edge-top-logo { top: 8px; }
+        .edge-top-logo img { height: 40px; }
+        .edge-top-logo { top: 6px; }
+        .edge-top-logo .edge-subtitle { font-size: 8px; }
       }
 
       /* Comet background animation */
@@ -94,6 +107,7 @@
       }
       @media (prefers-reduced-motion: reduce) {
         .comet { animation: none; opacity: 0; }
+        .edge-top-logo img { animation: none; }
       }
 
       /* Ensure app content sits above comets */
@@ -101,9 +115,10 @@
     </style>
   </head>
   <body>
-    <!-- Edge logo centered top -->
+    <!-- Edge logo centered top with Masters subtitle -->
     <div class="edge-top-logo">
-      <img src="/masters/assets/edge-logo-D_DeVSbv.png" alt="Edge Intelligence" />
+      <img src="/masters/assets/edge-logo-new.svg" alt="Edge Intelligence" />
+      <span class="edge-subtitle">Masters 2026 Intelligence</span>
     </div>
 
     <!-- Comet background animation -->
@@ -135,7 +150,7 @@
           container.appendChild(el);
         }
 
-        // Gold comets (replacing red from StockIQ → cyan for Masters)
+        // Gold comets
         for (var j = 0; j < 10; j++) {
           var angle2 = -20 - 140 * Math.random();
           var rad2 = angle2 * Math.PI / 180;
