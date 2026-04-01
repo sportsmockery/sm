@@ -28,6 +28,7 @@ export interface TeamInfo {
   primaryColor: string
   secondaryColor: string
   league: 'NFL' | 'NBA' | 'MLB' | 'NHL'
+  division?: string
 }
 
 export interface NextGameInfo {
