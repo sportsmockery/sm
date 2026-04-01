@@ -153,6 +153,47 @@
   50% { opacity: .3; }
 }
 
+/* === Sidebar logo — bigger, centered, with subtitle === */
+
+/* Target the sidebar header container (px-5 py-4 with border-b) */
+aside .border-sidebar-border:first-child,
+aside > .border-sidebar-border:first-child,
+aside [class*="px-5"][class*="py-4"][class*="border-b"] {
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 24px 16px 16px !important;
+  gap: 8px !important;
+}
+
+/* Make sidebar logo much bigger */
+aside [class*="px-5"][class*="py-4"][class*="border-b"] img,
+aside .border-sidebar-border:first-child img {
+  height: 80px !important;
+  width: auto !important;
+  animation: masters-glow 4s ease-in-out infinite;
+}
+
+/* Hide the text next to logo in sidebar header (Edge Intelligence text) */
+aside [class*="px-5"][class*="py-4"][class*="border-b"] > div:last-child,
+aside .border-sidebar-border:first-child > .flex-col {
+  display: none !important;
+}
+
+/* Add "Masters 2026 Intelligence" subtitle via pseudo-element */
+aside [class*="px-5"][class*="py-4"][class*="border-b"]::after,
+aside .border-sidebar-border:first-child::after {
+  content: "Masters 2026 Intelligence";
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+  margin-top: -2px;
+}
+
 /* === Desktop centering === */
 @media (min-width: 1024px) {
   /* Center the main content area when sidebar is collapsed */
