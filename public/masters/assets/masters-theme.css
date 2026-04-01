@@ -194,89 +194,90 @@ aside .border-sidebar-border:first-child::after {
   margin-top: -2px;
 }
 
-/* === Desktop centering === */
+/* === Desktop centering — only center main, not sidebar === */
 @media (min-width: 1024px) {
-  /* Center the main content area when sidebar is collapsed */
-  #root > div > main,
-  #root > div > div > main,
-  [class*="p-3"][class*="max-w-[1400px]"],
-  [class*="p-3"][class*="max-w-"] {
+  /* Center only the main content area, sidebar stays fixed left */
+  main {
     margin-left: auto !important;
     margin-right: auto !important;
   }
-  /* Ensure the content wrapper centers properly */
-  #root {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  #root > div {
-    width: 100%;
-    max-width: 1400px;
-    margin: 0 auto;
+  main > [class*="max-w-"] {
+    margin-left: auto !important;
+    margin-right: auto !important;
   }
 }
 
-/* === Text size bump — override tiny text === */
+/* === Text size bump — scoped to main content, not sidebar/tabs === */
 
-/* 10px → 12px */
-.text-\[10px\] {
-  font-size: 12px !important;
-}
+/* Only bump text in the main content area, not sidebar or tab triggers */
+main .text-\[10px\] { font-size: 12px !important; }
+main .text-\[11px\] { font-size: 13px !important; }
+main .text-\[12px\] { font-size: 14px !important; }
+main .text-\[13px\] { font-size: 15px !important; }
 
-/* 11px → 13px */
-.text-\[11px\] {
-  font-size: 13px !important;
-}
-
-/* 12px → 14px */
-.text-\[12px\],
-.text-xs {
-  font-size: 14px !important;
-}
-
-/* 13px → 15px */
-.text-\[13px\] {
-  font-size: 15px !important;
-}
-
-/* 14px → 16px */
-.text-\[14px\],
-.text-sm {
-  font-size: 16px !important;
-}
-
-/* Keep base/lg/xl as-is or bump slightly */
-.text-\[15px\] {
-  font-size: 17px !important;
-}
-
-.text-\[16px\] {
-  font-size: 18px !important;
-}
+/* Briefing page body text */
+main .text-\[14px\] { font-size: 16px !important; }
+main .text-\[15px\] { font-size: 17px !important; }
+main .text-\[16px\] { font-size: 18px !important; }
 
 /* Table cells — bump tabular data */
-td, th {
+main td, main th {
   font-size: max(14px, inherit) !important;
 }
 
-/* Navigation items */
-[class*="text-sidebar"] {
-  font-size: max(14px, inherit);
-}
-
-/* Story page / briefing text */
-.text-\[16px\].leading-relaxed,
-.text-\[18px\].leading-relaxed,
-[class*="leading-relaxed"] {
+/* Story / briefing body text */
+main [class*="leading-relaxed"] {
   font-size: max(18px, inherit) !important;
   line-height: 1.7 !important;
 }
 
 /* Hero / story headlines */
-.text-\[20px\],
-.text-\[22px\] {
+main .text-\[20px\],
+main .text-\[22px\] {
   font-size: 24px !important;
+}
+
+/* Mobile: scale text bumps down to avoid overflow */
+@media (max-width: 640px) {
+  main .text-\[10px\] { font-size: 11px !important; }
+  main .text-\[11px\] { font-size: 12px !important; }
+  main .text-\[12px\] { font-size: 13px !important; }
+  main .text-\[13px\] { font-size: 14px !important; }
+  main .text-\[14px\] { font-size: 15px !important; }
+  main .text-\[15px\] { font-size: 16px !important; }
+  main .text-\[16px\] { font-size: 17px !important; }
+  main .text-\[20px\],
+  main .text-\[22px\] { font-size: 20px !important; }
+  main td, main th { font-size: max(13px, inherit) !important; }
+}
+
+/* === Mobile optimization === */
+@media (max-width: 640px) {
+  /* Prevent horizontal overflow on tables */
+  main table { font-size: 13px; }
+  main [class*="overflow-x-auto"] { -webkit-overflow-scrolling: touch; }
+
+  /* Ensure cards don't overflow */
+  main [class*="rounded-xl"],
+  main [class*="rounded-lg"] {
+    overflow: hidden;
+    word-break: break-word;
+  }
+
+  /* Mobile sidebar overlay — ensure it covers full screen */
+  aside {
+    width: 280px !important;
+  }
+
+  /* Mobile top bar padding for content */
+  main {
+    padding-top: 56px !important;
+  }
+
+  /* Stat values don't wrap */
+  main [class*="tabular-nums"] {
+    white-space: nowrap;
+  }
 }
 
 /* First-page story glow behind logo */
