@@ -1,0 +1,154 @@
+/* Masters Tournament Color Override
+   Augusta National palette: deep green, gold/yellow, warm tones */
+
+:root {
+  /* === Masters Light Mode === */
+  --background: 40 30% 97%;
+  --foreground: 156 30% 8%;
+  --border: 40 12% 85%;
+  --card: 40 20% 95%;
+  --card-foreground: 156 30% 8%;
+  --card-border: 40 12% 85%;
+
+  /* Sidebar — deep Augusta green */
+  --sidebar: 161 100% 10%;
+  --sidebar-foreground: 40 30% 92%;
+  --sidebar-border: 161 80% 14%;
+  --sidebar-primary: 51 100% 50%;
+  --sidebar-primary-foreground: 161 100% 8%;
+  --sidebar-accent: 161 80% 16%;
+  --sidebar-accent-foreground: 40 30% 92%;
+  --sidebar-ring: 51 100% 50%;
+
+  --popover: 40 20% 94%;
+  --popover-foreground: 156 30% 8%;
+  --popover-border: 40 12% 85%;
+
+  /* Primary — Augusta Green */
+  --primary: 161 100% 20%;
+  --primary-foreground: 40 40% 96%;
+
+  --secondary: 40 10% 90%;
+  --secondary-foreground: 156 30% 8%;
+  --muted: 40 10% 92%;
+  --muted-foreground: 156 8% 42%;
+
+  /* Accent — Masters Gold */
+  --accent: 51 100% 50%;
+  --accent-foreground: 156 30% 8%;
+
+  /* Azalea pink for alerts */
+  --destructive: 350 73% 49%;
+  --destructive-foreground: 0 0% 98%;
+
+  --input: 40 12% 82%;
+  --ring: 51 100% 50%;
+
+  /* Charts — Masters palette */
+  --chart-1: 161 100% 25%;
+  --chart-2: 51 100% 50%;
+  --chart-3: 350 73% 49%;
+  --chart-4: 28 85% 55%;
+  --chart-5: 161 60% 40%;
+
+  /* Override Edge colors → Masters */
+  --edge-cyan: 51 100% 50%;
+  --edge-green: 161 100% 25%;
+}
+
+.dark {
+  /* === Masters Dark Mode === */
+  --background: 160 25% 5%;
+  --foreground: 40 15% 90%;
+  --border: 160 18% 14%;
+  --card: 160 20% 8%;
+  --card-foreground: 40 15% 90%;
+  --card-border: 160 18% 13%;
+
+  --sidebar: 160 30% 6%;
+  --sidebar-foreground: 40 12% 85%;
+  --sidebar-border: 160 24% 11%;
+  --sidebar-primary: 51 100% 50%;
+  --sidebar-primary-foreground: 160 30% 6%;
+  --sidebar-accent: 160 24% 13%;
+  --sidebar-accent-foreground: 40 12% 85%;
+  --sidebar-ring: 51 100% 50%;
+
+  --popover: 160 20% 10%;
+  --popover-foreground: 40 15% 90%;
+  --popover-border: 160 18% 14%;
+
+  --primary: 161 80% 30%;
+  --primary-foreground: 40 40% 96%;
+
+  --secondary: 160 15% 15%;
+  --secondary-foreground: 40 15% 90%;
+  --muted: 160 12% 16%;
+  --muted-foreground: 40 8% 55%;
+
+  --accent: 51 100% 50%;
+  --accent-foreground: 160 25% 5%;
+
+  --destructive: 350 73% 55%;
+  --destructive-foreground: 0 0% 98%;
+
+  --input: 160 12% 20%;
+  --ring: 51 100% 50%;
+
+  --chart-1: 161 80% 35%;
+  --chart-2: 51 100% 55%;
+  --chart-3: 350 70% 55%;
+  --chart-4: 28 80% 58%;
+  --chart-5: 161 50% 45%;
+
+  --edge-cyan: 51 100% 50%;
+  --edge-green: 161 80% 35%;
+}
+
+/* === Inline color overrides for hardcoded Tailwind classes === */
+
+/* Cyan text → Masters Gold */
+.text-\[hsl\(187_85\%_55\%\)\],
+.text-\[hsl\(187_85\%_60\%\)\] {
+  color: hsl(51 100% 50%) !important;
+}
+
+/* Tier colors — remap to Masters feel */
+.tier-elite {
+  color: #FFD700 !important;  /* Gold */
+}
+.tier-contender {
+  color: #2E8B57 !important;  /* Sea green */
+}
+.tier-field {
+  color: #8B8878 !important;  /* Warm gray */
+}
+.tier-longshot {
+  color: #6B6255 !important;  /* Warm muted */
+}
+
+/* Accent metric colors — gold tones */
+.text-\[hsl\(280_50\%_65\%\)\] {
+  color: hsl(38 80% 58%) !important;  /* Warm amber instead of purple */
+}
+
+.text-\[hsl\(0_60\%_60\%\)\] {
+  color: hsl(350 73% 52%) !important;  /* Azalea pink */
+}
+
+/* Scrollbar — dark green */
+.dark ::-webkit-scrollbar-track {
+  background: hsl(160 25% 7%) !important;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: hsl(161 30% 20%) !important;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: hsl(161 35% 28%) !important;
+}
+
+/* Edge animation colors → green glow instead of cyan */
+@keyframes edge-pulse {
+  0%, 100% { opacity: .15; }
+  50% { opacity: .3; }
+}
