@@ -153,50 +153,62 @@
   50% { opacity: .3; }
 }
 
-/* === Sidebar logo — bigger, centered, with subtitle === */
+/* === Sidebar logo — large, properly placed === */
 
-/* Target the sidebar header container (px-5 py-4 with border-b) */
+/* Target the sidebar header container */
 aside .border-sidebar-border:first-child,
 aside > .border-sidebar-border:first-child,
-aside [class*="px-5"][class*="py-4"][class*="border-b"] {
+aside [class*="px-5"][class*="py-4"][class*="border-b"],
+aside [class*="border-b"]:first-child {
   flex-direction: column !important;
   align-items: center !important;
   justify-content: center !important;
-  padding: 24px 16px 16px !important;
-  gap: 8px !important;
+  padding: 28px 20px 20px !important;
+  gap: 10px !important;
 }
 
-/* Make sidebar logo much bigger */
+/* Make sidebar logo large and prominent */
 aside [class*="px-5"][class*="py-4"][class*="border-b"] img,
-aside .border-sidebar-border:first-child img {
-  height: 80px !important;
+aside .border-sidebar-border:first-child img,
+aside [class*="border-b"]:first-child img {
+  height: 56px !important;
   width: auto !important;
+  max-width: 180px !important;
+  object-fit: contain !important;
   animation: masters-glow 4s ease-in-out infinite;
 }
 
-/* Hide the text next to logo in sidebar header (Edge Intelligence text) */
+/* Also target SVG logos */
+aside [class*="border-b"]:first-child svg {
+  height: 56px !important;
+  width: auto !important;
+  max-width: 180px !important;
+}
+
+/* Hide the text next to logo in sidebar header */
 aside [class*="px-5"][class*="py-4"][class*="border-b"] > div:last-child,
-aside .border-sidebar-border:first-child > .flex-col {
+aside .border-sidebar-border:first-child > .flex-col,
+aside [class*="border-b"]:first-child > .flex-col {
   display: none !important;
 }
 
-/* Add "Masters 2026 Intelligence" subtitle via pseudo-element */
+/* Add "Masters 2026 Intelligence" subtitle */
 aside [class*="px-5"][class*="py-4"][class*="border-b"]::after,
-aside .border-sidebar-border:first-child::after {
+aside .border-sidebar-border:first-child::after,
+aside [class*="border-b"]:first-child::after {
   content: "Masters 2026 Intelligence";
-  font-family: 'Inter', system-ui, sans-serif;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.5);
+  font-family: 'Libre Baskerville', 'Hoefler Text', 'Georgia', serif;
+  font-size: 14px;
+  font-weight: 400;
+  font-style: italic;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.6);
   text-align: center;
-  margin-top: -2px;
+  margin-top: 2px;
 }
 
 /* === Desktop centering — only center main, not sidebar === */
 @media (min-width: 1024px) {
-  /* Center only the main content area, sidebar stays fixed left */
   main {
     margin-left: auto !important;
     margin-right: auto !important;
@@ -207,63 +219,104 @@ aside .border-sidebar-border:first-child::after {
   }
 }
 
-/* === Text size bump — scoped to main content, not sidebar/tabs === */
-
-/* Only bump text in the main content area, not sidebar or tab triggers */
-main .text-\[10px\] { font-size: 12px !important; }
-main .text-\[11px\] { font-size: 13px !important; }
-main .text-\[12px\] { font-size: 14px !important; }
-main .text-\[13px\] { font-size: 15px !important; }
-
-/* Briefing page body text */
-main .text-\[14px\] { font-size: 16px !important; }
-main .text-\[15px\] { font-size: 17px !important; }
-main .text-\[16px\] { font-size: 18px !important; }
-
-/* Table cells — bump tabular data */
-main td, main th {
-  font-size: max(14px, inherit) !important;
+/* === Hero width — match content cards (max-w-6xl = 1152px) === */
+#root section[class*="min-h-screen"]:first-of-type {
+  max-width: 1152px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: 24px !important;
+  padding-right: 24px !important;
 }
 
-/* Story / briefing body text */
-main [class*="leading-relaxed"] {
+/* === Text size overrides — NO TEXT BELOW 14px === */
+/* Applied at #root level to catch ALL SPA content */
+
+/* Force all tiny text classes up to 14px minimum */
+#root .text-\[8px\],
+#root .text-\[9px\],
+#root .text-\[10px\],
+#root .text-\[11px\] { font-size: 14px !important; }
+
+#root .text-\[12px\] { font-size: 16px !important; }
+#root .text-\[13px\] { font-size: 17px !important; }
+
+/* Body text */
+#root .text-\[14px\] { font-size: 18px !important; }
+#root .text-\[15px\] { font-size: 19px !important; }
+#root .text-\[16px\] { font-size: 20px !important; }
+
+/* Subheadings */
+#root .text-\[17px\] { font-size: 21px !important; }
+#root .text-\[18px\] { font-size: 24px !important; }
+
+/* Headings */
+#root .text-\[20px\] { font-size: 28px !important; }
+#root .text-\[22px\] { font-size: 30px !important; }
+#root .text-\[24px\] { font-size: 32px !important; }
+#root .text-\[28px\] { font-size: 36px !important; }
+#root .text-\[32px\] { font-size: 40px !important; }
+
+/* Tailwind named size classes */
+#root .text-xs { font-size: 15px !important; }
+#root .text-sm { font-size: 17px !important; }
+#root .text-base { font-size: 19px !important; }
+#root .text-lg { font-size: 22px !important; }
+#root .text-xl { font-size: 28px !important; }
+#root .text-2xl { font-size: 34px !important; }
+#root .text-3xl { font-size: 40px !important; }
+
+/* Table cells */
+#root td, #root th {
+  font-size: max(16px, inherit) !important;
+}
+
+/* Leading-relaxed body text (story sections) */
+#root [class*="leading-relaxed"] {
   font-size: max(18px, inherit) !important;
   line-height: 1.7 !important;
 }
 
-/* Hero / story headlines */
-main .text-\[20px\],
-main .text-\[22px\] {
-  font-size: 24px !important;
+/* Headings */
+#root h1 { font-size: max(36px, inherit) !important; }
+#root h2 { font-size: max(30px, inherit) !important; }
+#root h3 { font-size: max(26px, inherit) !important; }
+#root h4 { font-size: max(22px, inherit) !important; }
+#root h5, #root h6 { font-size: max(18px, inherit) !important; }
+
+/* Paragraph and span text */
+#root p { font-size: max(17px, inherit) !important; }
+#root span { font-size: max(14px, inherit) !important; }
+
+/* Section heading labels (uppercase tracking-wide small text) */
+#root [class*="tracking-wide"],
+#root [class*="tracking-wider"],
+#root [class*="uppercase"] {
+  font-size: max(15px, inherit) !important;
 }
 
-/* Mobile: enforce minimum 12px text, scale bumps down to avoid overflow */
+/* Nuclear option — absolute minimum 14px on everything in the SPA */
+#root * {
+  font-size: max(14px, inherit) !important;
+}
+
+/* Mobile: slightly smaller but still 14px minimum */
 @media (max-width: 640px) {
-  main .text-\[10px\] { font-size: 12px !important; }
-  main .text-\[11px\] { font-size: 12px !important; }
-  main .text-\[12px\] { font-size: 13px !important; }
-  main .text-\[13px\] { font-size: 14px !important; }
-  main .text-\[14px\] { font-size: 15px !important; }
-  main .text-\[15px\] { font-size: 16px !important; }
-  main .text-\[16px\] { font-size: 17px !important; }
-  main .text-\[20px\],
-  main .text-\[22px\] { font-size: 20px !important; }
-  main td, main th { font-size: max(12px, inherit) !important; }
-  /* Global minimum — no text below 12px on mobile */
-  main * { min-font-size: 12px; }
-  main .ebs-label,
-  main .edge-conviction-tag,
-  main .edge-mini-metric,
-  main .edge-mini-metric .mm-label,
-  main .edge-metric-explainer {
-    font-size: max(12px, inherit) !important;
-  }
+  #root .text-\[20px\],
+  #root .text-\[22px\] { font-size: 22px !important; }
+  #root .text-xl { font-size: 24px !important; }
+  #root h1 { font-size: max(28px, inherit) !important; }
+  #root h2 { font-size: max(24px, inherit) !important; }
+  #root h3 { font-size: max(22px, inherit) !important; }
+  #root td, #root th { font-size: max(14px, inherit) !important; }
+  #root p { font-size: max(15px, inherit) !important; }
+  /* Still enforce 14px minimum on mobile */
+  #root * { font-size: max(14px, inherit) !important; }
 }
 
 /* === Mobile optimization === */
 @media (max-width: 640px) {
   /* Prevent horizontal overflow on tables */
-  main table { font-size: 13px; }
+  main table { font-size: 14px; }
   main [class*="overflow-x-auto"] { -webkit-overflow-scrolling: touch; }
 
   /* Ensure cards don't overflow */
@@ -287,6 +340,98 @@ main .text-\[22px\] {
   main [class*="tabular-nums"] {
     white-space: nowrap;
   }
+}
+
+/* === Card headings, numbers, icons — bigger === */
+
+/* Card title text (h3/h4 inside cards) */
+#root [class*="rounded-xl"] h3,
+#root [class*="rounded-lg"] h3,
+#root [class*="rounded-xl"] h4,
+#root [class*="rounded-lg"] h4 {
+  font-size: max(24px, inherit) !important;
+}
+
+/* Large stat numbers inside cards (tabular-nums, font-mono, etc.) */
+#root [class*="rounded-xl"] [class*="tabular-nums"],
+#root [class*="rounded-lg"] [class*="tabular-nums"],
+#root [class*="rounded-xl"] [class*="font-mono"],
+#root [class*="rounded-lg"] [class*="font-mono"] {
+  font-size: max(22px, inherit) !important;
+}
+
+/* Big number stats (text-2xl, text-3xl etc inside cards) */
+#root [class*="rounded-xl"] [class*="text-2xl"],
+#root [class*="rounded-lg"] [class*="text-2xl"] {
+  font-size: 36px !important;
+}
+#root [class*="rounded-xl"] [class*="text-3xl"],
+#root [class*="rounded-lg"] [class*="text-3xl"] {
+  font-size: 42px !important;
+}
+
+/* SVG icons — scale up everywhere */
+#root svg {
+  transform: scale(1.3);
+  transform-origin: center;
+}
+/* Icon size classes */
+#root .w-4 { width: 20px !important; height: 20px !important; }
+#root .h-4 { width: 20px !important; height: 20px !important; }
+#root .w-3 { width: 16px !important; height: 16px !important; }
+#root .h-3 { width: 16px !important; height: 16px !important; }
+#root .w-5 { width: 24px !important; height: 24px !important; }
+#root .h-5 { width: 24px !important; height: 24px !important; }
+
+/* === Decrease spacing between sections === */
+
+/* Grid gaps — tighten */
+#root [class*="gap-6"] { gap: 16px !important; }
+#root [class*="gap-5"] { gap: 14px !important; }
+#root [class*="gap-4"] { gap: 12px !important; }
+#root [class*="gap-8"] { gap: 20px !important; }
+
+/* Space-y — tighten vertical spacing between stacked sections */
+#root [class*="space-y-6"] > * + * { margin-top: 16px !important; }
+#root [class*="space-y-8"] > * + * { margin-top: 20px !important; }
+#root [class*="space-y-4"] > * + * { margin-top: 10px !important; }
+
+/* Padding inside cards — slightly tighter */
+#root [class*="rounded-xl"][class*="p-6"],
+#root [class*="rounded-lg"][class*="p-6"] {
+  padding: 18px !important;
+}
+#root [class*="rounded-xl"][class*="p-5"],
+#root [class*="rounded-lg"][class*="p-5"] {
+  padding: 16px !important;
+}
+
+/* Section margins */
+#root [class*="mb-8"] { margin-bottom: 20px !important; }
+#root [class*="mb-6"] { margin-bottom: 16px !important; }
+#root [class*="mt-8"] { margin-top: 20px !important; }
+#root [class*="mt-6"] { margin-top: 16px !important; }
+
+/* Section 07 "Build Your Conviction" — align left like other sections */
+#root section:last-of-type .max-w-4xl.text-center {
+  text-align: left !important;
+  max-width: 1152px !important; /* match max-w-6xl */
+}
+
+/* Hide "Scroll to begin" + arrow in hero */
+#root section:first-of-type [class*="tracking-"][class*="uppercase"] {
+  display: none !important;
+}
+/* Target the scroll arrow icon next to it */
+#root section:first-of-type [class*="text-white\\/20"][class*="w-4"] {
+  display: none !important;
+}
+/* Hide the entire scroll cue container at bottom of hero */
+#root section:first-of-type > div:last-child {
+  visibility: visible;
+}
+#root section:first-of-type [class*="absolute"][class*="bottom"] {
+  display: none !important;
 }
 
 /* First-page story glow behind logo */

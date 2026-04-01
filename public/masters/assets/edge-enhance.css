@@ -42,7 +42,7 @@
 }
 
 .edge-briefing-strip .ebs-label {
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -51,7 +51,7 @@
 }
 
 .edge-briefing-strip .ebs-player {
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 700;
   color: hsl(40, 15%, 92%);
   white-space: nowrap;
@@ -60,7 +60,7 @@
 }
 
 .edge-briefing-strip .ebs-detail {
-  font-size: 11px;
+  font-size: 14px;
   color: hsla(40, 15%, 90%, 0.55);
   white-space: nowrap;
   overflow: hidden;
@@ -69,7 +69,7 @@
 
 .edge-briefing-strip .ebs-value {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 600;
 }
 
@@ -89,13 +89,16 @@
   .edge-briefing-strip {
     grid-template-columns: 1fr;
   }
-  .edge-briefing-strip .ebs-label { font-size: 12px !important; }
-  .edge-briefing-strip .ebs-detail { font-size: 12px !important; }
-  .edge-briefing-strip .ebs-value { font-size: 12px !important; }
-  .edge-conviction-tag { font-size: 12px !important; }
-  .edge-mini-metric { font-size: 12px !important; }
+  .edge-briefing-strip .ebs-label { font-size: 13px !important; }
+  .edge-briefing-strip .ebs-player { font-size: 15px !important; }
+  .edge-briefing-strip .ebs-detail { font-size: 13px !important; }
+  .edge-briefing-strip .ebs-value { font-size: 13px !important; }
+  .edge-conviction-tag { font-size: 13px !important; }
+  .edge-mini-metric { font-size: 13px !important; }
   .edge-mini-metric .mm-label { font-size: 12px !important; }
-  .edge-metric-explainer { font-size: 12px !important; }
+  .edge-metric-explainer { font-size: 13px !important; }
+  .edge-focus-toggle { font-size: 13px !important; }
+  .edge-section-intro { font-size: 15px !important; }
 }
 
 /* ---------- Focus Mode Toggle ---------- */
@@ -109,7 +112,7 @@
   border: 1px solid hsla(160, 18%, 18%, 0.5);
   background: hsla(160, 18%, 10%, 0.6);
   font-family: 'Inter', system-ui, sans-serif;
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.06em;
   color: hsla(40, 15%, 90%, 0.6);
@@ -152,7 +155,7 @@
   padding: 2px 8px;
   border-radius: 6px;
   font-family: 'Inter', system-ui, sans-serif;
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.06em;
   white-space: nowrap;
@@ -201,7 +204,7 @@
 .edge-metric-explainer {
   display: block;
   font-family: 'Inter', system-ui, sans-serif;
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 400;
   color: hsla(40, 15%, 90%, 0.38);
   margin-top: 2px;
@@ -214,7 +217,7 @@
 
 .edge-section-intro {
   font-family: 'Inter', system-ui, sans-serif;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 400;
   color: hsla(40, 15%, 90%, 0.42);
   line-height: 1.5;
@@ -241,7 +244,7 @@
   padding: 1px 6px;
   border-radius: 4px;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 500;
   background: hsla(160, 18%, 12%, 0.4);
   border: 1px solid hsla(160, 18%, 18%, 0.25);
@@ -251,7 +254,7 @@
 
 .edge-mini-metric .mm-label {
   font-family: 'Inter', system-ui, sans-serif;
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
