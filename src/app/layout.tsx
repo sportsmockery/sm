@@ -5,7 +5,7 @@ import "@/styles/homepage.css";
 import "@/styles/homepage-v2.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { ChatProvider } from "@/contexts/ChatContext";
+import ConditionalChatProvider from "@/components/layout/ConditionalChatProvider";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { TeamRecordProvider } from "@/contexts/TeamRecordContext";
 // Header removed — top bar disabled
@@ -15,7 +15,6 @@ import SkipToContent from "@/components/layout/SkipToContent";
 import ScrollToTop from "@/components/layout/ScrollToTop";
 import BackToTop from "@/components/layout/BackToTop";
 import CookieBanner from "@/components/layout/CookieBanner";
-import TeamChatPanel from "@/components/chat/TeamChatPanel";
 import MotionProvider from "@/components/motion/MotionProvider";
 import NavigationProgress from "@/components/layout/NavigationProgress";
 import Breadcrumb from "@/components/layout/Breadcrumb";
@@ -120,9 +119,6 @@ export default function RootLayout({
         <link rel="preconnect" href="https://izwhcuccuwvlqqhpprbb.supabase.co" />
         <link rel="dns-prefetch" href="https://a.espncdn.com" />
         <link rel="preconnect" href="https://a.espncdn.com" crossOrigin="anonymous" />
-        <link rel="prefetch" href="/chicago-bears" />
-        <link rel="prefetch" href="/scout-ai" />
-        <link rel="prefetch" href="/gm" />
         {/* Organization + WebSite JSON-LD */}
         <script
           type="application/ld+json"
@@ -171,7 +167,7 @@ export default function RootLayout({
           <AuthProvider>
             <SubscriptionProvider>
               <TeamRecordProvider>
-              <ChatProvider teamSlug="bears">
+              <ConditionalChatProvider>
               <SkipToContent />
               <NavigationProgress />
               <div className="flex min-h-screen flex-col">
@@ -198,10 +194,9 @@ export default function RootLayout({
               <ScrollToTop />
               <BackToTop />
               <CookieBanner />
-              <TeamChatPanel teamSlug="bears" teamName="Bears" />
               {/* Floating buttons disabled - users access AI and Fan Chat via header buttons */}
               {/* AR Tour available in article sidebars */}
-            </ChatProvider>
+            </ConditionalChatProvider>
               </TeamRecordProvider>
             </SubscriptionProvider>
           </AuthProvider>

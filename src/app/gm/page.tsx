@@ -458,6 +458,11 @@ export default function GMPage() {
     setCashSent(0)
     setCashReceived(0)
 
+    // Auto-switch to build tab when team is selected from welcome
+    if (activeTab === 'welcome') {
+      setActiveTab('build')
+    }
+
     // Create new session for new team
     createSession(teamKey)
 
@@ -1276,7 +1281,7 @@ export default function GMPage() {
         borderBottom: '1px solid var(--sm-border)',
         padding: '12px 24px',
         position: 'sticky',
-        display: activeTab === 'welcome' ? 'none' : 'block',
+        display: 'block',
         top: 0,
         zIndex: 40,
         backdropFilter: 'blur(12px)',
