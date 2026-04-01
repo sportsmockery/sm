@@ -2,7 +2,7 @@ import { datalabAdmin } from '@/lib/supabase-datalab'
 import { notFound } from 'next/navigation'
 import TeamDetail from './TeamDetail'
 
-export const revalidate = 3600
+export const dynamic = 'force-dynamic'
 
 const DATALAB_URL = 'https://datalab.sportsmockery.com'
 
@@ -11,6 +11,7 @@ async function fetchScoutCommentary(teamSlug: string) {
     const params = new URLSearchParams({ angle: '0', team: teamSlug })
     const res = await fetch(`${DATALAB_URL}/api/scout/owner-commentary?${params}`, {
       next: { revalidate: 3600 },
+      signal: AbortSignal.timeout(10_000),
     })
     if (!res.ok) return null
     const json = await res.json()
@@ -33,10 +34,6 @@ const TEAM_NAMES: Record<string, string> = {
   blackhawks: 'Chicago Blackhawks',
   cubs: 'Chicago Cubs',
   whitesox: 'Chicago White Sox',
-}
-
-export async function generateStaticParams() {
-  return VALID_TEAMS.map(team => ({ team }))
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ team: string }> }) {

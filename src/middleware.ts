@@ -52,6 +52,7 @@ const publicPaths = [
   '/api/cron',   // Vercel cron jobs
   '/gm',         // GM Trade Simulator (handles own auth)
   '/owner',      // Ownership report cards
+  '/masters',    // Masters 2026 Intelligence dashboard
 ]
 
 
@@ -84,6 +85,19 @@ function createSupabaseMiddlewareClient(request: NextRequest) {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
+  const hostname = request.headers.get('host') || ''
+
+  // 0. masters.sportsmockery.com — rewrite all requests to /masters/*
+  if (hostname === 'masters.sportsmockery.com' || hostname.startsWith('masters.sportsmockery.com:')) {
+    // If already on /masters path, pass through
+    if (pathname.startsWith('/masters')) {
+      return NextResponse.next()
+    }
+    // Rewrite root and all other paths to /masters/*
+    const url = request.nextUrl.clone()
+    url.pathname = pathname === '/' ? '/masters' : `/masters${pathname}`
+    return NextResponse.rewrite(url)
+  }
 
   const isStaticAsset = pathname.startsWith('/_next') || pathname.startsWith('/static') || pathname.includes('.')
   const isApiPath = pathname.startsWith('/api')

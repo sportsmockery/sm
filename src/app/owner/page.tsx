@@ -1,7 +1,7 @@
 import { datalabAdmin } from '@/lib/supabase-datalab'
 import OwnershipHub from './OwnershipHub'
 
-export const revalidate = 3600
+export const dynamic = 'force-dynamic'
 
 const DATALAB_URL = 'https://datalab.sportsmockery.com'
 
@@ -11,6 +11,7 @@ async function fetchScoutCommentary(teamSlug?: string) {
     if (teamSlug) params.set('team', teamSlug)
     const res = await fetch(`${DATALAB_URL}/api/scout/owner-commentary?${params}`, {
       next: { revalidate: 3600 },
+      signal: AbortSignal.timeout(10_000),
     })
     if (!res.ok) return null
     const json = await res.json()
