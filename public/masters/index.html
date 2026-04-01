@@ -14,9 +14,60 @@
     <link rel="stylesheet" crossorigin href="/masters/assets/index-YKKsWlzD.css">
     <link rel="stylesheet" href="/masters/assets/masters-theme.css">
     <style>
-      /* Hide the fixed top logo — logo now lives in sidebar */
+      /* Edge logo — centered top, fades on scroll */
       .edge-top-logo {
+        position: fixed;
+        top: 14px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 9999;
+        pointer-events: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0px;
+        transition: opacity 0.3s ease;
+      }
+      .edge-top-logo img {
+        height: auto;
+        width: 400px;
+        max-width: 400px;
+        animation: masters-glow 4s ease-in-out infinite;
+      }
+      .edge-top-logo .edge-subtitle {
+        font-family: 'Inter', system-ui, sans-serif;
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.55);
+        white-space: nowrap;
+        margin-top: 4px;
+      }
+      .edge-top-logo.scrolled {
+        opacity: 0;
+        pointer-events: none;
+      }
+      @media (max-width: 640px) {
+        .edge-top-logo img { height: auto; width: 280px; max-width: 280px; }
+        .edge-top-logo { top: 6px; }
+        .edge-top-logo .edge-subtitle { font-size: 10px; }
+      }
+      /* Only show on briefing/home page, hide on dashboard */
+      body.on-dashboard .edge-top-logo {
         display: none;
+      }
+
+      /* Push briefing hero content down so it doesn't overlap with logo */
+      body:not(.on-dashboard) section[class*="min-h-screen"][class*="justify-center"] {
+        padding-top: 220px !important;
+        justify-content: flex-start !important;
+        padding-bottom: 60px !important;
+      }
+      @media (max-width: 640px) {
+        body:not(.on-dashboard) section[class*="min-h-screen"][class*="justify-center"] {
+          padding-top: 160px !important;
+        }
       }
 
       /* Comet background animation */
@@ -89,7 +140,7 @@
   <body>
     <!-- Edge logo centered top with Masters subtitle -->
     <div class="edge-top-logo">
-      <img src="/masters/assets/edge-logo-new.svg" alt="Edge Intelligence" />
+      <img src="/masters/assets/edge-logo-new.png" alt="Edge Intelligence" />
       <span class="edge-subtitle">Masters 2026 Intelligence</span>
     </div>
 
@@ -138,6 +189,50 @@
           el2.style.setProperty('--travel-y', (Math.sin(rad2) * travel2) + 'vh');
           container.appendChild(el2);
         }
+      })();
+
+      // Fade logo on scroll + hide on dashboard view
+      (function() {
+        var logo = document.querySelector('.edge-top-logo');
+        if (!logo) return;
+
+        // Fade out after scrolling 200px — check both window and SPA scroll container
+        function onScroll() {
+          var scrollTop = window.scrollY;
+          // Also check SPA's own scrolling container
+          var spaContainer = document.querySelector('[class*="min-h-screen"][class*="overflow"]');
+          if (spaContainer && spaContainer.scrollTop > scrollTop) {
+            scrollTop = spaContainer.scrollTop;
+          }
+          if (scrollTop > 200) {
+            logo.classList.add('scrolled');
+          } else {
+            logo.classList.remove('scrolled');
+          }
+        }
+        window.addEventListener('scroll', onScroll, { passive: true });
+        // Observe SPA container once it mounts
+        var observer = new MutationObserver(function() {
+          var c = document.querySelector('[class*="min-h-screen"][class*="overflow"]');
+          if (c) {
+            c.addEventListener('scroll', onScroll, { passive: true });
+            observer.disconnect();
+          }
+        });
+        observer.observe(document.getElementById('root'), { childList: true, subtree: true });
+
+        // Hide logo on dashboard pages (non-briefing hash routes)
+        function checkRoute() {
+          var hash = window.location.hash;
+          var isBriefing = !hash || hash === '#' || hash === '#/' || hash === '#/briefing' || hash === '#/briefing/';
+          if (isBriefing) {
+            document.body.classList.remove('on-dashboard');
+          } else {
+            document.body.classList.add('on-dashboard');
+          }
+        }
+        window.addEventListener('hashchange', checkRoute);
+        checkRoute();
       })();
     </script>
   </body>
