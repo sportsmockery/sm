@@ -465,7 +465,7 @@
     var strip = document.createElement('div');
     strip.className = 'edge-briefing-strip';
     strip.setAttribute('role', 'region');
-    strip.setAttribute('aria-label', 'Intelligence Briefing');
+    strip.setAttribute('aria-label', 'Data-Driven Intelligence System');
 
     var cards = [
       {
