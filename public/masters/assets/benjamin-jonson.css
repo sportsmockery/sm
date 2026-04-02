@@ -376,6 +376,36 @@
   }
 }
 
+/* Song credit — hidden until play, blinks white↔orange while playing */
+.bj-credit {
+  display: none;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.5);
+  text-decoration: none;
+  margin-top: 10px;
+  transition: color 0.3s ease, opacity 0.3s ease;
+}
+
+.bj-credit:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.bj-credit.bj-credit-visible {
+  display: inline-block;
+}
+
+@keyframes bj-credit-pulse {
+  0%, 100% { color: rgba(255, 255, 255, 0.6); }
+  50% { color: #C83803; }
+}
+
+.bj-credit.bj-credit-blink {
+  animation: bj-credit-pulse 1.6s ease-in-out infinite;
+}
+
 /* Mobile */
 @media (max-width: 768px) {
   #bj-feature {

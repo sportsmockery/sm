@@ -192,19 +192,17 @@ aside [class*="border-b"]:first-child > .flex-col {
   display: none !important;
 }
 
-/* Add "Masters 2026 Intelligence" subtitle */
+/* Add Masters logo image below sidebar Edge logo */
 aside [class*="px-5"][class*="py-4"][class*="border-b"]::after,
 aside .border-sidebar-border:first-child::after,
 aside [class*="border-b"]:first-child::after {
-  content: "Masters 2026 Intelligence";
-  font-family: 'Libre Baskerville', 'Hoefler Text', 'Georgia', serif;
-  font-size: 14px;
-  font-weight: 400;
-  font-style: italic;
-  letter-spacing: 0.08em;
-  color: rgba(255, 255, 255, 0.6);
-  text-align: center;
-  margin-top: 2px;
+  content: '';
+  display: block;
+  width: 140px;
+  height: 35px;
+  background: url('/masters/assets/masters-logo-text.png') center / contain no-repeat;
+  opacity: 0.75;
+  margin-top: 4px;
 }
 
 /* === Desktop centering — only center main, not sidebar === */
@@ -411,6 +409,14 @@ aside [class*="border-b"]:first-child::after {
 #root [class*="mb-6"] { margin-bottom: 16px !important; }
 #root [class*="mt-8"] { margin-top: 20px !important; }
 #root [class*="mt-6"] { margin-top: 16px !important; }
+
+/* Golf flag icon replacement */
+.golf-flag-icon {
+  display: inline-block;
+  font-size: 16px;
+  line-height: 1;
+  filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.3));
+}
 
 /* Section 07 "Build Your Conviction" — align left like other sections */
 #root section:last-of-type .max-w-4xl.text-center {

@@ -78,15 +78,12 @@
         display: inline-block;
       }
 
-      .edge-top-logo .edge-subtitle {
-        font-family: 'Libre Baskerville', 'Hoefler Text', 'Baskerville', 'Georgia', serif;
-        font-size: 22px;
-        font-weight: 400;
-        font-style: italic;
-        letter-spacing: 0.08em;
-        color: rgba(255, 255, 255, 0.7);
-        white-space: nowrap;
-        margin-top: 16px;
+      .edge-top-logo .edge-masters-logo {
+        height: auto;
+        width: 400px;
+        max-width: 400px;
+        margin-top: 20px;
+        opacity: 0.85;
       }
       .edge-top-logo.scrolled {
         opacity: 0;
@@ -95,7 +92,7 @@
       @media (max-width: 640px) {
         .edge-top-logo img { height: auto; width: 112px; max-width: 112px; }
         .edge-top-logo { top: 6px; }
-        .edge-top-logo .edge-subtitle { font-size: 16px; }
+        .edge-top-logo .edge-masters-logo { width: 280px; max-width: 280px; margin-top: 14px; }
       }
       /* Only show on briefing/home page, hide on dashboard */
       body.on-dashboard .edge-top-logo {
@@ -188,7 +185,7 @@
       <div class="edge-logo-sweep">
         <img src="/masters/assets/edge-logo-new.png" alt="Edge Intelligence" />
       </div>
-      <span class="edge-subtitle">Masters 2026 Intelligence</span>
+      <img src="/masters/assets/masters-logo-text.png" alt="Masters" class="edge-masters-logo" />
     </div>
 
     <!-- Comet background animation -->

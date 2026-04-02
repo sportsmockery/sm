@@ -81,6 +81,7 @@
       '          <div class="bj-time" id="bj-time">0:00 / 0:00</div>',
       '        </div>',
       '      </div>',
+      '      <a href="https://open.spotify.com/artist/6b2GcSqnpEn1ThF7z7UmKX?si=oR3mHJnsTSSvCiGI0tOH4Q" target="_blank" rel="noopener noreferrer" class="bj-credit" id="bj-credit">GO HOME TRAV \u00B7 \u201CBear Down, We Came To Win\u201D</a>',
       '    </div>',
       '  </div>',
       '</div>'
@@ -98,6 +99,7 @@
     var timeEl = document.getElementById('bj-time');
     var imgWrapper = document.getElementById('bj-img-wrapper');
     var glowEl = document.getElementById('bj-glow');
+    var creditEl = document.getElementById('bj-credit');
 
     function formatTime(s) {
       if (!s || isNaN(s)) return '0:00';
@@ -119,11 +121,14 @@
     function startAnimation() {
       imgWrapper.classList.add('bj-vibing');
       glowEl.classList.add('bj-glow-active');
+      creditEl.classList.add('bj-credit-visible');
+      creditEl.classList.add('bj-credit-blink');
     }
 
     function stopAnimation() {
       imgWrapper.classList.remove('bj-vibing');
       glowEl.classList.remove('bj-glow-active');
+      creditEl.classList.remove('bj-credit-blink');
     }
 
     playBtn.addEventListener('click', function () {
@@ -181,27 +186,90 @@
     }
   }
 
-  // Replace hero tagline text and center scroll cue
+  // Text replacements map
+  var textReplacements = {
+    'Where is consensus weakest': 'A data-driven intelligence system that isolates stability, exposes fragility, and reveals where the market gets the Masters wrong.',
+    'The Intelligence Briefing': 'Data-Driven Intelligence System',
+    '5-chapter editorial analysis — where consensus is weakest and where edge hides': 'Isolating stability, exposing fragility, and revealing where the market gets the Masters wrong'
+  };
+
   function patchHeroText() {
     var root = document.getElementById('root');
     if (!root) return;
-    // Find and replace the tagline
     var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    var keys = Object.keys(textReplacements);
     while (walker.nextNode()) {
       var node = walker.currentNode;
-      if (node.textContent && node.textContent.indexOf('Where is consensus weakest') !== -1) {
-        node.textContent = 'A data-driven intelligence system that isolates stability, exposes fragility, and reveals where the market gets the Masters wrong.';
+      if (!node.textContent) continue;
+      for (var i = 0; i < keys.length; i++) {
+        if (node.textContent.indexOf(keys[i]) !== -1) {
+          node.textContent = textReplacements[keys[i]];
+          break;
+        }
       }
     }
+  }
+
+  // Replace section card SVG icons with yellow golf flag
+  var flagsReplaced = false;
+  function replaceIconsWithFlags() {
+    if (flagsReplaced) return;
+    var root = document.getElementById('root');
+    if (!root) return;
+
+    // Golf flag SVG — yellow flag on a pole
+    var flagSvg = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+      '<path d="M5 4v16" stroke="#FFD700" stroke-width="1.5" stroke-linecap="round"/>' +
+      '<path d="M5 4l12 4-12 4z" fill="#FFD700"/>' +
+      '</svg>';
+
+    // Target SVGs inside section cards (rounded-xl/lg containers)
+    // but NOT inside nav, aside, buttons, or the Benjamin feature
+    var sections = root.querySelectorAll('section');
+    var count = 0;
+    sections.forEach(function (section) {
+      var svgs = section.querySelectorAll('[class*="rounded-xl"] svg, [class*="rounded-lg"] svg');
+      svgs.forEach(function (svg) {
+        var cl = svg.getAttribute('class') || '';
+        // Only replace small icon SVGs (w-3, w-4, w-5), skip large ones
+        if ((cl.indexOf('w-4') !== -1 || cl.indexOf('w-3') !== -1 || cl.indexOf('w-5') !== -1) &&
+            (cl.indexOf('h-4') !== -1 || cl.indexOf('h-3') !== -1 || cl.indexOf('h-5') !== -1)) {
+          // Don't replace if inside a button or interactive element
+          if (svg.closest('button') || svg.closest('a') || svg.closest('nav')) return;
+          var wrapper = document.createElement('span');
+          wrapper.className = 'golf-flag-icon';
+          wrapper.innerHTML = flagSvg;
+          wrapper.style.display = 'inline-flex';
+          wrapper.style.alignItems = 'center';
+          wrapper.style.justifyContent = 'center';
+          svg.parentNode.replaceChild(wrapper, svg);
+          count++;
+        }
+      });
+    });
+    if (count > 0) flagsReplaced = true;
+  }
+
+  // Run text patches on any page, retrying to catch late renders
+  function patchAllText() {
+    patchHeroText();
+    setTimeout(patchHeroText, 500);
+    setTimeout(patchHeroText, 1500);
+    setTimeout(patchHeroText, 3000);
   }
 
   // Watch for SPA mount and route changes
   function check() {
     if (isBriefingPage()) {
       injectFeature();
-      setTimeout(patchHeroText, 300);
+      setTimeout(patchAllText, 300);
+      setTimeout(replaceIconsWithFlags, 500);
     } else {
       removeFeature();
+      // Also patch text and flags on dashboard pages
+      setTimeout(patchAllText, 300);
+      flagsReplaced = false;
+      setTimeout(replaceIconsWithFlags, 800);
     }
   }
 
@@ -216,9 +284,14 @@
 
   window.addEventListener('hashchange', check);
 
-  // Re-check after SPA navigation settles
+  // Re-check after SPA navigation settles (debounced)
+  var debounceTimer = null;
   var observer = new MutationObserver(function () {
-    setTimeout(check, 300);
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(function () {
+      check();
+      patchHeroText();
+    }, 400);
   });
   observer.observe(document.getElementById('root') || document.body, {
     childList: true,
