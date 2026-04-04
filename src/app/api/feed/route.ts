@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     // Build the feed query
     const now = new Date()
 
-    // 1. Get HIGH IMPORTANCE unseen articles (score >= 50 for more inclusive results)
+    // Run all 3 queries in parallel — no dependencies between them
     let highImportanceQuery = supabaseAdmin
       .from('sm_posts')
       .select(POST_SELECT)
@@ -45,38 +45,38 @@ export async function POST(request: NextRequest) {
       .order('published_at', { ascending: false })
       .limit(10)
 
-    // Exclude viewed articles if any
     if (clientViewedIds.length > 0) {
       highImportanceQuery = highImportanceQuery.not('id', 'in', `(${clientViewedIds.join(',')})`)
     }
 
-    const { data: highImportance } = await highImportanceQuery
-
-    // 2. Get RECENT articles (all time, no date filter to ensure content)
-    // IMPORTANT: Always fetch full content set regardless of login state
     let recentQuery = supabaseAdmin
       .from('sm_posts')
       .select(POST_SELECT)
       .eq('status', 'published')
       .order('published_at', { ascending: false })
-      .limit(200)
+      .limit(80)
 
-    // Exclude already fetched high importance and viewed
-    const excludeIds = [...clientViewedIds, ...(highImportance?.map(p => p.id) || [])]
-    if (excludeIds.length > 0) {
-      recentQuery = recentQuery.not('id', 'in', `(${excludeIds.join(',')})`)
+    if (clientViewedIds.length > 0) {
+      recentQuery = recentQuery.not('id', 'in', `(${clientViewedIds.join(',')})`)
     }
 
-    const { data: recent } = await recentQuery
-
-    // 3. Get TRENDING articles (high view count, no date filter)
-    const { data: trending } = await supabaseAdmin
+    const trendingQuery = supabaseAdmin
       .from('sm_posts')
       .select(POST_SELECT)
       .eq('status', 'published')
       .order('views', { ascending: false })
       .order('published_at', { ascending: false })
       .limit(10)
+
+    const [highImportanceResult, recentResult, trendingResult] = await Promise.all([
+      highImportanceQuery,
+      recentQuery,
+      trendingQuery,
+    ])
+
+    const highImportance = highImportanceResult.data
+    const recent = recentResult.data
+    const trending = trendingResult.data
 
     // 4. Calculate final scores with team preference boost
     const calculateFinalScore = (post: any) => {
@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
         .select(POST_SELECT)
         .eq('status', 'published')
         .order('published_at', { ascending: false })
-        .limit(200)
+        .limit(80)
       allArticles = fallbackPosts || []
     }
 
@@ -333,18 +333,24 @@ export async function GET() {
       )
     }
 
-    // Default feed: All recent published posts, no personalization
-    // IMPORTANT: Always fetch full content set for anonymous users
-    let { data: posts, error } = await supabaseAdmin
-      .from('sm_posts')
-      .select(POST_SELECT)
-      .eq('status', 'published')
-      .order('published_at', { ascending: false })
-      .limit(200)
+    // Fetch posts and YouTube videos in parallel
+    const isDebug = process.env.NODE_ENV === 'development'
 
-    if (error) {
-      console.error('Feed GET error:', error)
+    const [postsResult, ytResult] = await Promise.all([
+      supabaseAdmin
+        .from('sm_posts')
+        .select(POST_SELECT)
+        .eq('status', 'published')
+        .order('published_at', { ascending: false })
+        .limit(60),
+      getYouTubeFeedVideos().catch(() => [] as YouTubeFeedVideo[]),
+    ])
+
+    if (postsResult.error) {
+      console.error('Feed GET error:', postsResult.error)
     }
+
+    let posts = postsResult.data
 
     // FALLBACK: Only if truly no posts found
     if (!posts || posts.length === 0) {
@@ -353,7 +359,7 @@ export async function GET() {
         .select(POST_SELECT)
         .eq('status', 'published')
         .order('published_at', { ascending: false })
-        .limit(200)
+        .limit(60)
       posts = fallback.data || []
     }
 
@@ -368,7 +374,6 @@ export async function GET() {
     for (const team of teams) {
       teamSections[team] = (posts || [])
         .filter(a => {
-          // Handle both array and object category structures
           const category = Array.isArray(a.category) ? a.category[0] : a.category
           return category?.slug?.toLowerCase()?.includes(team)
         })
@@ -376,26 +381,18 @@ export async function GET() {
     }
 
     // ── Adaptive River composition ──
-    // Use the composer to extract candidates, score, and compose a diverse feed
-    const isDebug = process.env.NODE_ENV === 'development'
     const river = composeAdaptiveRiver((posts || []).slice(0, 60), { debug: isDebug })
 
-    // Interleave YouTube videos into the river
-    let ytRiverItems: HomepageRiverItem[] = []
-    try {
-      const ytVideos = await getYouTubeFeedVideos()
-      ytRiverItems = ytVideos.map(mapYouTubeToRiverItem)
-    } catch { /* YouTube fetch failure should not break the feed */ }
+    const ytRiverItems: HomepageRiverItem[] = ytResult.map(mapYouTubeToRiverItem)
 
     const riverItems = interleaveVideos(
       river.hero ? [river.hero, ...river.items] : river.items,
       ytRiverItems
     )
 
-    // Team-specific river items from composer
     const teamRiverItems = river.teamItems
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       featured,
       topHeadlines,
       latestNews,
@@ -410,6 +407,10 @@ export async function GET() {
       },
       ...(isDebug && river.debug ? { _riverDebug: river.debug } : {}),
     })
+
+    // Cache feed for 60s, serve stale for 5min while revalidating
+    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300')
+    return response
   } catch (error) {
     console.error('Feed API error:', error)
     return NextResponse.json(

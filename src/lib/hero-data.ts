@@ -85,6 +85,17 @@ export interface HeroData {
 
 /* ── Main fetcher ── */
 
+/** Race a promise against a timeout — returns null if it takes too long */
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T | null> {
+  return Promise.race([
+    promise,
+    new Promise<null>((resolve) => setTimeout(() => resolve(null), ms)),
+  ])
+}
+
+/** Max time the entire hero pipeline can take before we return partial data */
+const HERO_TIMEOUT_MS = 3_000
+
 export async function getHeroData(userId: string | null): Promise<HeroData> {
   const result: HeroData = {
     featuredStory: null,
@@ -99,13 +110,21 @@ export async function getHeroData(userId: string | null): Promise<HeroData> {
 
   if (!supabaseAdmin) return result
 
-  // Run independent queries in parallel
-  const [featuredResult, prefsResult, liveGamesResult, storyUniverseResult, scoutLiveResult] = await Promise.allSettled([
+  // Wrap the entire pipeline in a timeout so the page always renders quickly
+  const pipelineResult = await withTimeout(fetchHeroPipeline(userId, result), HERO_TIMEOUT_MS)
+  return pipelineResult ?? result
+}
+
+async function fetchHeroPipeline(userId: string | null, result: HeroData): Promise<HeroData> {
+  // Run ALL independent queries in parallel — including debate context
+  // Team pulse depends on primaryTeam, so we fetch it in a second parallel wave
+  const [featuredResult, prefsResult, liveGamesResult, storyUniverseResult, scoutLiveResult, debateResult] = await Promise.allSettled([
     fetchFeaturedStory(),
     userId ? fetchUserPrimaryTeam(userId) : Promise.resolve(null),
     fetchLiveGames(),
     fetchStoryUniverse(),
     fetchScoutLive(),
+    fetchDebateContext(),
   ])
 
   // 1. Featured/trending story
@@ -129,23 +148,22 @@ export async function getHeroData(userId: string | null): Promise<HeroData> {
     result.primaryTeam = prefsResult.value
   }
 
-  // 3. Live game contexts (may be multiple games)
+  // 5. Live game contexts (may be multiple games)
   if (liveGamesResult.status === "fulfilled" && liveGamesResult.value) {
     result.gameContexts = liveGamesResult.value
   }
 
-  // 4. Team pulse context (if user has a primary team)
+  // 6. Debate context
+  if (debateResult.status === "fulfilled" && debateResult.value) {
+    result.debateContext = debateResult.value
+  }
+
+  // 7. Team pulse context — depends on primaryTeam so runs after the first batch
   if (result.primaryTeam) {
     const teamPulse = await fetchTeamPulse(result.primaryTeam)
     if (teamPulse) {
       result.teamContext = teamPulse
     }
-  }
-
-  // 5. Debate context (from recent articles with debate blocks)
-  const debate = await fetchDebateContext()
-  if (debate) {
-    result.debateContext = debate
   }
 
   return result
@@ -261,23 +279,30 @@ async function fetchLiveGames(): Promise<GameContext[] | null> {
     const games: GameContext[] = []
     const seenGameIds = new Set<string>()
 
-    // Check each registry entry against its live table
-    for (const entry of registry) {
-      // Skip duplicate game IDs (same game registered for multiple teams)
-      if (seenGameIds.has(entry.game_id)) continue
+    // Deduplicate registry entries by game_id
+    const uniqueEntries = registry.filter((entry) => {
+      if (seenGameIds.has(entry.game_id)) return false
       seenGameIds.add(entry.game_id)
+      return true
+    })
+
+    // Fetch all live game data in parallel instead of sequentially
+    const liveResults = await Promise.all(
+      uniqueEntries.map((entry) => {
+        const teamSlug = entry.team_id || "bears"
+        return datalabAdmin
+          .from(`${teamSlug}_live`)
+          .select("*")
+          .eq("game_id", entry.game_id)
+          .limit(1)
+          .then((res) => ({ entry, game: res.data?.[0] ?? null }))
+      })
+    )
+
+    for (const { entry, game } of liveResults) {
+      if (!game) continue
 
       const teamSlug = entry.team_id || "bears"
-      const liveTable = `${teamSlug}_live`
-
-      const { data: liveGames } = await datalabAdmin
-        .from(liveTable)
-        .select("*")
-        .eq("game_id", entry.game_id)
-        .limit(1)
-
-      const game = liveGames?.[0]
-      if (!game) continue
 
       // Determine game status
       const gameStatus = (game.status || "").toLowerCase()
@@ -394,13 +419,14 @@ async function fetchTeamPulse(teamSlug: string): Promise<TeamContext | null> {
   if (!supabaseAdmin) return null
 
   try {
-    // Get recent articles for this team to extract trending topics
+    // Get recent articles — we only need 3 team headlines, so limit to 15
+    // (with ~5 teams, ~3 per team on average in recent posts)
     const { data: posts } = await supabaseAdmin
       .from("sm_posts")
       .select("title, category:sm_categories!category_id(slug)")
       .eq("status", "published")
       .order("published_at", { ascending: false })
-      .limit(50)
+      .limit(15)
 
     if (!posts || posts.length === 0) return null
 
@@ -638,13 +664,15 @@ async function fetchDebateContext(): Promise<DebateContext | null> {
 
   try {
     // Look for recent articles that have debate blocks in their content
+    // Filter with ilike to avoid fetching full content for posts without debates
     const { data: posts } = await supabaseAdmin
       .from("sm_posts")
       .select("id, title, slug, content, category:sm_categories!category_id(slug)")
       .eq("status", "published")
       .eq("template_version", 1)
+      .ilike("content", '%"type":"debate"%')
       .order("published_at", { ascending: false })
-      .limit(20)
+      .limit(5)
 
     if (!posts) return null
 
