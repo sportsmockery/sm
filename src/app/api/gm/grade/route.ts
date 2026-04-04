@@ -1283,28 +1283,13 @@ export async function POST(request: NextRequest) {
       let partner2Logo: string | null = null
       let chicagoTeamLogo: string | null = null
 
-      const { data: p1 } = await datalabAdmin
-        .from('gm_league_teams')
-        .select('logo_url')
-        .eq('team_key', trade_partner_1)
-        .eq('sport', sport)
-        .single()
+      const [{ data: p1 }, { data: p2 }, { data: ct }] = await Promise.all([
+        datalabAdmin.from('gm_league_teams').select('logo_url').eq('team_key', trade_partner_1).eq('sport', sport).single(),
+        datalabAdmin.from('gm_league_teams').select('logo_url').eq('team_key', trade_partner_2).eq('sport', sport).single(),
+        datalabAdmin.from('gm_league_teams').select('logo_url').eq('team_key', chicago_team).eq('sport', sport).single(),
+      ])
       partner1Logo = p1?.logo_url || null
-
-      const { data: p2 } = await datalabAdmin
-        .from('gm_league_teams')
-        .select('logo_url')
-        .eq('team_key', trade_partner_2)
-        .eq('sport', sport)
-        .single()
       partner2Logo = p2?.logo_url || null
-
-      const { data: ct } = await datalabAdmin
-        .from('gm_league_teams')
-        .select('logo_url')
-        .eq('team_key', chicago_team)
-        .eq('sport', sport)
-        .single()
       chicagoTeamLogo = ct?.logo_url || null
 
       // Save 3-team trade to database
@@ -1484,40 +1469,40 @@ export async function POST(request: NextRequest) {
     const capRelief = calculateCapReliefBonus(safePlayers_sent, safePlayers_received, chicagoContext)
     console.log('Cap relief analysis:', capRelief)
 
-    // Find structurally similar trades for calibration
-    const similarTrades = await findSimilarTrades(
-      sport,
-      chicago_team,
-      safePlayers_sent,
-      safePlayers_received,
-      safeDraft_picks_sent,
-      safeDraft_picks_received,
-      3 // Get top 3 similar trades
-    )
+    // Fetch similar trades, historical references, and grading examples in parallel
+    const primaryPosition = safePlayers_sent[0]?.position || safePlayers_received[0]?.position
+    const [similarTrades, historicalRefs, examplesResult] = await Promise.all([
+      findSimilarTrades(
+        sport,
+        chicago_team,
+        safePlayers_sent,
+        safePlayers_received,
+        safeDraft_picks_sent,
+        safeDraft_picks_received,
+        3
+      ),
+      getHistoricalTradeReferences(sport, undefined, 5),
+      (async () => {
+        try {
+          const { data } = await datalabAdmin
+            .from('gm_grading_examples')
+            .select('trade_description, correct_grade, reasoning, category')
+            .eq('sport', sport)
+            .limit(5)
+          return data
+        } catch { return null }
+      })(),
+    ])
     console.log('Similar trades found:', similarTrades.length)
     const similarTradesBlock = formatSimilarTradesForPrompt(similarTrades)
-
-    // Fetch verified historical trade references for accurate citation
-    const primaryPosition = safePlayers_sent[0]?.position || safePlayers_received[0]?.position
-    const historicalRefs = await getHistoricalTradeReferences(sport, undefined, 5)
     const historicalRefsBlock = formatHistoricalReferencesForPrompt(historicalRefs)
     console.log('Historical references loaded:', historicalRefs.length)
 
-    // Look up few-shot grading examples
     let examplesBlock = ''
-    try {
-      const { data: examples } = await datalabAdmin
-        .from('gm_grading_examples')
-        .select('trade_description, correct_grade, reasoning, category')
-        .eq('sport', sport)
-        .limit(5)
-      if (examples && examples.length > 0) {
-        examplesBlock = `\n\nReference Grades (use as calibration):\n${examples.map(
-          (ex: any) => `- ${ex.category}: "${ex.trade_description}" → Grade ${ex.correct_grade} (${ex.reasoning})`
-        ).join('\n')}`
-      }
-    } catch {
-      // Table may not exist yet — continue without examples
+    if (examplesResult && examplesResult.length > 0) {
+      examplesBlock = `\n\nReference Grades (use as calibration):\n${examplesResult.map(
+        (ex: any) => `- ${ex.category}: "${ex.trade_description}" → Grade ${ex.correct_grade} (${ex.reasoning})`
+      ).join('\n')}`
     }
 
     const sentDesc = safePlayers_sent.map((p: any) => {
@@ -1906,24 +1891,14 @@ Grade this trade from the perspective of the ${teamDisplayNames[chicago_team]}.`
     const userEmail = user?.email || 'guest'
     const sharedCode = randomBytes(6).toString('hex')
 
-    let partnerTeamLogo: string | null = null
-    let chicagoTeamLogo: string | null = null
-    if (partner_team_key) {
-      const { data: pt } = await datalabAdmin
-        .from('gm_league_teams')
-        .select('logo_url')
-        .eq('team_key', partner_team_key)
-        .eq('sport', sport)
-        .single()
-      partnerTeamLogo = pt?.logo_url || null
-    }
-    const { data: ct } = await datalabAdmin
-      .from('gm_league_teams')
-      .select('logo_url')
-      .eq('team_key', chicago_team)
-      .eq('sport', sport)
-      .single()
-    chicagoTeamLogo = ct?.logo_url || null
+    const [{ data: ptData }, { data: ctData }] = await Promise.all([
+      partner_team_key
+        ? datalabAdmin.from('gm_league_teams').select('logo_url').eq('team_key', partner_team_key).eq('sport', sport).single()
+        : Promise.resolve({ data: null }),
+      datalabAdmin.from('gm_league_teams').select('logo_url').eq('team_key', chicago_team).eq('sport', sport).single(),
+    ])
+    const partnerTeamLogo = ptData?.logo_url || null
+    const chicagoTeamLogo = ctData?.logo_url || null
 
     const { data: trade, error: tradeError } = await datalabAdmin.from('gm_trades').insert({
       user_id: userId,

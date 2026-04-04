@@ -46,35 +46,41 @@ interface LatestArticle {
 }
 
 export default async function HandsFreeAudioPage() {
-  // Fetch latest article per team
-  const latestByTeam: LatestArticle[] = []
+  // Fetch all category IDs in parallel, then fetch latest posts in parallel
+  const catResults = await Promise.all(
+    TEAM_CATEGORY_SLUGS.map((catSlug) =>
+      supabaseAdmin
+        .from('sm_categories')
+        .select('id')
+        .eq('slug', catSlug)
+        .single()
+        .then((res) => ({ catSlug, catId: res.data?.id ?? null }))
+    )
+  )
 
-  for (const catSlug of TEAM_CATEGORY_SLUGS) {
-    const { data: cat } = await supabaseAdmin
-      .from('sm_categories')
-      .select('id')
-      .eq('slug', catSlug)
-      .single()
+  const validCats = catResults.filter((c) => c.catId !== null)
 
-    if (!cat) continue
+  const postResults = await Promise.all(
+    validCats.map(({ catSlug, catId }) =>
+      supabaseAdmin
+        .from('sm_posts')
+        .select('id, title, slug, excerpt, featured_image, published_at')
+        .eq('category_id', catId)
+        .eq('status', 'published')
+        .order('published_at', { ascending: false })
+        .limit(1)
+        .then((res) => ({ catSlug, post: res.data?.[0] ?? null }))
+    )
+  )
 
-    const { data: posts } = await supabaseAdmin
-      .from('sm_posts')
-      .select('id, title, slug, excerpt, featured_image, published_at')
-      .eq('category_id', cat.id)
-      .eq('status', 'published')
-      .order('published_at', { ascending: false })
-      .limit(1)
-
-    if (posts?.[0]) {
-      latestByTeam.push({
-        ...posts[0],
-        category_slug: catSlug,
-        team_key: TEAM_KEYS[catSlug] || catSlug,
-        team_name: DISPLAY_NAMES[catSlug] || catSlug,
-      })
-    }
-  }
+  const latestByTeam: LatestArticle[] = postResults
+    .filter((r) => r.post !== null)
+    .map((r) => ({
+      ...r.post!,
+      category_slug: r.catSlug,
+      team_key: TEAM_KEYS[r.catSlug] || r.catSlug,
+      team_name: DISPLAY_NAMES[r.catSlug] || r.catSlug,
+    }))
 
   // Also get the absolute latest article across all teams
   const { data: latestAll } = await supabaseAdmin

@@ -169,29 +169,31 @@ async function fetchFromSupabase(team: string | null) {
   const teams = team ? [team] : Object.keys(TEAM_TABLES)
   const allGames: any[] = []
 
-  for (const t of teams) {
-    const table = TEAM_TABLES[t]
-    if (!table) continue
+  // Query all team tables in parallel instead of sequentially
+  const results = await Promise.all(
+    teams.map(async (t) => {
+      const table = TEAM_TABLES[t]
+      if (!table) return []
 
-    const { data, error } = await datalabAdmin
-      .from(table)
-          .select('*')
-      .in('status', ['in_progress', 'pre', 'live', 'upcoming', 'final'])
-      .order('updated_at', { ascending: false })
-      .limit(3)
+      const { data, error } = await datalabAdmin
+        .from(table)
+        .select('*')
+        .in('status', ['in_progress', 'pre', 'live', 'upcoming', 'final'])
+        .order('updated_at', { ascending: false })
+        .limit(3)
 
-    if (error) {
-      console.error(`[live-games] Error querying ${table}:`, error.message)
-      continue
-    }
+      if (error) {
+        console.error(`[live-games] Error querying ${table}:`, error.message)
+        return []
+      }
 
-    if (data && data.length > 0) {
-      for (const game of data) {
-        // Normalize to Central Time string for UI (game_time_central)
+      if (!data || data.length === 0) return []
+
+      return data.map((game: any) => {
         const gameTimeCentral = toCentralTimeString(game.game_date)
         const gameTimeDisplay = parseGameTimeCentral(gameTimeCentral)
 
-        allGames.push({
+        return {
           game_id: game.game_id,
           sport: game.sport,
           status: game.status === 'pre' ? 'upcoming' : game.status,
@@ -215,10 +217,11 @@ async function fetchFromSupabase(team: string | null) {
           updated_at: game.updated_at,
           chicago_team: t,
           is_chicago_home: game.home_team_abbr === 'CHI' || game.home_team_abbr === 'CHC' || game.home_team_abbr === 'CHW',
-        })
-      }
-    }
-  }
+        }
+      })
+    })
+  )
+  allGames.push(...results.flat())
 
   // Fallback enrichment: if game_time_display is still null for upcoming games, try games_master
   const MASTER_TABLES: Record<string, string> = {
@@ -229,26 +232,36 @@ async function fetchFromSupabase(team: string | null) {
     whitesox: 'whitesox_games_master',
   }
 
-  for (const game of allGames) {
-    if (game.status === 'upcoming' && !game.game_time_display) {
-      const masterTable = MASTER_TABLES[game.chicago_team]
-      if (!masterTable) continue
-      const dateOnly = String(game.game_start_time || '').slice(0, 10)
-      if (!dateOnly || dateOnly.length < 10) continue
-      try {
-        const { data: masterRow } = await datalabAdmin
-          .from(masterTable)
-          .select('game_time, game_time_display')
-          .eq('game_date', dateOnly)
-          .limit(1)
-          .single()
-        if (masterRow?.game_time_display) {
-          game.game_time_display = masterRow.game_time_display
-        }
-        if (masterRow?.game_time) {
-          game.game_start_time = `${dateOnly}T${masterRow.game_time}-06:00`
-        }
-      } catch { /* skip enrichment on error */ }
+  // Enrich upcoming games missing display times — in parallel
+  const gamesToEnrich = allGames.filter(
+    (g) => g.status === 'upcoming' && !g.game_time_display && MASTER_TABLES[g.chicago_team]
+  )
+  if (gamesToEnrich.length > 0) {
+    const enrichResults = await Promise.all(
+      gamesToEnrich.map(async (game) => {
+        const masterTable = MASTER_TABLES[game.chicago_team]
+        const dateOnly = String(game.game_start_time || '').slice(0, 10)
+        if (!dateOnly || dateOnly.length < 10) return null
+        try {
+          const { data: masterRow } = await datalabAdmin
+            .from(masterTable)
+            .select('game_time, game_time_display')
+            .eq('game_date', dateOnly)
+            .limit(1)
+            .single()
+          return { game, masterRow }
+        } catch { return null }
+      })
+    )
+    for (const result of enrichResults) {
+      if (!result?.masterRow) continue
+      if (result.masterRow.game_time_display) {
+        result.game.game_time_display = result.masterRow.game_time_display
+      }
+      if (result.masterRow.game_time) {
+        const dateOnly = String(result.game.game_start_time || '').slice(0, 10)
+        result.game.game_start_time = `${dateOnly}T${result.masterRow.game_time}-06:00`
+      }
     }
   }
 

@@ -69,24 +69,33 @@ export async function GET() {
       })
     }
 
-    const games: any[] = []
     const seenGameIds = new Set<string>()
 
-    for (const entry of registry) {
-      if (seenGameIds.has(entry.game_id)) continue
+    // Deduplicate registry entries
+    const uniqueEntries = registry.filter((entry: any) => {
+      if (seenGameIds.has(entry.game_id)) return false
       seenGameIds.add(entry.game_id)
+      return true
+    })
 
-      const teamSlug = entry.team_id || "bears"
-      const liveTable = `${teamSlug}_live`
+    // Fetch all live game data in parallel
+    const liveResults = await Promise.all(
+      uniqueEntries.map((entry: any) => {
+        const teamSlug = entry.team_id || "bears"
+        return datalabAdmin
+          .from(`${teamSlug}_live`)
+          .select("*")
+          .eq("game_id", entry.game_id)
+          .limit(1)
+          .then((res) => ({ entry, game: res.data?.[0] ?? null }))
+      })
+    )
 
-      const { data: liveGames } = await datalabAdmin
-        .from(liveTable)
-        .select("*")
-        .eq("game_id", entry.game_id)
-        .limit(1)
+    const games: any[] = []
 
-      const game = liveGames?.[0]
+    for (const { entry, game } of liveResults) {
       if (!game) continue
+      const teamSlug = entry.team_id || "bears"
 
       const gameStatus = (game.status || "").toLowerCase()
       if (["final", "post", "completed", "postponed", "canceled"].includes(gameStatus)) continue

@@ -686,8 +686,10 @@ export async function getCubsStats(season?: number): Promise<CubsStats> {
 
   return buildSafeFetch(
     async () => {
-      const teamStats = await getTeamStats(targetSeason)
-      const leaderboards = await getLeaderboards(targetSeason)
+      const [teamStats, leaderboards] = await Promise.all([
+        getTeamStats(targetSeason),
+        getLeaderboards(targetSeason),
+      ])
       return { team: teamStats, leaderboards }
     },
     {
@@ -703,16 +705,7 @@ async function getTeamStats(season: number): Promise<CubsTeamStats> {
     return getDefaultTeamStats(season)
   }
 
-  // Get team season stats
-  const { data: teamData } = await datalabAdmin
-    .from('cubs_team_season_stats')
-    .select('*')
-    .eq('season', season)
-    .single()
-
-  // CRITICAL: Get authoritative record from cubs_seasons table (recommended by Datalab)
-  // This avoids issues with calculating record from games_master
-  // Filter by game_type to avoid .single() failure when both spring_training and regular rows exist
+  // Build seasons query with conditional game_type filter
   const mlbPhase = getMLBSeasonPhase()
   let seasonsQuery = datalabAdmin
     .from('cubs_seasons')
@@ -723,14 +716,21 @@ async function getTeamStats(season: number): Promise<CubsTeamStats> {
   } else if (mlbPhase === 'spring-training') {
     seasonsQuery = seasonsQuery.eq('game_type', 'spring_training')
   }
-  const { data: seasonRecord } = await seasonsQuery.single()
 
-  // Get completed games for runs calculation
-  const { data: gamesData } = await datalabAdmin
-    .from('cubs_games_master')
-    .select('cubs_score, opponent_score')
-    .eq('season', season)
-    .or('cubs_score.gt.0,opponent_score.gt.0')
+  // Run all 3 independent queries in parallel
+  const [{ data: teamData }, { data: seasonRecord }, { data: gamesData }] = await Promise.all([
+    datalabAdmin
+      .from('cubs_team_season_stats')
+      .select('*')
+      .eq('season', season)
+      .single(),
+    seasonsQuery.single(),
+    datalabAdmin
+      .from('cubs_games_master')
+      .select('cubs_score, opponent_score')
+      .eq('season', season)
+      .or('cubs_score.gt.0,opponent_score.gt.0'),
+  ])
 
   const wins = seasonRecord?.wins || 0
   const losses = seasonRecord?.losses || 0
@@ -774,13 +774,35 @@ async function getLeaderboards(season: number): Promise<CubsLeaderboard> {
     return { batting: [], homeRuns: [], obp: [], rbiLeaders: [], atBats: [], pitching: [], saves: [] }
   }
 
-  const players = await getCubsPlayers()
+  // Fetch players, raw player mappings, and game stats all in parallel
+  const [players, { data: rawPlayers }, gameStatsResult] = await Promise.all([
+    getCubsPlayers(),
+    datalabAdmin
+      .from('cubs_players')
+      .select('espn_id, player_id')
+      .eq('is_active', true),
+    datalabAdmin
+      .from('cubs_player_game_stats')
+      .select(`
+        player_id,
+        at_bats,
+        hits,
+        home_runs,
+        rbi,
+        walks,
+        innings_pitched,
+        earned_runs,
+        strikeouts_pitched,
+        win,
+        loss,
+        save
+      `)
+      .eq('season', season)
+      .eq('is_opponent', false),
+  ])
+  let gameStats = gameStatsResult.data
 
   // Build MLB player_id → player map (stats table uses MLB IDs, not ESPN IDs)
-  const { data: rawPlayers } = await datalabAdmin
-    .from('cubs_players')
-    .select('espn_id, player_id')
-    .eq('is_active', true)
   const espnToPlayer = new Map(players.map(p => [p.playerId, p]))
   const playersMap = new Map<string, typeof players[0]>()
   for (const rp of rawPlayers || []) {
@@ -789,26 +811,6 @@ async function getLeaderboards(season: number): Promise<CubsLeaderboard> {
       playersMap.set(String(rp.player_id), player)
     }
   }
-
-  // Get all game stats for season and aggregate by player
-  let { data: gameStats } = await datalabAdmin
-    .from('cubs_player_game_stats')
-    .select(`
-      player_id,
-      at_bats,
-      hits,
-      home_runs,
-      rbi,
-      walks,
-      innings_pitched,
-      earned_runs,
-      strikeouts_pitched,
-      win,
-      loss,
-      save
-    `)
-    .eq('season', season)
-    .eq('is_opponent', false)
 
   // Fallback to previous season if no stats (off-season)
   if (!gameStats || gameStats.length === 0) {

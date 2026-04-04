@@ -275,19 +275,24 @@ async function fetchFromDatalabApi(gameId: string) {
  * Fallback: Direct Supabase queries to {team}_live + {team}_player_stats_live
  */
 async function fetchFromSupabase(gameId: string) {
+  // Search all team tables in parallel instead of sequentially
+  const searchResults = await Promise.all(
+    TEAM_TABLES.map((team) =>
+      datalabAdmin
+        .from(`${team}_live`)
+        .select('*')
+        .eq('game_id', gameId)
+        .limit(1)
+        .then((res) => ({ team, data: res.data }))
+    )
+  )
+
   let gameRow: any = null
   let teamKey = ''
-
-  for (const team of TEAM_TABLES) {
-    const { data } = await datalabAdmin
-      .from(`${team}_live`)
-      .select('*')
-      .eq('game_id', gameId)
-      .limit(1)
-
-    if (data && data.length > 0) {
-      gameRow = data[0]
-      teamKey = team
+  for (const result of searchResults) {
+    if (result.data && result.data.length > 0) {
+      gameRow = result.data[0]
+      teamKey = result.team
       break
     }
   }
