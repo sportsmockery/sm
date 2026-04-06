@@ -247,7 +247,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid team' }, { status: 400 })
     }
 
-    // Try DataLab HTTP API first
+    // Try DataLab HTTP API first (with timeout so we fall back to Supabase quickly)
     let players: PlayerData[] | null = null
     try {
       const dlParams = new URLSearchParams()
@@ -260,9 +260,13 @@ export async function GET(request: NextRequest) {
       if (search) dlParams.set('search', search)
       if (posFilter) dlParams.set('position', posFilter)
 
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 6000)
       const res = await fetch(`${DATALAB_URL}/api/gm/roster?${dlParams.toString()}`, {
         headers: { 'X-API-Key': process.env.GM_API_KEY || '' },
+        signal: controller.signal,
       })
+      clearTimeout(timeout)
 
       if (res.ok) {
         const data = await res.json()
