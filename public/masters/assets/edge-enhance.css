@@ -363,12 +363,18 @@ body.edge-focus-mode main table td.edge-dim:hover {
   color: hsla(156, 30%, 8%, 0.6);
 }
 
-/* ---------- Sidebar logo — force 2x size ---------- */
+/* ---------- Sidebar Edge logo — 2x size ---------- */
 
-aside .border-sidebar-border img[alt="Edge Intelligence"] {
+aside img[alt="Edge Intelligence"] {
   height: 3.5rem !important;
   width: auto !important;
   max-height: none !important;
+}
+
+/* Give the sidebar header more room for the larger logo */
+aside > div:first-child {
+  padding-top: 1.25rem !important;
+  padding-bottom: 1.25rem !important;
 }
 
 /* ---------- Search box alignment fix ---------- */
@@ -376,22 +382,15 @@ aside .border-sidebar-border img[alt="Edge Intelligence"] {
 input[type="search"] {
   -webkit-appearance: none !important;
   appearance: none !important;
-  line-height: 1.5 !important;
-  display: flex !important;
-  align-items: center !important;
+  box-sizing: border-box !important;
 }
 
 input[type="search"]::-webkit-search-decoration,
-input[type="search"]::-webkit-search-cancel-button {
-  -webkit-appearance: none;
-  appearance: none;
-  display: none;
-}
-
-/* Ensure search icon container is properly aligned */
-.relative:has(input[type="search"]) {
-  display: flex;
-  align-items: center;
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration {
+  -webkit-appearance: none !important;
+  display: none !important;
 }
 
 /* ---------- Reduced motion ---------- */
