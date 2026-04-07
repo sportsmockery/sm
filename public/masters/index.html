@@ -390,25 +390,28 @@
         checkRoute();
       })();
 
-      // Force Edge logo to 2x size — runs continuously to catch all SPA renders
+      // Force Edge logo 3x + stacked sidebar layout — runs continuously to catch all SPA renders
       (function() {
         function resizeAllEdgeLogos() {
-          // Target every img with this alt text anywhere in the page
           var all = document.querySelectorAll('img[alt="Edge Intelligence"]');
           for (var i = 0; i < all.length; i++) {
             var img = all[i];
             // Skip the hero/briefing logo (it's inside .edge-top-logo)
             if (img.closest('.edge-top-logo')) continue;
-            // This is a sidebar or mobile bar logo — make it 2x
+            // Sidebar/mobile bar logo — make it 3x
             img.style.cssText = 'height: 10.5rem !important; width: auto !important; max-height: none !important; object-fit: contain !important;';
           }
+          // Force sidebar header to stack vertically
+          var headers = document.querySelectorAll('aside > div:first-child');
+          for (var j = 0; j < headers.length; j++) {
+            var h = headers[j];
+            h.style.cssText = 'display: flex !important; flex-direction: column !important; align-items: center !important; gap: 20px !important; padding: 12px 16px 16px !important; position: relative !important;';
+          }
         }
-        // Run on every DOM mutation inside #root
         var root = document.getElementById('root');
         if (root) {
           new MutationObserver(resizeAllEdgeLogos).observe(root, { childList: true, subtree: true });
         }
-        // Also run on an interval forever (SPA navigation can re-render)
         setInterval(resizeAllEdgeLogos, 300);
       })();
     </script>

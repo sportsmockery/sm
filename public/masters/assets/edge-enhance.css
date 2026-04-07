@@ -363,7 +363,15 @@ body.edge-focus-mode main table td.edge-dim:hover {
   color: hsla(156, 30%, 8%, 0.6);
 }
 
-/* ---------- Sidebar Edge logo — 6x size ---------- */
+/* ---------- Sidebar Edge logo — 3x size, stacked layout ---------- */
+
+/* Make sidebar header stack vertically */
+aside > div:first-child {
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 20px !important;
+  padding: 12px 16px 16px !important;
+}
 
 aside img[alt="Edge Intelligence"] {
   height: 10.5rem !important;
@@ -371,10 +379,18 @@ aside img[alt="Edge Intelligence"] {
   max-height: none !important;
 }
 
-/* Give the sidebar header more room for the larger logo */
-aside > div:first-child {
-  padding-top: 1.5rem !important;
-  padding-bottom: 1.5rem !important;
+/* Masters text block — center when stacked */
+aside > div:first-child > div:nth-child(2) {
+  align-items: center !important;
+  text-align: center !important;
+}
+
+/* Close button — position top-right so it doesn't break the stack */
+aside > div:first-child > button {
+  position: absolute !important;
+  top: 12px !important;
+  right: 12px !important;
+  margin-left: 0 !important;
 }
 
 /* ---------- Search box alignment fix ---------- */
