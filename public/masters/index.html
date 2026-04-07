@@ -389,6 +389,32 @@
         window.addEventListener('hashchange', checkRoute);
         checkRoute();
       })();
+
+      // Force sidebar Edge logo to 2x size via direct DOM manipulation
+      (function() {
+        function resizeLogo() {
+          var imgs = document.querySelectorAll('aside img[alt="Edge Intelligence"]');
+          imgs.forEach(function(img) {
+            img.style.setProperty('height', '3.5rem', 'important');
+            img.style.setProperty('width', 'auto', 'important');
+            img.style.setProperty('max-height', 'none', 'important');
+          });
+          // Also fix mobile top bar logo
+          var mobileImgs = document.querySelectorAll('div.lg\\:hidden img[alt="Edge Intelligence"]');
+          mobileImgs.forEach(function(img) {
+            img.style.setProperty('height', '1.75rem', 'important');
+          });
+        }
+        // Run after SPA mounts and on any DOM changes
+        var obs = new MutationObserver(resizeLogo);
+        obs.observe(document.getElementById('root'), { childList: true, subtree: true });
+        // Also run periodically for 5 seconds in case observer misses it
+        var tries = 0;
+        var interval = setInterval(function() {
+          resizeLogo();
+          if (++tries >= 10) clearInterval(interval);
+        }, 500);
+      })();
     </script>
   </body>
 </html>
