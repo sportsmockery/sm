@@ -363,18 +363,18 @@ body.edge-focus-mode main table td.edge-dim:hover {
   color: hsla(156, 30%, 8%, 0.6);
 }
 
-/* ---------- Sidebar Edge logo — 2x size ---------- */
+/* ---------- Sidebar Edge logo — 6x size ---------- */
 
 aside img[alt="Edge Intelligence"] {
-  height: 3.5rem !important;
+  height: 10.5rem !important;
   width: auto !important;
   max-height: none !important;
 }
 
 /* Give the sidebar header more room for the larger logo */
 aside > div:first-child {
-  padding-top: 1.25rem !important;
-  padding-bottom: 1.25rem !important;
+  padding-top: 1.5rem !important;
+  padding-bottom: 1.5rem !important;
 }
 
 /* ---------- Search box alignment fix ---------- */
