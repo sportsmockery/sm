@@ -390,30 +390,26 @@
         checkRoute();
       })();
 
-      // Force sidebar Edge logo to 2x size via direct DOM manipulation
+      // Force Edge logo to 2x size — runs continuously to catch all SPA renders
       (function() {
-        function resizeLogo() {
-          var imgs = document.querySelectorAll('aside img[alt="Edge Intelligence"]');
-          imgs.forEach(function(img) {
-            img.style.setProperty('height', '3.5rem', 'important');
-            img.style.setProperty('width', 'auto', 'important');
-            img.style.setProperty('max-height', 'none', 'important');
-          });
-          // Also fix mobile top bar logo
-          var mobileImgs = document.querySelectorAll('div.lg\\:hidden img[alt="Edge Intelligence"]');
-          mobileImgs.forEach(function(img) {
-            img.style.setProperty('height', '1.75rem', 'important');
-          });
+        function resizeAllEdgeLogos() {
+          // Target every img with this alt text anywhere in the page
+          var all = document.querySelectorAll('img[alt="Edge Intelligence"]');
+          for (var i = 0; i < all.length; i++) {
+            var img = all[i];
+            // Skip the hero/briefing logo (it's inside .edge-top-logo)
+            if (img.closest('.edge-top-logo')) continue;
+            // This is a sidebar or mobile bar logo — make it 2x
+            img.style.cssText = 'height: 3.5rem !important; width: auto !important; max-height: none !important; object-fit: contain !important;';
+          }
         }
-        // Run after SPA mounts and on any DOM changes
-        var obs = new MutationObserver(resizeLogo);
-        obs.observe(document.getElementById('root'), { childList: true, subtree: true });
-        // Also run periodically for 5 seconds in case observer misses it
-        var tries = 0;
-        var interval = setInterval(function() {
-          resizeLogo();
-          if (++tries >= 10) clearInterval(interval);
-        }, 500);
+        // Run on every DOM mutation inside #root
+        var root = document.getElementById('root');
+        if (root) {
+          new MutationObserver(resizeAllEdgeLogos).observe(root, { childList: true, subtree: true });
+        }
+        // Also run on an interval forever (SPA navigation can re-render)
+        setInterval(resizeAllEdgeLogos, 300);
       })();
     </script>
   </body>
