@@ -363,18 +363,35 @@ body.edge-focus-mode main table td.edge-dim:hover {
   color: hsla(156, 30%, 8%, 0.6);
 }
 
+/* ---------- Sidebar logo — force 2x size ---------- */
+
+aside .border-sidebar-border img[alt="Edge Intelligence"] {
+  height: 3.5rem !important;
+  width: auto !important;
+  max-height: none !important;
+}
+
 /* ---------- Search box alignment fix ---------- */
 
 input[type="search"] {
-  -webkit-appearance: none;
-  appearance: none;
-  line-height: 1.5;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  line-height: 1.5 !important;
+  display: flex !important;
+  align-items: center !important;
 }
 
 input[type="search"]::-webkit-search-decoration,
 input[type="search"]::-webkit-search-cancel-button {
   -webkit-appearance: none;
   appearance: none;
+  display: none;
+}
+
+/* Ensure search icon container is properly aligned */
+.relative:has(input[type="search"]) {
+  display: flex;
+  align-items: center;
 }
 
 /* ---------- Reduced motion ---------- */
