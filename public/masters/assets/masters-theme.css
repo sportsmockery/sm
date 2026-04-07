@@ -153,56 +153,54 @@
   50% { opacity: .3; }
 }
 
-/* === Sidebar logo — large, properly placed === */
+/* === Sidebar logo — stacked Edge + Masters, 3x size === */
 
-/* Target the sidebar header container */
-aside .border-sidebar-border:first-child,
-aside > .border-sidebar-border:first-child,
-aside [class*="px-5"][class*="py-4"][class*="border-b"],
-aside [class*="border-b"]:first-child {
+/* Stack sidebar header vertically */
+aside > div:first-child {
   flex-direction: column !important;
   align-items: center !important;
   justify-content: center !important;
-  padding: 28px 20px 20px !important;
-  gap: 10px !important;
+  padding: 16px 16px 12px !important;
+  gap: 0px !important;
+  position: relative !important;
+  border-bottom: 1px solid hsl(160 24% 11%) !important;
 }
 
-/* Make sidebar logo large and prominent */
-aside [class*="px-5"][class*="py-4"][class*="border-b"] img,
-aside .border-sidebar-border:first-child img,
-aside [class*="border-b"]:first-child img {
-  height: 56px !important;
+/* Edge logo — 3x size */
+aside > div:first-child img[alt="Edge Intelligence"] {
+  height: 10.5rem !important;
   width: auto !important;
-  max-width: 180px !important;
+  max-width: 200px !important;
+  max-height: none !important;
   object-fit: contain !important;
   animation: masters-glow 4s ease-in-out infinite;
+  margin: 0 !important;
 }
 
-/* Also target SVG logos */
-aside [class*="border-b"]:first-child svg {
-  height: 56px !important;
-  width: auto !important;
-  max-width: 180px !important;
-}
-
-/* Hide the text next to logo in sidebar header */
-aside [class*="px-5"][class*="py-4"][class*="border-b"] > div:last-child,
-aside .border-sidebar-border:first-child > .flex-col,
-aside [class*="border-b"]:first-child > .flex-col {
+/* Hide the inline "Masters 2026 / Intelligence" text — replaced by ::after logo */
+aside > div:first-child > div.flex-col,
+aside > div:first-child > div:nth-child(2) {
   display: none !important;
 }
 
-/* Add Masters logo image below sidebar Edge logo */
-aside [class*="px-5"][class*="py-4"][class*="border-b"]::after,
-aside .border-sidebar-border:first-child::after,
-aside [class*="border-b"]:first-child::after {
+/* Masters logo image via ::after — 20px below Edge logo */
+aside > div:first-child::after {
   content: '';
   display: block;
-  width: 140px;
-  height: 35px;
+  width: 160px;
+  height: 40px;
   background: url('/masters/assets/masters-logo-text.png') center / contain no-repeat;
-  opacity: 0.75;
-  margin-top: 4px;
+  opacity: 0.8;
+  margin-top: 20px;
+  flex-shrink: 0;
+}
+
+/* Close button (mobile) — top-right corner */
+aside > div:first-child > button {
+  position: absolute !important;
+  top: 10px !important;
+  right: 10px !important;
+  margin-left: 0 !important;
 }
 
 /* === Desktop centering — only center main, not sidebar === */
@@ -313,8 +311,17 @@ aside [class*="border-b"]:first-child::after {
 
 /* === Mobile optimization === */
 @media (max-width: 640px) {
+  /* Prevent horizontal overflow */
+  body, html { overflow-x: hidden !important; }
+
   /* Prevent horizontal overflow on tables */
-  main table { font-size: 14px; }
+  main table {
+    font-size: 14px;
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100vw;
+  }
   main [class*="overflow-x-auto"] { -webkit-overflow-scrolling: touch; }
 
   /* Ensure cards don't overflow */
@@ -322,22 +329,102 @@ aside [class*="border-b"]:first-child::after {
   main [class*="rounded-lg"] {
     overflow: hidden;
     word-break: break-word;
+    max-width: 100% !important;
   }
 
-  /* Mobile sidebar overlay — ensure it covers full screen */
+  /* Mobile sidebar overlay — full screen, respect safe areas */
   aside {
-    width: 280px !important;
+    width: min(280px, 80vw) !important;
+    padding-top: env(safe-area-inset-top, 0) !important;
   }
 
   /* Mobile top bar padding for content */
   main {
     padding-top: 56px !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
   }
 
   /* Stat values don't wrap */
   main [class*="tabular-nums"] {
     white-space: nowrap;
   }
+
+  /* Buttons — ensure minimum tap target, no cutoff */
+  main button, main a[role="button"], main [class*="btn"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Grid layouts — single column on mobile */
+  main [class*="grid-cols-3"] {
+    grid-template-columns: 1fr !important;
+  }
+  main [class*="grid-cols-4"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Ensure all content fits within viewport */
+  #root, #root > div, main > div {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+
+  /* Hero section — fit mobile viewport */
+  #root section[class*="min-h-screen"]:first-of-type {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    max-width: 100% !important;
+  }
+
+  /* SVG icons — don't scale up as much on mobile */
+  #root svg {
+    transform: scale(1.1) !important;
+  }
+
+  /* Card padding — tighter on mobile */
+  #root [class*="rounded-xl"][class*="p-6"],
+  #root [class*="rounded-lg"][class*="p-6"] {
+    padding: 14px !important;
+  }
+
+  /* Stat cards row — stack on mobile */
+  main > div > [class*="grid"] {
+    gap: 10px !important;
+  }
+}
+
+/* Extra-small phones (iPhone SE, etc.) */
+@media (max-width: 375px) {
+  aside {
+    width: min(260px, 75vw) !important;
+  }
+
+  main {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
+  /* Smaller logo on tiny phones */
+  aside > div:first-child img[alt="Edge Intelligence"] {
+    height: 7rem !important;
+  }
+  aside > div:first-child::after {
+    width: 120px !important;
+    height: 30px !important;
+  }
+
+  /* Grid always single column on tiny phones */
+  main [class*="grid-cols-2"],
+  main [class*="grid-cols-3"],
+  main [class*="grid-cols-4"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  #root h1 { font-size: max(24px, inherit) !important; }
+  #root h2 { font-size: max(22px, inherit) !important; }
 }
 
 /* === Card headings, numbers, icons — bigger === */
