@@ -363,6 +363,20 @@ body.edge-focus-mode main table td.edge-dim:hover {
   color: hsla(156, 30%, 8%, 0.6);
 }
 
+/* ---------- Search box alignment fix ---------- */
+
+input[type="search"] {
+  -webkit-appearance: none;
+  appearance: none;
+  line-height: 1.5;
+}
+
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
 /* ---------- Reduced motion ---------- */
 
 @media (prefers-reduced-motion: reduce) {
