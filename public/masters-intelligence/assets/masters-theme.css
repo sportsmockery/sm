@@ -1,0 +1,540 @@
+/* Masters Tournament Color Override
+   Augusta National palette: deep green, gold/yellow, warm tones */
+
+:root {
+  /* === Masters Light Mode === */
+  --background: 40 30% 97%;
+  --foreground: 156 30% 8%;
+  --border: 40 12% 85%;
+  --card: 40 20% 95%;
+  --card-foreground: 156 30% 8%;
+  --card-border: 40 12% 85%;
+
+  /* Sidebar — deep Augusta green */
+  --sidebar: 161 100% 10%;
+  --sidebar-foreground: 40 30% 92%;
+  --sidebar-border: 161 80% 14%;
+  --sidebar-primary: 51 100% 50%;
+  --sidebar-primary-foreground: 161 100% 8%;
+  --sidebar-accent: 161 80% 16%;
+  --sidebar-accent-foreground: 40 30% 92%;
+  --sidebar-ring: 51 100% 50%;
+
+  --popover: 40 20% 94%;
+  --popover-foreground: 156 30% 8%;
+  --popover-border: 40 12% 85%;
+
+  /* Primary — Augusta Green */
+  --primary: 161 100% 20%;
+  --primary-foreground: 40 40% 96%;
+
+  --secondary: 40 10% 90%;
+  --secondary-foreground: 156 30% 8%;
+  --muted: 40 10% 92%;
+  --muted-foreground: 156 8% 42%;
+
+  /* Accent — Masters Gold */
+  --accent: 51 100% 50%;
+  --accent-foreground: 156 30% 8%;
+
+  /* Azalea pink for alerts */
+  --destructive: 350 73% 49%;
+  --destructive-foreground: 0 0% 98%;
+
+  --input: 40 12% 82%;
+  --ring: 51 100% 50%;
+
+  /* Charts — Masters palette */
+  --chart-1: 161 100% 25%;
+  --chart-2: 51 100% 50%;
+  --chart-3: 350 73% 49%;
+  --chart-4: 28 85% 55%;
+  --chart-5: 161 60% 40%;
+
+  /* Override Edge colors → Masters */
+  --edge-cyan: 51 100% 50%;
+  --edge-green: 161 100% 25%;
+}
+
+.dark {
+  /* === Masters Dark Mode === */
+  --background: 160 25% 5%;
+  --foreground: 40 15% 90%;
+  --border: 160 18% 14%;
+  --card: 160 20% 8%;
+  --card-foreground: 40 15% 90%;
+  --card-border: 160 18% 13%;
+
+  --sidebar: 160 30% 6%;
+  --sidebar-foreground: 40 12% 85%;
+  --sidebar-border: 160 24% 11%;
+  --sidebar-primary: 51 100% 50%;
+  --sidebar-primary-foreground: 160 30% 6%;
+  --sidebar-accent: 160 24% 13%;
+  --sidebar-accent-foreground: 40 12% 85%;
+  --sidebar-ring: 51 100% 50%;
+
+  --popover: 160 20% 10%;
+  --popover-foreground: 40 15% 90%;
+  --popover-border: 160 18% 14%;
+
+  --primary: 161 80% 30%;
+  --primary-foreground: 40 40% 96%;
+
+  --secondary: 160 15% 15%;
+  --secondary-foreground: 40 15% 90%;
+  --muted: 160 12% 16%;
+  --muted-foreground: 40 8% 55%;
+
+  --accent: 51 100% 50%;
+  --accent-foreground: 160 25% 5%;
+
+  --destructive: 350 73% 55%;
+  --destructive-foreground: 0 0% 98%;
+
+  --input: 160 12% 20%;
+  --ring: 51 100% 50%;
+
+  --chart-1: 161 80% 35%;
+  --chart-2: 51 100% 55%;
+  --chart-3: 350 70% 55%;
+  --chart-4: 28 80% 58%;
+  --chart-5: 161 50% 45%;
+
+  --edge-cyan: 51 100% 50%;
+  --edge-green: 161 80% 35%;
+}
+
+/* === Inline color overrides for hardcoded Tailwind classes === */
+
+/* Cyan text → Masters Gold */
+.text-\[hsl\(187_85\%_55\%\)\],
+.text-\[hsl\(187_85\%_60\%\)\] {
+  color: hsl(51 100% 50%) !important;
+}
+
+/* Tier colors — remap to Masters feel */
+.tier-elite {
+  color: #FFD700 !important;  /* Gold */
+}
+.tier-contender {
+  color: #2E8B57 !important;  /* Sea green */
+}
+.tier-field {
+  color: #8B8878 !important;  /* Warm gray */
+}
+.tier-longshot {
+  color: #6B6255 !important;  /* Warm muted */
+}
+
+/* Accent metric colors — gold tones */
+.text-\[hsl\(280_50\%_65\%\)\] {
+  color: hsl(38 80% 58%) !important;  /* Warm amber instead of purple */
+}
+
+.text-\[hsl\(0_60\%_60\%\)\] {
+  color: hsl(350 73% 52%) !important;  /* Azalea pink */
+}
+
+/* Scrollbar — dark green */
+.dark ::-webkit-scrollbar-track {
+  background: hsl(160 25% 7%) !important;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: hsl(161 30% 20%) !important;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: hsl(161 35% 28%) !important;
+}
+
+/* Edge animation colors → green glow instead of cyan */
+@keyframes edge-pulse {
+  0%, 100% { opacity: .15; }
+  50% { opacity: .3; }
+}
+
+/* === Sidebar logo — stacked Edge + Masters, 3x size === */
+
+/* Stack sidebar header vertically */
+aside > div:first-child {
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 16px 16px 12px !important;
+  gap: 0px !important;
+  position: relative !important;
+  border-bottom: 1px solid hsl(160 24% 11%) !important;
+}
+
+/* Edge logo — 3x size */
+aside > div:first-child img[alt="Edge Intelligence"] {
+  height: 10.5rem !important;
+  width: auto !important;
+  max-width: 200px !important;
+  max-height: none !important;
+  object-fit: contain !important;
+  animation: masters-glow 4s ease-in-out infinite;
+  margin: 0 !important;
+}
+
+/* Hide the inline "Masters 2026 / Intelligence" text — replaced by ::after logo */
+aside > div:first-child > div.flex-col,
+aside > div:first-child > div:nth-child(2) {
+  display: none !important;
+}
+
+/* Masters logo image via ::after — 20px below Edge logo */
+aside > div:first-child::after {
+  content: '';
+  display: block;
+  width: 160px;
+  height: 40px;
+  background: url('/masters/assets/masters-logo-text.png') center / contain no-repeat;
+  opacity: 0.8;
+  margin-top: 20px;
+  flex-shrink: 0;
+}
+
+/* Close button (mobile) — top-right corner */
+aside > div:first-child > button {
+  position: absolute !important;
+  top: 10px !important;
+  right: 10px !important;
+  margin-left: 0 !important;
+}
+
+/* === Desktop centering — only center main, not sidebar === */
+@media (min-width: 1024px) {
+  main {
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  main > [class*="max-w-"] {
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
+
+/* === Hero width — match content cards (max-w-6xl = 1152px) === */
+#root section[class*="min-h-screen"]:first-of-type {
+  max-width: 1152px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: 24px !important;
+  padding-right: 24px !important;
+}
+
+/* === Text size overrides — NO TEXT BELOW 14px === */
+/* Applied at #root level to catch ALL SPA content */
+
+/* Force all tiny text classes up to 14px minimum */
+#root .text-\[8px\],
+#root .text-\[9px\],
+#root .text-\[10px\],
+#root .text-\[11px\] { font-size: 14px !important; }
+
+#root .text-\[12px\] { font-size: 16px !important; }
+#root .text-\[13px\] { font-size: 17px !important; }
+
+/* Body text */
+#root .text-\[14px\] { font-size: 18px !important; }
+#root .text-\[15px\] { font-size: 19px !important; }
+#root .text-\[16px\] { font-size: 20px !important; }
+
+/* Subheadings */
+#root .text-\[17px\] { font-size: 21px !important; }
+#root .text-\[18px\] { font-size: 24px !important; }
+
+/* Headings */
+#root .text-\[20px\] { font-size: 28px !important; }
+#root .text-\[22px\] { font-size: 30px !important; }
+#root .text-\[24px\] { font-size: 32px !important; }
+#root .text-\[28px\] { font-size: 36px !important; }
+#root .text-\[32px\] { font-size: 40px !important; }
+
+/* Tailwind named size classes */
+#root .text-xs { font-size: 15px !important; }
+#root .text-sm { font-size: 17px !important; }
+#root .text-base { font-size: 19px !important; }
+#root .text-lg { font-size: 22px !important; }
+#root .text-xl { font-size: 28px !important; }
+#root .text-2xl { font-size: 34px !important; }
+#root .text-3xl { font-size: 40px !important; }
+
+/* Table cells */
+#root td, #root th {
+  font-size: max(16px, inherit) !important;
+}
+
+/* Leading-relaxed body text (story sections) */
+#root [class*="leading-relaxed"] {
+  font-size: max(18px, inherit) !important;
+  line-height: 1.7 !important;
+}
+
+/* Headings */
+#root h1 { font-size: max(36px, inherit) !important; }
+#root h2 { font-size: max(30px, inherit) !important; }
+#root h3 { font-size: max(26px, inherit) !important; }
+#root h4 { font-size: max(22px, inherit) !important; }
+#root h5, #root h6 { font-size: max(18px, inherit) !important; }
+
+/* Paragraph and span text */
+#root p { font-size: max(17px, inherit) !important; }
+#root span { font-size: max(14px, inherit) !important; }
+
+/* Section heading labels (uppercase tracking-wide small text) */
+#root [class*="tracking-wide"],
+#root [class*="tracking-wider"],
+#root [class*="uppercase"] {
+  font-size: max(15px, inherit) !important;
+}
+
+/* Nuclear option — absolute minimum 14px on everything in the SPA */
+#root * {
+  font-size: max(14px, inherit) !important;
+}
+
+/* Mobile: slightly smaller but still 14px minimum */
+@media (max-width: 640px) {
+  #root .text-\[20px\],
+  #root .text-\[22px\] { font-size: 22px !important; }
+  #root .text-xl { font-size: 24px !important; }
+  #root h1 { font-size: max(28px, inherit) !important; }
+  #root h2 { font-size: max(24px, inherit) !important; }
+  #root h3 { font-size: max(22px, inherit) !important; }
+  #root td, #root th { font-size: max(14px, inherit) !important; }
+  #root p { font-size: max(15px, inherit) !important; }
+  /* Still enforce 14px minimum on mobile */
+  #root * { font-size: max(14px, inherit) !important; }
+}
+
+/* === Mobile optimization === */
+@media (max-width: 640px) {
+  /* Prevent horizontal overflow */
+  body, html { overflow-x: hidden !important; }
+
+  /* Prevent horizontal overflow on tables */
+  main table {
+    font-size: 14px;
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100vw;
+  }
+  main [class*="overflow-x-auto"] { -webkit-overflow-scrolling: touch; }
+
+  /* Ensure cards don't overflow */
+  main [class*="rounded-xl"],
+  main [class*="rounded-lg"] {
+    overflow: hidden;
+    word-break: break-word;
+    max-width: 100% !important;
+  }
+
+  /* Mobile sidebar overlay — full screen, respect safe areas */
+  aside {
+    width: min(280px, 80vw) !important;
+    padding-top: env(safe-area-inset-top, 0) !important;
+  }
+
+  /* Mobile top bar padding for content */
+  main {
+    padding-top: 56px !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+
+  /* Stat values don't wrap */
+  main [class*="tabular-nums"] {
+    white-space: nowrap;
+  }
+
+  /* Buttons — ensure minimum tap target, no cutoff */
+  main button, main a[role="button"], main [class*="btn"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Grid layouts — single column on mobile */
+  main [class*="grid-cols-3"] {
+    grid-template-columns: 1fr !important;
+  }
+  main [class*="grid-cols-4"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Ensure all content fits within viewport */
+  #root, #root > div, main > div {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+
+  /* Hero section — fit mobile viewport */
+  #root section[class*="min-h-screen"]:first-of-type {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    max-width: 100% !important;
+  }
+
+  /* SVG icons — don't scale up as much on mobile */
+  #root svg {
+    transform: scale(1.1) !important;
+  }
+
+  /* Card padding — tighter on mobile */
+  #root [class*="rounded-xl"][class*="p-6"],
+  #root [class*="rounded-lg"][class*="p-6"] {
+    padding: 14px !important;
+  }
+
+  /* Stat cards row — stack on mobile */
+  main > div > [class*="grid"] {
+    gap: 10px !important;
+  }
+}
+
+/* Extra-small phones (iPhone SE, etc.) */
+@media (max-width: 375px) {
+  aside {
+    width: min(260px, 75vw) !important;
+  }
+
+  main {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
+  /* Smaller logo on tiny phones */
+  aside > div:first-child img[alt="Edge Intelligence"] {
+    height: 7rem !important;
+  }
+  aside > div:first-child::after {
+    width: 120px !important;
+    height: 30px !important;
+  }
+
+  /* Grid always single column on tiny phones */
+  main [class*="grid-cols-2"],
+  main [class*="grid-cols-3"],
+  main [class*="grid-cols-4"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  #root h1 { font-size: max(24px, inherit) !important; }
+  #root h2 { font-size: max(22px, inherit) !important; }
+}
+
+/* === Card headings, numbers, icons — bigger === */
+
+/* Card title text (h3/h4 inside cards) */
+#root [class*="rounded-xl"] h3,
+#root [class*="rounded-lg"] h3,
+#root [class*="rounded-xl"] h4,
+#root [class*="rounded-lg"] h4 {
+  font-size: max(24px, inherit) !important;
+}
+
+/* Large stat numbers inside cards (tabular-nums, font-mono, etc.) */
+#root [class*="rounded-xl"] [class*="tabular-nums"],
+#root [class*="rounded-lg"] [class*="tabular-nums"],
+#root [class*="rounded-xl"] [class*="font-mono"],
+#root [class*="rounded-lg"] [class*="font-mono"] {
+  font-size: max(22px, inherit) !important;
+}
+
+/* Big number stats (text-2xl, text-3xl etc inside cards) */
+#root [class*="rounded-xl"] [class*="text-2xl"],
+#root [class*="rounded-lg"] [class*="text-2xl"] {
+  font-size: 36px !important;
+}
+#root [class*="rounded-xl"] [class*="text-3xl"],
+#root [class*="rounded-lg"] [class*="text-3xl"] {
+  font-size: 42px !important;
+}
+
+/* SVG icons — scale up everywhere */
+#root svg {
+  transform: scale(1.3);
+  transform-origin: center;
+}
+/* Icon size classes */
+#root .w-4 { width: 20px !important; height: 20px !important; }
+#root .h-4 { width: 20px !important; height: 20px !important; }
+#root .w-3 { width: 16px !important; height: 16px !important; }
+#root .h-3 { width: 16px !important; height: 16px !important; }
+#root .w-5 { width: 24px !important; height: 24px !important; }
+#root .h-5 { width: 24px !important; height: 24px !important; }
+
+/* === Decrease spacing between sections === */
+
+/* Grid gaps — tighten */
+#root [class*="gap-6"] { gap: 16px !important; }
+#root [class*="gap-5"] { gap: 14px !important; }
+#root [class*="gap-4"] { gap: 12px !important; }
+#root [class*="gap-8"] { gap: 20px !important; }
+
+/* Space-y — tighten vertical spacing between stacked sections */
+#root [class*="space-y-6"] > * + * { margin-top: 16px !important; }
+#root [class*="space-y-8"] > * + * { margin-top: 20px !important; }
+#root [class*="space-y-4"] > * + * { margin-top: 10px !important; }
+
+/* Padding inside cards — slightly tighter */
+#root [class*="rounded-xl"][class*="p-6"],
+#root [class*="rounded-lg"][class*="p-6"] {
+  padding: 18px !important;
+}
+#root [class*="rounded-xl"][class*="p-5"],
+#root [class*="rounded-lg"][class*="p-5"] {
+  padding: 16px !important;
+}
+
+/* Section margins */
+#root [class*="mb-8"] { margin-bottom: 20px !important; }
+#root [class*="mb-6"] { margin-bottom: 16px !important; }
+#root [class*="mt-8"] { margin-top: 20px !important; }
+#root [class*="mt-6"] { margin-top: 16px !important; }
+
+/* Golf flag icon replacement */
+.golf-flag-icon {
+  display: inline-block;
+  font-size: 16px;
+  line-height: 1;
+  filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.3));
+}
+
+/* Section 07 "Build Your Conviction" — align left like other sections */
+#root section:last-of-type .max-w-4xl.text-center {
+  text-align: left !important;
+  max-width: 1152px !important; /* match max-w-6xl */
+}
+
+/* Hide "Scroll to begin" + arrow in hero */
+#root section:first-of-type [class*="tracking-"][class*="uppercase"] {
+  display: none !important;
+}
+/* Target the scroll arrow icon next to it */
+#root section:first-of-type [class*="text-white\\/20"][class*="w-4"] {
+  display: none !important;
+}
+/* Hide the entire scroll cue container at bottom of hero */
+#root section:first-of-type > div:last-child {
+  visibility: visible;
+}
+#root section:first-of-type [class*="absolute"][class*="bottom"] {
+  display: none !important;
+}
+
+/* First-page story glow behind logo */
+@keyframes masters-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 20px rgba(0, 86, 59, 0.5))
+            drop-shadow(0 0 40px rgba(0, 86, 59, 0.25));
+  }
+  50% {
+    filter: drop-shadow(0 0 30px rgba(0, 86, 59, 0.7))
+            drop-shadow(0 0 60px rgba(0, 86, 59, 0.35));
+  }
+}
