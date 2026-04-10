@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover" />
+  <title>Masters 2026 — Live Leaderboard | Edge Intelligence</title>
+  <meta name="description" content="Live Masters Tournament leaderboard and hole-by-hole scorecards — Edge Intelligence" />
+  <link rel="icon" type="image/x-icon" href="/masters/favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: hsl(160 25% 5%);
+      --bg-card: hsl(160 20% 8%);
+      --bg-card-hover: hsl(160 20% 10%);
+      --bg-row-alt: hsl(160 18% 7%);
+      --border: hsl(160 18% 14%);
+      --border-subtle: hsl(160 18% 11%);
+      --text: hsl(40 15% 90%);
+      --text-dim: hsl(40 8% 55%);
+      --text-muted: hsl(40 8% 40%);
+      --gold: hsl(51 100% 50%);
+      --gold-dim: hsl(51 80% 40%);
+      --green: hsl(161 80% 30%);
+      --green-bright: hsl(161 80% 45%);
+      --red-score: hsl(0 72% 55%);
+      --blue-score: hsl(220 70% 55%);
+      --blue-dark: hsl(220 65% 30%);
+      --eagle-gold: hsl(45 100% 50%);
+      --birdie-red: hsl(0 72% 50%);
+      --bogey-blue: hsl(220 60% 35%);
+      --double-blue: hsl(220 55% 20%);
+      --cut-gray: hsl(40 5% 35%);
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Header ── */
+    .page-header {
+      background: linear-gradient(180deg, hsl(160 30% 8%) 0%, var(--bg) 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 24px 20px 20px;
+    }
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .header-top {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .header-logo {
+      height: 36px;
+      width: auto;
+      opacity: 0.9;
+    }
+    .header-masters-logo {
+      height: 28px;
+      width: auto;
+      opacity: 0.7;
+    }
+    .header-divider {
+      width: 1px;
+      height: 28px;
+      background: var(--border);
+    }
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      transition: color 0.15s;
+      margin-left: auto;
+    }
+    .back-link:hover { color: var(--gold); }
+    .back-link svg { width: 14px; height: 14px; }
+
+    .tournament-title {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      line-height: 1.2;
+    }
+    .tournament-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 20px;
+      margin-top: 8px;
+      font-size: 14px;
+      color: var(--text-dim);
+    }
+    .tournament-meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .status-live {
+      background: hsla(0, 72%, 50%, 0.15);
+      color: hsl(0 72% 60%);
+      border: 1px solid hsla(0, 72%, 50%, 0.25);
+    }
+    .status-live::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: hsl(0 72% 55%);
+      animation: pulse-dot 1.5s ease infinite;
+    }
+    .status-scheduled {
+      background: hsla(51, 100%, 50%, 0.1);
+      color: var(--gold);
+      border: 1px solid hsla(51, 100%, 50%, 0.2);
+    }
+    .status-final {
+      background: hsla(161, 80%, 30%, 0.12);
+      color: var(--green-bright);
+      border: 1px solid hsla(161, 80%, 35%, 0.2);
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* ── Main content ── */
+    .main-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* ── Leaderboard table ── */
+    .leaderboard-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .leaderboard-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 15px;
+    }
+    .leaderboard-table thead th {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: hsl(160 22% 10%);
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 12px 10px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .leaderboard-table thead th:nth-child(1) { text-align: center; width: 52px; }
+    .leaderboard-table thead th:nth-child(2) { text-align: left; }
+    .leaderboard-table tbody tr {
+      cursor: pointer;
+      transition: background 0.12s;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .leaderboard-table tbody tr:nth-child(even) {
+      background: var(--bg-row-alt);
+    }
+    .leaderboard-table tbody tr:hover {
+      background: var(--bg-card-hover);
+    }
+    .leaderboard-table tbody tr.is-cut {
+      opacity: 0.4;
+      cursor: default;
+    }
+    .leaderboard-table tbody tr.is-withdrawn {
+      opacity: 0.45;
+      cursor: default;
+    }
+    .leaderboard-table td {
+      padding: 10px 10px;
+      text-align: center;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+    .leaderboard-table td:nth-child(1) {
+      font-weight: 700;
+      color: var(--text-dim);
+      width: 52px;
+    }
+    .leaderboard-table td:nth-child(2) {
+      text-align: left;
+    }
+
+    /* Player cell */
+    .player-cell {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .player-headshot {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: hsl(160 15% 15%);
+      flex-shrink: 0;
+    }
+    .player-info {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .player-name {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .player-country {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .country-flag {
+      width: 14px;
+      height: 10px;
+      object-fit: cover;
+      border-radius: 1px;
+    }
+
+    /* Score colors */
+    .score-under { color: var(--red-score); font-weight: 700; }
+    .score-over { color: var(--blue-score); font-weight: 600; }
+    .score-even { color: var(--text-dim); }
+    .score-cut { color: var(--cut-gray); font-weight: 600; font-style: italic; }
+
+    /* ── Cut line separator ── */
+    .cut-line-row td {
+      padding: 0 !important;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+      border: none !important;
+    }
+    .cut-line-label {
+      position: relative;
+    }
+    .cut-line-label::after {
+      content: 'PROJECTED CUT';
+      position: absolute;
+      right: 16px;
+      top: -8px;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: var(--gold-dim);
+      background: var(--bg-card);
+      padding: 0 8px;
+    }
+
+    /* ── Scorecard (expandable) ── */
+    .scorecard-row td {
+      padding: 0 !important;
+      border: none !important;
+    }
+    .scorecard-container {
+      background: hsl(160 20% 6%);
+      border-top: 1px solid var(--border);
+      padding: 16px 20px 20px;
+      animation: slideDown 0.2s ease;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; max-height: 0; }
+      to { opacity: 1; max-height: 600px; }
+    }
+    .scorecard-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .scorecard-player-img {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--border);
+    }
+    .scorecard-player-name {
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .scorecard-rounds {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .scorecard-round-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 4px;
+    }
+    .scorecard-grid {
+      display: grid;
+      grid-template-columns: 50px repeat(9, 1fr) 50px;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      font-size: 13px;
+    }
+    .sc-cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 4px;
+      border-right: 1px solid var(--border-subtle);
+      border-bottom: 1px solid var(--border-subtle);
+      font-variant-numeric: tabular-nums;
+    }
+    .sc-cell:last-child { border-right: none; }
+    .sc-header {
+      background: hsl(160 22% 10%);
+      color: var(--text-muted);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+    .sc-label {
+      font-weight: 700;
+      color: var(--text-dim);
+      font-size: 11px;
+      letter-spacing: 0.06em;
+    }
+    .sc-total {
+      font-weight: 700;
+      background: hsl(160 22% 10%);
+    }
+    .sc-par {
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+    /* Hole score shapes */
+    .sc-score {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      font-weight: 600;
+      font-size: 13px;
+    }
+    .sc-eagle {
+      background: var(--eagle-gold);
+      color: #000;
+      border-radius: 50%;
+    }
+    .sc-birdie {
+      background: var(--birdie-red);
+      color: #fff;
+      border-radius: 50%;
+    }
+    .sc-bogey {
+      background: var(--bogey-blue);
+      color: #fff;
+      border-radius: 3px;
+    }
+    .sc-double {
+      background: var(--double-blue);
+      color: #fff;
+      border-radius: 3px;
+      border: 1px solid hsl(220 50% 40%);
+    }
+
+    /* ── Loading / Error ── */
+    .loading-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-dim);
+    }
+    .loading-spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--border);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .error-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: hsl(0 60% 60%);
+    }
+
+    /* ── Polling indicator ── */
+    .poll-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-muted);
+      padding: 8px 16px;
+      text-align: right;
+      justify-content: flex-end;
+    }
+    .poll-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--green-bright);
+      animation: pulse-dot 2s ease infinite;
+    }
+
+    /* ── Mobile ── */
+    @media (max-width: 768px) {
+      .page-header { padding: 16px 14px; }
+      .tournament-title { font-size: 22px; }
+      .tournament-meta { font-size: 13px; gap: 4px 14px; }
+      .main-content { padding: 12px; }
+      .leaderboard-table { font-size: 13px; }
+      .leaderboard-table thead th { font-size: 10px; padding: 10px 6px; }
+      .leaderboard-table td { padding: 8px 6px; }
+      .player-headshot { width: 28px; height: 28px; }
+      .player-name { font-size: 13px; }
+      .player-country { display: none; }
+      /* Hide R3/R4 on mobile when not needed */
+      .round-col-3, .round-col-4 { display: none; }
+      .scorecard-container { padding: 12px 10px 16px; }
+      .scorecard-grid { font-size: 11px; }
+      .sc-cell { padding: 6px 2px; }
+      .sc-score { width: 22px; height: 22px; font-size: 11px; }
+      .scorecard-grid {
+        grid-template-columns: 36px repeat(9, 1fr) 36px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .tournament-title { font-size: 19px; }
+      .header-logo { height: 28px; }
+      .header-masters-logo { height: 22px; }
+      .player-cell { gap: 6px; }
+      .player-headshot { width: 24px; height: 24px; }
+      .leaderboard-table td:nth-child(1) { width: 40px; }
+    }
+
+    /* ── Utility ── */
+    .sr-only {
+      position: absolute;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+  <header class="page-header">
+    <div class="header-inner">
+      <div class="header-top">
+        <img src="/masters/assets/edge-logo-new.png" alt="Edge Intelligence" class="header-logo" />
+        <div class="header-divider"></div>
+        <img src="/masters/assets/masters-logo-text.png" alt="Masters" class="header-masters-logo" />
+        <a href="/masters#/overview" class="back-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect>
+          </svg>
+          Dashboard
+        </a>
+      </div>
+      <div id="tournament-header">
+        <div class="loading-state"><div class="loading-spinner"></div>Loading tournament...</div>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <div id="leaderboard-container">
+      <div class="loading-state"><div class="loading-spinner"></div>Loading leaderboard...</div>
+    </div>
+  </main>
+
+  <script>
+    // ── Supabase client ──
+    const SUPABASE_URL = 'https://siwoqfzzcxmngnseyzpv.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpd29xZnp6Y3htbmduc2V5enB2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc2NDk0ODAsImV4cCI6MjA4MzIyNTQ4MH0.PzeJ6OG2ofjLWSpJ2UmI-1aXVrHnh3ar6eTgph4uJgc';
+    const EVENT_ID = '401811941';
+
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    const POLL_MS = { scheduled: 60000, in_progress: 30000, final: null };
+    let pollTimer = null;
+    let expandedPlayerId = null;
+    let currentTournament = null;
+    let currentLeaderboard = [];
+
+    // Augusta National par for each hole
+    const AUGUSTA_PAR = [4, 5, 4, 3, 4, 3, 4, 5, 4, 4, 4, 3, 5, 4, 5, 3, 4, 4];
+
+    // ── Fetch tournament info ──
+    async function fetchTournament() {
+      const { data, error } = await sb
+        .from('golf_tournaments')
+        .select('*')
+        .eq('espn_event_id', EVENT_ID)
+        .single();
+      if (error) throw error;
+      return data;
+    }
+
+    // ── Fetch leaderboard ──
+    async function fetchLeaderboard() {
+      const { data, error } = await sb
+        .from('golf_leaderboard')
+        .select('*')
+        .eq('espn_event_id', EVENT_ID)
+        .order('position', { ascending: true });
+      if (error) throw error;
+      return data || [];
+    }
+
+    // ── Fetch hole scores for a player ──
+    async function fetchHoleScores(playerId) {
+      const { data, error } = await sb
+        .from('golf_hole_scores')
+        .select('*')
+        .eq('espn_event_id', EVENT_ID)
+        .eq('espn_player_id', playerId)
+        .order('round_number', { ascending: true })
+        .order('hole_number', { ascending: true });
+      if (error) throw error;
+      return data || [];
+    }
+
+    // ── Determine real status from raw_status ──
+    function getTournamentStatus(t) {
+      if (t.raw_status && t.raw_status.type) {
+        const rs = t.raw_status.type;
+        const state = rs.state;
+        if (state === 'in') return 'in_progress';
+        if (state === 'post' && rs.completed) {
+          // Check if all rounds done
+          if (t.current_round >= 4) return 'final';
+          return 'in_progress'; // round complete but tournament continues
+        }
+        if (state === 'pre') return 'scheduled';
+      }
+      return t.status || 'scheduled';
+    }
+
+    // ── Render tournament header ──
+    function renderTournamentHeader(t) {
+      const status = getTournamentStatus(t);
+      const roundLabel = t.current_round ? `Round ${t.current_round}` : '';
+      const detail = t.raw_status?.type?.detail || '';
+
+      let statusBadge = '';
+      if (status === 'in_progress') {
+        statusBadge = `<span class="status-badge status-live">${detail || 'LIVE'}</span>`;
+      } else if (status === 'final') {
+        statusBadge = `<span class="status-badge status-final">FINAL RESULTS</span>`;
+      } else {
+        const start = new Date(t.start_date + 'T00:00:00');
+        const now = new Date();
+        const diff = Math.max(0, start - now);
+        const days = Math.floor(diff / 86400000);
+        const hrs = Math.floor((diff % 86400000) / 3600000);
+        const label = days > 0 ? `Starts in ${days}d ${hrs}h` : 'Starting soon';
+        statusBadge = `<span class="status-badge status-scheduled">${label}</span>`;
+      }
+
+      const venue = [t.venue || 'Augusta National Golf Club', [t.venue_city || 'Augusta', t.venue_state || 'GA'].filter(Boolean).join(', ')].filter(Boolean).join(' \u00B7 ');
+      const cutDisplay = t.cut_line ? `Cut: ${t.cut_line}` : 'Cut: TBD';
+
+      document.getElementById('tournament-header').innerHTML = `
+        <h1 class="tournament-title">Masters Tournament ${statusBadge}</h1>
+        <div class="tournament-meta">
+          <span>${venue}</span>
+          <span>Par ${t.course_par || 72}</span>
+          <span>${t.total_players || '--'} Players</span>
+          <span>${cutDisplay}</span>
+          ${t.purse ? `<span>Purse: ${t.purse}</span>` : ''}
+        </div>
+      `;
+      return status;
+    }
+
+    // ── Score color helpers ──
+    function scoreClass(num) {
+      if (num < 0) return 'score-under';
+      if (num > 0) return 'score-over';
+      return 'score-even';
+    }
+
+    function formatScoreToPar(text, num) {
+      if (num === 0) return 'E';
+      if (num < 0) return String(num);
+      return '+' + num;
+    }
+
+    function thruDisplay(thru) {
+      if (thru === 18) return 'F';
+      if (thru === 0 || thru == null) return '-';
+      return thru;
+    }
+
+    function roundStroke(roundScores, roundNum) {
+      if (!roundScores) return '-';
+      let parsed = roundScores;
+      if (typeof parsed === 'string') {
+        try { parsed = JSON.parse(parsed); } catch { return '-'; }
+      }
+      const r = parsed.find(rs => rs.round === roundNum);
+      return r && r.strokes > 0 ? r.strokes : '-';
+    }
+
+    // ── Hole score styling ──
+    function holeScoreHtml(strokes, scoreType) {
+      if (!strokes || strokes === 0) return `<span class="sc-score">&ndash;</span>`;
+      const num = parseInt(scoreType);
+      let cls = '';
+      if (scoreType === 'E' || num === 0) cls = '';
+      else if (num <= -2) cls = 'sc-eagle';
+      else if (num === -1) cls = 'sc-birdie';
+      else if (num === 1) cls = 'sc-bogey';
+      else if (num >= 2) cls = 'sc-double';
+      return `<span class="sc-score ${cls}">${strokes}</span>`;
+    }
+
+    // ── Render leaderboard table ──
+    function renderLeaderboard(players, status) {
+      if (!players.length) {
+        document.getElementById('leaderboard-container').innerHTML = `
+          <div class="loading-state">No leaderboard data yet. Check back when the tournament begins.</div>`;
+        return;
+      }
+
+      // Determine which round columns to show
+      const maxRound = Math.max(...players.map(p => p.current_round || 1));
+      const showR3 = maxRound >= 3;
+      const showR4 = maxRound >= 4;
+
+      // Find first cut player for cut line
+      const cutIndex = players.findIndex(p => p.is_cut);
+
+      let rows = '';
+      players.forEach((p, i) => {
+        // Insert cut line
+        if (i === cutIndex && cutIndex > 0) {
+          const colSpan = 6 + (showR3 ? 1 : 0) + (showR4 ? 1 : 0);
+          rows += `<tr class="cut-line-row"><td colspan="${colSpan}" class="cut-line-label"></td></tr>`;
+        }
+
+        const posDisplay = p.tied ? `T${p.position}` : `${p.position}`;
+        const isCut = p.is_cut;
+        const isWD = p.is_withdrawn;
+        const rowClass = isCut ? 'is-cut' : isWD ? 'is-withdrawn' : '';
+        const todayText = isCut ? 'CUT' : isWD ? 'WD' : (p.today || '-');
+        const todayClass = isCut ? 'score-cut' : isWD ? 'score-cut' : (p.today_num != null ? scoreClass(p.today_num) : 'score-even');
+        const totalClass = scoreClass(p.score_to_par_num || 0);
+        const totalDisplay = formatScoreToPar(p.score_to_par, p.score_to_par_num || 0);
+        const clickable = !isCut && !isWD;
+
+        rows += `
+          <tr class="${rowClass}" ${clickable ? `data-player-id="${p.espn_player_id}"` : ''}>
+            <td>${posDisplay}</td>
+            <td>
+              <div class="player-cell">
+                <img src="${p.headshot_url || ''}" alt="" class="player-headshot" loading="lazy"
+                     onerror="this.style.display='none'" />
+                <div class="player-info">
+                  <span class="player-name">${p.player_name}</span>
+                  <span class="player-country">
+                    ${p.country_flag_url ? `<img src="${p.country_flag_url}" alt="" class="country-flag" loading="lazy" />` : ''}
+                    ${p.country || ''}
+                  </span>
+                </div>
+              </div>
+            </td>
+            <td class="${totalClass}" style="font-weight:700">${totalDisplay}</td>
+            <td class="${todayClass}">${todayText}</td>
+            <td>${thruDisplay(p.thru)}</td>
+            <td>${roundStroke(p.round_scores, 1)}</td>
+            <td>${roundStroke(p.round_scores, 2)}</td>
+            ${showR3 ? `<td class="round-col-3">${roundStroke(p.round_scores, 3)}</td>` : ''}
+            ${showR4 ? `<td class="round-col-4">${roundStroke(p.round_scores, 4)}</td>` : ''}
+          </tr>`;
+
+        // Expanded scorecard row
+        if (p.espn_player_id === expandedPlayerId) {
+          const colSpan = 6 + (showR3 ? 1 : 0) + (showR4 ? 1 : 0);
+          rows += `<tr class="scorecard-row"><td colspan="${colSpan}"><div class="scorecard-container" id="scorecard-${p.espn_player_id}">
+            <div class="loading-state"><div class="loading-spinner"></div>Loading scorecard...</div>
+          </div></td></tr>`;
+        }
+      });
+
+      const pollHtml = status === 'in_progress'
+        ? `<div class="poll-indicator"><span class="poll-dot"></span>Live — updating every 30s</div>`
+        : status === 'scheduled'
+        ? `<div class="poll-indicator">Checking for updates every 60s</div>`
+        : '';
+
+      document.getElementById('leaderboard-container').innerHTML = `
+        <div class="leaderboard-card">
+          <table class="leaderboard-table">
+            <thead>
+              <tr>
+                <th>Pos</th>
+                <th>Player</th>
+                <th>Total</th>
+                <th>Today</th>
+                <th>Thru</th>
+                <th>R1</th>
+                <th>R2</th>
+                ${showR3 ? '<th class="round-col-3">R3</th>' : ''}
+                ${showR4 ? '<th class="round-col-4">R4</th>' : ''}
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+          ${pollHtml}
+        </div>`;
+
+      // Bind row clicks
+      document.querySelectorAll('tr[data-player-id]').forEach(tr => {
+        tr.addEventListener('click', () => handleRowClick(tr.dataset.playerId));
+      });
+
+      // If a scorecard is expanded, load it
+      if (expandedPlayerId) {
+        loadScorecard(expandedPlayerId);
+      }
+    }
+
+    // ── Row click → expand/collapse scorecard ──
+    async function handleRowClick(playerId) {
+      if (expandedPlayerId === playerId) {
+        expandedPlayerId = null;
+      } else {
+        expandedPlayerId = playerId;
+      }
+      renderLeaderboard(currentLeaderboard, getTournamentStatus(currentTournament));
+    }
+
+    // ── Load and render scorecard ──
+    async function loadScorecard(playerId) {
+      const container = document.getElementById(`scorecard-${playerId}`);
+      if (!container) return;
+
+      try {
+        const holes = await fetchHoleScores(playerId);
+        const player = currentLeaderboard.find(p => p.espn_player_id === playerId);
+        if (!holes.length) {
+          container.innerHTML = `<div style="padding:16px;color:var(--text-dim);text-align:center">No hole-by-hole data available yet</div>`;
+          return;
+        }
+
+        // Group by round
+        const rounds = {};
+        holes.forEach(h => {
+          if (!rounds[h.round_number]) rounds[h.round_number] = [];
+          rounds[h.round_number].push(h);
+        });
+
+        let html = `
+          <div class="scorecard-header">
+            ${player?.headshot_url ? `<img src="${player.headshot_url}" class="scorecard-player-img" alt="" />` : ''}
+            <div>
+              <div class="scorecard-player-name">${player?.player_name || 'Player'}</div>
+              <div style="font-size:12px;color:var(--text-dim)">${player?.country || ''}</div>
+            </div>
+          </div>
+          <div class="scorecard-rounds">`;
+
+        for (const [roundNum, roundHoles] of Object.entries(rounds).sort((a,b) => a[0]-b[0])) {
+          const front9 = roundHoles.filter(h => h.hole_number <= 9).sort((a,b) => a.hole_number - b.hole_number);
+          const back9 = roundHoles.filter(h => h.hole_number > 9).sort((a,b) => a.hole_number - b.hole_number);
+          const frontTotal = front9.reduce((s, h) => s + (h.strokes || 0), 0);
+          const backTotal = back9.reduce((s, h) => s + (h.strokes || 0), 0);
+          const roundTotal = frontTotal + backTotal;
+          const frontPar = AUGUSTA_PAR.slice(0, 9).reduce((s, p) => s + p, 0);
+          const backPar = AUGUSTA_PAR.slice(9).reduce((s, p) => s + p, 0);
+
+          html += `<div>
+            <div class="scorecard-round-label">Round ${roundNum}</div>
+            <!-- Front 9 -->
+            <div class="scorecard-grid">
+              <div class="sc-cell sc-header sc-label">HOLE</div>
+              ${[1,2,3,4,5,6,7,8,9].map(n => `<div class="sc-cell sc-header">${n}</div>`).join('')}
+              <div class="sc-cell sc-header sc-label">OUT</div>
+
+              <div class="sc-cell sc-par sc-label">PAR</div>
+              ${AUGUSTA_PAR.slice(0,9).map(p => `<div class="sc-cell sc-par">${p}</div>`).join('')}
+              <div class="sc-cell sc-par sc-total">${frontPar}</div>
+
+              <div class="sc-cell sc-label">SCORE</div>
+              ${[1,2,3,4,5,6,7,8,9].map(n => {
+                const h = front9.find(x => x.hole_number === n);
+                return `<div class="sc-cell">${h ? holeScoreHtml(h.strokes, h.score_type) : '&ndash;'}</div>`;
+              }).join('')}
+              <div class="sc-cell sc-total">${frontTotal || '-'}</div>
+            </div>
+
+            <!-- Back 9 -->
+            <div class="scorecard-grid" style="margin-top:6px">
+              <div class="sc-cell sc-header sc-label">HOLE</div>
+              ${[10,11,12,13,14,15,16,17,18].map(n => `<div class="sc-cell sc-header">${n}</div>`).join('')}
+              <div class="sc-cell sc-header sc-label">IN</div>
+
+              <div class="sc-cell sc-par sc-label">PAR</div>
+              ${AUGUSTA_PAR.slice(9).map(p => `<div class="sc-cell sc-par">${p}</div>`).join('')}
+              <div class="sc-cell sc-par sc-total">${backPar}</div>
+
+              <div class="sc-cell sc-label">SCORE</div>
+              ${[10,11,12,13,14,15,16,17,18].map(n => {
+                const h = back9.find(x => x.hole_number === n);
+                return `<div class="sc-cell">${h ? holeScoreHtml(h.strokes, h.score_type) : '&ndash;'}</div>`;
+              }).join('')}
+              <div class="sc-cell sc-total">${backTotal || '-'}</div>
+            </div>
+
+            ${roundTotal ? `<div style="text-align:right;font-size:13px;color:var(--text-dim);margin-top:4px;font-weight:600">
+              Total: ${roundTotal} (${roundTotal - 72 >= 0 ? '+' : ''}${roundTotal - 72 === 0 ? 'E' : roundTotal - 72})
+            </div>` : ''}
+          </div>`;
+        }
+
+        html += '</div>';
+        container.innerHTML = html;
+      } catch (err) {
+        container.innerHTML = `<div class="error-state">Failed to load scorecard</div>`;
+        console.error('Scorecard error:', err);
+      }
+    }
+
+    // ── Main load + polling ──
+    async function loadAll() {
+      try {
+        currentTournament = await fetchTournament();
+        const status = renderTournamentHeader(currentTournament);
+        currentLeaderboard = await fetchLeaderboard();
+        renderLeaderboard(currentLeaderboard, status);
+
+        // Set up polling
+        if (pollTimer) clearInterval(pollTimer);
+        const interval = POLL_MS[status];
+        if (interval) {
+          pollTimer = setInterval(async () => {
+            try {
+              currentTournament = await fetchTournament();
+              const newStatus = renderTournamentHeader(currentTournament);
+              currentLeaderboard = await fetchLeaderboard();
+              renderLeaderboard(currentLeaderboard, newStatus);
+
+              // Re-check poll interval if status changed
+              const newInterval = POLL_MS[newStatus];
+              if (newInterval !== interval) {
+                clearInterval(pollTimer);
+                if (newInterval) {
+                  pollTimer = setInterval(arguments.callee, newInterval);
+                }
+              }
+            } catch (e) { console.error('Poll error:', e); }
+          }, interval);
+        }
+      } catch (err) {
+        document.getElementById('tournament-header').innerHTML = `<div class="error-state">Failed to load tournament data</div>`;
+        document.getElementById('leaderboard-container').innerHTML = '';
+        console.error('Load error:', err);
+      }
+    }
+
+    loadAll();
+  </script>
+</body>
+</html>
