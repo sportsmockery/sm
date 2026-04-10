@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
 
     const userId = user.id
     const body = await request.json()
-    const { favoriteTeams, notificationPrefs } = body
+    const { favoriteTeams, notificationPrefs, contentInterests } = body
 
     // Validate favoriteTeams
     if (!Array.isArray(favoriteTeams) || favoriteTeams.length === 0) {
@@ -127,14 +127,19 @@ export async function POST(request: NextRequest) {
       : filteredTeams
 
     // Upsert preferences
+    const upsertPayload: Record<string, unknown> = {
+      user_id: userId,
+      favorite_teams: sortedTeams,
+      notification_prefs: notificationPrefs || {},
+      updated_at: new Date().toISOString(),
+    }
+    if (Array.isArray(contentInterests)) {
+      upsertPayload.content_interests = contentInterests
+    }
+
     const { data, error } = await supabaseAdmin
       .from('sm_user_preferences')
-      .upsert({
-        user_id: userId,
-        favorite_teams: sortedTeams,
-        notification_prefs: notificationPrefs || {},
-        updated_at: new Date().toISOString(),
-      })
+      .upsert(upsertPayload)
       .select()
       .single()
 
