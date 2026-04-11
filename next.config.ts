@@ -84,6 +84,46 @@ const nextConfig: NextConfig = {
       { source: '/category/:path*', destination: '/', permanent: true },
       { source: '/chat', destination: '/fan-chat', permanent: true },
       { source: '/war-room', destination: '/gm', permanent: false },
+
+      // Old WordPress date-based URLs (2014–2020) → homepage
+      { source: '/2014/:path*', destination: '/', permanent: true },
+      { source: '/2015/:path*', destination: '/', permanent: true },
+      { source: '/2016/:path*', destination: '/', permanent: true },
+      { source: '/2017/:path*', destination: '/', permanent: true },
+      { source: '/2018/:path*', destination: '/', permanent: true },
+      { source: '/2019/:path*', destination: '/', permanent: true },
+      { source: '/2020/:path*', destination: '/', permanent: true },
+
+      // Old nested category/rumor URLs → team hub pages
+      { source: '/chicago-bears/chicago-bears-rumors/:slug*', destination: '/chicago-bears', permanent: true },
+      { source: '/chicago-cubs/chicago-cubs-rumors/:slug*', destination: '/chicago-cubs', permanent: true },
+      { source: '/chicago-bulls-rumors/:slug*', destination: '/chicago-bulls', permanent: true },
+      { source: '/chicago-blackhawks-rumors/:slug*', destination: '/chicago-blackhawks', permanent: true },
+      { source: '/chicago-white-sox-rumors/:slug*', destination: '/chicago-white-sox', permanent: true },
+
+      // Casino/betting/gambling content → homepage (E-E-A-T cleanup)
+      { source: '/betmgm-illinois', destination: '/', permanent: true },
+      { source: '/betmgm-illinois/:path*', destination: '/', permanent: true },
+      { source: '/pointsbet-illinois-sportsbook', destination: '/', permanent: true },
+      { source: '/pointsbet-illinois-sportsbook/:path*', destination: '/', permanent: true },
+      { source: '/draftkings-illinois-sportsbook', destination: '/', permanent: true },
+      { source: '/draftkings-illinois-sportsbook/:path*', destination: '/', permanent: true },
+      { source: '/chicago-blackhawks-odds', destination: '/chicago-blackhawks', permanent: true },
+      { source: '/chicago-blackhawks-odds/:path*', destination: '/chicago-blackhawks', permanent: true },
+      { source: '/sports-betting/:path*', destination: '/', permanent: true },
+
+      // Spam author pages → homepage
+      { source: '/author/the-importance-reputable-casino-slot-play', destination: '/', permanent: true },
+      { source: '/author/the-importance-reputable-casino-slot-play/:path*', destination: '/', permanent: true },
+      { source: '/author/soccer-event-thats-bridging-continents', destination: '/', permanent: true },
+      { source: '/author/soccer-event-thats-bridging-continents/:path*', destination: '/', permanent: true },
+      { source: '/author/exploring-the-deliciou-world-of-hHC-infused-treat', destination: '/', permanent: true },
+      { source: '/author/exploring-the-deliciou-world-of-hHC-infused-treat/:path*', destination: '/', permanent: true },
+      { source: '/author/What-makes-the-Gems-and-Mines', destination: '/', permanent: true },
+      { source: '/author/What-makes-the-Gems-and-Mines/:path*', destination: '/', permanent: true },
+
+      // Old uncategorized content → homepage
+      { source: '/uncategorized/:path*', destination: '/', permanent: true },
     ]
   },
 
