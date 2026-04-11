@@ -263,6 +263,25 @@
   max-width: 100%;
 }
 
+/* Mobile: tighter card padding, smaller headlines */
+@media (max-width: 480px) {
+  .hp-feed-card {
+    padding: 1rem 1rem 1.25rem;
+    border-radius: 12px;
+    margin-bottom: 8px;
+  }
+  .hp-feed-card h2 {
+    font-size: 18px !important;
+  }
+}
+
+/* Disable hover lift effect on touch devices */
+@media (hover: none) {
+  .hp-feed-card:hover {
+    transform: none;
+  }
+}
+
 .hp-feed-card:hover {
   border-color: rgba(0, 0, 0, 0.1);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04), 0 4px 8px rgba(0, 0, 0, 0.03);

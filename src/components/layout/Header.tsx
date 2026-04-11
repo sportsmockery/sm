@@ -157,9 +157,15 @@ export default function Header() {
               color: 'var(--sm-text-muted)',
               display: 'flex',
               alignItems: 'center',
+              justifyContent: 'center',
+              padding: '8px',
+              minWidth: '44px',
+              minHeight: '44px',
+              borderRadius: '8px',
+              WebkitTapHighlightColor: 'transparent',
             }}
           >
-            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </Link>
@@ -415,13 +421,20 @@ export default function Header() {
             aria-label="Close menu"
             style={{
               position: 'absolute',
-              top: '24px',
-              right: '24px',
+              top: '16px',
+              right: '16px',
               background: 'none',
               border: 'none',
               cursor: 'pointer',
               color: 'var(--sm-text-muted)',
-              padding: '4px',
+              padding: '12px',
+              minWidth: '48px',
+              minHeight: '48px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: '12px',
+              WebkitTapHighlightColor: 'transparent',
             }}
           >
             <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -537,10 +550,12 @@ export default function Header() {
                   color: '#BC0000',
                   fontSize: '16px',
                   fontWeight: 500,
-                 
-                  padding: '12px 0',
+                  padding: '14px 12px',
+                  minHeight: '48px',
                   textAlign: 'left',
-                  borderBottom: '1px solid var(--sm-border)',
+                  width: '100%',
+                  borderRadius: '8px',
+                  WebkitTapHighlightColor: 'transparent',
                 }}
               >
                 Sign Out

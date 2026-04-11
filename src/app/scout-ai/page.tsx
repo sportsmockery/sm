@@ -394,9 +394,9 @@ export default function AskAIPage() {
         <div className="sm-grid-overlay" />
         <div style={{ maxWidth: 'min(1600px, 100vw - 32px)', margin: '0 auto', padding: '24px 16px', position: 'relative', zIndex: 1 }}>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(260px, 280px) 1fr', gap: 24, alignItems: 'start' }}>
-            {/* Left Sidebar - same height as main box, top-aligned */}
-            <div>
+          <div className="scout-ai-layout" style={{ display: 'grid', gap: 24, alignItems: 'start' }}>
+            {/* Left Sidebar - hidden on mobile, shown on desktop */}
+            <div className="scout-ai-sidebar">
               <div className="glass-card glass-card-static" style={{
                 minHeight: 'calc(100vh - 120px)',
                 display: 'flex',

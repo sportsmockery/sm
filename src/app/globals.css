@@ -4196,7 +4196,13 @@ button.live-strip-chip--desk {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 8px;
+  padding: 12px;
+  min-width: 48px;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  -webkit-tap-highlight-color: transparent;
 }
 .nav-hamburger span {
   width: 24px;
@@ -4206,9 +4212,13 @@ button.live-strip-chip--desk {
 }
 
 @media (max-width: 768px) {
-  .sm-nav { padding: 0 20px; }
+  .sm-nav { padding: 0 12px; }
   .nav-links { display: none; }
   .nav-hamburger { display: flex; }
+  .nav-logo-img { width: 160px; max-width: 160px; }
+}
+@media (max-width: 360px) {
+  .nav-logo-img { width: 130px; max-width: 130px; }
 }
 
 /* Mobile drawer */
@@ -4222,22 +4232,33 @@ button.live-strip-chip--desk {
 .drawer-panel {
   position: absolute;
   right: 0; top: 0; bottom: 0;
-  width: 300px;
+  width: min(300px, 85vw);
   background: var(--sm-surface);
-  padding: 80px 32px 32px;
+  padding: 72px 24px 32px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
   transform: translateX(100%);
   transition: transform 0.3s ease;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px));
 }
 .mobile-drawer.open .drawer-panel { transform: translateX(0); }
 .drawer-panel a {
   color: var(--sm-text);
   font-size: 16px;
   font-weight: 500;
-  padding: 12px 0;
+  padding: 14px 12px;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
   border-bottom: 1px solid var(--sm-border);
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+.drawer-panel a:active {
+  background: var(--sm-card-hover, rgba(255,255,255,0.06));
 }
 .drawer-panel hr {
   border: none;
@@ -5370,7 +5391,7 @@ a.glass-card-sm:active,
 .mobile-bottom-nav { display: none; }
 @media (max-width: 1023px) {
   .mobile-bottom-nav { display: flex; }
-  body { padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px)); }
+  body { padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)); }
 }
 
 /* ========== SWIPE GALLERY ========== */
@@ -5426,8 +5447,24 @@ a.glass-card-sm:active,
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* ========== Scout AI — Responsive Layout ========== */
+.scout-ai-layout {
+  grid-template-columns: minmax(260px, 280px) 1fr;
+}
+@media (max-width: 899px) {
+  .scout-ai-layout {
+    grid-template-columns: 1fr;
+  }
+  .scout-ai-sidebar {
+    display: none;
+  }
+}
+
 /* ========== Homepage Right Sidebar — no scrollbar ========== */
 .homepage-right-sidebar::-webkit-scrollbar { display: none; }
+@media (max-width: 1199px) {
+  .homepage-right-sidebar { display: none !important; }
+}
 
 /* ========== EDGE Left Sidebar Layout (removed — floating sidebar in RiverLayout) ========== */
 
