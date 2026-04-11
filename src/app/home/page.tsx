@@ -135,7 +135,7 @@ export default function HomePage() {
             The most advanced sports platform ever built — designed for the next generation of fandom.
           </p>
           <div className="hm-hero-actions hm-hero-stagger hm-stagger-5">
-            <Link href="/home/login" className="hm-btn-primary hm-btn-glow-pulse">
+            <Link href="/login" className="hm-btn-primary hm-btn-glow-pulse">
               <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" viewBox="0 0 24 24">
                 <polygon points="5,3 19,12 5,21" />
               </svg>
@@ -246,7 +246,7 @@ export default function HomePage() {
                 Powered by real-time data feeds, salary cap databases, and historical analytics —
                 it gives you GM-level intelligence in seconds.
               </p>
-              <Link href="/home/login" className="hm-btn-primary" style={{ marginTop: 8 }}>
+              <Link href="/login" className="hm-btn-primary" style={{ marginTop: 8 }}>
                 Try Scout AI &rarr;
               </Link>
               <div className="hm-stats">
@@ -307,7 +307,7 @@ export default function HomePage() {
                 and simulates entire seasons to see how your moves play out. Mock draft integration
                 lets you rebuild from the ground up.
               </p>
-              <Link href="/home/login" className="hm-btn-primary" style={{ marginTop: 8 }}>
+              <Link href="/login" className="hm-btn-primary" style={{ marginTop: 8 }}>
                 Open GM Simulator &rarr;
               </Link>
               <div className="hm-stats">
@@ -370,7 +370,7 @@ export default function HomePage() {
                 Real-time chat rooms for every Chicago team, each with an AI personality that knows the roster,
                 the stats, and the storylines. Polls, trending topics, and a community that never sleeps.
               </p>
-              <Link href="/home/login" className="hm-btn-primary" style={{ marginTop: 8 }}>
+              <Link href="/login" className="hm-btn-primary" style={{ marginTop: 8 }}>
                 Join the Fan Hub &rarr;
               </Link>
               <div className="hm-stats">
@@ -437,7 +437,7 @@ export default function HomePage() {
                 Interactive stats, animated charts, player leaderboards, schedules, and box scores
                 for all five Chicago teams. The most comprehensive data experience in Chicago sports.
               </p>
-              <Link href="/home/login" className="hm-btn-primary" style={{ marginTop: 8 }}>
+              <Link href="/login" className="hm-btn-primary" style={{ marginTop: 8 }}>
                 Explore Data Cosmos &rarr;
               </Link>
               <div className="hm-stats">
@@ -461,7 +461,7 @@ export default function HomePage() {
               Experience what happens when AI meets fandom.
             </p>
             <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <Link href="/home/login" className="hm-btn-primary">
+              <Link href="/login" className="hm-btn-primary">
                 Unlock SM+ Premium
               </Link>
               <Link href="/" className="hm-btn-secondary">

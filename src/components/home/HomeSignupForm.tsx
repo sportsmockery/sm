@@ -86,7 +86,7 @@ export default function HomeSignupForm() {
           We&apos;ve sent a confirmation link to <strong style={{ color: '#fff' }}>{email}</strong>. Click the link to activate your account.
         </p>
         <Link
-          href="/home/login"
+          href="/login"
           style={{ display: 'inline-block', marginTop: 24, fontSize: 15, fontWeight: 600, color: '#ff4444', textDecoration: 'none' }}
         >
           Back to login
@@ -256,7 +256,7 @@ export default function HomeSignupForm() {
       {/* Login link */}
       <p style={{ textAlign: 'center', fontSize: 15, color: '#8a8a9a', margin: 0 }}>
         Already have an account?{' '}
-        <Link href="/home/login" style={{ fontWeight: 600, color: '#ff4444', textDecoration: 'none' }}>
+        <Link href="/login" style={{ fontWeight: 600, color: '#ff4444', textDecoration: 'none' }}>
           Sign in
         </Link>
       </p>

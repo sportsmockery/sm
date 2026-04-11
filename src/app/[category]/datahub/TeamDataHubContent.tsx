@@ -415,7 +415,7 @@ export default function TeamDataHubContent({ teamKey }: TeamDataHubContentProps)
 
             {/* Back to all teams */}
             <Link
-              href="/datahub"
+              href="/"
               className="flex items-center justify-center gap-2 p-4 bg-[var(--sm-surface)] rounded-xl hover:bg-[var(--sm-card-hover)] transition-colors"
             >
               <svg className="w-5 h-5 text-[var(--sm-text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">

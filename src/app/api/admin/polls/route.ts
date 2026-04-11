@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { requireAdmin } from '@/lib/admin-auth'
 
 /**
  * GET /api/admin/polls
  * List all polls with filtering
  */
 export async function GET(request: NextRequest) {
+  const auth = await requireAdmin(request)
+  if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status })
+
   try {
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
@@ -62,6 +66,9 @@ export async function GET(request: NextRequest) {
  * Supports linking to posts via sm_post_polls junction table
  */
 export async function POST(request: NextRequest) {
+  const auth = await requireAdmin(request)
+  if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status })
+
   try {
     const body = await request.json()
 

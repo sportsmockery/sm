@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { requireAdmin } from '@/lib/admin-auth'
 
 export const dynamic = 'force-dynamic'
 
@@ -6,6 +7,9 @@ export const dynamic = 'force-dynamic'
 // POST from DataLab: { "count": 5, "message": "New viral drafts ready in Twitter_viral_predictions" }
 
 export async function POST(request: NextRequest) {
+  const auth = await requireAdmin(request)
+  if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status })
+
   try {
     const body = await request.json()
     const { count, message } = body

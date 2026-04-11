@@ -150,7 +150,7 @@ export default function HomeLoginForm({ redirectTo = '/admin' }: HomeLoginFormPr
       {/* Sign up link */}
       <p style={{ textAlign: 'center', fontSize: 15, color: '#8a8a9a', margin: 0 }}>
         Don&apos;t have an account?{' '}
-        <Link href="/home/signup" style={{ fontWeight: 600, color: '#ff4444', textDecoration: 'none' }}>
+        <Link href="/signup" style={{ fontWeight: 600, color: '#ff4444', textDecoration: 'none' }}>
           Sign up
         </Link>
       </p>

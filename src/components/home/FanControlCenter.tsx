@@ -66,7 +66,7 @@ export default function FanControlCenter() {
 
               {/* CTA */}
               <Link
-                href="/chat"
+                href="/fan-chat"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-[#C83803] text-white font-semibold rounded-xl hover:bg-[#a52d02] transition-colors"
                
               >

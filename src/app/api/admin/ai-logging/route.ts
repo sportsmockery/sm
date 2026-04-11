@@ -8,12 +8,16 @@ import {
   generateDataKey,
   validateWithMultipleSources,
 } from '@/lib/ai-external-service'
+import { requireAdmin } from '@/lib/admin-auth'
 
 /**
  * GET /api/admin/ai-logging
  * Fetch AI external query logs and statistics
  */
 export async function GET(request: NextRequest) {
+  const auth = await requireAdmin(request)
+  if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status })
+
   try {
     const { searchParams } = new URL(request.url)
     const action = searchParams.get('action') || 'logs'
@@ -64,6 +68,9 @@ export async function GET(request: NextRequest) {
  * Perform actions on AI logs (validate, import, update)
  */
 export async function POST(request: NextRequest) {
+  const auth = await requireAdmin(request)
+  if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status })
+
   try {
     const body = await request.json()
     const { action, logId, team, data, dataType } = body

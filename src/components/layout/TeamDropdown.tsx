@@ -58,7 +58,7 @@ export default function TeamDropdown() {
           {teams.map((team) => (
             <div key={team.slug} className="group">
               <Link
-                href={`/teams/${team.slug}`}
+                href={`/${team.slug}`}
                 onClick={() => setIsOpen(false)}
                 className="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors"
               >
@@ -76,7 +76,7 @@ export default function TeamDropdown() {
                 {['Schedule', 'Roster', 'Stats'].map((subPage) => (
                   <Link
                     key={subPage}
-                    href={`/teams/${team.slug}/${subPage.toLowerCase()}`}
+                    href={`/${team.slug}/${subPage.toLowerCase()}`}
                     onClick={() => setIsOpen(false)}
                     className="text-xs"
                     style={{ color: 'var(--sm-text-dim)' }}

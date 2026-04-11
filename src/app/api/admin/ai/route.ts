@@ -5,6 +5,7 @@ import { randomUUID } from 'crypto'
 import Anthropic from '@anthropic-ai/sdk'
 import { getPostIQSystemPrompt, getTeamKnowledge, VOICE_GUIDELINES, HEADLINE_GUIDELINES, SOCIAL_STRATEGY, JOURNALISM_STANDARDS } from '@/lib/postiq-knowledge'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { requireAdmin } from '@/lib/admin-auth'
 
 const anthropic = new Anthropic()
 const DATALAB_API = 'https://datalab.sportsmockery.com'
@@ -245,39 +246,15 @@ async function tryDataLabPostIQ(body: AIRequest, userId?: string): Promise<Respo
  * Proxies to DataLab PostIQ v2 API, falls back to local Anthropic
  */
 export async function POST(request: NextRequest) {
+  const auth = await requireAdmin(request)
+  if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status })
+
   try {
     const body: AIRequest = await request.json()
     const { action, content, title, category, team, postId } = body
 
-    // Get user session for logging
-    let userId: string | undefined
-    try {
-      const cookieStore = await cookies()
-      const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-          cookies: {
-            getAll() {
-              return cookieStore.getAll()
-            },
-            setAll(cookiesToSet) {
-              cookiesToSet.forEach(({ name, value, options }) => {
-                try {
-                  cookieStore.set(name, value, options)
-                } catch {
-                  // Ignore
-                }
-              })
-            },
-          },
-        }
-      )
-      const { data: { session } } = await supabase.auth.getSession()
-      userId = session?.user?.id
-    } catch {
-      // Continue without user ID
-    }
+    // Use authenticated user ID for logging
+    const userId = auth.user!.id
 
     // Try DataLab first
     const datalabResponse = await tryDataLabPostIQ(body, userId)

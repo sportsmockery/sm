@@ -36,7 +36,6 @@ export default function HomeFooter() {
             <h4 style={{ fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1, color: '#8a8a9a', marginBottom: 16 }}>Platform</h4>
             <FooterLink href="/scout-ai">Scout AI</FooterLink>
             <FooterLink href="/gm">War Room</FooterLink>
-            <FooterLink href="/datahub">Data Hub</FooterLink>
             <FooterLink href="/fan-chat">Fan Hub</FooterLink>
           </div>
           <div>

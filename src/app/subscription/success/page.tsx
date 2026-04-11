@@ -110,7 +110,7 @@ function SubscriptionSuccessContent() {
               <Link href="/chicago-bears" className="btn-primary">
                 Explore AR Tours
               </Link>
-              <Link href="/chat" className="btn-secondary">
+              <Link href="/fan-chat" className="btn-secondary">
                 Join Fan Chat
               </Link>
             </div>

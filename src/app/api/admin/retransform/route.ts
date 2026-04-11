@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase-server'
 import { transformPostContent } from '@/lib/transform-post'
 import { serializeDocument } from '@/components/admin/BlockEditor/serializer'
 import { revalidatePath } from 'next/cache'
+import { requireAdmin } from '@/lib/admin-auth'
 
 export const maxDuration = 300
 export const dynamic = 'force-dynamic'
@@ -21,11 +22,13 @@ const WP_API = 'https://www.sportsmockery.com/wp-json/wp/v2/posts'
  *   ?slug=xxx    — retransform a single post by slug
  */
 export async function POST(request: NextRequest) {
-  // Basic auth check
+  // Allow access via admin role OR cron secret
   const authHeader = request.headers.get('authorization')
   const cronSecret = process.env.CRON_SECRET
-  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const isCronAuth = cronSecret && authHeader === `Bearer ${cronSecret}`
+  if (!isCronAuth) {
+    const auth = await requireAdmin(request)
+    if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status })
   }
 
   const params = request.nextUrl.searchParams

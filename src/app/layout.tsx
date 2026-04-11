@@ -19,7 +19,6 @@ import MotionProvider from "@/components/motion/MotionProvider";
 import NavigationProgress from "@/components/layout/NavigationProgress";
 import Breadcrumb from "@/components/layout/Breadcrumb";
 import NavigationOrb from "@/components/layout/NavigationOrb";
-import ParticleBg from "@/components/layout/ParticleBg";
 import LiveStrip from "@/components/layout/LiveStrip";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
 import { WebSocketProvider } from "@/context/WebSocketProvider";
@@ -190,7 +189,7 @@ export default function RootLayout({
               </div>
               {/* NavigationOrb removed — nav moved to left sidebar */}
               <MobileBottomNav />
-              {/* ParticleBg removed — replaced by Chicago star canvas in hero */}
+
               <ScrollToTop />
               <BackToTop />
               <CookieBanner />

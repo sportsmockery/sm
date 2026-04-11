@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { requireAdmin } from '@/lib/admin-auth'
 
 const WP_BASE_URL = 'https://www.sportsmockery.com/wp-json/sm-export/v1'
 
@@ -13,7 +14,10 @@ interface WPAuthor {
   post_count: number
 }
 
-export async function POST() {
+export async function POST(request: NextRequest) {
+  const auth = await requireAdmin(request)
+  if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status })
+
   try {
     const res = await fetch(`${WP_BASE_URL}/authors`, {
       next: { revalidate: 0 },

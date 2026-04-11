@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { requireAdmin } from '@/lib/admin-auth'
 
 export const maxDuration = 300
 export const dynamic = 'force-dynamic'
@@ -18,11 +19,13 @@ const PAGE_SIZE = 1000
  * Protected by CRON_SECRET bearer token.
  */
 export async function GET(request: NextRequest) {
+  // Allow access via admin role OR cron secret
   const authHeader = request.headers.get('authorization')
   const cronSecret = process.env.CRON_SECRET
-
-  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const isCronAuth = cronSecret && authHeader === `Bearer ${cronSecret}`
+  if (!isCronAuth) {
+    const auth = await requireAdmin(request)
+    if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status })
   }
 
   console.log('[Fix Authors] Starting author ID fix...')

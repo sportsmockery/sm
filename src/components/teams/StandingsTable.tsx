@@ -135,7 +135,7 @@ export default function StandingsTable({ standings, currentTeam, showConference 
                   </td>
                   <td className="px-4 py-3">
                     <Link
-                      href={`/teams/${entry.team.slug}`}
+                      href={`/${entry.team.slug}`}
                       className="flex items-center gap-3 hover:underline"
                     >
                       <div className="relative h-8 w-8 flex-shrink-0">

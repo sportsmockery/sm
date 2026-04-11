@@ -91,7 +91,7 @@ export default function UpcomingGamesWidget({ games, team, limit = 5 }: Upcoming
       </div>
 
       <Link
-        href={`/teams/${team.slug}/schedule`}
+        href={`/${team.slug}/schedule`}
         className="block border-t px-5 py-3 text-center text-sm font-semibold transition-colors"
         style={{ borderColor: 'var(--sm-border)', color: 'var(--sm-text-muted)' }}
       >

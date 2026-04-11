@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { requireAdmin } from '@/lib/admin-auth'
 
 export const dynamic = 'force-dynamic'
 
 /** GET /api/admin/posts/[id]/tags — fetch tags for a post */
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireAdmin(request)
+  if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status })
   const { id } = await params
 
   const { data, error } = await supabaseAdmin
@@ -26,6 +29,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
 /** PUT /api/admin/posts/[id]/tags — set tags for a post (replace all) */
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireAdmin(request)
+  if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status })
+
   const { id } = await params
   const postId = parseInt(id)
   const { tagNames } = await request.json() as { tagNames: string[] }

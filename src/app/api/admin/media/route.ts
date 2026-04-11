@@ -2,8 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { requireAdmin } from '@/lib/admin-auth'
 
 export async function GET(request: NextRequest) {
+  const auth = await requireAdmin(request)
+  if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status })
+
   try {
     const supabase = supabaseAdmin
     const { searchParams } = new URL(request.url)
@@ -53,27 +57,10 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  try {
-    // Create auth client with cookies to verify user
-    const cookieStore = await cookies()
-    const authClient = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return cookieStore.getAll()
-          },
-          setAll() {},
-        },
-      }
-    )
+  const auth = await requireAdmin(request)
+  if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status })
 
-    // Check authentication
-    const { data: { user } } = await authClient.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+  try {
 
     const formData = await request.formData()
     const file = formData.get('file') as File
@@ -130,7 +117,7 @@ export async function POST(request: NextRequest) {
         width,
         height,
         alt_text: '',
-        uploaded_by: user.id
+        uploaded_by: auth.user!.id
       })
       .select()
       .single()

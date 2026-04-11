@@ -68,7 +68,7 @@ export default function HomeNav() {
           </Link>
         ))}
         <Link
-          href="/home/login"
+          href="/login"
           style={{
             backgroundColor: '#BC0000',
             color: '#fff',
@@ -139,7 +139,7 @@ export default function HomeNav() {
             </Link>
           ))}
           <Link
-            href="/home/login"
+            href="/login"
             onClick={() => setMenuOpen(false)}
             style={{
               backgroundColor: '#BC0000',

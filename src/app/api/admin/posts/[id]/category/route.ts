@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { requireAdmin } from '@/lib/admin-auth'
 
 export const dynamic = 'force-dynamic'
 
 /** PUT /api/admin/posts/[id]/category — update category */
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireAdmin(request)
+  if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status })
   const { id } = await params
   const { categoryId } = await request.json() as { categoryId: number | null }
 

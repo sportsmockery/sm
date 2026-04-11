@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { datalabAdmin } from '@/lib/supabase-datalab'
+import { requireAdmin } from '@/lib/admin-auth'
 
 export const dynamic = 'force-dynamic'
 
 // GET — list all competitions
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const auth = await requireAdmin(request)
+  if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status })
+
   try {
     const { data, error } = await datalabAdmin
       .from('gm_competitions')
@@ -20,6 +24,9 @@ export async function GET() {
 
 // POST — start a new competition
 export async function POST(request: NextRequest) {
+  const auth = await requireAdmin(request)
+  if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status })
+
   try {
     const body = await request.json()
     const { name, max_scored_trades_per_day = 5 } = body

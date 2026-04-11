@@ -127,7 +127,7 @@ export default function PlayerHeader({ player, stats }: PlayerHeaderProps) {
             {/* Team & Status */}
             <div className="mb-2 flex flex-wrap items-center justify-center gap-2 md:justify-start">
               <Link
-                href={`/teams/${player.team.slug}`}
+                href={`/${player.team.slug}`}
                 className="flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-sm font-semibold text-white hover:bg-white/30"
               >
                 <div className="relative h-5 w-5">

@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { requireAdmin } from '@/lib/admin-auth'
 
 /**
  * GET /api/admin/tags?q=search&limit=10
  * Search tags by name (for autocomplete)
  */
 export async function GET(request: NextRequest) {
+  const auth = await requireAdmin(request)
+  if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status })
+
   try {
     const { searchParams } = new URL(request.url)
     const q = searchParams.get('q') || ''
@@ -40,6 +44,9 @@ export async function GET(request: NextRequest) {
  * Create a new tag
  */
 export async function POST(request: NextRequest) {
+  const auth = await requireAdmin(request)
+  if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status })
+
   try {
     const body = await request.json()
     const { name, slug } = body

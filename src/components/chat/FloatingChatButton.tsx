@@ -61,7 +61,7 @@ export default function FloatingChatButton({ teamSlug, teamName }: FloatingChatB
 
   return (
     <Link
-      href="/chat"
+      href="/fan-chat"
       target="_blank"
       rel="noopener noreferrer"
       onMouseEnter={() => setIsHovered(true)}

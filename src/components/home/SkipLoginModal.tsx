@@ -124,7 +124,7 @@ export default function SkipLoginModal({ open, onClose }: SkipLoginModalProps) {
 
           {/* Actions */}
           <div className="hm-modal-actions">
-            <Link href="/home/signup" className="hm-modal-btn-primary">
+            <Link href="/signup" className="hm-modal-btn-primary">
               Create Free Account
             </Link>
             <button className="hm-modal-btn-secondary" onClick={handleSkip}>

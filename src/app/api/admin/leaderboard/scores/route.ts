@@ -1,10 +1,14 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { datalabAdmin } from '@/lib/supabase-datalab'
+import { requireAdmin } from '@/lib/admin-auth'
 
 export const dynamic = 'force-dynamic'
 
 // GET — current scores with anti-inflation applied
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const auth = await requireAdmin(request)
+  if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status })
+
   try {
     // Get active competition for date filter and daily cap
     const { data: activeComp } = await datalabAdmin

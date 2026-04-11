@@ -73,19 +73,46 @@
   ],
   "headers": [
     {
-      "source": "/(.*)",
+      "source": "/api/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
+          "value": "no-store, no-cache, must-revalidate, max-age=0"
         },
         {
           "key": "Pragma",
           "value": "no-cache"
+        }
+      ]
+    },
+    {
+      "source": "/admin/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, no-cache, must-revalidate, max-age=0"
         },
         {
-          "key": "Expires",
-          "value": "0"
+          "key": "Pragma",
+          "value": "no-cache"
+        }
+      ]
+    },
+    {
+      "source": "/_next/static/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/(.+\\.(?:ico|png|jpg|jpeg|gif|svg|webp|woff|woff2|ttf|eot)$)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400, stale-while-revalidate=604800"
         }
       ]
     }
