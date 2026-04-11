@@ -281,7 +281,7 @@ export default function StudioPostEditor({
       const userId = currentUserId || 'anonymous'
 
       if (isRefresh) {
-        const response = await fetch('https://datalab.sportsmockery.com/api/postiq/ideas', {
+        const response = await fetch('/api/postiq/ideas', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ team, user_id: userId, action: 'refresh' }),
@@ -297,7 +297,7 @@ export default function StudioPostEditor({
           setIdeasCanRefresh(false); setIdeasRefreshesRemaining(0)
         }
       } else {
-        const response = await fetch(`https://datalab.sportsmockery.com/api/postiq/ideas?team=${encodeURIComponent(team)}&user_id=${encodeURIComponent(userId)}&limit=5`)
+        const response = await fetch(`/api/postiq/ideas?team=${encodeURIComponent(team)}&user_id=${encodeURIComponent(userId)}&limit=5`)
         if (response.ok) {
           const data = await response.json()
           if (data.ideas) {

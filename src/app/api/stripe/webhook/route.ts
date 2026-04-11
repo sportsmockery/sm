@@ -3,9 +3,15 @@ import Stripe from 'stripe'
 import { getStripe, getTierFromPriceId } from '@/lib/stripe'
 import { supabaseAdmin } from '@/lib/supabase-server'
 
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
-
 export async function POST(request: NextRequest) {
+  if (!process.env.STRIPE_WEBHOOK_SECRET) {
+    return NextResponse.json(
+      { error: 'Stripe webhooks are not configured.' },
+      { status: 503 }
+    )
+  }
+
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
   const body = await request.text()
   const signature = request.headers.get('stripe-signature')!
   const stripe = getStripe()

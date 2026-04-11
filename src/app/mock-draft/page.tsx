@@ -177,7 +177,7 @@ export default function MockDraftPage() {
   const fetchEligibility = useCallback(async () => {
     setEligibilityLoading(true)
     try {
-      const res = await fetch('https://datalab.sportsmockery.com/api/gm/draft/teams')
+      const res = await fetch('/api/gm/draft/eligibility')
       const eligMap: Record<string, TeamEligibility> = {}
 
       if (res.ok) {

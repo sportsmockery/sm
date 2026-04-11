@@ -512,7 +512,7 @@ export default function AdvancedPostEditor({
 
       if (isRefresh) {
         // Use POST for refresh
-        const response = await fetch('https://datalab.sportsmockery.com/api/postiq/ideas', {
+        const response = await fetch('/api/postiq/ideas', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -536,7 +536,7 @@ export default function AdvancedPostEditor({
       } else {
         // Use GET for initial fetch
         const response = await fetch(
-          `https://datalab.sportsmockery.com/api/postiq/ideas?team=${encodeURIComponent(team)}&user_id=${encodeURIComponent(userId)}&limit=5`
+          `/api/postiq/ideas?team=${encodeURIComponent(team)}&user_id=${encodeURIComponent(userId)}&limit=5`
         )
         if (response.ok) {
           const data = await response.json()

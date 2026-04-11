@@ -359,7 +359,7 @@ export default function GMPage() {
     if (teamType === 'chicago') setTradeablePicksLoading(true)
     try {
       const res = await fetch(
-        `https://datalab.sportsmockery.com/api/gm/tradeable-picks?sport=${sport}&team=${teamKey}`
+        `/api/gm/tradeable-picks?sport=${sport}&team=${teamKey}`
       )
       if (res.ok) {
         const data = await res.json()

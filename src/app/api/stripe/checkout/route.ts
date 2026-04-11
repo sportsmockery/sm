@@ -4,6 +4,13 @@ import { getStripe, PRICE_IDS, PriceTier } from '@/lib/stripe'
 import { supabaseAdmin } from '@/lib/supabase-server'
 
 export async function POST(request: NextRequest) {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    return NextResponse.json(
+      { error: 'Subscriptions are not yet available. Coming soon!' },
+      { status: 503 }
+    )
+  }
+
   try {
     const stripe = getStripe()
     // Get authenticated user from Supabase

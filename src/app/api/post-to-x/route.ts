@@ -13,10 +13,10 @@ function getSupabaseClient() {
 
 function getTwitterClient() {
   return new TwitterApi({
-    appKey: process.env.TWITTER_CONSUMER_KEY!,
-    appSecret: process.env.TWITTER_CONSUMER_SECRET!,
-    accessToken: process.env.TWITTER_ACCESS_TOKEN!,
-    accessSecret: process.env.TWITTER_ACCESS_TOKEN_SECRET!,
+    appKey: process.env.X_API_KEY!,
+    appSecret: process.env.X_API_SECRET!,
+    accessToken: process.env.X_ACCESS_TOKEN!,
+    accessSecret: process.env.X_ACCESS_TOKEN_SECRET!,
   });
 }
 

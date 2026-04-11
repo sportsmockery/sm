@@ -11,7 +11,33 @@ module.exports = {
   generateRobotsTxt: true,
   generateIndexSitemap: false,
   additionalPaths: async (config) => {
-    const paths = []
+    const paths = [
+      // Feature pages
+      { loc: '/gm', changefreq: 'weekly', priority: 0.9 },
+      { loc: '/mock-draft', changefreq: 'weekly', priority: 0.9 },
+      { loc: '/scout-ai', changefreq: 'weekly', priority: 0.9 },
+      { loc: '/fan-chat', changefreq: 'weekly', priority: 0.8 },
+      { loc: '/live', changefreq: 'always', priority: 0.8 },
+      { loc: '/leaderboard', changefreq: 'daily', priority: 0.7 },
+      { loc: '/owner', changefreq: 'weekly', priority: 0.7 },
+      { loc: '/pricing', changefreq: 'monthly', priority: 0.6 },
+      // Team hub pages
+      { loc: '/chicago-bears', changefreq: 'daily', priority: 0.9 },
+      { loc: '/chicago-bulls', changefreq: 'daily', priority: 0.9 },
+      { loc: '/chicago-cubs', changefreq: 'daily', priority: 0.9 },
+      { loc: '/chicago-white-sox', changefreq: 'daily', priority: 0.9 },
+      { loc: '/chicago-blackhawks', changefreq: 'daily', priority: 0.9 },
+      // Team sub-pages
+      ...['chicago-bears','chicago-bulls','chicago-cubs','chicago-white-sox','chicago-blackhawks']
+        .flatMap(team => [
+          { loc: `/${team}/roster`, changefreq: 'weekly', priority: 0.7 },
+          { loc: `/${team}/schedule`, changefreq: 'daily', priority: 0.7 },
+          { loc: `/${team}/scores`, changefreq: 'daily', priority: 0.7 },
+          { loc: `/${team}/stats`, changefreq: 'daily', priority: 0.7 },
+          { loc: `/${team}/players`, changefreq: 'weekly', priority: 0.7 },
+          { loc: `/${team}/cap-tracker`, changefreq: 'weekly', priority: 0.6 },
+        ]),
+    ]
 
     // Fetch all published posts
     const { data: posts } = await supabase

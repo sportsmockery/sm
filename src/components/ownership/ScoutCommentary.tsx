@@ -16,7 +16,7 @@ interface CommentaryData {
   team?: string
 }
 
-const DATALAB_URL = 'https://datalab.sportsmockery.com'
+const DATALAB_URL = ''
 const TOTAL_ANGLES = 3
 
 function getCacheKey(teamSlug: string | undefined, angle: number) {
