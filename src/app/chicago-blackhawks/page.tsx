@@ -12,12 +12,14 @@ import { supabaseAdmin } from '@/lib/supabase-server'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'Chicago Blackhawks | News, Stats, Schedule & Roster | SportsMockery',
-  description: 'Complete Chicago Blackhawks coverage including latest news, team stats, schedule, roster, and expert analysis.',
+  title: 'Chicago Blackhawks News & Stats',
+  description: 'Complete Chicago Blackhawks coverage — breaking news, trade rumors, prospect updates, team stats, schedule, roster, and player profiles from Sports Mockery.',
+  alternates: { canonical: '/chicago-blackhawks' },
   openGraph: {
     title: 'Chicago Blackhawks Hub | Sports Mockery',
-    description: 'Your #1 source for Chicago Blackhawks news, stats, schedule, and analysis',
+    description: 'Your #1 source for Chicago Blackhawks news, stats, schedule, roster, and expert analysis.',
     type: 'website',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
   },
 }
 

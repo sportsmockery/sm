@@ -4,8 +4,13 @@ import { getBearsFilmRoomVideos } from '@/lib/getBearsFilmRoomVideos';
 import { BearsFilmRoomClient } from './BearsFilmRoomClient';
 
 export const metadata: Metadata = {
-  title: {
-    absolute: 'Sports Mockery | BFR',
+  title: 'Bears Film Room — Video Analysis',
+  description: 'Watch in-depth Chicago Bears video analysis, film breakdowns, and podcast episodes. Expert analysis of Bears plays, draft prospects, and game strategy.',
+  alternates: { canonical: '/bears-film-room' },
+  openGraph: {
+    title: 'Bears Film Room | Sports Mockery',
+    description: 'In-depth Chicago Bears video analysis, film breakdowns, and podcast episodes.',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
   },
 };
 

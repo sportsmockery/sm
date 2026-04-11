@@ -10,7 +10,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
-        allow: '/',
+        allow: ['/', '/api/rss'],
         disallow: [
           '/admin/',
           '/api/',
@@ -23,7 +23,7 @@ export default function robots(): MetadataRoute.Robots {
       },
       {
         userAgent: 'Googlebot',
-        allow: '/',
+        allow: ['/', '/api/rss'],
         disallow: ['/admin/', '/api/'],
       },
     ],

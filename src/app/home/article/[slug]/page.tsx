@@ -71,11 +71,13 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
   return {
     title,
     description,
+    alternates: { canonical: `/home/article/${slug}` },
     openGraph: {
       title,
       description,
       type: 'article',
       publishedTime: post.published_at,
+      modifiedTime: post.updated_at || post.published_at,
       images: post.featured_image ? [{ url: post.featured_image, width: 1200, height: 630 }] : [],
     },
   }

@@ -4,14 +4,14 @@ import { getSouthsideBehaviorEmbeds } from '@/lib/getSouthsideBehaviorEmbeds';
 import { SouthsideBehaviorClient } from './SouthsideBehaviorClient';
 
 export const metadata: Metadata = {
-  title: {
-    absolute: 'Sports Mockery | Southside Behavior',
-  },
-  description: 'Quick-hit TikToks from the South Side fan perspective. Catch the latest clips, reactions, and behind-the-scenes moments from White Sox fandom.',
+  title: 'Southside Behavior — White Sox Clips',
+  description: 'Quick-hit TikToks from the South Side fan perspective. Catch the latest clips, reactions, and behind-the-scenes moments from Chicago White Sox fandom.',
+  alternates: { canonical: '/southside-behavior' },
   openGraph: {
-    title: 'Southside Behavior | White Sox TikTok',
-    description: 'Quick-hit TikToks from the South Side fan perspective',
+    title: 'Southside Behavior | Sports Mockery',
+    description: 'Quick-hit TikToks and clips from the South Side fan perspective. White Sox reactions and behind-the-scenes moments.',
     type: 'website',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
   },
 };
 
