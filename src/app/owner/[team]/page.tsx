@@ -2,7 +2,7 @@ import { datalabAdmin } from '@/lib/supabase-datalab'
 import { notFound } from 'next/navigation'
 import TeamDetail from './TeamDetail'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 3600
 
 const DATALAB_URL = 'https://datalab.sportsmockery.com'
 

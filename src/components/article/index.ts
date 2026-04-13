@@ -9,4 +9,5 @@ export { default as RailCard } from './RailCard'
 export { default as NextUpStrip } from './NextUpStrip'
 export { default as SlimCTA } from './SlimCTA'
 export { default as ArticleShareBar } from './ArticleShareBar'
+// ChartEmbed lazy-loaded via next/dynamic where consumed (echarts is ~500KB)
 export { default as ChartEmbed } from './ChartEmbed'

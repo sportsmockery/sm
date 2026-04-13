@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: 'Chicago Bears 2025 team and player statistics. View passing, rushing, receiving, and defensive leaderboards plus team stats.',
 }
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 600
 
 export default async function BearsStatsPage() {
   // 2025-26 NFL season is stored as season = 2025

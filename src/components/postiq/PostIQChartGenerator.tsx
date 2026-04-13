@@ -3,11 +3,11 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import dynamic from 'next/dynamic'
 import { ChartBuilderModal, ChartConfig, AISuggestion, ChartType } from '@/components/admin/ChartBuilder'
-import { AnimatedBarChart } from '@/components/charts/AnimatedBarChart'
-import { AnimatedLineChart } from '@/components/charts/AnimatedLineChart'
-import { AnimatedPieChart } from '@/components/charts/AnimatedPieChart'
-import { AnimatedScatterChart } from '@/components/charts/AnimatedScatterChart'
 
+const AnimatedBarChart = dynamic(() => import('@/components/charts/AnimatedBarChart').then(m => ({ default: m.AnimatedBarChart })), { ssr: false })
+const AnimatedLineChart = dynamic(() => import('@/components/charts/AnimatedLineChart').then(m => ({ default: m.AnimatedLineChart })), { ssr: false })
+const AnimatedPieChart = dynamic(() => import('@/components/charts/AnimatedPieChart').then(m => ({ default: m.AnimatedPieChart })), { ssr: false })
+const AnimatedScatterChart = dynamic(() => import('@/components/charts/AnimatedScatterChart').then(m => ({ default: m.AnimatedScatterChart })), { ssr: false })
 const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false })
 
 interface ChartDataPoint {

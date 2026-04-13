@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: 'Chicago Cubs 2025 team and player statistics. View batting averages, home runs, RBIs, and pitching stats.',
 }
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 600
 
 export default async function CubsStatsPage() {
   const team = CHICAGO_TEAMS.cubs

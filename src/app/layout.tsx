@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Space_Grotesk } from "next/font/google";
+import dynamic from "next/dynamic";
 import "./globals.css";
 import "@/styles/homepage.css";
 import "@/styles/homepage-v2.css";
@@ -12,19 +13,19 @@ import { TeamRecordProvider } from "@/contexts/TeamRecordContext";
 // LeftSidebar removed — replaced by AppSidebar via SidebarLayout
 import SidebarLayout from "@/components/layout/SidebarLayout";
 import SkipToContent from "@/components/layout/SkipToContent";
-import ScrollToTop from "@/components/layout/ScrollToTop";
-import BackToTop from "@/components/layout/BackToTop";
-import CookieBanner from "@/components/layout/CookieBanner";
 import MotionProvider from "@/components/motion/MotionProvider";
 import NavigationProgress from "@/components/layout/NavigationProgress";
-import Breadcrumb from "@/components/layout/Breadcrumb";
-import NavigationOrb from "@/components/layout/NavigationOrb";
 import LiveStrip from "@/components/layout/LiveStrip";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
 import { WebSocketProvider } from "@/context/WebSocketProvider";
 import { MediaControllerProvider } from "@/context/MediaControllerContext";
 import { AudioPlayerProvider } from "@/context/AudioPlayerContext";
-import AudioMiniPlayer from "@/components/SportsRiver/AudioMiniPlayer";
+
+// Lazy-load non-critical layout components — code-split into separate chunks
+const ScrollToTop = dynamic(() => import("@/components/layout/ScrollToTop"));
+const BackToTop = dynamic(() => import("@/components/layout/BackToTop"));
+const CookieBanner = dynamic(() => import("@/components/layout/CookieBanner"));
+const AudioMiniPlayer = dynamic(() => import("@/components/SportsRiver/AudioMiniPlayer"));
 
 // Floating buttons disabled - users access AI and Fan Chat via header buttons
 // import BearsAIButton from "@/components/bears/BearsAIButton";
@@ -35,6 +36,7 @@ const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
   subsets: ["latin"],
   weight: ["400", "500", "700"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {

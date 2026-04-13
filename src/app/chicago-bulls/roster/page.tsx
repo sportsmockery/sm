@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: 'Complete 2025-26 Chicago Bulls roster with player profiles, positions, measurements, and stats.',
 }
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 600
 
 const TEAM_COLOR = 'var(--sm-red)'
 

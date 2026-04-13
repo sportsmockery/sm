@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 }
 
 // Revalidate every hour
-export const dynamic = 'force-dynamic'
+export const revalidate = 600
 
 function formatMoney(n: number | null | undefined): string {
   if (n == null) return '--'

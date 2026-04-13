@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   },
 }
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 600
 
 export default async function CubsDepthChartPage() {
   const team = CHICAGO_TEAMS.cubs

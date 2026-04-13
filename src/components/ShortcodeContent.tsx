@@ -1,9 +1,14 @@
 'use client'
 
 import { useMemo } from 'react'
+import dynamic from 'next/dynamic'
 import { splitContentByShortcodes, ContentSegment } from '@/lib/shortcodes'
-import ChartEmbed from '@/components/charts/ChartEmbed'
 import PollEmbed from '@/components/polls/PollEmbed'
+
+const ChartEmbed = dynamic(() => import('@/components/charts/ChartEmbed'), {
+  ssr: false,
+  loading: () => <div style={{ height: 300, background: 'var(--sm-surface)', borderRadius: 14, animation: 'pulse 1.5s ease-in-out infinite' }} />,
+})
 
 interface ShortcodeContentProps {
   html: string

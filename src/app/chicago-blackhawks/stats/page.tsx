@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: 'Chicago Blackhawks 2025-26 team and player statistics. View goals, assists, points, and goaltending leaderboards.',
 }
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 600
 
 export default async function BlackhawksStatsPage() {
   const team = CHICAGO_TEAMS.blackhawks

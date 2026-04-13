@@ -69,8 +69,18 @@ const nextConfig: NextConfig = {
 
   // Enable production build optimizations
   experimental: {
-    // Optimize package imports
-    optimizePackageImports: ['date-fns', '@supabase/supabase-js'],
+    // Optimize package imports — tree-shake heavy charting & utility libraries
+    optimizePackageImports: [
+      'date-fns',
+      '@supabase/supabase-js',
+      'recharts',
+      'echarts-for-react',
+      'd3',
+      'framer-motion',
+      'chart.js',
+      'react-chartjs-2',
+      'lucide-react',
+    ],
   },
 
   // Redirects for legacy WordPress routes
@@ -116,6 +126,36 @@ const nextConfig: NextConfig = {
       {
         // Cache fonts
         source: '/fonts/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        // Cache team sidebar API (refreshed by ISR)
+        source: '/api/team-sidebar',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, s-maxage=300, stale-while-revalidate=600',
+          },
+        ],
+      },
+      {
+        // Cache river/feed API
+        source: '/api/river',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, s-maxage=60, stale-while-revalidate=120',
+          },
+        ],
+      },
+      {
+        // Cache SVG/logo assets
+        source: '/:path*.svg',
         headers: [
           {
             key: 'Cache-Control',

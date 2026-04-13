@@ -3,9 +3,14 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import OwnershipCard from '@/components/ownership/OwnershipCard'
-import GradeTimeline from '@/components/ownership/GradeTimeline'
 import ScoutCommentary from '@/components/ownership/ScoutCommentary'
+
+const GradeTimeline = dynamic(() => import('@/components/ownership/GradeTimeline'), {
+  ssr: false,
+  loading: () => <div style={{ height: 300, borderRadius: 14, background: 'var(--sm-surface)' }} />,
+})
 import FanGMComments from '@/components/ownership/FanGMComments'
 
 interface OwnershipGrade {

@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: 'Complete 2025 Chicago Cubs roster with player profiles, positions, measurements, and stats.',
 }
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 600
 
 const TEAM_COLOR = 'var(--sm-red)'
 

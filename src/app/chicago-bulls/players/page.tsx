@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: 'Complete list of Chicago Bulls players with photos, positions, stats, and player profiles.',
 }
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 600
 
 type PositionGroup = 'guards' | 'forwards' | 'centers'
 

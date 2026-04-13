@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: PlayerPageProps): Promise<Met
   }
 }
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 600
 
 export default async function BlackhawksPlayerPage({ params }: PlayerPageProps) {
   const { slug } = await params

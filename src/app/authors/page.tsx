@@ -12,6 +12,8 @@ export const metadata: Metadata = {
   },
 }
 
+export const revalidate = 3600
+
 interface AuthorsPageProps {
   searchParams: Promise<{
     sort?: string

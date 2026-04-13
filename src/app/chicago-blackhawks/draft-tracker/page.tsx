@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   },
 }
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 600
 
 async function getBlackhawksPosts(limit: number = 20) {
   try {

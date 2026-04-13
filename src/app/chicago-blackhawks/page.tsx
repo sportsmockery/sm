@@ -9,7 +9,7 @@ import { CHICAGO_TEAMS, fetchTeamRecord, fetchNextGame, fetchLastGame } from '@/
 import { getTeamSeasonOverview, getTeamKeyPlayers, getTeamTrends } from '@/lib/team-sidebar-data'
 import { supabaseAdmin } from '@/lib/supabase-server'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 300
 
 export const metadata: Metadata = {
   title: 'Chicago Blackhawks | News, Stats, Schedule & Roster | SportsMockery',
