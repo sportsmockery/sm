@@ -723,7 +723,7 @@ async function getTeamStats(season: number): Promise<WhiteSoxTeamStats> {
 
   const wins = seasonRecord?.wins || 0
   const losses = seasonRecord?.losses || 0
-  const gamesPlayed = (gamesData?.length || 0) || (wins + losses)
+  const gamesPlayed = wins + losses
   const runsScored = gamesData?.reduce((sum: number, g: any) => sum + (g.whitesox_score || 0), 0) || 0
   const runsAllowed = gamesData?.reduce((sum: number, g: any) => sum + (g.opponent_score || 0), 0) || 0
 

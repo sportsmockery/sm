@@ -189,7 +189,8 @@ function generateSlug(name: string): string {
 
 /**
  * Get all Blackhawks players from DataLab
- * Filters to current roster using is_active = true
+ * Uses blackhawks_contracts as the roster source of truth (~23 players),
+ * joined with blackhawks_players for headshots and bio data.
  */
 export async function getBlackhawksPlayers(): Promise<BlackhawksPlayer[]> {
   if (!datalabAdmin) {
@@ -197,18 +198,60 @@ export async function getBlackhawksPlayers(): Promise<BlackhawksPlayer[]> {
     return []
   }
 
-  const data = await safeDatalabQuery(
-    () => datalabAdmin
-      .from('blackhawks_players')
-      .select('*')
-      .eq('is_active', true)
-      .order('position')
-      .order('name'),
-    [] as any[],
-    'blackhawks players'
-  )
+  const [contracts, players] = await Promise.all([
+    safeDatalabQuery(
+      () => datalabAdmin
+        .from('blackhawks_contracts')
+        .select('player_id, player_name, position, age, cap_hit, base_salary, contract_years, free_agent_year')
+        .eq('season', 2026)
+        .order('position')
+        .order('player_name'),
+      [] as any[],
+      'blackhawks contracts'
+    ),
+    safeDatalabQuery(
+      () => datalabAdmin
+        .from('blackhawks_players')
+        .select('*'),
+      [] as any[],
+      'blackhawks players (headshots)'
+    ),
+  ])
 
-  return transformPlayers(data)
+  // Build headshot/bio lookup by ESPN ID
+  const playersMap = new Map(players?.map((p: any) => [String(p.espn_id), p]) || [])
+
+  // Merge contracts (roster driver) with player bio data
+  const merged = contracts.map((c: any) => {
+    const bio = playersMap.get(String(c.player_id)) || {} as any
+    return {
+      ...bio,
+      // Contract fields take precedence for name/position
+      name: c.player_name || bio.name || bio.full_name,
+      full_name: c.player_name || bio.name || bio.full_name,
+      position: c.position || bio.position,
+      age: c.age ?? bio.age,
+      espn_id: c.player_id,
+      // Bio fields from players table
+      jersey_number: bio.jersey_number,
+      height: bio.height,
+      height_inches: bio.height_inches,
+      weight_lbs: bio.weight_lbs || bio.weight,
+      weight: bio.weight_lbs || bio.weight,
+      slug: bio.slug,
+      first_name: bio.first_name,
+      last_name: bio.last_name,
+      birth_country: bio.birth_country,
+      headshot_url: bio.headshot_url,
+      status: bio.status,
+      years_pro: bio.years_pro,
+      years_exp: bio.years_exp,
+      experience: bio.experience,
+      college: bio.college,
+    }
+  })
+
+  return transformPlayers(merged)
 }
 
 /**
@@ -554,10 +597,10 @@ export async function getBlackhawksSchedule(season?: number): Promise<Blackhawks
         return gameDate >= seasonStartDate && gameDate <= seasonEndDate
       })
 
-      // Filter to regular season and postseason only (exclude preseason)
+      // Filter to regular season and postseason only (exclude preseason and all-star)
       const filtered = dateFiltered.filter((g: any) => {
         const gameType = g.game_type?.toUpperCase() || ''
-        return gameType !== 'PRE' && gameType !== 'PRESEASON'
+        return gameType !== 'PRE' && gameType !== 'PRESEASON' && gameType !== 'ALL-STAR' && gameType !== 'ALLSTAR'
       })
 
       return filtered.map((g: any) => transformGame(g))

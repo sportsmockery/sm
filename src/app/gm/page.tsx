@@ -1334,7 +1334,7 @@ export default function GMPage() {
               </button>
 
               <button
-                onClick={() => router.push('/leaderboards')}
+                onClick={() => router.push('/gm')}
                 title="Leaderboard"
                 style={{
                   padding: '6px 12px', borderRadius: 8,

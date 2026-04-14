@@ -305,8 +305,10 @@ async function getSeasonPlayerIds(season: number): Promise<string[]> {
 
 /**
  * Get players directly from Datalab
- * Filters to only show players from current season (or most recent season for off-season)
- * Only includes players with headshots
+ * Uses bears_contracts as the roster source of truth (per CLAUDE.md),
+ * joining bears_players only for headshots and additional detail.
+ * bears_contracts contains only active contract players (~52), avoiding
+ * the 81+ rows in bears_players (which includes PS, IR, etc.).
  */
 async function getBearsPlayersFromDatalab(): Promise<BearsPlayer[]> {
   if (!datalabAdmin) {
@@ -314,34 +316,68 @@ async function getBearsPlayersFromDatalab(): Promise<BearsPlayer[]> {
     return []
   }
 
-  const data = await safeDatalabQuery(
-    () => datalabAdmin
-      .from('bears_players')
-      .select(`
-        id,
-        player_id,
-        espn_id,
-        name,
-        first_name,
-        last_name,
-        position,
-        position_group,
-        jersey_number,
-        height_inches,
-        weight_lbs,
-        age,
-        college,
-        years_exp,
-        status,
-        is_active,
-        headshot_url
-      `)
-      .eq('is_active', true)
-      .order('position_group')
-      .order('name'),
-    [] as any[],
-    'bears players'
-  )
+  // Fetch contracts (roster source of truth) and players (for headshots/detail) in parallel
+  const [contracts, players] = await Promise.all([
+    safeDatalabQuery(
+      () => datalabAdmin
+        .from('bears_contracts')
+        .select('player_id, player_name, position, age')
+        .eq('season', 2026)
+        .order('position')
+        .order('player_name'),
+      [] as any[],
+      'bears contracts'
+    ),
+    safeDatalabQuery(
+      () => datalabAdmin
+        .from('bears_players')
+        .select(`
+          id,
+          player_id,
+          espn_id,
+          name,
+          first_name,
+          last_name,
+          position,
+          position_group,
+          jersey_number,
+          height_inches,
+          weight_lbs,
+          age,
+          college,
+          years_exp,
+          status,
+          headshot_url
+        `),
+      [] as any[],
+      'bears players headshots'
+    ),
+  ])
+
+  // Build headshot/detail lookup by ESPN ID (contracts.player_id = players.espn_id)
+  const headshots = new Map(players?.map((p: any) => [String(p.espn_id), p]) || [])
+
+  // Deduplicate contracts by player_id to prevent duplicate rows
+  const seen = new Set<string>()
+  const uniqueContracts = contracts.filter((c: any) => {
+    const pid = String(c.player_id)
+    if (seen.has(pid)) return false
+    seen.add(pid)
+    return true
+  })
+
+  // Merge: contracts drive the roster, players provide headshots/detail
+  const data = uniqueContracts.map((c: any) => {
+    const detail = headshots.get(String(c.player_id)) || {}
+    return {
+      ...detail,
+      // Contracts fields take precedence where they exist
+      espn_id: c.player_id,
+      name: c.player_name || detail.name,
+      position: c.position || detail.position,
+      age: c.age || detail.age,
+    }
+  })
 
   return transformPlayers(data)
 }

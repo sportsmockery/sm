@@ -10,7 +10,7 @@ const FEATURES = [
   { name: 'War Room', description: 'Trades, drafts & simulations', href: '/gm', icon: 'WR' },
   { name: 'Fan Chat', description: 'Team chat rooms with AI', href: '/fan-chat', icon: 'FC' },
   { name: 'Data Hub', description: 'Stats, scores, schedules', href: '/datahub', icon: 'DH' },
-  { name: 'Leaderboards', description: 'Fan rankings & GM scores', href: '/leaderboards', icon: 'LB' },
+  { name: 'Leaderboards', description: 'Fan rankings & GM scores', href: '/gm', icon: 'LB' },
   { name: 'Predictions', description: 'SM Prophecy predictions', href: '/predictions', icon: 'PR' },
   { name: 'My Profile', description: 'Account settings', href: '/profile', icon: 'ME' },
 ];

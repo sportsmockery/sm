@@ -650,7 +650,7 @@ export default function MockDraftPage() {
                 Trade Simulator
               </button>
               <button
-                onClick={() => router.push('/leaderboards')}
+                onClick={() => router.push('/gm')}
                 style={{
                   padding: '6px 12px', borderRadius: 8,
                   border: '1px solid var(--sm-border)',
