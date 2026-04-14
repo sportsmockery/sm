@@ -23,19 +23,22 @@ export const IS_BUILD_TIME =
   (process.env.NODE_ENV === 'production' && !process.env.VERCEL_URL && !process.env.VERCEL_ENV)
 
 /** Default timeout in ms — keep well under Vercel's 60s page gen limit */
-const DEFAULT_TIMEOUT_MS = 8_000
-const BUILD_TIMEOUT_MS = 5_000
+const DEFAULT_TIMEOUT_MS = 12_000
+const BUILD_TIMEOUT_MS = 8_000
 
 interface BuildSafeFetchOptions {
-  /** Timeout in ms (defaults to 8s at runtime, 5s at build) */
+  /** Timeout in ms (defaults to 12s at runtime, 8s at build) */
   timeout?: number
   /** Label for logging on timeout/error */
   label?: string
+  /** Number of retry attempts (default 1 = no retry at runtime, 0 at build) */
+  retries?: number
 }
 
 /**
- * Execute an async operation with timeout protection and fallback.
+ * Execute an async operation with timeout protection, retry, and fallback.
  * At build time, uses a shorter timeout and silently falls back.
+ * At runtime, retries once on failure to handle intermittent DB connection issues.
  */
 export async function buildSafeFetch<T>(
   fn: () => Promise<T>,
@@ -45,25 +48,34 @@ export async function buildSafeFetch<T>(
   const defaultTimeout = IS_BUILD_TIME ? BUILD_TIMEOUT_MS : DEFAULT_TIMEOUT_MS
   const timeout = options.timeout ?? defaultTimeout
   const label = options.label ?? 'data fetch'
+  const maxRetries = options.retries ?? (IS_BUILD_TIME ? 0 : 1)
 
-  try {
-    const result = await Promise.race([
-      fn(),
-      new Promise<T>((_, reject) =>
-        setTimeout(() => reject(new Error(`Timeout after ${timeout}ms`)), timeout)
-      ),
-    ])
-    return result
-  } catch (error: any) {
-    const phase = IS_BUILD_TIME ? '[BUILD]' : '[RUNTIME]'
-    // Only warn-level at build time to avoid noisy logs
-    if (IS_BUILD_TIME) {
-      console.warn(`${phase} ${label}: using fallback data (${error.message})`)
-    } else {
-      console.error(`${phase} ${label} failed:`, error.message)
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const result = await Promise.race([
+        fn(),
+        new Promise<T>((_, reject) =>
+          setTimeout(() => reject(new Error(`Timeout after ${timeout}ms`)), timeout)
+        ),
+      ])
+      return result
+    } catch (error: any) {
+      const phase = IS_BUILD_TIME ? '[BUILD]' : '[RUNTIME]'
+      if (attempt < maxRetries) {
+        console.warn(`${phase} ${label}: attempt ${attempt + 1} failed (${error.message}), retrying...`)
+        // Brief pause before retry
+        await new Promise(r => setTimeout(r, 500))
+        continue
+      }
+      if (IS_BUILD_TIME) {
+        console.warn(`${phase} ${label}: using fallback data (${error.message})`)
+      } else {
+        console.error(`${phase} ${label} failed after ${attempt + 1} attempts:`, error.message)
+      }
+      return fallback
     }
-    return fallback
   }
+  return fallback
 }
 
 /**
