@@ -11,46 +11,35 @@ import {
   PostSummary,
   categorySlugToTeam
 } from './types'
-import { fetchTeamRecord, fetchNextGame } from './team-config'
-import { getBearsSchedule } from './bearsData'
+import { fetchTeamRecord, fetchNextGame, fetchLastGame } from './team-config'
+import { getBearsSchedule, getBearsSeparatedRecord } from './bearsData'
 import { buildSafeFetch, safeDatalabQuery } from './build-safe-fetch'
 
 /**
  * Get Bears season overview data
  * Returns current record, standings, next/last game info
- * Now fetches LIVE data from ESPN API and Datalab
+ * Uses bears_season_record as source of truth for record data
  */
 export async function getBearsSeasonOverview(): Promise<BearsSeasonOverview> {
   try {
-    // Fetch live data from ESPN API and Datalab in parallel
-    const [espnRecord, espnNextGame, schedule] = await Promise.all([
-      fetchTeamRecord('bears'),
+    // Fetch record from bears_season_record (source of truth) + next/last game in parallel
+    const [separatedRecord, espnNextGame, lastGameInfo] = await Promise.all([
+      getBearsSeparatedRecord(2025),
       fetchNextGame('bears'),
-      getBearsSchedule(2025),
+      fetchLastGame('bears'),
     ])
 
-    // Get the most recent completed game for "last game" info
-    const completedGames = schedule
-      .filter(g => g.status === 'final')
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    const wins = separatedRecord.regularSeason.wins
+    const losses = separatedRecord.regularSeason.losses
+    const ties = separatedRecord.regularSeason.ties
 
-    const lastGame = completedGames[0]
-
-    // Use ESPN data if available, otherwise fall back to calculated data from schedule
-    const wins = espnRecord?.wins ?? completedGames.filter(g => g.result === 'W').length
-    const losses = espnRecord?.losses ?? completedGames.filter(g => g.result === 'L').length
-    const ties = espnRecord?.ties ?? 0
-
-    // Calculate standing (simplified - could be enhanced with division standings API)
-    const standing = `${wins}-${losses} in NFC North`
+    const standing = separatedRecord.divisionRank
+      ? `${wins}-${losses} ${separatedRecord.divisionRank}`
+      : `${wins}-${losses} in NFC North`
 
     return {
       season: 2025,
-      record: {
-        wins,
-        losses,
-        ties,
-      },
+      record: { wins, losses, ties },
       standing,
       nextGame: espnNextGame ? {
         opponent: espnNextGame.opponent,
@@ -58,15 +47,14 @@ export async function getBearsSeasonOverview(): Promise<BearsSeasonOverview> {
         time: espnNextGame.time,
         isHome: espnNextGame.isHome,
       } : null,
-      lastGame: lastGame ? {
-        opponent: lastGame.opponent,
-        result: lastGame.result as 'W' | 'L' | 'T',
-        score: `${lastGame.bearsScore}-${lastGame.oppScore}`,
+      lastGame: lastGameInfo ? {
+        opponent: lastGameInfo.opponent,
+        result: lastGameInfo.result,
+        score: `${lastGameInfo.teamScore}-${lastGameInfo.opponentScore}`,
       } : null,
     }
   } catch (error) {
     console.error('Error fetching Bears season overview:', error)
-    // Return minimal data on error
     return {
       season: 2025,
       record: { wins: 0, losses: 0, ties: 0 },

@@ -258,7 +258,7 @@ export async function fetchTeamRecord(teamKey: string): Promise<TeamRecord | nul
       }
     },
     null,
-    { label: `${teamKey} team record` }
+    { label: `${teamKey} team record`, timeout: 12_000 }
   )
 }
 
@@ -298,7 +298,7 @@ export async function fetchNextGame(teamKey: string): Promise<NextGameInfo | nul
       return formatNextGame(games[0], config)
     },
     null,
-    { label: `${teamKey} next game` }
+    { label: `${teamKey} next game`, timeout: 12_000 }
   )
 }
 
@@ -415,7 +415,7 @@ export async function fetchLastGame(teamKey: string): Promise<LastGameInfo | nul
       }
     },
     null,
-    { label: `${teamKey} last game` }
+    { label: `${teamKey} last game`, timeout: 12_000 }
   )
 }
 
@@ -504,6 +504,6 @@ export async function fetchLastGameWithId(teamKey: string): Promise<LastGameWith
       }
     },
     null,
-    { label: `${teamKey} last game with ID` }
+    { label: `${teamKey} last game with ID`, timeout: 12_000 }
   )
 }

@@ -701,11 +701,14 @@ export async function getBearsSchedule(season?: number): Promise<BearsGame[]> {
 async function getBearsScheduleFromDatalab(season: number): Promise<BearsGame[]> {
   if (!datalabAdmin) return []
 
+  // Select only the columns we need (per DataLab spec) to reduce payload and speed up query
+  const SCHEDULE_COLUMNS = 'id, game_id, external_id, game_date, game_time, game_time_display, season, week, game_type, opponent, opponent_full_name, is_bears_home, bears_score, opponent_score, bears_win, stadium, broadcast, broadcast_window, nationally_televised, is_overtime, status, temp_f, wind_mph'
+
   return buildSafeFetch(
     async () => {
       const { data, error } = await datalabAdmin
         .from('bears_games_master')
-        .select('*')
+        .select(SCHEDULE_COLUMNS)
         .eq('season', season)
         .order('game_date', { ascending: true })
 
@@ -717,7 +720,7 @@ async function getBearsScheduleFromDatalab(season: number): Promise<BearsGame[]>
       if (!data || data.length === 0) {
         const { data: prevData, error: prevError } = await datalabAdmin
           .from('bears_games_master')
-          .select('*')
+          .select(SCHEDULE_COLUMNS)
           .eq('season', season - 1)
           .order('game_date', { ascending: true })
 
@@ -727,7 +730,7 @@ async function getBearsScheduleFromDatalab(season: number): Promise<BearsGame[]>
       return data.map((g: any) => transformGame(g, null))
     },
     [],
-    { label: 'bears schedule' }
+    { label: 'bears schedule', timeout: 15_000 }
   )
 }
 
@@ -1137,34 +1140,58 @@ export interface BearsSeparatedRecord {
 }
 
 export async function getBearsSeparatedRecord(season?: number): Promise<BearsSeparatedRecord> {
-  const schedule = await getBearsSchedule(season)
+  const targetSeason = season || getCurrentSeason()
 
-  // Calculate regular season record
-  const regularGames = schedule.filter(g => g.status === 'final' && g.gameType === 'regular')
-  const regWins = regularGames.filter(g => g.result === 'W').length
-  const regLosses = regularGames.filter(g => g.result === 'L').length
-  const regTies = regularGames.filter(g => g.result === 'T').length
-
-  // Calculate postseason record
-  const postGames = schedule.filter(g => g.status === 'final' && g.gameType === 'postseason')
-  const postWins = postGames.filter(g => g.result === 'W').length
-  const postLosses = postGames.filter(g => g.result === 'L').length
-
-  // VALIDATION: Expected from ESPN - Bears 2025: Regular 11-6 (1st NFC North), Post 1-1
-  // Get division rank from Datalab if available
-  let divisionRank: string | null = null
+  // Read record directly from bears_season_record (source of truth)
+  // instead of calculating from schedule to avoid timeout-related empty results
   if (datalabAdmin) {
-    const { data } = await datalabAdmin
-      .from('bears_season_record')
-      .select('division_rank')
-      .single()
-    divisionRank = data?.division_rank || '1st NFC North' // Fallback to expected value
+    const record = await buildSafeFetch(
+      async () => {
+        const { data, error } = await datalabAdmin
+          .from('bears_season_record')
+          .select('regular_season_wins, regular_season_losses, postseason_wins, postseason_losses')
+          .eq('season', targetSeason)
+          .single()
+
+        if (error || !data) return null
+        return data
+      },
+      null,
+      { label: 'bears season record', timeout: 12_000 }
+    )
+
+    if (record) {
+      return {
+        regularSeason: {
+          wins: Number(record.regular_season_wins) || 0,
+          losses: Number(record.regular_season_losses) || 0,
+          ties: 0,
+        },
+        postseason: {
+          wins: Number(record.postseason_wins) || 0,
+          losses: Number(record.postseason_losses) || 0,
+        },
+        divisionRank: null,
+      }
+    }
   }
 
+  // Fallback: calculate from schedule if bears_season_record unavailable
+  const schedule = await getBearsSchedule(targetSeason)
+  const regularGames = schedule.filter(g => g.status === 'final' && g.gameType === 'regular')
+  const postGames = schedule.filter(g => g.status === 'final' && g.gameType === 'postseason')
+
   return {
-    regularSeason: { wins: regWins, losses: regLosses, ties: regTies },
-    postseason: { wins: postWins, losses: postLosses },
-    divisionRank,
+    regularSeason: {
+      wins: regularGames.filter(g => g.result === 'W').length,
+      losses: regularGames.filter(g => g.result === 'L').length,
+      ties: regularGames.filter(g => g.result === 'T').length,
+    },
+    postseason: {
+      wins: postGames.filter(g => g.result === 'W').length,
+      losses: postGames.filter(g => g.result === 'L').length,
+    },
+    divisionRank: null,
   }
 }
 
