@@ -37,6 +37,11 @@ interface Data {
   viewsDistribution: Array<{ range: string; count: number }>
   scoreDistribution: Array<{ range: string; count: number }>
   social: { youtube: any[]; x: any[]; facebook: any[] }
+  seo?: {
+    overview: { rank: number; organicKeywords: number; organicTraffic: number; organicCost: number; adwordsKeywords: number; adwordsTraffic: number } | null
+    keywords: Array<{ keyword: string; position: number; previousPosition: number; searchVolume: number; cpc: number; url: string; trafficPct: number; competition: number }>
+    competitors: Array<{ domain: string; relevance: number; commonKeywords: number; organicKeywords: number; organicTraffic: number }>
+  } | null
   paymentSync?: {
     sync: { status: string; lastSync: string | null; errorMessage?: string; writersSynced?: number; totalViewsSynced?: number }
     payments: any[]
@@ -790,12 +795,12 @@ export default function ExecDashboard() {
   const load = useCallback(async (silent = false) => {
     if (!silent) setLoading(true); else setRefreshing(true)
     try {
-      const r = await fetch(`/api/exec-dashboard?range=${range}`)
+      const r = await fetch(`/api/exec-dashboard?range=${range}${range === 'custom' && customStart && customEnd ? `&start=${customStart}&end=${customEnd}` : ''}`)
       if (!r.ok) throw new Error('fetch failed')
       setData(await r.json()); setError(false)
     } catch { setError(true) }
     finally { setLoading(false); setRefreshing(false) }
-  }, [range])
+  }, [range, customStart, customEnd])
 
   useEffect(() => { load() }, [load])
 
@@ -844,7 +849,7 @@ export default function ExecDashboard() {
         { q: 'Platform health?', a: `YouTube: ${fN(data.social.youtube.reduce((s: number, c: any) => s + c.subscribers, 0))} subs. X: ${fN(data.social.x.reduce((s: number, c: any) => s + c.followers, 0))} followers.`, color: C.purple },
       ],
       SEO: [
-        { q: 'Organic performance?', a: `Estimated ${Math.round(35 + Math.random() * 15)}% organic traffic share across ${d.totalPosts} published articles.`, color: C.green },
+        { q: 'Organic performance?', a: data.seo?.overview ? `Ranking for ${fN(data.seo.overview.organicKeywords)} keywords with ~${fN(data.seo.overview.organicTraffic)} estimated monthly organic visits.` : `SEMRush data unavailable. Check API key.`, color: C.green },
       ],
       Content: [
         { q: 'Publishing velocity?', a: `${d.velocity} posts/week across ${d.totalCategories} categories. ${d.periodPosts} published this period.`, color: C.blue },
@@ -1018,6 +1023,35 @@ export default function ExecDashboard() {
               <EvergreenIndex writers={data.writers} publishingTrend={data.publishingTrend} />
             </div>
 
+            {/* Monthly Trend */}
+            {(() => {
+              const monthsWithViews = data.monthlyTrend.filter(m => m.views > 0)
+              const showFiltered = monthsWithViews.length > 0 && monthsWithViews.length < 4
+              const trendData = showFiltered ? monthsWithViews : data.monthlyTrend.filter(m => m.count > 0 || m.views > 0)
+              if (trendData.length === 0) return null
+              return (
+                <Section title="Monthly Trend" badge={<span className="text-xs tabular-nums" style={{ color: 'var(--sm-text-dim)' }}>last 12 months</span>}>
+                  <ResponsiveContainer width="100%" height={320}>
+                    <ComposedChart data={trendData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                      <XAxis dataKey="month" tickFormatter={fM} tick={{ fill: '#55556a', fontSize: 12 }} tickLine={false} axisLine={false} />
+                      <YAxis yAxisId="left" tick={{ fill: '#55556a', fontSize: 12 }} tickLine={false} axisLine={false} />
+                      <YAxis yAxisId="right" orientation="right" tick={{ fill: '#55556a', fontSize: 12 }} tickLine={false} axisLine={false} />
+                      <RTooltip content={<ChartTip />} />
+                      <Legend iconType="circle" iconSize={8} formatter={(v: string) => <span style={{ color: 'var(--sm-text-muted)', fontSize: 13 }}>{v}</span>} />
+                      <Bar yAxisId="left" dataKey="count" fill={C.purple + '60'} radius={[3, 3, 0, 0]} name="Posts" />
+                      <Line yAxisId="right" type="monotone" dataKey="views" stroke={C.blue} strokeWidth={2} dot={{ r: 3, fill: C.blue }} activeDot={{ r: 5, fill: C.blue }} name="Views" />
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                  {showFiltered && (
+                    <p className="text-xs mt-2 text-center" style={{ color: 'var(--sm-text-dim)' }}>
+                      View tracking started {fM(monthsWithViews[0].month)}. Showing only months with view data.
+                    </p>
+                  )}
+                </Section>
+              )
+            })()}
+
             {/* Top movers table */}
             <Section title="Top Content" badge={<span className="text-xs tabular-nums" style={{ color: 'var(--sm-text-dim)' }}>{data.topContent.length} articles</span>}>
               <SortableTable
@@ -1092,6 +1126,18 @@ export default function ExecDashboard() {
                 </div>
               ))}
             </div>
+            {/* Facebook token warning */}
+            {data.social.facebook.some((p: any) => p.needsToken) && (
+              <div className="rounded-lg border px-4 py-3 flex items-center gap-3" style={{ background: 'rgba(245,158,11,0.04)', borderColor: 'rgba(245,158,11,0.25)' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: '#f59e0b', flexShrink: 0 }}>
+                  <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4M12 17h.01" />
+                </svg>
+                <div>
+                  <p className="text-sm font-bold" style={{ color: '#f59e0b' }}>Facebook Token Expired</p>
+                  <p className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>Reconnect by updating <span className="font-mono">FB_PAGE_ACCESS_TOKEN</span> and <span className="font-mono">FB_PAGE_ID</span> in Vercel Env Vars.</p>
+                </div>
+              </div>
+            )}
             {/* YouTube channels table */}
             {data.social.youtube.length > 0 && (
               <Section title="YouTube Channels">
@@ -1128,9 +1174,9 @@ export default function ExecDashboard() {
           {tab === 'SEO' && <>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[
-                { l: 'Organic Traffic', v: Math.round(35 + Math.random() * 15) + '%', c: C.green, s: 'of total sessions' },
-                { l: 'Search Impressions', v: fN(data.overview.periodViews * 3), c: C.blue, s: 'this period' },
-                { l: 'Avg Position', v: '12.4', c: C.amber, s: 'Google Search Console' },
+                { l: 'Domain Rank', v: data.seo?.overview ? fN(data.seo.overview.rank) : 'N/A', c: C.green, s: 'SEMRush' },
+                { l: 'Organic Keywords', v: data.seo?.overview ? fN(data.seo.overview.organicKeywords) : 'N/A', c: C.blue, s: 'ranking keywords' },
+                { l: 'Organic Traffic', v: data.seo?.overview ? fN(data.seo.overview.organicTraffic) : 'N/A', c: C.amber, s: 'estimated monthly visits' },
               ].map(m => (
                 <div key={m.l} className="rounded-lg border px-4 py-3" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
                   <p className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--sm-text-dim)' }}>{m.l}</p>
@@ -1139,18 +1185,48 @@ export default function ExecDashboard() {
                 </div>
               ))}
             </div>
-            <Section title="Top Ranking Articles">
-              <SortableTable
-                columns={[
-                  { key: 'title', label: 'Article', render: (v: string) => <span className="font-medium truncate block" style={{ maxWidth: 400 }}>{v}</span> },
-                  { key: 'author_name', label: 'Author' },
-                  { key: 'views', label: 'Views', align: 'right', render: (v: number) => <span className="font-bold tabular-nums" style={{ color: C.blue }}>{fN(v || 0)}</span> },
-                  { key: '_position', label: 'Est. Position', align: 'right', render: (v: number) => <span className="font-bold tabular-nums" style={{ color: C.green }}>{v}</span> },
-                ]}
-                data={[...data.topContent].sort((a: any, b: any) => (b.views || 0) - (a.views || 0)).map((p, i) => ({ ...p, _position: Math.round(3 + i * 2.5 + Math.abs(Math.sin(i)) * 5) }))}
-                onRowClick={openPost}
-              />
+            {/* SEMRush Keywords Table */}
+            <Section title="Top Ranking Keywords" badge={data.seo?.keywords?.length ? <span className="text-xs tabular-nums" style={{ color: 'var(--sm-text-dim)' }}>{data.seo.keywords.length} keywords</span> : undefined}>
+              {data.seo?.keywords && data.seo.keywords.length > 0 ? (
+                <SortableTable
+                  columns={[
+                    { key: 'keyword', label: 'Keyword', render: (v: string) => <span className="font-medium">{v}</span> },
+                    { key: 'position', label: 'Position', align: 'right', render: (v: number, r: any) => {
+                      const diff = r.previousPosition - v
+                      return (
+                        <span className="inline-flex items-center gap-1">
+                          <span className="font-bold tabular-nums" style={{ color: C.green }}>{v}</span>
+                          {diff !== 0 && <span className="text-xs font-bold tabular-nums" style={{ color: diff > 0 ? '#10b981' : '#bc0000' }}>{diff > 0 ? '+' : ''}{diff}</span>}
+                        </span>
+                      )
+                    }},
+                    { key: 'searchVolume', label: 'Volume', align: 'right', render: (v: number) => <span className="font-bold tabular-nums" style={{ color: C.blue }}>{fN(v)}</span> },
+                    { key: 'trafficPct', label: 'Traffic %', align: 'right', render: (v: number) => <span className="font-bold tabular-nums" style={{ color: C.purple }}>{v.toFixed(2)}%</span> },
+                    { key: 'cpc', label: 'CPC', align: 'right', priority: 'low', render: (v: number) => <span className="tabular-nums" style={{ color: 'var(--sm-text-muted)' }}>${v.toFixed(2)}</span> },
+                    { key: 'url', label: 'URL', priority: 'low', render: (v: string) => <span className="text-xs truncate block" style={{ maxWidth: 200, color: 'var(--sm-text-dim)' }}>{v.replace(/^https?:\/\/(www\.)?sportsmockery\.com/, '')}</span> },
+                  ]}
+                  data={data.seo.keywords}
+                  pageSize={10}
+                />
+              ) : (
+                <p className="text-sm py-4 text-center" style={{ color: 'var(--sm-text-dim)' }}>No keyword data available. Check SEMRush API key.</p>
+              )}
             </Section>
+            {/* Competitors */}
+            {data.seo?.competitors && data.seo.competitors.length > 0 && (
+              <Section title="Organic Competitors" badge={<span className="text-xs tabular-nums" style={{ color: 'var(--sm-text-dim)' }}>{data.seo.competitors.length} competitors</span>}>
+                <SortableTable
+                  columns={[
+                    { key: 'domain', label: 'Domain', render: (v: string) => <span className="font-medium">{v}</span> },
+                    { key: 'relevance', label: 'Relevance', align: 'right', render: (v: number) => <span className="font-bold tabular-nums" style={{ color: C.purple }}>{(v * 100).toFixed(1)}%</span> },
+                    { key: 'commonKeywords', label: 'Common Keywords', align: 'right', render: (v: number) => <span className="font-bold tabular-nums" style={{ color: C.blue }}>{fN(v)}</span> },
+                    { key: 'organicKeywords', label: 'Organic Keywords', align: 'right', priority: 'low', render: (v: number) => <span className="font-bold tabular-nums">{fN(v)}</span> },
+                    { key: 'organicTraffic', label: 'Organic Traffic', align: 'right', render: (v: number) => <span className="font-bold tabular-nums" style={{ color: C.green }}>{fN(v)}</span> },
+                  ]}
+                  data={data.seo.competitors}
+                />
+              </Section>
+            )}
             <EvergreenIndex writers={data.writers} publishingTrend={data.publishingTrend} />
           </>}
 

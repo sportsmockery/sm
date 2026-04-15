@@ -24,16 +24,56 @@ const XA = [
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
-  const range = searchParams.get('range') || '28d'
-  const daysMap: Record<string, number> = { '7d': 7, '28d': 28, '90d': 90, '1y': 365 }
-  const days = daysMap[range] || 28
+  const range = searchParams.get('range') || 'this-month'
   const now = new Date()
-  const startDate = new Date(now.getTime() - days * 86400000)
+  let startDate: Date
+  let endDate: Date = now
+  switch (range) {
+    case 'today':
+      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      break
+    case 'yesterday':
+      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1)
+      endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      break
+    case 'this-week':
+      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay())
+      break
+    case 'this-month':
+      startDate = new Date(now.getFullYear(), now.getMonth(), 1)
+      break
+    case 'last-month':
+      startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+      endDate = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999)
+      break
+    case 'ytd':
+      startDate = new Date(now.getFullYear(), 0, 1)
+      break
+    case 'last-year':
+      startDate = new Date(now.getFullYear() - 1, 0, 1)
+      endDate = new Date(now.getFullYear() - 1, 11, 31, 23, 59, 59, 999)
+      break
+    case 'custom': {
+      const cs = searchParams.get('start')
+      const ce = searchParams.get('end')
+      startDate = cs ? new Date(cs) : new Date(now.getFullYear(), now.getMonth(), 1)
+      endDate = ce ? new Date(ce) : now
+      break
+    }
+    // Legacy keys
+    case '7d': startDate = new Date(now.getTime() - 7 * 86400000); break
+    case '28d': startDate = new Date(now.getTime() - 28 * 86400000); break
+    case '90d': startDate = new Date(now.getTime() - 90 * 86400000); break
+    case '1y': startDate = new Date(now.getTime() - 365 * 86400000); break
+    default:
+      startDate = new Date(now.getFullYear(), now.getMonth(), 1)
+  }
+  const days = Math.max(1, Math.round((endDate.getTime() - startDate.getTime()) / 86400000))
   const prevStart = new Date(startDate.getTime() - days * 86400000)
 
   try {
     const [editorial, social, seo, paymentSync] = await Promise.all([
-      fetchEditorial(startDate, prevStart, now, days),
+      fetchEditorial(startDate, prevStart, endDate, days),
       fetchSocial(),
       fetchSEO(),
       fetchPaymentSyncStatus(),
@@ -65,7 +105,7 @@ async function wpFetchAllPosts(after: Date, before: Date): Promise<{ posts: any[
       const { data, total: t } = await wpApiFetch(
         `/posts?per_page=${PER_PAGE}&page=${page}&orderby=date&order=desc&status=publish` +
         `&after=${after.toISOString()}&before=${before.toISOString()}` +
-        `&_fields=id,date,date_gmt,slug,title,author,categories`
+        `&_fields=id,date,date_gmt,slug,title,author,categories,featured_media`
       )
       if (page === 1) total = t
       if (!Array.isArray(data) || data.length === 0) break
@@ -114,6 +154,21 @@ async function fetchEditorial(startDate: Date, prevStart: Date, now: Date, days:
   const prevPeriodPosts = prevCountRes.total
   const authors: any[] = authorsRaw || []
   const categories: any[] = categoriesRes.data || []
+
+  // ── Bulk fetch featured images ──
+  const mediaIds = [...new Set(period.filter((p: any) => p.featured_media).map((p: any) => p.featured_media))] as number[]
+  const mediaMap = new Map<number, string>()
+  if (mediaIds.length > 0) {
+    for (let i = 0; i < mediaIds.length; i += 100) {
+      const chunk = mediaIds.slice(i, i + 100)
+      try {
+        const { data: mediaData } = await wpApiFetch(`/media?include=${chunk.join(',')}&per_page=100&_fields=id,source_url`)
+        for (const m of (mediaData || [])) {
+          mediaMap.set(m.id, m.source_url)
+        }
+      } catch {}
+    }
+  }
 
   // Build lookup maps
   const aMap = new Map(authors.map((a: any) => [a.id, a]))
@@ -250,20 +305,35 @@ async function fetchEditorial(startDate: Date, prevStart: Date, now: Date, days:
     author_name: getAuthorName(p.author),
     category_name: getCatName(p.categories?.[0]),
     views: postViewsMap.get(p.id) || 0,
-    featured_image: null,
+    featured_image: mediaMap.get(p.featured_media) || null,
   })
 
+  // Build cross-reference maps from period posts for topContent
+  const postCatMap = new Map<number, string>()
+  const postImageMap = new Map<number, string | null>()
+  for (const p of period) {
+    if (p.categories?.length > 0) {
+      postCatMap.set(p.id, getCatName(p.categories[0]))
+    }
+    if (p.featured_media) {
+      postImageMap.set(p.id, mediaMap.get(p.featured_media) || null)
+    }
+  }
+
   // Sort top content by views from SMED data
-  const topContent = [...(smedTopPosts || [])].slice(0, 15).map((sp: any) => ({
-    id: parseInt(sp.post_id),
-    title: sp.title || '',
-    slug: sp.slug || '',
-    published_at: sp.published_at || '',
-    author_name: sp.author_name || '',
-    category_name: '',
-    views: parseInt(sp.views || '0'),
-    featured_image: null,
-  }))
+  const topContent = [...(smedTopPosts || [])].slice(0, 15).map((sp: any) => {
+    const postId = parseInt(sp.post_id)
+    return {
+      id: postId,
+      title: sp.title || '',
+      slug: sp.slug || '',
+      published_at: sp.published_at || '',
+      author_name: sp.author_name || '',
+      category_name: postCatMap.get(postId) || '',
+      views: parseInt(sp.views || '0'),
+      featured_image: postImageMap.get(postId) || null,
+    }
+  })
   // Fall back to period posts if SMED data unavailable
   const recentPosts = period.slice(0, 25).map(enrichPost)
 
@@ -354,7 +424,8 @@ async function fetchX() {
 }
 
 async function fetchFacebook() {
-  const token = process.env.FB_PAGE_ACCESS_TOKEN, pid = process.env.FB_PAGE_ID; if (!token || !pid) return []
+  const token = process.env.FB_PAGE_ACCESS_TOKEN, pid = process.env.FB_PAGE_ID
+  if (!token || !pid) return [{ id: 'sportsmockery', label: 'SportsMockery', name: 'SportsMockery', followers: 0, likes: 0, picture: '', needsToken: true }]
   try {
     const r = await fetch(`https://graph.facebook.com/v24.0/${pid}?fields=name,fan_count,followers_count,picture&access_token=${token}`, { next: { revalidate: 3600 } })
     if (!r.ok) return []; const d = await r.json()
