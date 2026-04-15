@@ -10,11 +10,14 @@ import { postResponse, postPendingResponses } from '@/lib/bot/bot-service'
 import type { TeamSlug, PostRequest, PostResponse } from '@/lib/bot/types'
 import { TEAM_SLUGS } from '@/lib/bot/types'
 
-// Validate API key for cron/webhook access
+// Validate API key for cron/webhook access (timing-safe)
 function validateApiKey(request: NextRequest): boolean {
   const apiKey = request.headers.get('x-api-key')
   const expectedKey = process.env.BOT_API_KEY
-  return !expectedKey || apiKey === expectedKey
+  if (!expectedKey || !apiKey) return false
+  if (apiKey.length !== expectedKey.length) return false
+  const { timingSafeEqual } = require('crypto')
+  return timingSafeEqual(Buffer.from(apiKey), Buffer.from(expectedKey))
 }
 
 export async function POST(request: NextRequest) {

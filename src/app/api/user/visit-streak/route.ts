@@ -5,7 +5,7 @@ import { supabaseAdmin } from '@/lib/db'
 
 export const dynamic = 'force-dynamic'
 
-async function getSession() {
+async function getAuthenticatedUser() {
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -21,8 +21,8 @@ async function getSession() {
       },
     }
   )
-  const { data: { session } } = await supabase.auth.getSession()
-  return session
+  const { data: { user } } = await supabase.auth.getUser()
+  return user
 }
 
 /**
@@ -35,13 +35,13 @@ async function getSession() {
  */
 export async function POST() {
   try {
-    const session = await getSession()
-    if (!session?.user) {
+    const user = await getAuthenticatedUser()
+    if (!user) {
       return NextResponse.json({ streak: 0, name: null }, { status: 401 })
     }
 
-    const userId = session.user.id
-    const userName = session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || null
+    const userId = user.id
+    const userName = user.user_metadata?.full_name || user.email?.split('@')[0] || null
     const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD
 
     // Get current preferences

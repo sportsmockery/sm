@@ -3,6 +3,7 @@
  * Supports both cookie-based (web) and Bearer token (mobile) auth.
  * Returns the authenticated user or null.
  */
+import crypto from 'crypto'
 import { NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
@@ -82,6 +83,16 @@ export async function requireAdmin(request?: NextRequest): Promise<
 }
 
 /**
+ * Timing-safe string comparison to prevent timing attacks on secret values.
+ */
+function timingSafeCompare(a: string, b: string): boolean {
+  if (a.length !== b.length) return false
+  const bufA = Buffer.from(a)
+  const bufB = Buffer.from(b)
+  return crypto.timingSafeEqual(bufA, bufB)
+}
+
+/**
  * Verify cron secret for cron job endpoints.
  * Returns true if authorized, false otherwise.
  */
@@ -90,10 +101,12 @@ export function verifyCronSecret(request: NextRequest): boolean {
   const cronSecret = process.env.CRON_SECRET
 
   if (!cronSecret) {
-    // CRON_SECRET must be set in production
     console.error('[Cron Auth] CRON_SECRET environment variable is not set')
     return false
   }
 
-  return authHeader === `Bearer ${cronSecret}`
+  if (!authHeader) return false
+
+  const expected = `Bearer ${cronSecret}`
+  return timingSafeCompare(authHeader, expected)
 }

@@ -43,8 +43,8 @@ export async function POST(request: NextRequest) {
       }
     )
 
-    const { data: { session } } = await supabase.auth.getSession()
-    const userId = session?.user?.id || null
+    const { data: { user } } = await supabase.auth.getUser()
+    const userId = user?.id || null
 
     // ========== REPEAT TRADE CACHE CHECK ==========
     if (userId) {
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
           const isThreeTeamTrade = !!(trade_partner_1 && trade_partner_2)
           const cachedAiVersion = `cached_${cachedTrade.ai_version || 'unknown'}`
           const newSharedCode = randomBytes(6).toString('hex')
-          const userEmail = session?.user?.email || 'guest'
+          const userEmail = user?.email || 'guest'
 
           // Create new trade record (appears in history normally)
           const { data: newTrade } = await datalabAdmin.from('gm_trades').insert({
@@ -196,9 +196,6 @@ export async function POST(request: NextRequest) {
     // No cache hit — proxy to Datalab v2 endpoint
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-    }
-    if (session?.access_token) {
-      headers['Authorization'] = `Bearer ${session.access_token}`
     }
 
     const response = await fetch(`${DATALAB_API}/api/v2/gm/grade`, {

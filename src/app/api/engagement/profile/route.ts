@@ -26,12 +26,12 @@ export async function GET() {
       }
     )
 
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session?.user) {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
       return NextResponse.json({ profile: null, hasSufficientData: false }, { status: 401 })
     }
 
-    const userId = session.user.id
+    const userId = user.id
 
     // Fetch engagement profile
     const { data: profile } = await supabaseAdmin

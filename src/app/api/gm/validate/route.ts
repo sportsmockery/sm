@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic'
 
 const DATALAB_URL = 'https://datalab.sportsmockery.com'
 
-async function getSessionWithToken() {
+async function getAuthenticatedUser() {
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -22,8 +22,8 @@ async function getSessionWithToken() {
       },
     }
   )
-  const { data: { session } } = await supabase.auth.getSession()
-  return session
+  const { data: { user } } = await supabase.auth.getUser()
+  return user
 }
 
 interface ValidateRequest {
@@ -70,8 +70,8 @@ export interface ValidationResult {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getSessionWithToken()
-    if (!session?.user) {
+    const user = await getAuthenticatedUser()
+    if (!user) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
     }
 
@@ -171,9 +171,6 @@ export async function POST(request: NextRequest) {
     // Call Data Lab for comprehensive validation
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-    }
-    if (session.access_token) {
-      headers['Authorization'] = `Bearer ${session.access_token}`
     }
 
     const res = await fetch(`${DATALAB_URL}/api/gm/validate`, {

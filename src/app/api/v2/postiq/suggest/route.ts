@@ -38,10 +38,10 @@ export async function POST(request: NextRequest) {
       }
     )
 
-    const { data: { session } } = await supabase.auth.getSession()
+    const { data: { user } } = await supabase.auth.getUser()
 
     // Require authenticated user
-    if (!session?.user) {
+    if (!user) {
       return NextResponse.json(
         { error: 'Unauthorized - login required' },
         { status: 401 }
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     // Include user_id in request body for logging on DataLab side
     const requestBody = {
       ...body,
-      user_id: session.user.id,
+      user_id: user.id,
     }
 
     const response = await fetch(`${DATALAB_API}/api/v2/postiq/suggest`, {

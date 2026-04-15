@@ -32,8 +32,8 @@ export async function GET(request: NextRequest) {
     const supabase = await getSupabaseClient()
 
     // Check authentication
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
         room:chat_rooms(team_slug, team_name, team_color),
         from_user:chat_users!chat_notifications_from_user_id_fkey(display_name, avatar_url, badge)
       `)
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1)
 
@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
     const { count: unreadCount } = await supabase
       .from('chat_notifications')
       .select('*', { count: 'exact', head: true })
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .eq('is_read', false)
 
     return NextResponse.json({
@@ -95,8 +95,8 @@ export async function PUT(request: NextRequest) {
     const supabase = await getSupabaseClient()
 
     // Check authentication
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -108,7 +108,7 @@ export async function PUT(request: NextRequest) {
       const { error } = await supabase
         .from('chat_notifications')
         .update({ is_read: true, read_at: new Date().toISOString() })
-        .eq('user_id', session.user.id)
+        .eq('user_id', user.id)
         .eq('is_read', false)
 
       if (error) {
@@ -125,7 +125,7 @@ export async function PUT(request: NextRequest) {
         .from('chat_notifications')
         .update({ is_read: true, read_at: new Date().toISOString() })
         .eq('id', notificationId)
-        .eq('user_id', session.user.id)
+        .eq('user_id', user.id)
 
       if (error) {
         console.error('Failed to mark as read:', error)

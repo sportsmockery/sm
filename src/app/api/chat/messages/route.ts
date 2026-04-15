@@ -32,8 +32,8 @@ export async function POST(request: NextRequest) {
     const supabase = await getSupabaseClient()
 
     // Check authentication
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     const { data: chatUser } = await supabase
       .from('chat_users')
       .select('*')
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .single()
 
     if (!chatUser) {
@@ -76,20 +76,20 @@ export async function POST(request: NextRequest) {
     const { count: minuteCount } = await supabase
       .from('chat_messages')
       .select('*', { count: 'exact', head: true })
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .gte('created_at', oneMinuteAgo)
 
     const { count: hourCount } = await supabase
       .from('chat_messages')
       .select('*', { count: 'exact', head: true })
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .gte('created_at', oneHourAgo)
 
     // Get last message for duplicate check
     const { data: lastMessages } = await supabase
       .from('chat_messages')
       .select('content')
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(1)
 
@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
       await supabase
         .from('chat_moderation_log')
         .insert({
-          user_id: session.user.id,
+          user_id: user.id,
           action: moderationResult.action,
           reason: moderationResult.message,
           flags: moderationResult.flags,
@@ -151,7 +151,7 @@ export async function POST(request: NextRequest) {
         await supabase
           .from('chat_users')
           .update({ is_banned: true, muted_until: banUntil.toISOString() })
-          .eq('user_id', session.user.id)
+          .eq('user_id', user.id)
       }
 
       // Handle mute (progressive)
@@ -166,7 +166,7 @@ export async function POST(request: NextRequest) {
             mute_count: chatUser.mute_count + 1,
             warning_count: chatUser.warning_count + 1,
           })
-          .eq('user_id', session.user.id)
+          .eq('user_id', user.id)
       }
 
       return NextResponse.json({
@@ -184,7 +184,7 @@ export async function POST(request: NextRequest) {
       .from('chat_messages')
       .insert({
         room_id: roomId,
-        user_id: session.user.id,
+        user_id: user.id,
         content,
         content_type: contentType,
         gif_url: gifUrl,

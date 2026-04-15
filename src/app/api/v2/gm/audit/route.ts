@@ -38,14 +38,11 @@ export async function POST(request: NextRequest) {
       }
     )
 
-    const { data: { session } } = await supabase.auth.getSession()
+    const { data: { user } } = await supabase.auth.getUser()
 
     // Call Datalab v2 endpoint
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-    }
-    if (session?.access_token) {
-      headers['Authorization'] = `Bearer ${session.access_token}`
     }
 
     const response = await fetch(`${DATALAB_API}/api/v2/gm/audit`, {
@@ -99,14 +96,11 @@ export async function GET(request: NextRequest) {
       }
     )
 
-    const { data: { session } } = await supabase.auth.getSession()
+    const { data: { user } } = await supabase.auth.getUser()
 
     // Call Datalab v2 endpoint
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-    }
-    if (session?.access_token) {
-      headers['Authorization'] = `Bearer ${session.access_token}`
     }
 
     const response = await fetch(

@@ -39,8 +39,8 @@ export async function POST() {
       }
     )
 
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session?.user) {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -48,7 +48,7 @@ export async function POST() {
     const { data: prefs } = await supabaseAdmin
       .from('sm_user_preferences')
       .select('last_visit_date')
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .single()
 
     const lastVisitDate = prefs?.last_visit_date || null
