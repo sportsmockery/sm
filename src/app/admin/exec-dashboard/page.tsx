@@ -97,6 +97,25 @@ function evergreenPct(name: string) {
   return 15 + Math.abs(h % 55)
 }
 
+// Read Freestar ad report data from localStorage (shared with embedded Freestar app)
+// The embedded app at /admin/freestar/ stores reports under key "sm_ad_reports"
+// (defined as Pr.adReports in public/admin/freestar/assets/index-DGTApot3.js)
+const FREESTAR_STORAGE_KEY = 'sm_ad_reports'
+
+function getFreestarLocalRevenue(startDate: string, endDate: string): number | null {
+  try {
+    const raw = localStorage.getItem(FREESTAR_STORAGE_KEY)
+    if (!raw) return null
+    const reports: Array<{ date: string; revenue: number }> = JSON.parse(raw)
+    if (!Array.isArray(reports) || reports.length === 0) return null
+    const filtered = reports.filter(r => r.date >= startDate && r.date <= endDate)
+    if (filtered.length === 0) return null
+    return filtered.reduce((sum, r) => sum + (r.revenue || 0), 0)
+  } catch {
+    return null
+  }
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // CHART TOOLTIP
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -693,6 +712,7 @@ export default function ExecDashboard() {
   // Freestar P&L state
   const [freestarRevenue, setFreestarRevenue] = useState<number | null>(null)
   const [freestarLoading, setFreestarLoading] = useState(false)
+  const [revenueSource, setRevenueSource] = useState<'local' | 'api' | 'estimate'>('estimate')
   const [freehandExpenses, setFreehandExpenses] = useState<Array<{ id: string; desc: string; amount: number; date: string }>>([])
   const [newExpenseDesc, setNewExpenseDesc] = useState('')
   const [newExpenseAmount, setNewExpenseAmount] = useState('')
@@ -714,63 +734,95 @@ export default function ExecDashboard() {
     } catch {}
   }, [freehandExpenses])
 
-  // Fetch Freestar revenue when on Freestar tab or range changes
+  // Compute date range strings for Freestar revenue queries
+  const freestarDateRange = useMemo(() => {
+    const now = new Date()
+    let start: Date, end: Date
+    if (range === 'today') {
+      start = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      end = now
+    } else if (range === 'yesterday') {
+      start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1)
+      end = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    } else if (range === 'this-week') {
+      const day = now.getDay()
+      start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - day)
+      end = now
+    } else if (range === 'this-month') {
+      start = new Date(now.getFullYear(), now.getMonth(), 1)
+      end = now
+    } else if (range === 'last-month') {
+      start = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+      end = new Date(now.getFullYear(), now.getMonth(), 0)
+    } else if (range === 'ytd') {
+      start = new Date(now.getFullYear(), 0, 1)
+      end = now
+    } else if (range === 'last-year') {
+      start = new Date(now.getFullYear() - 1, 0, 1)
+      end = new Date(now.getFullYear() - 1, 11, 31)
+    } else if (range === 'custom' && customStart && customEnd) {
+      start = new Date(customStart)
+      end = new Date(customEnd)
+    } else {
+      start = new Date(now.getFullYear(), now.getMonth(), 1)
+      end = now
+    }
+    return { startStr: start.toISOString().slice(0, 10), endStr: end.toISOString().slice(0, 10) }
+  }, [range, customStart, customEnd])
+
+  // Fetch Freestar revenue: prefer localStorage (matches embedded dashboard), fallback to API
   useEffect(() => {
     if (tab !== 'Freestar') return
+    const { startStr, endStr } = freestarDateRange
+
+    // First, try reading from localStorage (same source as embedded Freestar dashboard)
+    const localRevenue = getFreestarLocalRevenue(startStr, endStr)
+    if (localRevenue !== null) {
+      setFreestarRevenue(Math.round(localRevenue))
+      setRevenueSource('local')
+      setFreestarLoading(false)
+      return
+    }
+
+    // Fall back to API if no local data
     const fetchFreestarRevenue = async () => {
       setFreestarLoading(true)
       try {
-        // Calculate date range based on current range filter
-        const now = new Date()
-        let start: Date, end: Date
-        if (range === 'today') {
-          start = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-          end = now
-        } else if (range === 'yesterday') {
-          start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1)
-          end = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-        } else if (range === 'this-week') {
-          const day = now.getDay()
-          start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - day)
-          end = now
-        } else if (range === 'this-month') {
-          start = new Date(now.getFullYear(), now.getMonth(), 1)
-          end = now
-        } else if (range === 'last-month') {
-          start = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-          end = new Date(now.getFullYear(), now.getMonth(), 0)
-        } else if (range === 'ytd') {
-          start = new Date(now.getFullYear(), 0, 1)
-          end = now
-        } else if (range === 'last-year') {
-          start = new Date(now.getFullYear() - 1, 0, 1)
-          end = new Date(now.getFullYear() - 1, 11, 31)
-        } else if (range === 'custom' && customStart && customEnd) {
-          start = new Date(customStart)
-          end = new Date(customEnd)
-        } else {
-          start = new Date(now.getFullYear(), now.getMonth(), 1)
-          end = now
-        }
-        const startStr = start.toISOString().slice(0, 10)
-        const endStr = end.toISOString().slice(0, 10)
-        // Freestar API via proxy
         const res = await fetch(`/api/freestar-revenue?start=${startStr}&end=${endStr}`)
         if (res.ok) {
           const json = await res.json()
           setFreestarRevenue(json.revenue ?? null)
+          setRevenueSource('api')
         }
       } catch {
         // Fallback: estimate from dashboard data
         if (data?.overview) {
           setFreestarRevenue(Math.round(data.overview.periodViews * 0.00186))
+          setRevenueSource('estimate')
         }
       } finally {
         setFreestarLoading(false)
       }
     }
     fetchFreestarRevenue()
-  }, [tab, range, customStart, customEnd, data])
+  }, [tab, range, customStart, customEnd, data, freestarDateRange])
+
+  // Listen for localStorage changes from the embedded Freestar iframe
+  // The storage event fires when another window/tab/iframe modifies localStorage
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === FREESTAR_STORAGE_KEY && tab === 'Freestar') {
+        const { startStr, endStr } = freestarDateRange
+        const localRevenue = getFreestarLocalRevenue(startStr, endStr)
+        if (localRevenue !== null) {
+          setFreestarRevenue(Math.round(localRevenue))
+          setRevenueSource('local')
+        }
+      }
+    }
+    window.addEventListener('storage', handleStorageChange)
+    return () => window.removeEventListener('storage', handleStorageChange)
+  }, [tab, freestarDateRange])
 
   const addFreehandExpense = () => {
     if (!newExpenseDesc.trim() || !newExpenseAmount) return
@@ -1763,7 +1815,9 @@ export default function ExecDashboard() {
                       <p className="text-3xl font-extrabold tabular-nums" style={{ color: '#10b981' }}>
                         ${revenue.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                       </p>
-                      <p className="text-xs mt-1" style={{ color: 'var(--sm-text-dim)' }}>Freestar ad revenue</p>
+                      <p className="text-xs mt-1" style={{ color: 'var(--sm-text-dim)' }}>
+                        {revenueSource === 'local' ? 'From uploaded reports' : revenueSource === 'api' ? 'Freestar API' : 'Estimated from views'}
+                      </p>
                     </div>
                     {/* Expenses */}
                     <div className="rounded-xl border px-5 py-4 relative overflow-hidden" style={{ background: 'var(--sm-card)', borderColor: 'rgba(188,0,0,0.25)' }}>
