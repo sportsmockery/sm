@@ -39,11 +39,25 @@
 
     body {
       font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      background: hsl(200 15% 12%) url('https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?w=1920&q=80') center center / cover no-repeat fixed;
+      background: hsl(200 15% 12%);
       color: var(--text);
       min-height: 100vh;
       -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
+    }
+    /* Hero background — use ::after with fixed positioning instead of background-attachment:fixed
+       which is broken on iOS Safari. Load smaller image on mobile. */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: url('https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?w=1920&q=80') center center / cover no-repeat;
+    }
+    @media (max-width: 768px) {
+      body::after {
+        background-image: url('https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?w=800&q=70');
+      }
     }
     body::before {
       content: '';
@@ -63,7 +77,8 @@
     body.on-dashboard {
       background: var(--bg) !important;
     }
-    body.on-dashboard::before {
+    body.on-dashboard::before,
+    body.on-dashboard::after {
       display: none;
     }
     body.on-dashboard .edge-top-logo,
@@ -1082,8 +1097,21 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── Mobile ── */
+    /* ══════════════════════════════════════════════════════
+       MOBILE OPTIMIZATIONS
+       ══════════════════════════════════════════════════════ */
+
+    /* Tablet (768px) */
     @media (max-width: 768px) {
+      /* Briefing sections — tighter spacing */
+      .tournament-hero { margin-bottom: 48px; }
+      .intelligence-grid { margin-bottom: 48px; }
+      .edge-blocks { margin-bottom: 48px; }
+      .mini-leaderboard { margin-bottom: 48px; }
+      .archetypes-grid { margin-bottom: 48px; }
+
+      /* Leaderboard table */
+      .leaderboard-card { border-radius: 10px; }
       .leaderboard-table { font-size: 13px; }
       .leaderboard-table thead th { font-size: 10px; padding: 10px 6px; }
       .leaderboard-table td { padding: 8px 6px; }
@@ -1091,6 +1119,8 @@
       .player-name { font-size: 13px; }
       .player-country { display: none; }
       .round-col-3, .round-col-4 { display: none; }
+
+      /* Scorecard */
       .scorecard-container { padding: 12px 10px 16px; }
       .scorecard-grid {
         font-size: 11px;
@@ -1098,14 +1128,213 @@
       }
       .sc-cell { padding: 6px 2px; }
       .sc-score { width: 22px; height: 22px; font-size: 11px; }
+
+      /* Dashboard header */
       .dash-header-inner { gap: 10px; }
       .dash-title { font-size: 17px; }
     }
-    @media (max-width: 480px) {
-      .leaderboard-table td:nth-child(1) { width: 40px; }
-      .player-cell { gap: 6px; }
-      .player-headshot { width: 24px; height: 24px; }
+
+    /* Mobile (640px) */
+    @media (max-width: 640px) {
+      /* Prevent any horizontal overflow */
+      body, html { overflow-x: hidden !important; }
+
+      /* Briefing view — tighter top padding, safe areas */
+      #briefing-view {
+        padding-top: 180px;
+        padding-bottom: 40px;
+      }
+      .briefing-container {
+        padding: 0 16px;
+        padding-left: calc(16px + env(safe-area-inset-left, 0px));
+        padding-right: calc(16px + env(safe-area-inset-right, 0px));
+      }
+
+      /* Tournament hero */
+      .tournament-hero { margin-bottom: 40px; }
+      .tournament-hero h1 { font-size: 18px; }
+      .tournament-hero .venue-line { font-size: 14px; }
+      .tournament-hero .dates-line { font-size: 13px; }
+      .facts-strip { gap: 6px 12px; font-size: 12px; }
+      .defending-champ { font-size: 12px; }
+      .thesis { font-size: 15px; padding-left: 16px; }
+
+      /* Section headers */
+      .section-title { font-size: 22px; }
+      .section-label { font-size: 10px; margin-bottom: 10px; }
+
+      /* Intelligence cards — single column */
+      .intelligence-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-bottom: 40px;
+      }
+      .glass-card { padding: 18px; border-radius: 12px; }
+      .intel-card-player { font-size: 18px; }
+      .intel-card-text { font-size: 13px; }
+
+      /* Edge blocks — no offset, tighter spacing */
+      .edge-blocks { margin-bottom: 40px; }
+      .edge-block {
+        padding: 16px 0 16px 16px;
+        margin-bottom: 20px;
+      }
+      .edge-block:nth-child(even) { margin-left: 0; }
+      .edge-block-title { font-size: 16px; }
+      .edge-block-text { font-size: 14px; line-height: 1.6; }
+
+      /* Mini leaderboard — horizontal scroll for the table */
+      .mini-leaderboard { margin-bottom: 40px; }
+      .mini-lb-table { font-size: 13px; }
+      .mini-lb-table thead th { font-size: 10px; padding: 8px 6px; }
+      .mini-lb-table td { padding: 8px 6px; }
+      .mini-headshot { width: 24px; height: 24px; }
+      .mini-player-cell { gap: 6px; }
+      .mini-flag { display: none; }
+
+      /* Archetype cards — single column, no overflow */
+      .archetypes-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-bottom: 40px;
+      }
+      .archetype-card { padding: 16px; border-radius: 12px; }
+      .archetype-card-desc { font-size: 12px; }
+      .archetype-card-players { font-size: 13px; }
+
+      /* CTA button — full width on mobile */
+      .cta-btn {
+        width: 100%;
+        justify-content: center;
+        padding: 16px 24px;
+        font-size: 15px;
+        min-height: 50px;
+      }
+
+      /* ── Dashboard mobile ── */
+      .dash-header { padding: 14px 16px; }
+      .dash-header-inner {
+        gap: 8px;
+        padding-left: env(safe-area-inset-left, 0px);
+        padding-right: env(safe-area-inset-right, 0px);
+      }
       .dash-logo { height: 24px; }
+      .dash-divider { height: 20px; }
+      .dash-title { font-size: 16px; }
+      .dash-back { font-size: 12px; gap: 4px; min-height: 44px; display: inline-flex; align-items: center; }
+      .dash-back svg { width: 12px; height: 12px; }
+
+      /* Dashboard nav — horizontal scroll, no wrapping */
+      .dash-nav {
+        padding: 12px 16px 0;
+        gap: 6px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+      .dash-nav::-webkit-scrollbar { display: none; }
+      .dash-nav a {
+        padding: 10px 16px;
+        font-size: 13px;
+        white-space: nowrap;
+        min-height: 44px;
+        flex-shrink: 0;
+      }
+
+      /* Dashboard content */
+      .dash-content {
+        padding: 14px 12px;
+        padding-left: calc(12px + env(safe-area-inset-left, 0px));
+        padding-right: calc(12px + env(safe-area-inset-right, 0px));
+      }
+
+      /* Tournament meta */
+      .tournament-meta-dash { font-size: 11px; gap: 4px 10px; }
+
+      /* Leaderboard — horizontal scroll wrapper */
+      .leaderboard-card {
+        border-radius: 10px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .leaderboard-table { min-width: 520px; }
+      .leaderboard-table td:nth-child(1) { width: 40px; }
+
+      /* Scorecard tab */
+      .scorecard-tab-content { padding: 16px 12px; border-radius: 10px; }
+      .player-selector {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+      }
+      .player-selector select {
+        min-width: unset;
+        width: 100%;
+        padding: 12px;
+        font-size: 16px; /* prevents iOS zoom on focus */
+        min-height: 44px;
+      }
+      .scorecard-player-name { font-size: 16px; }
+      .scorecard-player-img { width: 40px; height: 40px; }
+
+      /* Scorecard grid — tighter for mobile */
+      .scorecard-grid {
+        font-size: 10px;
+        grid-template-columns: 30px repeat(9, 1fr) 30px;
+      }
+      .sc-cell { padding: 5px 1px; }
+      .sc-score { width: 20px; height: 20px; font-size: 10px; }
+      .sc-header { font-size: 9px; }
+      .sc-label { font-size: 9px; }
+
+      /* Field grid — 2 columns, smaller cards */
+      .field-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+      .field-card { padding: 10px; gap: 8px; border-radius: 8px; }
+      .field-headshot { width: 36px; height: 36px; }
+      .field-card-name { font-size: 13px; }
+      .field-card-meta { font-size: 11px; }
+      .field-card-score { font-size: 14px; }
+      .field-search {
+        min-width: unset;
+        width: 100%;
+        padding: 12px;
+        font-size: 16px; /* prevents iOS zoom */
+        min-height: 44px;
+      }
+      .field-controls { gap: 8px; }
+      .field-sort-btn { padding: 10px 12px; min-height: 44px; font-size: 12px; }
+
+      /* Status badge */
+      .status-badge { font-size: 10px; padding: 3px 8px; }
+    }
+
+    /* Small phones (375px and below) */
+    @media (max-width: 375px) {
+      #briefing-view { padding-top: 160px; }
+
+      .tournament-hero h1 { font-size: 16px; }
+      .thesis { font-size: 14px; padding-left: 12px; }
+
+      .section-title { font-size: 20px; }
+
+      .glass-card { padding: 14px; }
+      .intel-card-player { font-size: 16px; }
+
+      .edge-block { padding: 14px 0 14px 12px; }
+
+      /* Field grid single column on very small screens */
+      .field-grid { grid-template-columns: 1fr; }
+      .field-headshot { width: 40px; height: 40px; }
+
+      /* Scorecard even tighter */
+      .scorecard-grid {
+        grid-template-columns: 26px repeat(9, 1fr) 26px;
+        font-size: 9px;
+      }
+      .sc-score { width: 18px; height: 18px; font-size: 9px; }
     }
 
     .sr-only {
@@ -1528,9 +1757,11 @@
       });
 
       container.innerHTML =
+        '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch">' +
         '<table class="mini-lb-table"><thead><tr>' +
           '<th style="width:44px">Pos</th><th>Player</th><th>Total</th><th>Thru</th><th>Today</th>' +
-        '</tr></thead><tbody>' + rows + '</tbody></table>';
+        '</tr></thead><tbody>' + rows + '</tbody></table>' +
+        '</div>';
     }
 
     // ── Dashboard Status Badge ──
@@ -2040,8 +2271,12 @@
       var container = document.getElementById('comets');
       if (!container || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-      // 40 cyan comets
-      for (var i = 0; i < 40; i++) {
+      var isMobile = window.innerWidth <= 640;
+      var cyanCount = isMobile ? 18 : 40;
+      var coralCount = isMobile ? 5 : 10;
+
+      // Cyan comets
+      for (var i = 0; i < cyanCount; i++) {
         var angle = -30 - 30 * Math.random();
         var rad = angle * Math.PI / 180;
         var travel = 120 + 80 * Math.random();
@@ -2057,8 +2292,8 @@
         container.appendChild(el);
       }
 
-      // 10 coral comets (replaces gold for RBC)
-      for (var j = 0; j < 10; j++) {
+      // Coral comets (replaces gold for RBC)
+      for (var j = 0; j < coralCount; j++) {
         var angle2 = -20 - 140 * Math.random();
         var rad2 = angle2 * Math.PI / 180;
         var travel2 = 100 + 100 * Math.random();
