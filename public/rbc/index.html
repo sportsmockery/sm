@@ -1255,7 +1255,7 @@
         <div style="height: 16px;"></div>
         <div class="glass-card" style="padding: 0; overflow: hidden;">
           <div id="mini-lb-container">
-            <div class="loading-state"><div class="loading-spinner"></div>Loading leaderboard...</div>
+            <div style="padding:24px;text-align:center;color:var(--text-dim)">Leaderboard will populate when Round 1 begins &mdash; April 16</div>
           </div>
         </div>
         <a href="#/leaderboard" class="view-full-link">
@@ -1345,7 +1345,7 @@
 
     <div class="dash-content">
       <div id="dash-tab-content">
-        <div class="loading-state"><div class="loading-spinner"></div>Loading...</div>
+        <div style="text-align:center;color:var(--text-dim);padding:60px 20px">Tournament begins April 16. Leaderboard, scorecards, and field data will appear here once play starts.</div>
       </div>
     </div>
   </div>
@@ -1562,7 +1562,7 @@
     function renderFullLeaderboard(players, status) {
       if (!players.length) {
         document.getElementById('dash-tab-content').innerHTML =
-          '<div class="loading-state">No leaderboard data yet. Check back when the tournament begins.</div>';
+          '<div style="text-align:center;color:var(--text-dim);padding:60px 20px">Leaderboard will populate when Round 1 begins &mdash; Thursday, April 16.</div>';
         return;
       }
 
@@ -1951,6 +1951,21 @@
         a.classList.toggle('active', a.dataset.tab === currentTab);
       });
 
+      // Pre-tournament: show static message instead of empty/spinning tabs
+      if (status === 'scheduled' && !currentLeaderboard.length) {
+        var msg = '';
+        if (currentTab === 'leaderboard') {
+          msg = 'Leaderboard will populate when Round 1 begins &mdash; Thursday, April 16.';
+        } else if (currentTab === 'scorecard') {
+          msg = 'Scoring begins Thursday, April 16.';
+        } else if (currentTab === 'field') {
+          msg = 'Field data will appear once tee times are posted.';
+        }
+        document.getElementById('dash-tab-content').innerHTML =
+          '<div style="text-align:center;color:var(--text-dim);padding:60px 20px">' + msg + '</div>';
+        return;
+      }
+
       if (currentTab === 'leaderboard') {
         renderFullLeaderboard(currentLeaderboard, status);
       } else if (currentTab === 'scorecard') {
@@ -1980,8 +1995,13 @@
 
         if (currentTournament) {
           renderDashStatus(currentTournament);
-          renderCurrentTab();
+        } else {
+          document.getElementById('dash-status').innerHTML = '<span class="status-badge status-scheduled">Starts April 16</span>';
+          document.getElementById('dash-meta').innerHTML =
+            '<span>Harbour Town Golf Links &bull; Hilton Head Island, SC</span>' +
+            '<span>Par 71</span><span>82 Players</span><span>No Cut (Signature Event)</span><span>Purse: $20,000,000</span>';
         }
+        renderCurrentTab();
       }
     }
 
@@ -2057,48 +2077,60 @@
 
     // ── Main Load + Polling ──
     async function loadAll() {
+      // Try to load tournament metadata
       try {
         currentTournament = await fetchTournament();
-        var status = getTournamentStatus(currentTournament);
-        currentLeaderboard = await fetchLeaderboard();
-
-        // Render briefing mini leaderboard
-        renderMiniLeaderboard(currentLeaderboard, status);
-
-        // If on dashboard, render it
-        checkRoute();
-
-        // Set up polling
-        if (pollTimer) clearInterval(pollTimer);
-        var interval = POLL_MS[status];
-        if (interval) {
-          pollTimer = setInterval(async function() {
-            try {
-              currentTournament = await fetchTournament();
-              var newStatus = getTournamentStatus(currentTournament);
-              currentLeaderboard = await fetchLeaderboard();
-
-              renderMiniLeaderboard(currentLeaderboard, newStatus);
-
-              if (document.body.classList.contains('on-dashboard')) {
-                renderDashStatus(currentTournament);
-                renderCurrentTab();
-              }
-
-              var newInterval = POLL_MS[newStatus];
-              if (newInterval !== interval) {
-                clearInterval(pollTimer);
-                if (newInterval) {
-                  pollTimer = setInterval(arguments.callee, newInterval);
-                }
-              }
-            } catch (e) { console.error('Poll error:', e); }
-          }, interval);
-        }
       } catch (err) {
-        console.error('Load error:', err);
-        document.getElementById('mini-lb-container').innerHTML =
-          '<div style="padding:24px;text-align:center;color:var(--text-dim)">Tournament data loading... check back soon.</div>';
+        console.error('Tournament fetch failed:', err);
+        currentTournament = null;
+      }
+
+      var status = getTournamentStatus(currentTournament);
+
+      // Only fetch leaderboard if tournament is in progress or final
+      if (status === 'in_progress' || status === 'final') {
+        try {
+          currentLeaderboard = await fetchLeaderboard();
+        } catch (err) {
+          console.error('Leaderboard fetch failed:', err);
+          currentLeaderboard = [];
+        }
+        renderMiniLeaderboard(currentLeaderboard, status);
+      }
+      // Pre-tournament: leave the static "begins April 16" message in place
+
+      // Render dashboard if we're on it
+      checkRoute();
+
+      // Set up polling
+      if (pollTimer) clearInterval(pollTimer);
+      var interval = POLL_MS[status];
+      if (interval) {
+        pollTimer = setInterval(async function pollFn() {
+          try {
+            currentTournament = await fetchTournament();
+            var newStatus = getTournamentStatus(currentTournament);
+
+            // Only fetch leaderboard during/after tournament
+            if (newStatus === 'in_progress' || newStatus === 'final') {
+              currentLeaderboard = await fetchLeaderboard();
+              renderMiniLeaderboard(currentLeaderboard, newStatus);
+            }
+
+            if (document.body.classList.contains('on-dashboard')) {
+              renderDashStatus(currentTournament);
+              renderCurrentTab();
+            }
+
+            var newInterval = POLL_MS[newStatus];
+            if (newInterval !== interval) {
+              clearInterval(pollTimer);
+              if (newInterval) {
+                pollTimer = setInterval(pollFn, newInterval);
+              }
+            }
+          } catch (e) { console.error('Poll error:', e); }
+        }, interval);
       }
     }
 
