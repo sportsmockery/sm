@@ -127,7 +127,6 @@ export default async function WhiteSoxPayrollTrackerPage() {
   const totalCommitted = cap?.total_committed || 0
   const totalCap = cap?.total_cap || 0
   const usedPct = totalCap > 0 && totalCommitted > 0 ? (totalCommitted / totalCap) * 100 : 0
-  const deadPct = cap ? (cap.dead_money / (cap.total_cap || 1)) * 100 : 0
 
   // Position group breakdown
   const groupTotals = rows.reduce((acc, r) => {
@@ -228,18 +227,6 @@ export default async function WhiteSoxPayrollTrackerPage() {
               </span>
             </div>
             <div className="cap-bar-container">
-              {/* Dead money segment */}
-              <div
-                style={{
-                  position: 'absolute',
-                  left: 0,
-                  top: 0,
-                  height: '100%',
-                  width: `${Math.min(deadPct, 100)}%`,
-                  backgroundColor: 'rgba(239, 68, 68, 0.3)',
-                  borderRadius: '7px 0 0 7px',
-                }}
-              />
               {/* Total committed */}
               <div
                 className="cap-bar-used"
@@ -470,7 +457,7 @@ export default async function WhiteSoxPayrollTrackerPage() {
               >
                 <div>Player</div>
                 <div>Pos</div>
-                <div style={{ textAlign: 'right' }}>Luxury Tax</div>
+                <div style={{ textAlign: 'right' }}>Luxury Tax Value</div>
                 <div style={{ textAlign: 'right' }}>Base Salary</div>
                 <div style={{ textAlign: 'center' }}>Years</div>
                 <div style={{ textAlign: 'center' }}>FA Year</div>

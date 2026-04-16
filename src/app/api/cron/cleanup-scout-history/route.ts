@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { supabaseAdmin } from '@/lib/supabase-server'
 
 export const maxDuration = 30
 export const dynamic = 'force-dynamic'
@@ -30,30 +30,18 @@ export async function GET(request: NextRequest) {
   const startTime = Date.now()
 
   try {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-    if (!supabaseUrl || !supabaseKey) {
-      return NextResponse.json({
-        success: false,
-        error: 'Supabase credentials not configured',
-      }, { status: 500 })
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseKey)
-
     // Calculate cutoff date (30 days ago)
     const cutoff = new Date()
     cutoff.setDate(cutoff.getDate() - MAX_DAYS)
 
     // Get count of entries to delete
-    const { count: toDeleteCount } = await supabase
+    const { count: toDeleteCount } = await supabaseAdmin
       .from('scout_query_history')
       .select('*', { count: 'exact', head: true })
       .lt('created_at', cutoff.toISOString())
 
     // Delete old entries
-    const { error: deleteError } = await supabase
+    const { error: deleteError } = await supabaseAdmin
       .from('scout_query_history')
       .delete()
       .lt('created_at', cutoff.toISOString())
@@ -67,7 +55,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get current table size
-    const { count: totalCount } = await supabase
+    const { count: totalCount } = await supabaseAdmin
       .from('scout_query_history')
       .select('*', { count: 'exact', head: true })
 

@@ -61,13 +61,11 @@ export interface BaseCardProps {
 export function ScoutInsightBadge() {
   return (
     <span
-      className="inline-flex items-center rounded-full px-2 py-0.5"
+      className="inline-flex items-center rounded-full px-2 py-0.5 bg-[rgba(11,15,20,0.06)] dark:bg-[rgba(255,255,255,0.08)] text-[#0B0F14] dark:text-[#FAFAFB]"
       style={{
-        fontSize: 10,
+        fontSize: 13,
         fontWeight: 600,
         letterSpacing: "0.03em",
-        backgroundColor: "rgba(0, 0, 0, 0.06)",
-        color: "#3a3a3a",
       }}
     >
       Scout Insight
@@ -156,7 +154,7 @@ function getTeamAccentColor(team: string): string | undefined {
 function CardLabel({ label, isBreaking = false }: { label: string; isBreaking?: boolean }) {
   return (
     <span style={{
-      fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em',
+      fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em',
       color: isBreaking ? '#BC0000' : 'var(--hp-muted-foreground)'
     }}>
       {label}
@@ -245,7 +243,7 @@ export function EngagementRow({
           </button>
         )}
         {listenUrl && listenButtonStyle === "circle" && slug && headline && (
-          <span style={{ fontSize: 12, fontWeight: 600, color: '#00D4FF', letterSpacing: '0.02em' }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: '#00D4FF', letterSpacing: '0.02em' }}>
             {isThisArticlePlaying ? 'Playing...' : 'Listen Now!'}
           </span>
         )}
@@ -258,7 +256,7 @@ export function EngagementRow({
             <svg width="12" height="14" viewBox="0 0 20 24" fill="none" className="flex-shrink-0" aria-hidden="true">
               <path d="M2 1L18 12L2 23V1Z" fill="currentColor" />
             </svg>
-            <span style={{ fontSize: 12, fontWeight: 500 }}>Listen</span>
+            <span style={{ fontSize: 13, fontWeight: 500 }}>Listen</span>
           </Link>
         )}
       </div>
@@ -273,21 +271,21 @@ export function EngagementRow({
             aria-label={label}
           >
             <span style={{ fontSize: 14 }}>{emoji}</span>
-            <span style={{ fontSize: 12, fontWeight: reactions[key] ? 600 : 400 }}>{count}</span>
+            <span style={{ fontSize: 13, fontWeight: reactions[key] ? 600 : 400 }}>{count}</span>
           </button>
         ))}
         {stats.comments > 0 && (articleUrl ? (
           <Link href={articleUrl} className="group flex items-center gap-1 transition-opacity hover:opacity-70 hp-tap-target" aria-label="Comments">
             <MessageCircle className="h-4 w-4" />
-            <span style={{ fontSize: 12 }}>{stats.comments}</span>
+            <span style={{ fontSize: 13 }}>{stats.comments}</span>
           </Link>
         ) : (
           <span className="group flex items-center gap-1 hp-tap-target" aria-label="Comments">
             <MessageCircle className="h-4 w-4" />
-            <span style={{ fontSize: 12 }}>{stats.comments}</span>
+            <span style={{ fontSize: 13 }}>{stats.comments}</span>
           </span>
         ))}
-        <span className="flex items-center gap-1 hp-tap-target" style={{ fontSize: 12 }} title="Views">
+        <span className="flex items-center gap-1 hp-tap-target" style={{ fontSize: 13 }} title="Views">
           <Eye className="h-4 w-4" />
           {stats.views && stats.views !== '0' ? stats.views : '0'}
         </span>
@@ -371,13 +369,11 @@ export function EditorialCard({
                 style={{ height: 32, width: 'auto', objectFit: 'contain' }}
               />
               <span
-                className="inline-flex items-center rounded-full px-2 py-0.5"
+                className="inline-flex items-center rounded-full px-2 py-0.5 bg-[rgba(11,15,20,0.06)] dark:bg-[rgba(255,255,255,0.08)] text-[#0B0F14] dark:text-[#FAFAFB]"
                 style={{
-                  fontSize: 10,
+                  fontSize: 13,
                   fontWeight: 600,
                   letterSpacing: "0.03em",
-                  backgroundColor: "rgba(0,0,0,0.06)",
-                  color: "#3a3a3a",
                   textTransform: "uppercase",
                 }}
               >
@@ -387,7 +383,7 @@ export function EditorialCard({
           ) : (
             <CardLabel label={breakingIndicator || "NEWS"} isBreaking={breakingIndicator === "BREAKING"} />
           )}
-          <span style={{ fontSize: 11, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
+          <span style={{ fontSize: 13, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
         </div>
         <TeamTag team={team} teamHex={teamHex} />
       </div>
@@ -440,7 +436,7 @@ export function EditorialCard({
 
       {insight && (
         <div className="mt-5 rounded-2xl p-4" style={{ background: 'var(--hp-muted)', borderLeft: `3px solid ${cardAccentColor ?? teamHex}`, opacity: 0.9 }}>
-          <span style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--hp-muted-foreground)' }}>Insight</span>
+          <span style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--hp-muted-foreground)' }}>Insight</span>
           <p className="mt-2" style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--hp-foreground)', opacity: 0.65 }}>{insight}</p>
         </div>
       )}
@@ -449,7 +445,7 @@ export function EditorialCard({
         {authorPhoto && (
           <Image src={authorPhoto} alt={author_name} width={20} height={20} className="h-5 w-5 rounded-full object-cover" unoptimized />
         )}
-        <span style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }}>By {author_name}</span>
+        <span style={{ fontSize: 13, color: 'var(--hp-muted-foreground)' }}>By {author_name}</span>
       </div>
 
       {/* Scout Stat hover overlay */}
@@ -462,10 +458,10 @@ export function EditorialCard({
             boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
           }}
         >
-          <span style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#00D4FF" }}>
+          <span style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#00D4FF" }}>
             Scout Stat
           </span>
-          <p className="mt-1" style={{ fontSize: 12, lineHeight: 1.4, color: "var(--hp-foreground)", opacity: 0.8 }}>
+          <p className="mt-1" style={{ fontSize: 13, lineHeight: 1.4, color: "var(--hp-foreground)", opacity: 0.8 }}>
             {scoutStat}
           </p>
         </div>
@@ -476,7 +472,7 @@ export function EditorialCard({
         <div className="mt-5 rounded-2xl p-4" style={{ border: '1px solid var(--hp-border)', background: 'var(--hp-muted)', opacity: 0.9 }}>
           <div className="flex items-center gap-2">
             <Activity className="h-4 w-4 text-[#BC0000]" />
-            <span style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--hp-muted-foreground)' }}>GM Pulse</span>
+            <span style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--hp-muted-foreground)' }}>GM Pulse</span>
           </div>
           <p className="mt-2" style={{ fontSize: 15, fontWeight: 500, color: 'var(--hp-foreground)' }}>{gmQuestion}</p>
           <div className="mt-3 flex gap-3">
@@ -492,7 +488,7 @@ export function EditorialCard({
             >
               {vote && <span className="absolute inset-y-0 left-0 transition-all duration-500" style={{ width: `${yesPercentage}%`, background: 'rgba(34,197,94,0.2)' }} />}
               <span className="relative z-10 flex items-center justify-center gap-2">
-                Yes {vote && <span style={{ fontSize: 12 }}>({yesPercentage}%)</span>}
+                Yes {vote && <span style={{ fontSize: 13 }}>({yesPercentage}%)</span>}
               </span>
             </button>
             <button
@@ -507,11 +503,11 @@ export function EditorialCard({
             >
               {vote && <span className="absolute inset-y-0 left-0 transition-all duration-500" style={{ width: `${noPercentage}%`, background: 'rgba(239,68,68,0.2)' }} />}
               <span className="relative z-10 flex items-center justify-center gap-2">
-                No {vote && <span style={{ fontSize: 12 }}>({noPercentage}%)</span>}
+                No {vote && <span style={{ fontSize: 13 }}>({noPercentage}%)</span>}
               </span>
             </button>
           </div>
-          {vote && <p className="mt-2 text-center" style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }}>{totalVotes.toLocaleString()} votes</p>}
+          {vote && <p className="mt-2 text-center" style={{ fontSize: 13, color: 'var(--hp-muted-foreground)' }}>{totalVotes.toLocaleString()} votes</p>}
         </div>
       )}
     </article>
@@ -543,7 +539,7 @@ export function PollCard({ question, context, options, totalVotes, status, team,
       <div className="flex items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-3">
           <CardLabel label="POLL" />
-          <span style={{ fontSize: 11, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
+          <span style={{ fontSize: 13, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
         </div>
         <TeamTag team={team} teamHex={teamHex} />
       </div>
@@ -577,7 +573,7 @@ export function PollCard({ question, context, options, totalVotes, status, team,
               )}
               <span className="relative z-10 flex items-center justify-between">
                 <span style={{ color: isSelected ? '#00D4FF' : 'var(--hp-foreground)' }}>{option}</span>
-                {isVoted && <span style={{ fontSize: 12, fontWeight: 600, color: isSelected ? '#00D4FF' : 'var(--hp-muted-foreground)' }}>{percentage}%</span>}
+                {isVoted && <span style={{ fontSize: 13, fontWeight: 600, color: isSelected ? '#00D4FF' : 'var(--hp-muted-foreground)' }}>{percentage}%</span>}
               </span>
             </button>
           )
@@ -590,7 +586,7 @@ export function PollCard({ question, context, options, totalVotes, status, team,
           {(commentsCount ?? 0) > 0 && (
             <span className="flex items-center gap-1 hp-tap-target" aria-label="Comments">
               <MessageCircle className="h-4 w-4" />
-              <span style={{ fontSize: 12 }}>{commentsCount}</span>
+              <span style={{ fontSize: 13 }}>{commentsCount}</span>
             </span>
           )}
           <div className="flex items-center gap-1">
@@ -624,7 +620,7 @@ export function ChartCard({ headline, takeaway, chartData, statSource, team, tea
       <div className="flex items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-3">
           <CardLabel label="STATS" />
-          <span style={{ fontSize: 11, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
+          <span style={{ fontSize: 13, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
         </div>
         <TeamTag team={team} teamHex={teamHex} />
       </div>
@@ -640,7 +636,7 @@ export function ChartCard({ headline, takeaway, chartData, statSource, team, tea
                 <stop offset="95%" stopColor={teamHex} stopOpacity={0}/>
               </linearGradient>
             </defs>
-            <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: 'var(--hp-muted-foreground)' }} />
+            <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 13, fill: 'var(--hp-muted-foreground)' }} />
             <YAxis hide />
             <Tooltip
               contentStyle={{
@@ -666,7 +662,7 @@ export function ChartCard({ headline, takeaway, chartData, statSource, team, tea
         <p style={{ fontSize: 14, color: 'var(--hp-foreground)', opacity: 0.8 }}>{takeaway}</p>
       </div>
 
-      <p className="mt-3" style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }}>Source: {statSource}</p>
+      <p className="mt-3" style={{ fontSize: 13, color: 'var(--hp-muted-foreground)' }}>Source: {statSource}</p>
       <EngagementRow stats={stats} articleUrl={articleUrl} />
     </article>
   )
@@ -695,7 +691,7 @@ export function HubUpdateCard({ updateText, takeaway, status, team, teamColor, t
         <div className="flex items-center gap-3">
           <CardLabel label="UPDATE" isBreaking={status === "LIVE"} />
           {status === "LIVE" && <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#BC0000' }} />}
-          <span style={{ fontSize: 11, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
+          <span style={{ fontSize: 13, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
         </div>
         <TeamTag team={team} teamHex={teamHex} />
       </div>
@@ -709,7 +705,7 @@ export function HubUpdateCard({ updateText, takeaway, status, team, teamColor, t
           <ChevronRight className="h-4 w-4" />
         </button>
         {(commentsCount ?? 0) > 0 && (
-          <span className="flex items-center gap-1 hp-tap-target" style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }} aria-label="Comments">
+          <span className="flex items-center gap-1 hp-tap-target" style={{ fontSize: 13, color: 'var(--hp-muted-foreground)' }} aria-label="Comments">
             <MessageCircle className="h-4 w-4" />
             <span>{commentsCount}</span>
           </span>
@@ -743,7 +739,7 @@ export function BoxScoreCard({ homeTeam, awayTeam, status, period, keyPerformer,
       <div className="flex items-center gap-3 mb-4">
         <CardLabel label="BOX SCORE" isBreaking={status === "LIVE"} />
         {status === "LIVE" && <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#BC0000' }} />}
-        <span style={{ fontSize: 11, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
+        <span style={{ fontSize: 13, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
       </div>
 
       <div className="mt-4 rounded-2xl p-4" style={{ border: '1px solid var(--hp-border)', background: 'var(--hp-card)' }}>
@@ -783,7 +779,7 @@ export function BoxScoreCard({ homeTeam, awayTeam, status, period, keyPerformer,
           <button onClick={() => router.push(`/scout-ai?q=${encodeURIComponent(`${awayTeam.name} vs ${homeTeam.name} reactions`)}`)} className="hp-tap-target hover:opacity-80 transition-opacity" style={{ fontSize: 14, fontWeight: 500, color: '#00D4FF' }}>Reactions</button>
         </div>
         {(commentsCount ?? 0) > 0 && (
-          <span className="flex items-center gap-1 hp-tap-target" style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }} aria-label="Comments">
+          <span className="flex items-center gap-1 hp-tap-target" style={{ fontSize: 13, color: 'var(--hp-muted-foreground)' }} aria-label="Comments">
             <MessageCircle className="h-4 w-4" />
             <span>{commentsCount}</span>
           </span>
@@ -814,7 +810,7 @@ export function TradeProposalCard({ proposer, teamGets, otherTeamGets, fairnessS
     <article className="hp-feed-card hp-card-enter">
       <div className="flex items-center gap-3 mb-4">
         <CardLabel label="TRADE" />
-        <span style={{ fontSize: 11, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
+        <span style={{ fontSize: 13, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
       </div>
 
       <p style={{ fontSize: 13, color: 'var(--hp-muted-foreground)' }}>Proposed by {proposer.name}</p>
@@ -823,10 +819,10 @@ export function TradeProposalCard({ proposer, teamGets, otherTeamGets, fairnessS
         <div className="grid grid-cols-2" style={{ borderBottom: 'none' }}>
           <div className="p-4" style={{ borderRight: '1px solid var(--hp-border)' }}>
             <div className="flex items-center gap-2 mb-3">
-              <span className="inline-flex items-center rounded-lg px-2.5 py-1 text-white" style={{ fontSize: 11, fontWeight: 600, backgroundColor: teamHex }}>
+              <span className="inline-flex items-center rounded-lg px-2.5 py-1 text-white" style={{ fontSize: 13, fontWeight: 600, backgroundColor: teamHex }}>
                 {teamGets.name}
               </span>
-              <span style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }}>receives</span>
+              <span style={{ fontSize: 13, color: 'var(--hp-muted-foreground)' }}>receives</span>
             </div>
             <ul className="space-y-1.5">
               {teamGets.items.map((item, i) => (
@@ -840,10 +836,10 @@ export function TradeProposalCard({ proposer, teamGets, otherTeamGets, fairnessS
 
           <div className="p-4">
             <div className="flex items-center gap-2 mb-3">
-              <span className="inline-flex items-center rounded-lg px-2.5 py-1" style={{ fontSize: 11, fontWeight: 600, background: 'var(--hp-muted-foreground)', color: 'var(--hp-background)' }}>
+              <span className="inline-flex items-center rounded-lg px-2.5 py-1" style={{ fontSize: 13, fontWeight: 600, background: 'var(--hp-muted-foreground)', color: 'var(--hp-background)' }}>
                 {otherTeamGets.name}
               </span>
-              <span style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }}>receives</span>
+              <span style={{ fontSize: 13, color: 'var(--hp-muted-foreground)' }}>receives</span>
             </div>
             <ul className="space-y-1.5">
               {otherTeamGets.items.map((item, i) => (
@@ -859,18 +855,18 @@ export function TradeProposalCard({ proposer, teamGets, otherTeamGets, fairnessS
         <div className="p-4 flex items-center justify-between" style={{ borderTop: '1px solid var(--hp-border)', background: 'var(--hp-muted)' }}>
           <div className="flex items-center gap-4">
             <div>
-              <span style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }}>Fairness</span>
+              <span style={{ fontSize: 13, color: 'var(--hp-muted-foreground)' }}>Fairness</span>
               <div className="flex items-center gap-2 mt-1">
                 <div className="h-2 w-24 rounded-full overflow-hidden" style={{ background: 'var(--hp-muted)' }}>
                   <div className="h-full rounded-full" style={{ width: `${fairnessScore}%`, background: 'linear-gradient(to right, #BC0000, #eab308, #00D4FF)' }} />
                 </div>
-                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--hp-foreground)' }}>{fairnessScore}%</span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--hp-foreground)' }}>{fairnessScore}%</span>
               </div>
             </div>
             {isEditorApproved && (
               <div className="flex items-center gap-1" style={{ color: '#16a34a' }}>
                 <Check className="h-4 w-4" />
-                <span style={{ fontSize: 12, fontWeight: 600 }}>Editor Approved</span>
+                <span style={{ fontSize: 13, fontWeight: 600 }}>Editor Approved</span>
               </div>
             )}
           </div>
@@ -880,9 +876,9 @@ export function TradeProposalCard({ proposer, teamGets, otherTeamGets, fairnessS
               onClick={() => setUserVote("approve")}
               className="flex items-center gap-1 rounded-xl px-3 py-1.5 transition-all hp-tap-target"
               style={{
-                fontSize: 12, fontWeight: 600,
+                fontSize: 13, fontWeight: 600,
                 background: userVote === "approve" ? '#00D4FF' : 'var(--hp-card)',
-                color: userVote === "approve" ? '#fff' : 'var(--hp-foreground)',
+                color: userVote === "approve" ? '#FAFAFB' : 'var(--hp-foreground)',
                 border: `1px solid ${userVote === "approve" ? '#00D4FF' : 'var(--hp-border)'}`,
               }}
             >
@@ -892,9 +888,9 @@ export function TradeProposalCard({ proposer, teamGets, otherTeamGets, fairnessS
               onClick={() => setUserVote("reject")}
               className="flex items-center gap-1 rounded-xl px-3 py-1.5 transition-all hp-tap-target"
               style={{
-                fontSize: 12, fontWeight: 600,
+                fontSize: 13, fontWeight: 600,
                 background: userVote === "reject" ? '#BC0000' : 'var(--hp-card)',
-                color: userVote === "reject" ? '#fff' : 'var(--hp-foreground)',
+                color: userVote === "reject" ? '#FAFAFB' : 'var(--hp-foreground)',
                 border: `1px solid ${userVote === "reject" ? '#BC0000' : 'var(--hp-border)'}`,
               }}
             >
@@ -904,7 +900,7 @@ export function TradeProposalCard({ proposer, teamGets, otherTeamGets, fairnessS
         </div>
       </div>
 
-      <div className="mt-3 flex justify-end" style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }}>
+      <div className="mt-3 flex justify-end" style={{ fontSize: 13, color: 'var(--hp-muted-foreground)' }}>
         {(commentsCount ?? 0) > 0 && (
           <span className="flex items-center gap-1 hp-tap-target" aria-label="Comments">
             <MessageCircle className="h-4 w-4" />
@@ -935,14 +931,7 @@ export function ScoutSummaryCard({ summary, bullets, topic, team, teamColor, tim
   const router = useRouter()
   const audio = useAudioPlayer()
 
-  const normalizedTeam = team.toLowerCase()
-  const edgeColor =
-    normalizedTeam.includes('bear') ? '#C83803' :        // Bears
-    normalizedTeam.includes('white sox') || normalizedTeam.includes('whitesox') ? '#000000' : // White Sox
-    normalizedTeam.includes('cub') ? '#0E3386' :         // Cubs
-    normalizedTeam.includes('bull') ? '#CE1141' :        // Bulls
-    normalizedTeam.includes('blackhawk') ? '#00833E' :   // Blackhawks
-    '#BC0000'
+  const edgeColor = getTeamAccentColor(team) ?? '#BC0000'
 
   const articleHref = slug && categorySlug ? `/${categorySlug}/${slug}` : null
 
@@ -988,7 +977,7 @@ export function ScoutSummaryCard({ summary, bullets, topic, team, teamColor, tim
           >
             Scout AI Insight
           </span>
-          <span style={{ fontSize: 11, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
+          <span style={{ fontSize: 13, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
         </div>
         <TeamTag team={team} teamHex={teamHex} />
       </div>
@@ -1005,7 +994,7 @@ export function ScoutSummaryCard({ summary, bullets, topic, team, teamColor, tim
       </p>
       <p
         style={{
-          fontSize: 12,
+          fontSize: 13,
           lineHeight: 1.5,
           fontWeight: 500,
           color: 'var(--hp-muted-foreground)',
@@ -1032,7 +1021,7 @@ export function ScoutSummaryCard({ summary, bullets, topic, team, teamColor, tim
 
       {bullets.length > 0 && (
         <div className="mt-4 rounded-2xl p-4" style={{ background: 'var(--hp-muted)', border: '1px solid var(--hp-border)' }}>
-          <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--hp-muted-foreground)' }}>Key Insights</span>
+          <span style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--hp-muted-foreground)' }}>Key Insights</span>
           <ul className="mt-2.5 space-y-2">
             {bullets.map((bullet, i) => (
               <li key={i} className="flex items-start gap-2.5" style={{ fontSize: 14, color: 'var(--hp-foreground)', opacity: 0.8 }}>
@@ -1067,13 +1056,13 @@ export function ScoutSummaryCard({ summary, bullets, topic, team, teamColor, tim
           <button
             onClick={() => router.push(`/scout-ai?q=${encodeURIComponent(`${topic} ${team}`)}`)}
             className="flex items-center gap-1.5 transition-opacity hp-tap-target hover:opacity-70"
-            style={{ fontSize: 12, fontWeight: 500 }}
+            style={{ fontSize: 13, fontWeight: 500 }}
           >
             <Image src="/downloads/scout-v2.png" alt="Scout" width={16} height={16} className="h-4 w-4 rounded-full object-contain" />
             <span>Ask Scout</span>
           </button>
         </div>
-        <div className="flex items-center gap-3" style={{ fontSize: 12 }}>
+        <div className="flex items-center gap-3" style={{ fontSize: 13 }}>
           {(commentsCount ?? 0) > 0 && (articleHref ? (
             <Link href={articleHref} className="flex items-center gap-1 transition-opacity hover:opacity-70 hp-tap-target" aria-label="Comments">
               <MessageCircle className="h-4 w-4" />
@@ -1117,7 +1106,7 @@ export function TrendingArticleCard({ headline, summary, trendMetric, team, team
       <div className="flex items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-3">
           <CardLabel label="TRENDING" />
-          <span style={{ fontSize: 11, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
+          <span style={{ fontSize: 13, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
         </div>
         <TeamTag team={team} teamHex={teamHex} />
       </div>
@@ -1136,7 +1125,7 @@ export function TrendingArticleCard({ headline, summary, trendMetric, team, team
       )}
       <p className="mt-3 line-clamp-3" style={{ fontSize: 15, lineHeight: 1.65, color: 'var(--hp-foreground)', opacity: 0.7 }}>{summary}</p>
 
-      <div className="mt-5 flex items-center justify-end gap-3" style={{ fontSize: 12, color: 'var(--hp-muted-foreground)' }}>
+      <div className="mt-5 flex items-center justify-end gap-3" style={{ fontSize: 13, color: 'var(--hp-muted-foreground)' }}>
         {stats.comments > 0 && (articleUrl ? (
           <Link href={articleUrl} className="flex items-center gap-1 transition-opacity hover:opacity-70 hp-tap-target" aria-label="Comments">
             <MessageCircle className="h-4 w-4" />
@@ -1185,7 +1174,7 @@ export function DebateCard({ prompt, sideA, sideB, participantCount, team, teamC
       <div className="flex items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-3">
           <CardLabel label="DEBATE" />
-          <span style={{ fontSize: 11, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
+          <span style={{ fontSize: 13, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
         </div>
         <TeamTag team={team} teamHex={teamHex} />
       </div>
@@ -1234,7 +1223,7 @@ export function DebateCard({ prompt, sideA, sideB, participantCount, team, teamC
             <span>{participantCount.toLocaleString()} participating</span>
           </div>
           {(commentsCount ?? 0) > 0 && (
-            <span className="flex items-center gap-1 hp-tap-target" style={{ fontSize: 12 }} aria-label="Comments">
+            <span className="flex items-center gap-1 hp-tap-target" style={{ fontSize: 13 }} aria-label="Comments">
               <MessageCircle className="h-4 w-4" />
               <span>{commentsCount}</span>
             </span>
@@ -1299,7 +1288,7 @@ export function ScoutBriefingCard() {
         >
           Scout Briefing
         </span>
-        <span style={{ fontSize: 11, color: 'var(--hp-muted-foreground)' }}>23h</span>
+        <span style={{ fontSize: 13, color: 'var(--hp-muted-foreground)' }}>23h</span>
       </div>
 
       <ul className="space-y-2">
@@ -1340,7 +1329,7 @@ export function ScoutBriefingCard() {
         <button
           onClick={() => router.push("/scout-ai")}
           className="flex items-center gap-1.5 transition-opacity hp-tap-target hover:opacity-70"
-          style={{ fontSize: 12, fontWeight: 500 }}
+          style={{ fontSize: 13, fontWeight: 500 }}
         >
           <Image src="/downloads/scout-v2.png" alt="Scout" width={16} height={16} className="h-4 w-4 rounded-full object-contain" />
           <span>Ask Scout</span>
@@ -1374,7 +1363,7 @@ export function ScoutAnalysisCard({ analysis }: ScoutAnalysisCardProps) {
         />
         <span
           style={{
-            fontSize: 12,
+            fontSize: 13,
             fontWeight: 700,
             textTransform: "uppercase",
             letterSpacing: "0.05em",
@@ -1451,7 +1440,7 @@ export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team,
                   priority
                 />
               </div>
-              <span style={{ fontSize: 11, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
+              <span style={{ fontSize: 13, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
             </>
           ) : isUntoldChicago(source) ? (
             <>
@@ -1473,12 +1462,12 @@ export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team,
                 style={{ height: 40, width: 'auto', objectFit: 'contain' }}
                 priority
               />
-              <span style={{ fontSize: 11, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
+              <span style={{ fontSize: 13, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
             </>
           ) : (
             <>
               <CardLabel label="VIDEO" />
-              <span style={{ fontSize: 11, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
+              <span style={{ fontSize: 13, color: 'var(--hp-muted-foreground)' }}>{timestamp}</span>
             </>
           )}
         </div>
@@ -1492,15 +1481,15 @@ export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team,
             className="flex items-center gap-1.5 rounded-full px-3 py-1 transition-opacity hover:opacity-80"
             style={{
               backgroundColor: '#FF0000',
-              color: '#fff',
-              fontSize: 11,
+              color: '#FAFAFB',
+              fontSize: 13,
               fontWeight: 600,
               textDecoration: 'none',
               lineHeight: '20px',
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <svg width="14" height="10" viewBox="0 0 24 17" fill="#fff">
+            <svg width="14" height="10" viewBox="0 0 24 17" fill="#FAFAFB">
               <path d="M23.5 2.5a3 3 0 00-2.1-2.1C19.5 0 12 0 12 0S4.5 0 2.6.4A3 3 0 00.5 2.5 31.5 31.5 0 000 8.5a31.5 31.5 0 00.5 6 3 3 0 002.1 2.1c1.9.4 9.4.4 9.4.4s7.5 0 9.4-.4a3 3 0 002.1-2.1 31.5 31.5 0 00.5-6 31.5 31.5 0 00-.5-6zM9.6 12.1V4.9l6.3 3.6-6.3 3.6z" />
             </svg>
             Subscribe
@@ -1513,15 +1502,15 @@ export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team,
             className="flex items-center gap-1.5 rounded-full px-3 py-1 transition-opacity hover:opacity-80"
             style={{
               backgroundColor: '#FF0000',
-              color: '#fff',
-              fontSize: 11,
+              color: '#FAFAFB',
+              fontSize: 13,
               fontWeight: 600,
               textDecoration: 'none',
               lineHeight: '20px',
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <svg width="14" height="10" viewBox="0 0 24 17" fill="#fff">
+            <svg width="14" height="10" viewBox="0 0 24 17" fill="#FAFAFB">
               <path d="M23.5 2.5a3 3 0 00-2.1-2.1C19.5 0 12 0 12 0S4.5 0 2.6.4A3 3 0 00.5 2.5 31.5 31.5 0 000 8.5a31.5 31.5 0 00.5 6 3 3 0 002.1 2.1c1.9.4 9.4.4 9.4.4s7.5 0 9.4-.4a3 3 0 002.1-2.1 31.5 31.5 0 00.5-6 31.5 31.5 0 00-.5-6zM9.6 12.1V4.9l6.3 3.6-6.3 3.6z" />
             </svg>
             Subscribe
@@ -1581,10 +1570,10 @@ export function VideoCard({ title, duration, source, teaser, thumbnailUrl, team,
                   </svg>
                 </div>
               </div>
-              <div className="absolute bottom-3 right-3 rounded-lg px-2.5 py-1" style={{ background: 'rgba(0,0,0,0.8)', fontSize: 12, fontWeight: 500, color: '#fff' }}>
+              <div className="absolute bottom-3 right-3 rounded-lg px-2.5 py-1" style={{ background: 'rgba(0,0,0,0.8)', fontSize: 13, fontWeight: 500, color: '#FAFAFB' }}>
                 {duration}
               </div>
-              <div className="absolute top-3 left-3 rounded-lg px-2.5 py-1" style={{ background: 'rgba(0,0,0,0.6)', fontSize: 12, fontWeight: 500, color: '#fff' }}>
+              <div className="absolute top-3 left-3 rounded-lg px-2.5 py-1" style={{ background: 'rgba(0,0,0,0.6)', fontSize: 13, fontWeight: 500, color: '#FAFAFB' }}>
                 {source}
               </div>
             </button>
@@ -1646,7 +1635,7 @@ export function FanReactionsCard() {
             gap: 5,
             padding: '3px 8px',
             borderRadius: 999,
-            fontSize: 10,
+            fontSize: 13,
             fontWeight: 700,
             letterSpacing: '0.05em',
             color: '#22c55e',
@@ -1669,7 +1658,7 @@ export function FanReactionsCard() {
             <p style={{ fontSize: 14, lineHeight: 1.5, color: "var(--hp-foreground)", fontStyle: "italic" }}>
               &ldquo;{r.quote}&rdquo;
             </p>
-            <p className="mt-1" style={{ fontSize: 12, color: "var(--hp-muted-foreground)" }}>
+            <p className="mt-1" style={{ fontSize: 13, color: "var(--hp-muted-foreground)" }}>
               &mdash; {r.user}
             </p>
           </div>
@@ -1710,7 +1699,7 @@ export function ScoutPredictionCard({ homeTeam, awayTeam, homeScore, awayScore, 
     <article className="hp-feed-card hp-card-enter" style={{ borderLeft: "3px solid #00D4FF" }}>
       <div className="flex items-center gap-2.5 mb-4">
         <Image src="/downloads/scout-v2.png" alt="Scout" width={20} height={20} className="h-5 w-5 rounded-full object-contain" />
-        <span style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#00D4FF" }}>
+        <span style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#00D4FF" }}>
           Scout Prediction
         </span>
         <ScoutInsightBadge />
@@ -1760,7 +1749,7 @@ export function ScoutPredictionCard({ homeTeam, awayTeam, homeScore, awayScore, 
         </button>
       </div>
       {userVote && (
-        <p className="mt-2 text-center" style={{ fontSize: 12, color: "var(--hp-muted-foreground)" }}>
+        <p className="mt-2 text-center" style={{ fontSize: 13, color: "var(--hp-muted-foreground)" }}>
           {total.toLocaleString()} votes
         </p>
       )}
@@ -1784,13 +1773,13 @@ export function RumorCredibilityMeter({ level }: { level: CredibilityLevel }) {
 
   return (
     <div className="mt-2 flex items-center gap-2.5">
-      <span style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--hp-muted-foreground)" }}>
+      <span style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--hp-muted-foreground)" }}>
         Credibility
       </span>
       <div className="h-1.5 flex-1 rounded-full overflow-hidden" style={{ background: "var(--hp-muted)", maxWidth: 80 }}>
         <div className="h-full rounded-full transition-all" style={{ width, background: color }} />
       </div>
-      <span style={{ fontSize: 10, fontWeight: 700, color }}>{label}</span>
+      <span style={{ fontSize: 13, fontWeight: 700, color }}>{label}</span>
     </div>
   )
 }
@@ -1811,7 +1800,7 @@ export function GameModeCard({ homeTeam, awayTeam, kickoff, scoutNote }: GameMod
     <article className="hp-feed-card hp-card-enter" style={{ border: "2px solid rgba(188, 0, 0, 0.3)" }}>
       <div className="flex items-center gap-2.5 mb-3">
         <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: "#BC0000" }} />
-        <span style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#BC0000" }}>
+        <span style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#BC0000" }}>
           Game Mode
         </span>
       </div>
@@ -1826,7 +1815,7 @@ export function GameModeCard({ homeTeam, awayTeam, kickoff, scoutNote }: GameMod
       <div className="mt-4 flex items-start gap-2.5 rounded-xl p-3" style={{ background: "var(--hp-muted)", borderLeft: "3px solid #00D4FF" }}>
         <Image src="/downloads/scout-v2.png" alt="Scout" width={20} height={20} className="h-5 w-5 rounded-full object-contain mt-0.5" />
         <div>
-          <span style={{ fontSize: 11, fontWeight: 700, color: "#00D4FF" }}>Scout says:</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: "#00D4FF" }}>Scout says:</span>
           <p className="mt-0.5" style={{ fontSize: 14, lineHeight: 1.5, color: "var(--hp-foreground)", opacity: 0.8 }}>
             {scoutNote}
           </p>

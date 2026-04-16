@@ -1,46 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { datalabAdmin } from '@/lib/supabase-datalab'
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+import { requireAdmin } from '@/lib/admin-auth'
 
 export const dynamic = 'force-dynamic'
-
-async function getAdminUser(request: NextRequest) {
-  const cookieStore = await cookies()
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll()
-        },
-        setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, options)
-            })
-          } catch {}
-        },
-      },
-    }
-  )
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
-
-  // Check if user is admin
-  const { data: roleData } = await supabase
-    .from('sm_user_roles')
-    .select('role')
-    .eq('email', user.email)
-    .single()
-
-  if (roleData?.role !== 'admin') return null
-
-  return user
-}
 
 interface UserGMScore {
   user_id: string
@@ -58,9 +20,9 @@ interface UserGMScore {
 
 export async function GET(request: NextRequest) {
   try {
-    const admin = await getAdminUser(request)
-    if (!admin) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
+    const auth = await requireAdmin(request)
+    if (auth.error) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status })
     }
 
     const searchParams = request.nextUrl.searchParams

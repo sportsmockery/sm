@@ -218,7 +218,8 @@ function generateSlug(name: string): string {
 
 /**
  * Get all Cubs players from DataLab
- * Filters to current roster using is_active = true (confirmed by Datalab Jan 26, 2026)
+ * Uses cubs_contracts as the roster source of truth (~40 players),
+ * joined with cubs_players for headshots and bio data.
  */
 export async function getCubsPlayers(): Promise<CubsPlayer[]> {
   if (!datalabAdmin) {
@@ -226,16 +227,51 @@ export async function getCubsPlayers(): Promise<CubsPlayer[]> {
     return []
   }
 
-  const data = await safeDatalabQuery(
-    () => datalabAdmin
-      .from('cubs_players')
-      .select('*')
-      .eq('is_active', true)
-      .order('position')
-      .order('name'),
-    [] as any[],
-    'cubs players'
-  )
+  // Fetch contracts (roster source of truth) and players (for headshots/detail) in parallel
+  const [contracts, players] = await Promise.all([
+    safeDatalabQuery(
+      () => datalabAdmin
+        .from('cubs_contracts')
+        .select('player_id, player_name, position, age, cap_hit, base_salary, contract_years, free_agent_year')
+        .eq('season', 2026)
+        .order('position')
+        .order('player_name'),
+      [] as any[],
+      'cubs contracts'
+    ),
+    safeDatalabQuery(
+      () => datalabAdmin
+        .from('cubs_players')
+        .select('*'),
+      [] as any[],
+      'cubs players (headshots)'
+    ),
+  ])
+
+  // Build headshot/bio lookup by ESPN ID (contracts.player_id = players.espn_id)
+  const headshots = new Map(players?.map((p: any) => [String(p.espn_id), p]) || [])
+
+  // Deduplicate contracts by player_id to prevent duplicate rows
+  const seen = new Set<string>()
+  const uniqueContracts = contracts.filter((c: any) => {
+    const pid = String(c.player_id)
+    if (seen.has(pid)) return false
+    seen.add(pid)
+    return true
+  })
+
+  // Merge: contracts drive the roster, players provide headshots/detail
+  const data = uniqueContracts.map((c: any) => {
+    const bio = headshots.get(String(c.player_id)) || {} as any
+    return {
+      ...bio,
+      // Contract fields take precedence
+      espn_id: c.player_id,
+      name: c.player_name || bio.name || bio.full_name,
+      position: c.position || bio.position,
+      age: c.age ?? bio.age,
+    }
+  })
 
   return transformPlayers(data)
 }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { supabaseAdmin } from '@/lib/supabase-server';
 import {
   sendChicagoDailyEmail,
   sendABTest,
@@ -12,8 +12,6 @@ import {
 // =============================================================================
 
 const CRON_SECRET = process.env.CRON_SECRET;
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 // =============================================================================
 // GET Handler (Vercel Cron)
@@ -48,9 +46,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch subscribers from Supabase
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
-
-    const { data: subscribers, error: subError } = await supabase
+    const { data: subscribers, error: subError } = await supabaseAdmin
       .from('email_subscribers')
       .select('email')
       .eq('subscribed', true)
@@ -108,7 +104,7 @@ export async function GET(request: NextRequest) {
     const successCount = results.filter((r) => r.success).length;
     const totalSent = results.reduce((sum, r) => sum + r.recipientCount, 0);
 
-    await supabase.from('email_send_log').insert({
+    await supabaseAdmin.from('email_send_log').insert({
       campaign: 'chicago_daily',
       date: targetDate.toISOString().split('T')[0],
       recipients_count: totalSent,

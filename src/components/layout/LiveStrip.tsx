@@ -6,7 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter, usePathname } from 'next/navigation';
 
-const POLL_INTERVAL = 15_000; // 15s when live games exist
+const POLL_INTERVAL = 10_000; // 10s when live games exist
 
 interface LiveGame {
   game_id: string;

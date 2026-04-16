@@ -203,7 +203,8 @@ function generateSlug(name: string): string {
 
 /**
  * Get all Bulls players from DataLab
- * Filters to current roster using is_current_bulls = true
+ * Uses bulls_contracts as the roster source of truth (~15 players),
+ * joined with bulls_players for headshots and bio data.
  */
 export async function getBullsPlayers(): Promise<BullsPlayer[]> {
   if (!datalabAdmin) {
@@ -211,16 +212,51 @@ export async function getBullsPlayers(): Promise<BullsPlayer[]> {
     return []
   }
 
-  const data = await safeDatalabQuery(
-    () => datalabAdmin
-      .from('bulls_players')
-      .select('*')
-      .eq('is_current_bulls', true)
-      .order('position')
-      .order('name'),
-    [] as any[],
-    'bulls players'
-  )
+  // Fetch contracts (roster source of truth) and players (for headshots/detail) in parallel
+  const [contracts, players] = await Promise.all([
+    safeDatalabQuery(
+      () => datalabAdmin
+        .from('bulls_contracts')
+        .select('player_id, player_name, position, age, cap_hit, base_salary, contract_years, free_agent_year')
+        .eq('season', 2026)
+        .order('position')
+        .order('player_name'),
+      [] as any[],
+      'bulls contracts'
+    ),
+    safeDatalabQuery(
+      () => datalabAdmin
+        .from('bulls_players')
+        .select('*'),
+      [] as any[],
+      'bulls players (headshots)'
+    ),
+  ])
+
+  // Build headshot/bio lookup by ESPN ID (Bulls uses espn_player_id, not espn_id)
+  const headshots = new Map(players?.map((p: any) => [String(p.espn_player_id), p]) || [])
+
+  // Deduplicate contracts by player_id to prevent duplicate rows
+  const seen = new Set<string>()
+  const uniqueContracts = contracts.filter((c: any) => {
+    const pid = String(c.player_id)
+    if (seen.has(pid)) return false
+    seen.add(pid)
+    return true
+  })
+
+  // Merge: contracts drive the roster, players provide headshots/detail
+  const data = uniqueContracts.map((c: any) => {
+    const bio = headshots.get(String(c.player_id)) || {} as any
+    return {
+      ...bio,
+      // Contract fields take precedence
+      espn_player_id: c.player_id,
+      name: c.player_name || bio.name || bio.full_name,
+      position: c.position || bio.position,
+      age: c.age ?? bio.age,
+    }
+  })
 
   return transformPlayers(data)
 }
@@ -259,7 +295,7 @@ function transformPlayers(data: any[]): BullsPlayer[] {
     const yearsExp = p.years_pro ?? p.years_exp ?? p.experience
 
     return {
-      playerId: String(p.player_id || p.espn_id || p.id),
+      playerId: String(p.espn_player_id || p.player_id || p.id),
       internalId: p.id,
       slug: p.slug || generateSlug(p.name || p.full_name),
       fullName: p.name || p.full_name,

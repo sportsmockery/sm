@@ -214,7 +214,7 @@ export const DebateCard = React.memo(function DebateCard({ item }: { item: FeedI
           style={{ backgroundColor: 'rgba(214,176,94,0.06)', border: '1px solid rgba(214,176,94,0.15)' }}
         >
           <p className="text-[16px] font-medium leading-relaxed" style={{ color: BRAND.white }}>
-            {item.block.data.text}
+            <span dangerouslySetInnerHTML={{ __html: item.block.data.text }} />
           </p>
         </div>
         <ReadMoreLink slug={item.meta.slug} />
@@ -317,7 +317,7 @@ function RumorCardContent({ block }: { block: ContentBlock }) {
           {block.data.timestamp && (
             <span className="text-[12px] block mb-1" style={{ color: '#A0A8B0' }}>{block.data.timestamp}</span>
           )}
-          <p className="text-[14px] leading-relaxed line-clamp-3" style={{ color: BRAND.white }}>{block.data.text}</p>
+          <p className="text-[14px] leading-relaxed line-clamp-3" style={{ color: BRAND.white }}><span dangerouslySetInnerHTML={{ __html: block.data.text }} /></p>
         </div>
       );
 

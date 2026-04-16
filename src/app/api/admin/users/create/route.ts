@@ -1,13 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { supabaseAdmin } from '@/lib/supabase-server'
 import { requireAdmin } from '@/lib/admin-auth'
-
-// Create admin client with service role key
-function getSupabaseAdmin() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY!
-  return createClient(url, key)
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,14 +17,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email and password are required' }, { status: 400 })
     }
 
-    if (password.length < 6) {
-      return NextResponse.json({ error: 'Password must be at least 6 characters' }, { status: 400 })
+    if (password.length < 8) {
+      return NextResponse.json({ error: 'Password must be at least 8 characters' }, { status: 400 })
     }
 
-    const supabase = getSupabaseAdmin()
-
     // Check if user already exists in Auth
-    const { data: existingUsers } = await supabase.auth.admin.listUsers()
+    const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers()
     const existingAuthUser = existingUsers?.users.find(u => u.email?.toLowerCase() === email.toLowerCase())
 
     if (existingAuthUser) {
@@ -39,7 +30,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create user in Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
       email_confirm: true, // Auto-confirm email
@@ -55,7 +46,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create user in sm_users table
-    const { error: dbError } = await supabase
+    const { error: dbError } = await supabaseAdmin
       .from('sm_users')
       .insert({
         id: authData.user.id,

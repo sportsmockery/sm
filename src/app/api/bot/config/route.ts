@@ -14,7 +14,8 @@ import { TEAM_SLUGS } from '@/lib/bot/types'
 function validateApiKey(request: NextRequest): boolean {
   const apiKey = request.headers.get('x-api-key')
   const expectedKey = process.env.BOT_API_KEY
-  return !expectedKey || apiKey === expectedKey
+  if (!expectedKey) return false
+  return apiKey === expectedKey
 }
 
 export async function GET(request: NextRequest) {

@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 
 // Poll every 30s when checking for live game, 10s during live game
-const POLL_INTERVAL_IDLE = 30000
+const POLL_INTERVAL_IDLE = 60000
 const POLL_INTERVAL_LIVE = 10000
 
 interface LiveGameInfo {

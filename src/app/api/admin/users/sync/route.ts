@@ -1,13 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { supabaseAdmin } from '@/lib/supabase-server'
 import { requireAdmin } from '@/lib/admin-auth'
-
-// Create admin client with service role key
-function getSupabaseAdmin() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY!
-  return createClient(url, key)
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,7 +10,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: auth.error }, { status: auth.status })
     }
 
-    const supabase = getSupabaseAdmin()
+    const supabase = supabaseAdmin
 
     // Get all users from Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.admin.listUsers()
@@ -100,7 +93,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: auth.error }, { status: auth.status })
     }
 
-    const supabase = getSupabaseAdmin()
+    const supabase = supabaseAdmin
 
     const [authResult, dbResult] = await Promise.all([
       supabase.auth.admin.listUsers(),

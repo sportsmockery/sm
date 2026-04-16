@@ -6,8 +6,9 @@ import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { CHICAGO_TEAMS } from '@/lib/teams'
 
-// Polling interval: 10 seconds
-const POLL_INTERVAL = 10000
+// Polling intervals
+const POLL_INTERVAL_LIVE = 10_000  // 10s when live games are active
+const POLL_INTERVAL_IDLE = 60_000  // 60s when no live games
 
 // Team configuration
 const TEAM_CONFIG: Record<string, { slug: string; name: string; abbr: string }> = {
@@ -113,14 +114,15 @@ export default function LiveGamesTopBar({ teamFilter, isHomepage = false }: Live
     }
   }, [detectedTeam, isHomepage])
 
-  // Set up polling
+  // Set up polling with dynamic interval based on live game state
   useEffect(() => {
     fetchLiveGames()
 
-    const interval = setInterval(fetchLiveGames, POLL_INTERVAL)
+    const hasLiveGames = liveGames.some(g => g.status === 'in_progress')
+    const interval = setInterval(fetchLiveGames, hasLiveGames ? POLL_INTERVAL_LIVE : POLL_INTERVAL_IDLE)
 
     return () => clearInterval(interval)
-  }, [fetchLiveGames])
+  }, [fetchLiveGames, liveGames])
 
   // Don't render on live game pages (they have their own GameSwitcher)
   // Don't render anything if no live games

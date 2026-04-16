@@ -94,6 +94,8 @@ const nextConfig: NextConfig = {
       { source: '/category/:path*', destination: '/', permanent: true },
       { source: '/chat', destination: '/fan-chat', permanent: true },
       { source: '/war-room', destination: '/gm', permanent: false },
+      { source: '/bears', destination: '/chicago-bears', permanent: true },
+      { source: '/bears/:path*', destination: '/chicago-bears/:path*', permanent: true },
     ]
   },
 

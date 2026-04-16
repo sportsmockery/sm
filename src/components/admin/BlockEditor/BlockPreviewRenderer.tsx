@@ -128,7 +128,7 @@ function RenderBlock({ block }: { block: ContentBlock }) {
             }}
           >
             <p className="text-[16px] leading-relaxed italic mb-3" style={{ color: 'var(--sm-text, #0B0F14)' }}>
-              &ldquo;{block.data.text}&rdquo;
+              &ldquo;<span dangerouslySetInnerHTML={{ __html: block.data.text }} />&rdquo;
             </p>
             <footer className="flex items-center gap-2">
               <span className="text-[13px] font-medium" style={{ color: BRAND.cyan }}>
@@ -342,7 +342,7 @@ function RenderBlock({ block }: { block: ContentBlock }) {
       if (!block.data.text) return <EmptyState label="Hot Take — add your bold claim" accent={BRAND.gold} />;
       return (
         <TopTakeBlock>
-          <p className="text-[16px] font-medium leading-relaxed" style={{ color: 'var(--sm-text, #0B0F14)' }}>{block.data.text}</p>
+          <p className="text-[16px] font-medium leading-relaxed" style={{ color: 'var(--sm-text, #0B0F14)' }} dangerouslySetInnerHTML={{ __html: block.data.text }} />
         </TopTakeBlock>
       );
 

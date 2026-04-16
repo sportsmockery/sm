@@ -431,7 +431,7 @@ function formatHistoricalReferencesForPrompt(trades: HistoricalTradeReference[])
   return block
 }
 
-const MODEL_NAME = 'claude-opus-4-5-20251101'
+const MODEL_NAME = 'claude-sonnet-4-20250514'
 
 // ============================================================================
 // CONFIDENCE-BASED AUTHORITY ROUTING

@@ -4,8 +4,8 @@ import { createClient } from '@supabase/supabase-js'
 // Contains {team}_* tables with game data, player stats, schedules, etc.
 // Teams: bears, bulls, blackhawks, cubs, whitesox
 
-const DATALAB_URL = process.env.DATALAB_SUPABASE_URL || 'https://siwoqfzzcxmngnseyzpv.supabase.co'
-const DATALAB_ANON_KEY = process.env.DATALAB_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpd29xZnp6Y3htbmduc2V5enB2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc2NDk0ODAsImV4cCI6MjA4MzIyNTQ4MH0.PzeJ6OG2ofjLWSpJ2UmI-1aXVrHnh3ar6eTgph4uJgc'
+const DATALAB_URL = process.env.DATALAB_SUPABASE_URL!
+const DATALAB_ANON_KEY = process.env.DATALAB_SUPABASE_ANON_KEY!
 
 // 15-second global fetch timeout to prevent build hangs
 const DATALAB_FETCH_TIMEOUT_MS = 15_000

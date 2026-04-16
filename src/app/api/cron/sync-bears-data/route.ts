@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { supabaseAdmin } from '@/lib/supabase-server'
 import { datalabAdmin } from '@/lib/supabase-datalab'
 
 /**
@@ -13,13 +13,6 @@ import { datalabAdmin } from '@/lib/supabase-datalab'
  * POST /api/cron/sync-bears-data
  * Authorization: Bearer <CRON_SECRET>
  */
-
-// Create admin client for SportsMockery DB
-const SM_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const SM_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!
-const smAdmin = createClient(SM_URL, SM_SERVICE_KEY, {
-  auth: { autoRefreshToken: false, persistSession: false },
-})
 
 // Cron secret for authentication
 const CRON_SECRET = process.env.CRON_SECRET || ''
@@ -180,10 +173,10 @@ async function syncTable(
 
     // Upsert to SportsMockery DB
     // First, try to delete existing data (full replace strategy)
-    await smAdmin.from(tableName).delete().neq(primaryKey, 'impossible_value_to_match_nothing')
+    await supabaseAdmin.from(tableName).delete().neq(primaryKey, 'impossible_value_to_match_nothing')
 
     // Then insert all rows
-    const { error: insertError } = await smAdmin
+    const { error: insertError } = await supabaseAdmin
       .from(tableName)
       .insert(cleanedData)
 
@@ -191,7 +184,7 @@ async function syncTable(
       // Table might not exist, try upsert instead
       console.warn(`Insert failed for ${tableName}, trying upsert:`, insertError.message)
 
-      const { error: upsertError } = await smAdmin
+      const { error: upsertError } = await supabaseAdmin
         .from(tableName)
         .upsert(cleanedData, { onConflict: primaryKey })
 

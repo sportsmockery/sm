@@ -190,31 +190,16 @@ export default function MockDraftPage() {
         }
       }
 
-      // Fallback ONLY if API returned nothing at all
+      // If API returned no teams, show empty state — do NOT enable all teams
       if (Object.keys(eligMap).length === 0) {
-        console.warn('DataLab returned no teams, using fallback')
-        for (const team of CHICAGO_TEAMS) {
-          eligMap[team.key] = {
-            sport: team.sport, draft_year: 2026, team_key: team.key, team_name: team.name,
-            season_status: 'offseason', eligible: true, reason: '✓ Ready to draft',
-            logo_url: team.logo, mock_draft_window_status: 'open',
-          }
-        }
+        console.warn('DataLab returned no eligible teams')
       }
 
       setEligibility(eligMap)
     } catch (e) {
       console.error('Failed to fetch eligibility:', e)
-      // On complete API failure, enable all teams as fallback
-      const fallbackMap: Record<string, TeamEligibility> = {}
-      for (const team of CHICAGO_TEAMS) {
-        fallbackMap[team.key] = {
-          sport: team.sport, draft_year: 2026, team_key: team.key, team_name: team.name,
-          season_status: 'offseason', eligible: true, reason: '✓ Ready to draft',
-          logo_url: team.logo, mock_draft_window_status: 'open',
-        }
-      }
-      setEligibility(fallbackMap)
+      // On API failure, show empty state — do NOT enable in-season teams
+      setEligibility({})
     }
     setEligibilityLoading(false)
   }, [])

@@ -3,11 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
-import { createClient } from '@supabase/supabase-js'
-
-// DataLab Supabase for realtime on fan_chat_messages
-const DATALAB_URL = 'https://siwoqfzzcxmngnseyzpv.supabase.co'
-const DATALAB_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpd29xZnp6Y3htbmduc2V5enB2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc2NDk0ODAsImV4cCI6MjA4MzIyNTQ4MH0.PzeJ6OG2ofjLWSpJ2UmI-1aXVrHnh3ar6eTgph4uJgc'
+import { datalabClient } from '@/lib/supabase-datalab'
 
 // Message type for display
 interface ChatMessage {
@@ -175,13 +171,9 @@ export default function FanChatPage() {
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const currentChannel = channels.find(c => c.id === activeChannel) || channels[0]
 
-  // DataLab Supabase client for realtime on fan_chat_messages
-  const datalabClientRef = useRef(
-    createClient(DATALAB_URL, DATALAB_ANON_KEY, {
-      auth: { autoRefreshToken: false, persistSession: false },
-    })
-  )
-  const realtimeChannelRef = useRef<ReturnType<typeof datalabClientRef.current.channel> | null>(null)
+  // DataLab Supabase client for realtime on fan_chat_messages (singleton)
+  const datalabClientRef = useRef(datalabClient)
+  const realtimeChannelRef = useRef<ReturnType<typeof datalabClient.channel> | null>(null)
 
   // Scroll to bottom within container only
   const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {

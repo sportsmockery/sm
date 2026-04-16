@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { supabaseAdmin } from '@/lib/supabase-server'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 300 // 5 min cache
@@ -11,13 +11,8 @@ export async function GET(req: NextRequest) {
       5
     )
 
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
-
     // Fetch top posts by importance_score (same source as homepage editor picks)
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('sm_posts')
       .select('id, title, slug, excerpt, category:sm_categories!category_id(slug)')
       .eq('status', 'published')

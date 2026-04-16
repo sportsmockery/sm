@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { requireAdmin } from '@/lib/admin-auth'
 
 const WP_API = 'https://www.sportsmockery.com/wp-json/wp/v2'
 const WP_EXPORT = 'https://www.sportsmockery.com/wp-json/sm-export/v1'
@@ -22,7 +23,12 @@ const XA = [
   { username: 'dabearsblog', label: 'DaBearsBlog' },
 ]
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
+  const auth = await requireAdmin(request)
+  if (auth.error) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status })
+  }
+
   const { searchParams } = new URL(request.url)
   const range = searchParams.get('range') || '28d'
   const daysMap: Record<string, number> = { '7d': 7, '28d': 28, '90d': 90, '1y': 365 }

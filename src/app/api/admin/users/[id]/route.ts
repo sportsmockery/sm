@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { supabaseAdmin } from '@/lib/supabase-server'
 import { requireAdmin } from '@/lib/admin-auth'
-
-function getSupabaseAdmin() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY!
-  return createClient(url, key)
-}
 
 export async function GET(
   request: NextRequest,
@@ -20,7 +14,7 @@ export async function GET(
     }
 
     const { id } = await params
-    const supabase = getSupabaseAdmin()
+    const supabase = supabaseAdmin
 
     const { data: user, error } = await supabase
       .from('sm_users')
@@ -59,7 +53,7 @@ export async function PATCH(
 
     const { id } = await params
     const body = await request.json()
-    const supabase = getSupabaseAdmin()
+    const supabase = supabaseAdmin
 
     const allowedFields = ['name', 'role', 'is_fan_council_member', 'reputation_score', 'bio', 'avatar_url']
     const updates: Record<string, unknown> = {}
@@ -104,7 +98,7 @@ export async function DELETE(
     }
 
     const { id } = await params
-    const supabase = getSupabaseAdmin()
+    const supabase = supabaseAdmin
 
     // Delete from sm_users
     const { error: dbError } = await supabase

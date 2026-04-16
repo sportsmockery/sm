@@ -25,6 +25,10 @@ function SocialLinks() {
 }
 
 export function UntoldChicagoClient({ latestVideo, previousVideos }: Props) {
+  const [activeVideoId, setActiveVideoId] = useState(latestVideo?.videoId ?? '');
+
+  useEffect(() => { window.scrollTo(0, 0); }, []);
+
   if (!latestVideo) {
     return (
       <main className="sm-show-page sm-untold-chicago">
@@ -44,10 +48,6 @@ export function UntoldChicagoClient({ latestVideo, previousVideos }: Props) {
       </main>
     );
   }
-
-  const [activeVideoId, setActiveVideoId] = useState(latestVideo.videoId);
-
-  useEffect(() => { window.scrollTo(0, 0); }, []);
 
   return (
     <main className="sm-show-page sm-untold-chicago">

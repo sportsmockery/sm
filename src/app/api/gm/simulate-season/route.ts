@@ -85,17 +85,40 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(payload),
     })
 
-    if (!res.ok) {
-      const errorText = await res.text().catch(() => 'Unknown error')
-      console.error(`[Simulate Season V3] DataLab returned ${res.status}:`, errorText)
-      return NextResponse.json(
-        { success: false, error: `DataLab simulation failed (${res.status})` },
-        { status: res.status >= 500 ? 502 : res.status }
-      )
+    if (res.ok) {
+      const data = await res.json()
+      return NextResponse.json(data)
     }
 
-    const data = await res.json()
-    return NextResponse.json(data)
+    // V3 failed — try DataLab V1 fallback
+    const v3ErrorText = await res.text().catch(() => 'Unknown error')
+    console.warn(`[Simulate Season V3] DataLab returned ${res.status}:`, v3ErrorText)
+    console.log('[Simulate Season] Attempting V1 fallback...')
+
+    const v1Res = await fetch(`${DATALAB_URL}/api/gm/sim/season`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': process.env.GM_API_KEY || '',
+      },
+      body: JSON.stringify(payload),
+    })
+
+    if (v1Res.ok) {
+      const v1Data = await v1Res.json()
+      // Tag as V1 if not already versioned
+      if (!v1Data.simulation_version) {
+        v1Data.simulation_version = 'v1'
+      }
+      return NextResponse.json(v1Data)
+    }
+
+    const v1ErrorText = await v1Res.text().catch(() => 'Unknown error')
+    console.error(`[Simulate Season V1] DataLab returned ${v1Res.status}:`, v1ErrorText)
+    return NextResponse.json(
+      { success: false, error: `DataLab simulation failed (V3: ${res.status}, V1: ${v1Res.status})` },
+      { status: res.status >= 500 ? 502 : res.status }
+    )
 
   } catch (error) {
     console.error('[Simulate Season] Error:', error)

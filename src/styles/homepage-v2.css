@@ -256,7 +256,7 @@
   transition: all 0.2s;
   background: var(--hp-card);
   margin-bottom: 12px;
-  border-radius: 16px;
+  border-radius: 14px;
   border: 1px solid rgba(0, 0, 0, 0.06);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03), 0 2px 4px rgba(0, 0, 0, 0.02);
   overflow: hidden;
@@ -267,7 +267,7 @@
 @media (max-width: 480px) {
   .hp-feed-card {
     padding: 1rem 1rem 1.25rem;
-    border-radius: 12px;
+    border-radius: 14px;
     margin-bottom: 8px;
   }
   .hp-feed-card h2 {

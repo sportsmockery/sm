@@ -1,15 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { TwitterApi } from 'twitter-api-v2';
-import { createClient } from '@supabase/supabase-js';
+import { supabaseAdmin } from '@/lib/supabase-server';
 
 export const dynamic = 'force-dynamic';
-
-function getSupabaseClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-}
 
 function getTwitterClient() {
   return new TwitterApi({
@@ -24,7 +17,6 @@ export async function POST(request: NextRequest) {
   try {
     const { predictionId, caption, mediaUrl } = await request.json();
 
-    const supabase = getSupabaseClient();
     const twitterClient = getTwitterClient();
 
     if (!predictionId || !caption) {
@@ -54,7 +46,7 @@ export async function POST(request: NextRequest) {
       tweetId = tweet.data.id;
     }
 
-    await supabase
+    await supabaseAdmin
       .from('Twitter_viral_predictions')
       .update({ tweet_id: tweetId, posted_at: new Date().toISOString(), status: 'posted' })
       .eq('id', predictionId);
