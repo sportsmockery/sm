@@ -53,6 +53,7 @@ const publicPaths = [
   '/gm',         // GM Trade Simulator (handles own auth)
   '/owner',      // Ownership report cards
   '/masters',    // Masters 2026 Intelligence dashboard
+  '/rbc',        // RBC Heritage 2026 Intelligence
 ]
 
 
@@ -87,15 +88,23 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const hostname = request.headers.get('host') || ''
 
-  // 0. masters.sportsmockery.com — rewrite all requests to /masters/*
+  // 0a. masters.sportsmockery.com — rewrite all requests to /masters/*
   if (hostname === 'masters.sportsmockery.com' || hostname.startsWith('masters.sportsmockery.com:')) {
-    // If already on /masters path, pass through
     if (pathname.startsWith('/masters')) {
       return NextResponse.next()
     }
-    // Rewrite root and all other paths to /masters/*
     const url = request.nextUrl.clone()
     url.pathname = pathname === '/' ? '/masters' : `/masters${pathname}`
+    return NextResponse.rewrite(url)
+  }
+
+  // 0b. rbc.sportsmockery.com — rewrite all requests to /rbc/*
+  if (hostname === 'rbc.sportsmockery.com' || hostname.startsWith('rbc.sportsmockery.com:')) {
+    if (pathname.startsWith('/rbc')) {
+      return NextResponse.next()
+    }
+    const url = request.nextUrl.clone()
+    url.pathname = pathname === '/' ? '/rbc' : `/rbc${pathname}`
     return NextResponse.rewrite(url)
   }
 
