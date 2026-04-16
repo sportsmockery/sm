@@ -71,6 +71,13 @@
       "schedule": "0 6 * * *"
     }
   ],
+  "rewrites": [
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "rbc.sportsmockery.com" }],
+      "destination": "/rbc/:path*"
+    }
+  ],
   "headers": [
     {
       "source": "/api/(.*)",
