@@ -19,6 +19,11 @@ export default function robots(): MetadataRoute.Robots {
           '/signup',
           '/forgot-password',
           '/reset-password',
+          '/betmgm-illinois',
+          '/pointsbet-illinois-sportsbook',
+          '/draftkings-illinois-sportsbook',
+          '/chicago-blackhawks-odds',
+          '/sports-betting',
         ],
       },
       {

@@ -52,6 +52,47 @@ interface WPPostsResponse {
   total_pages: number
 }
 
+// === SEO CONTENT BLOCKLIST ===
+// These slugs/patterns are blocked from import to prevent casino/betting/spam
+// content from contaminating the new site's E-E-A-T signals.
+
+const BLOCKED_CATEGORY_SLUGS = new Set([
+  'betmgm-illinois',
+  'pointsbet-illinois-sportsbook',
+  'draftkings-illinois-sportsbook',
+  'sports-betting',
+  'chicago-blackhawks-odds',
+  'uncategorized',
+])
+
+const BLOCKED_AUTHOR_SLUGS = new Set([
+  'the-importance-reputable-casino-slot-play',
+  'casino-slot-play',
+  'soccer-event',
+  'hhc-infused',
+  'gems-and-mines',
+])
+
+const BLOCKED_POST_SLUG_PATTERNS = [
+  'betmgm', 'pointsbet', 'draftkings', 'fanduel',
+  'sportsbook', 'casino-slot', 'sports-betting',
+  'online-casino', 'gambling', 'casino-games',
+  'betting-odds', 'parlay', 'wager',
+]
+
+function isBlockedPostSlug(slug: string): boolean {
+  const lower = slug.toLowerCase()
+  return BLOCKED_POST_SLUG_PATTERNS.some(pattern => lower.includes(pattern))
+}
+
+function isBlockedAuthor(author: WPAuthor): boolean {
+  const slug = author.display_name.toLowerCase().replace(/\s+/g, '-')
+  const email = author.email.toLowerCase()
+  return [...BLOCKED_AUTHOR_SLUGS].some(
+    blocked => slug.includes(blocked) || email.includes(blocked)
+  )
+}
+
 // Fetch with retry logic
 async function fetchWithRetry<T>(url: string, retries = 3): Promise<T> {
   for (let i = 0; i < retries; i++) {
@@ -94,7 +135,16 @@ async function importCategories(): Promise<void> {
   const categories = await fetchWithRetry<WPCategory[]>(`${WP_BASE_URL}/categories`)
   console.log(`Fetched ${categories.length} categories from WordPress`)
 
-  const newCategories = categories.filter(c => !existingIds.has(c.id))
+  // Filter out blocked casino/betting/spam categories
+  const allowedCategories = categories.filter(c => {
+    if (BLOCKED_CATEGORY_SLUGS.has(c.slug)) {
+      console.log(`⛔ Blocked category: ${c.slug}`)
+      return false
+    }
+    return true
+  })
+
+  const newCategories = allowedCategories.filter(c => !existingIds.has(c.id))
 
   if (newCategories.length === 0) {
     console.log('All categories already imported, skipping...')
@@ -134,7 +184,16 @@ async function importAuthors(): Promise<void> {
   const authors = await fetchWithRetry<WPAuthor[]>(`${WP_BASE_URL}/authors`)
   console.log(`Fetched ${authors.length} authors from WordPress`)
 
-  const newAuthors = authors.filter(a => !existingIds.has(a.id))
+  // Filter out blocked spam authors
+  const allowedAuthors = authors.filter(a => {
+    if (isBlockedAuthor(a)) {
+      console.log(`⛔ Blocked author: ${a.display_name} (${a.email})`)
+      return false
+    }
+    return true
+  })
+
+  const newAuthors = allowedAuthors.filter(a => !existingIds.has(a.id))
 
   if (newAuthors.length === 0) {
     console.log('All authors already imported, skipping...')
@@ -186,7 +245,17 @@ async function importPosts(): Promise<void> {
         )
 
     const posts = response.posts
-    const newPosts = posts.filter(p => !existingIds.has(p.id))
+
+    // Filter out blocked casino/betting/spam posts
+    const allowedPosts = posts.filter(p => {
+      if (isBlockedPostSlug(p.slug)) {
+        console.log(`⛔ Blocked post (slug pattern): ${p.slug} — "${p.title}"`)
+        return false
+      }
+      return true
+    })
+
+    const newPosts = allowedPosts.filter(p => !existingIds.has(p.id))
     skipped += posts.length - newPosts.length
 
     if (newPosts.length > 0) {
