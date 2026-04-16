@@ -1,0 +1,2108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover" />
+  <title>RBC Heritage 2026 — Intelligence | Edge</title>
+  <meta name="description" content="Edge Intelligence — RBC Heritage at Harbour Town Golf Links. Tournament intelligence, live leaderboard, and hole-by-hole scorecards." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: hsl(160 25% 5%);
+      --bg-card: hsl(160 20% 8%);
+      --bg-card-hover: hsl(160 20% 10%);
+      --bg-row-alt: hsl(160 18% 7%);
+      --border: hsl(160 18% 14%);
+      --border-subtle: hsl(160 18% 11%);
+      --text: hsl(40 15% 90%);
+      --text-dim: hsl(40 8% 55%);
+      --text-muted: hsl(40 8% 40%);
+      --cyan: hsl(187 85% 55%);
+      --coral: hsl(12 85% 60%);
+      --sand: hsl(42 80% 65%);
+      --green: hsl(161 80% 30%);
+      --green-bright: hsl(161 80% 45%);
+      --red-score: hsl(0 72% 55%);
+      --blue-score: hsl(220 70% 55%);
+      --eagle-gold: hsl(45 100% 50%);
+      --birdie-red: hsl(0 72% 50%);
+      --bogey-blue: hsl(220 60% 35%);
+      --double-blue: hsl(220 55% 20%);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: hsl(200 15% 12%) url('https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?w=1920&q=80') center center / cover no-repeat fixed;
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background: linear-gradient(
+        180deg,
+        rgba(5, 15, 20, 0.75) 0%,
+        rgba(5, 15, 20, 0.65) 40%,
+        rgba(5, 15, 20, 0.82) 100%
+      );
+      pointer-events: none;
+    }
+
+    /* Dashboard mode — opaque dark bg, hide hero elements */
+    body.on-dashboard {
+      background: var(--bg) !important;
+    }
+    body.on-dashboard::before {
+      display: none;
+    }
+    body.on-dashboard .edge-top-logo,
+    body.on-dashboard .edge-dashboard-btn,
+    body.on-dashboard .bg-comets {
+      display: none !important;
+    }
+    body.on-dashboard #briefing-view {
+      display: none !important;
+    }
+    body.on-dashboard #dashboard-view {
+      display: block !important;
+    }
+
+    body:not(.on-dashboard) #briefing-view {
+      display: block;
+    }
+    body:not(.on-dashboard) #dashboard-view {
+      display: none !important;
+    }
+
+    /* ── Edge logo centered top ── */
+    .edge-top-logo {
+      position: fixed;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0px;
+      transition: opacity 0.15s ease;
+    }
+    .edge-top-logo img {
+      height: auto;
+      width: 150px;
+      max-width: 150px;
+    }
+    .edge-top-logo .rbc-title {
+      margin-top: 16px;
+      text-align: center;
+    }
+    .edge-top-logo .rbc-title h2 {
+      font-size: 42px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      line-height: 1;
+      text-shadow: 0 2px 20px rgba(0,0,0,0.5);
+    }
+    .edge-top-logo .rbc-title p {
+      font-size: 14px;
+      color: var(--text-dim);
+      margin-top: 6px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+    .edge-top-logo.scrolled {
+      opacity: 0;
+      pointer-events: none;
+    }
+    @media (max-width: 640px) {
+      .edge-top-logo img { width: 112px; max-width: 112px; }
+      .edge-top-logo { top: max(6px, env(safe-area-inset-top, 6px)); }
+      .edge-top-logo .rbc-title h2 { font-size: 28px; }
+      .edge-top-logo .rbc-title p { font-size: 11px; }
+    }
+    @media (max-width: 375px) {
+      .edge-top-logo img { width: 80px; max-width: 80px; }
+      .edge-top-logo .rbc-title h2 { font-size: 24px; }
+    }
+
+    /* ── Dashboard button ── */
+    .edge-dashboard-btn {
+      position: fixed;
+      top: 18px;
+      left: 20px;
+      z-index: 9999;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid hsla(160, 18%, 30%, 0.4);
+      background: hsla(160, 18%, 10%, 0.5);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      color: hsla(40, 15%, 90%, 0.6);
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .edge-dashboard-btn:hover {
+      border-color: hsla(187, 85%, 55%, 0.3);
+      color: hsla(40, 15%, 90%, 0.9);
+      background: hsla(160, 18%, 14%, 0.6);
+    }
+    .edge-dashboard-btn svg {
+      width: 14px;
+      height: 14px;
+      opacity: 0.6;
+    }
+    @media (max-width: 640px) {
+      .edge-dashboard-btn {
+        top: auto;
+        bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+        right: calc(16px + env(safe-area-inset-right, 0px));
+        left: auto;
+        padding: 10px 16px;
+        font-size: 13px;
+        border-radius: 20px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+        min-height: 44px;
+        min-width: 44px;
+        z-index: 10000;
+      }
+    }
+
+    /* ── Comet animation ── */
+    .bg-comets {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .comet {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow:
+        0 0 4px 1px hsla(187, 85%, 55%, 0.6),
+        0 0 12px 2px hsla(187, 85%, 55%, 0.3);
+      left: var(--start-x);
+      top: var(--start-y);
+      opacity: 0;
+      animation: comet-fly var(--duration) var(--delay) linear infinite;
+    }
+    .comet::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      right: 0;
+      transform: translateY(-50%) rotate(var(--angle));
+      transform-origin: right center;
+      width: 60px;
+      height: 1px;
+      background: linear-gradient(to left, hsla(187, 85%, 55%, 0.5), transparent);
+    }
+    .comet.coral {
+      background: var(--coral);
+      box-shadow:
+        0 0 4px 1px hsla(12, 85%, 60%, 0.6),
+        0 0 12px 2px hsla(12, 85%, 60%, 0.3);
+    }
+    .comet.coral::after {
+      background: linear-gradient(to left, hsla(12, 85%, 60%, 0.4), transparent);
+    }
+    @keyframes comet-fly {
+      0% { opacity: 0; transform: translate(0, 0); }
+      5% { opacity: 0.8; }
+      70% { opacity: 0.6; }
+      100% { opacity: 0; transform: translate(var(--travel-x), var(--travel-y)); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .comet { animation: none; opacity: 0; }
+    }
+
+    /* ── Briefing View ── */
+    #briefing-view {
+      position: relative;
+      z-index: 1;
+      padding-top: 260px;
+      padding-bottom: 80px;
+    }
+    @media (max-width: 640px) {
+      #briefing-view { padding-top: 200px; }
+    }
+
+    .briefing-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Section headers */
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 16px;
+    }
+    .section-title {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      margin-bottom: 12px;
+      line-height: 1.2;
+    }
+    .section-subtitle {
+      font-size: 16px;
+      color: var(--text-dim);
+      line-height: 1.6;
+      max-width: 680px;
+    }
+
+    /* Section 1: Tournament Header */
+    .tournament-hero {
+      text-align: center;
+      margin-bottom: 80px;
+    }
+    .tournament-hero h1 {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+    .tournament-hero .venue-line {
+      font-size: 16px;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+    }
+    .tournament-hero .dates-line {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+    .facts-strip {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px 20px;
+      font-size: 13px;
+      color: var(--text-dim);
+      margin-bottom: 24px;
+    }
+    .facts-strip span {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .facts-strip .divider { color: var(--border); }
+    .defending-champ {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--sand);
+      margin-bottom: 24px;
+    }
+    .thesis {
+      font-size: 17px;
+      font-style: italic;
+      color: hsla(40, 15%, 90%, 0.7);
+      max-width: 680px;
+      margin: 0 auto;
+      line-height: 1.6;
+      border-left: 3px solid var(--coral);
+      padding-left: 20px;
+      text-align: left;
+    }
+
+    /* Glass cards */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 24px;
+      transition: all 0.2s ease;
+    }
+    .glass-card:hover {
+      border-color: hsla(187, 85%, 55%, 0.2);
+      box-shadow: 0 0 20px hsla(187, 85%, 55%, 0.06);
+    }
+
+    /* Section 2: Intelligence Briefing */
+    .intelligence-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 80px;
+    }
+    .intel-card-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 8px;
+    }
+    .intel-card-player {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .intel-card-text {
+      font-size: 14px;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    /* Section 3: What Actually Wins */
+    .edge-blocks {
+      margin-bottom: 80px;
+    }
+    .edge-block {
+      border-left: 3px solid var(--cyan);
+      padding: 24px 0 24px 24px;
+      margin-bottom: 32px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    .edge-block.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .edge-block:nth-child(even) {
+      margin-left: 40px;
+    }
+    @media (max-width: 640px) {
+      .edge-block:nth-child(even) { margin-left: 0; }
+    }
+    .edge-block-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .edge-block-num {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--coral);
+      margin-bottom: 4px;
+      letter-spacing: 0.06em;
+    }
+    .edge-block-text {
+      font-size: 15px;
+      color: var(--text-dim);
+      line-height: 1.7;
+    }
+
+    /* Section 4: Mini Leaderboard */
+    .mini-leaderboard {
+      margin-bottom: 80px;
+    }
+    .mini-lb-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    .mini-lb-table thead th {
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 10px 8px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .mini-lb-table thead th:nth-child(2) { text-align: left; }
+    .mini-lb-table tbody tr {
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      transition: background 0.12s;
+    }
+    .mini-lb-table tbody tr:hover {
+      background: rgba(255,255,255,0.03);
+    }
+    .mini-lb-table td {
+      padding: 10px 8px;
+      text-align: center;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+    .mini-lb-table td:nth-child(2) { text-align: left; }
+    .mini-player-cell {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .mini-headshot {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: hsl(160 15% 15%);
+      flex-shrink: 0;
+    }
+    .mini-flag {
+      width: 14px;
+      height: 10px;
+      object-fit: cover;
+      border-radius: 1px;
+      margin-left: 6px;
+    }
+    .view-full-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--cyan);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      margin-top: 16px;
+      transition: color 0.15s;
+    }
+    .view-full-link:hover { color: hsl(187 85% 70%); }
+
+    /* Section 5: Field Archetypes */
+    .archetypes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+      margin-bottom: 80px;
+    }
+    .archetype-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 14px;
+      padding: 20px;
+      border-left: 4px solid;
+    }
+    .archetype-card-title {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .archetype-card-desc {
+      font-size: 13px;
+      color: var(--text-dim);
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+    .archetype-card-players {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* Section 6: CTA */
+    .cta-section {
+      text-align: center;
+      padding: 40px 0;
+    }
+    .cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 32px;
+      border-radius: 10px;
+      background: hsla(187, 85%, 55%, 0.12);
+      border: 1px solid hsla(187, 85%, 55%, 0.3);
+      color: var(--cyan);
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      animation: cta-pulse 2.5s ease infinite;
+    }
+    .cta-btn:hover {
+      background: hsla(187, 85%, 55%, 0.2);
+      border-color: hsla(187, 85%, 55%, 0.5);
+      transform: scale(1.02);
+    }
+    @keyframes cta-pulse {
+      0%, 100% { box-shadow: 0 0 0 0 hsla(187, 85%, 55%, 0.15); }
+      50% { box-shadow: 0 0 20px 4px hsla(187, 85%, 55%, 0.1); }
+    }
+
+    /* Score colors */
+    .score-under { color: var(--red-score); font-weight: 700; }
+    .score-over { color: var(--blue-score); font-weight: 600; }
+    .score-even { color: var(--text-dim); }
+
+    /* ════════════════════════════════════════════════════════════════
+       DASHBOARD VIEW
+       ════════════════════════════════════════════════════════════════ */
+    #dashboard-view {
+      display: none;
+    }
+
+    .dash-header {
+      background: linear-gradient(180deg, hsl(160 30% 8%) 0%, var(--bg) 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 20px;
+    }
+    .dash-header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .dash-logo {
+      height: 32px;
+      width: auto;
+      opacity: 0.9;
+    }
+    .dash-divider {
+      width: 1px;
+      height: 28px;
+      background: var(--border);
+    }
+    .dash-title {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .dash-back {
+      margin-left: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      transition: color 0.15s;
+    }
+    .dash-back:hover { color: var(--cyan); }
+    .dash-back svg { width: 14px; height: 14px; }
+
+    /* Dashboard navigation pills */
+    .dash-nav {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 16px 20px 0;
+      display: flex;
+      gap: 4px;
+    }
+    .dash-nav a {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: all 0.15s;
+      border: 1px solid transparent;
+    }
+    .dash-nav a:hover {
+      color: var(--text);
+      background: hsla(160, 18%, 14%, 0.5);
+    }
+    .dash-nav a.active {
+      color: var(--cyan);
+      background: hsla(187, 85%, 55%, 0.08);
+      border-color: hsla(187, 85%, 55%, 0.2);
+    }
+
+    /* Dashboard content area */
+    .dash-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* ── Leaderboard Table (Dashboard) ── */
+    .leaderboard-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .leaderboard-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 15px;
+    }
+    .leaderboard-table thead th {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: hsl(160 22% 10%);
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 12px 10px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    .leaderboard-table thead th:nth-child(1) { text-align: center; width: 52px; }
+    .leaderboard-table thead th:nth-child(2) { text-align: left; }
+    .leaderboard-table tbody tr {
+      cursor: pointer;
+      transition: background 0.12s;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .leaderboard-table tbody tr:nth-child(even) {
+      background: var(--bg-row-alt);
+    }
+    .leaderboard-table tbody tr:hover {
+      background: var(--bg-card-hover);
+    }
+    .leaderboard-table tbody tr.champion-row {
+      border-left: 3px solid var(--sand);
+    }
+    .leaderboard-table td {
+      padding: 10px;
+      text-align: center;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+    .leaderboard-table td:nth-child(1) {
+      font-weight: 700;
+      color: var(--text-dim);
+      width: 52px;
+    }
+    .leaderboard-table td:nth-child(2) {
+      text-align: left;
+    }
+
+    /* Player cell */
+    .player-cell {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .player-headshot {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: hsl(160 15% 15%);
+      flex-shrink: 0;
+    }
+    .player-info {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .player-name {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .player-country {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .country-flag {
+      width: 14px;
+      height: 10px;
+      object-fit: cover;
+      border-radius: 1px;
+    }
+
+    /* Status badges */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .status-live {
+      background: hsla(0, 72%, 50%, 0.15);
+      color: hsl(0 72% 60%);
+      border: 1px solid hsla(0, 72%, 50%, 0.25);
+    }
+    .status-live::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: hsl(0 72% 55%);
+      animation: pulse-dot 1.5s ease infinite;
+    }
+    .status-scheduled {
+      background: hsla(187, 85%, 55%, 0.1);
+      color: var(--cyan);
+      border: 1px solid hsla(187, 85%, 55%, 0.2);
+    }
+    .status-final {
+      background: hsla(161, 80%, 30%, 0.12);
+      color: var(--green-bright);
+      border: 1px solid hsla(161, 80%, 35%, 0.2);
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .tournament-meta-dash {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 18px;
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+
+    /* Poll indicator */
+    .poll-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-muted);
+      padding: 8px 16px;
+      text-align: right;
+      justify-content: flex-end;
+    }
+    .poll-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--green-bright);
+      animation: pulse-dot 2s ease infinite;
+    }
+
+    /* Scorecard (expandable & tab) */
+    .scorecard-row td {
+      padding: 0 !important;
+      border: none !important;
+    }
+    .scorecard-container {
+      background: hsl(160 20% 6%);
+      border-top: 1px solid var(--border);
+      padding: 16px 20px 20px;
+      animation: slideDown 0.2s ease;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; max-height: 0; }
+      to { opacity: 1; max-height: 600px; }
+    }
+    .scorecard-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .scorecard-player-img {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--border);
+    }
+    .scorecard-player-name {
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .scorecard-rounds {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .scorecard-round-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 4px;
+    }
+    .scorecard-grid {
+      display: grid;
+      grid-template-columns: 50px repeat(9, 1fr) 50px;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      font-size: 13px;
+    }
+    .sc-cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 4px;
+      border-right: 1px solid var(--border-subtle);
+      border-bottom: 1px solid var(--border-subtle);
+      font-variant-numeric: tabular-nums;
+    }
+    .sc-cell:last-child { border-right: none; }
+    .sc-header {
+      background: hsl(160 22% 10%);
+      color: var(--text-muted);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+    .sc-label {
+      font-weight: 700;
+      color: var(--text-dim);
+      font-size: 11px;
+      letter-spacing: 0.06em;
+    }
+    .sc-total {
+      font-weight: 700;
+      background: hsl(160 22% 10%);
+    }
+    .sc-par {
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+    .sc-score {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      font-weight: 600;
+      font-size: 13px;
+    }
+    .sc-eagle {
+      background: var(--eagle-gold);
+      color: #000;
+      border-radius: 50%;
+    }
+    .sc-birdie {
+      background: var(--birdie-red);
+      color: #fff;
+      border-radius: 50%;
+    }
+    .sc-bogey {
+      background: var(--bogey-blue);
+      color: #fff;
+      border-radius: 3px;
+    }
+    .sc-double {
+      background: var(--double-blue);
+      color: #fff;
+      border-radius: 3px;
+      border: 1px solid hsl(220 50% 40%);
+    }
+
+    /* Scorecard tab standalone */
+    .scorecard-tab-content {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+    }
+    .player-selector {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .player-selector select {
+      background: hsl(160 20% 10%);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-family: 'Inter', system-ui, sans-serif;
+      min-width: 200px;
+      cursor: pointer;
+    }
+    .player-selector select:focus {
+      outline: none;
+      border-color: var(--cyan);
+    }
+
+    /* Field grid */
+    .field-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .field-search {
+      background: hsl(160 20% 10%);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-family: 'Inter', system-ui, sans-serif;
+      flex: 1;
+      min-width: 200px;
+    }
+    .field-search:focus {
+      outline: none;
+      border-color: var(--cyan);
+    }
+    .field-search::placeholder {
+      color: var(--text-muted);
+    }
+    .field-sort-btn {
+      background: hsl(160 20% 10%);
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: 'Inter', system-ui, sans-serif;
+    }
+    .field-sort-btn:hover {
+      color: var(--text);
+      border-color: var(--cyan);
+    }
+    .field-sort-btn.active {
+      color: var(--cyan);
+      border-color: var(--cyan);
+    }
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    @media (max-width: 900px) {
+      .field-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 640px) {
+      .field-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    .field-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.15s;
+    }
+    .field-card:hover {
+      background: var(--bg-card-hover);
+      border-color: hsla(187, 85%, 55%, 0.2);
+    }
+    .field-headshot {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: hsl(160 15% 15%);
+      flex-shrink: 0;
+    }
+    .field-card-info {
+      min-width: 0;
+    }
+    .field-card-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .field-card-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+    .field-card-score {
+      margin-left: auto;
+      font-size: 16px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Loading / Error states */
+    .loading-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-dim);
+    }
+    .loading-spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--border);
+      border-top-color: var(--cyan);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Mobile ── */
+    @media (max-width: 768px) {
+      .leaderboard-table { font-size: 13px; }
+      .leaderboard-table thead th { font-size: 10px; padding: 10px 6px; }
+      .leaderboard-table td { padding: 8px 6px; }
+      .player-headshot { width: 28px; height: 28px; }
+      .player-name { font-size: 13px; }
+      .player-country { display: none; }
+      .round-col-3, .round-col-4 { display: none; }
+      .scorecard-container { padding: 12px 10px 16px; }
+      .scorecard-grid {
+        font-size: 11px;
+        grid-template-columns: 36px repeat(9, 1fr) 36px;
+      }
+      .sc-cell { padding: 6px 2px; }
+      .sc-score { width: 22px; height: 22px; font-size: 11px; }
+      .dash-header-inner { gap: 10px; }
+      .dash-title { font-size: 17px; }
+    }
+    @media (max-width: 480px) {
+      .leaderboard-table td:nth-child(1) { width: 40px; }
+      .player-cell { gap: 6px; }
+      .player-headshot { width: 24px; height: 24px; }
+      .dash-logo { height: 24px; }
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ FIXED ELEMENTS (Briefing only) ═══ -->
+  <div class="edge-top-logo">
+    <img src="/rbc/assets/edge-logo-new.png" alt="Edge Intelligence" />
+    <div class="rbc-title">
+      <h2>RBC Heritage</h2>
+      <p>Harbour Town Golf Links</p>
+    </div>
+  </div>
+
+  <a href="#/leaderboard" class="edge-dashboard-btn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="3" width="7" height="7"></rect>
+      <rect x="14" y="3" width="7" height="7"></rect>
+      <rect x="3" y="14" width="7" height="7"></rect>
+      <rect x="14" y="14" width="7" height="7"></rect>
+    </svg>
+    Dashboard
+  </a>
+
+  <div class="bg-comets" id="comets"></div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       VIEW 1: BRIEFING / STORY
+       ═══════════════════════════════════════════════════════════════ -->
+  <div id="briefing-view">
+    <div class="briefing-container">
+
+      <!-- Section 1: Tournament Header -->
+      <section class="tournament-hero">
+        <h1>RBC Heritage</h1>
+        <div class="venue-line">Harbour Town Golf Links &bull; Hilton Head Island, SC</div>
+        <div class="dates-line">April 16&ndash;19, 2026</div>
+        <div class="facts-strip">
+          <span>Par 71</span>
+          <span class="divider">|</span>
+          <span>7,243 yards</span>
+          <span class="divider">|</span>
+          <span>Signature Event</span>
+          <span class="divider">|</span>
+          <span>$20M purse</span>
+        </div>
+        <div class="defending-champ">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"/></svg>
+          Defending Champion: Scottie Scheffler
+        </div>
+        <div class="thesis">
+          Harbour Town rewards restraint, angle management, and emotional reset
+          after Augusta &mdash; not the same profile the market prices in.
+        </div>
+      </section>
+
+      <!-- Section 2: Intelligence Briefing -->
+      <section style="margin-bottom: 80px;">
+        <div class="section-label">Intelligence Briefing</div>
+        <div class="section-title">Five Edges for Harbour Town</div>
+        <div style="height: 20px;"></div>
+        <div class="intelligence-grid">
+          <div class="glass-card">
+            <div class="intel-card-label">Best Harbour Town Fit</div>
+            <div class="intel-card-player">Collin Morikawa</div>
+            <div class="intel-card-text">The player whose game most naturally matches Harbour Town&rsquo;s demands: precision iron play, club-down discipline, small-green accuracy, and Dye-course patience.</div>
+          </div>
+          <div class="glass-card">
+            <div class="intel-card-label">Most Stable Profile</div>
+            <div class="intel-card-player">Corey Conners</div>
+            <div class="intel-card-text">The player with the highest floor this week: consistent positional play, no blow-up holes, strong scrambling from tight lies.</div>
+          </div>
+          <div class="glass-card">
+            <div class="intel-card-label">Most Fragile Favorite</div>
+            <div class="intel-card-player">Viktor Hovland</div>
+            <div class="intel-card-text">The highest-ranked player whose game has structural mismatches with Harbour Town &mdash; over-reliance on distance, poor small-green miss quality, or post-Masters fatigue.</div>
+          </div>
+          <div class="glass-card">
+            <div class="intel-card-label">Biggest Value Discrepancy</div>
+            <div class="intel-card-player">Russell Henley</div>
+            <div class="intel-card-text">The player where sportsbook perception diverges most from Harbour Town fit &mdash; the market is underpricing their structural advantages.</div>
+          </div>
+          <div class="glass-card">
+            <div class="intel-card-label">Strongest Post-Masters Bounce</div>
+            <div class="intel-card-player">Jordan Spieth</div>
+            <div class="intel-card-text">The player best positioned to reset after Augusta &mdash; emotional composure, Dye-course comfort, and a game that thrives when shifting from power to precision.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: What Actually Wins at Harbour Town -->
+      <section class="edge-blocks">
+        <div class="section-label">Course Intelligence</div>
+        <div class="section-title">What Actually Wins at Harbour Town</div>
+        <div style="height: 24px;"></div>
+
+        <div class="edge-block">
+          <div class="edge-block-num">01</div>
+          <div class="edge-block-title">Sightline Tolerance</div>
+          <div class="edge-block-text">Some players lose comfort when the course visually narrows them off the tee. Dye courses create decision stress, not just execution stress. Harbour Town is famous for tight visual corridors through live oaks that reward players who trust their shape.</div>
+        </div>
+        <div class="edge-block">
+          <div class="edge-block-num">02</div>
+          <div class="edge-block-title">Small-Green Miss Quality</div>
+          <div class="edge-block-text">Not just GIR% &mdash; where the miss finishes relative to short-sided runoffs and awkward chips matters more here than almost any other PGA Tour stop. Harbour Town&rsquo;s greens average 3,800 sq ft vs the Tour average of 5,500.</div>
+        </div>
+        <div class="edge-block">
+          <div class="edge-block-num">03</div>
+          <div class="edge-block-title">Closing-Stretch Wind Adaptability</div>
+          <div class="edge-block-text">The exposed water-adjacent finish (holes 15&ndash;18) changes club selection and trajectory more than season-long numbers capture. Players who can hold a low stinger into wind gain hidden edge.</div>
+        </div>
+        <div class="edge-block">
+          <div class="edge-block-num">04</div>
+          <div class="edge-block-title">Club-Down Acceptance</div>
+          <div class="edge-block-text">Players willing to hit less than driver repeatedly gain hidden EV here. Harbour Town often punishes ego more than distance deficiency. The course plays 7,243 yards but most winners hit 3-wood off half the tees.</div>
+        </div>
+        <div class="edge-block">
+          <div class="edge-block-num">05</div>
+          <div class="edge-block-title">Pete Dye Patience Index</div>
+          <div class="edge-block-text">Some players mentally fight Dye courses &mdash; the railroad ties, the odd angles, the conservative targets. Others accept the visual deception and play the course instead of the scorecard.</div>
+        </div>
+        <div class="edge-block">
+          <div class="edge-block-num">06</div>
+          <div class="edge-block-title">Post-Masters Emotional Reset</div>
+          <div class="edge-block-text">This event follows Augusta. Players arrive drained, flat, or overhyped. The market overpays for Masters contenders even though Harbour Town is a completely different test. The best RBC Heritage players reset fast.</div>
+        </div>
+        <div class="edge-block">
+          <div class="edge-block-num">07</div>
+          <div class="edge-block-title">Underreaction to Boring Profiles</div>
+          <div class="edge-block-text">This tournament quietly favors accurate, patient, control-first players whose upside looks lower on TV than it does in probability space. Restraint wins more often here than fireworks.</div>
+        </div>
+      </section>
+
+      <!-- Section 4: Live Leaderboard (mini) -->
+      <section class="mini-leaderboard">
+        <div class="section-label">Live Leaderboard</div>
+        <div class="section-title" id="mini-lb-title">Top 10</div>
+        <div style="height: 16px;"></div>
+        <div class="glass-card" style="padding: 0; overflow: hidden;">
+          <div id="mini-lb-container">
+            <div class="loading-state"><div class="loading-spinner"></div>Loading leaderboard...</div>
+          </div>
+        </div>
+        <a href="#/leaderboard" class="view-full-link">
+          View Full Leaderboard &rarr;
+        </a>
+      </section>
+
+      <!-- Section 5: Field Archetypes -->
+      <section style="margin-bottom: 80px;">
+        <div class="section-label">Field Intelligence</div>
+        <div class="section-title">Field Archetypes</div>
+        <div style="height: 16px;"></div>
+        <div class="archetypes-grid">
+          <div class="archetype-card" style="border-left-color: var(--cyan);">
+            <div class="archetype-card-title" style="color: var(--cyan);">True Contenders</div>
+            <div class="archetype-card-desc">Players with both the game profile and the form to win</div>
+            <div class="archetype-card-players">Scottie Scheffler, Collin Morikawa, Xander Schauffele, Matt Fitzpatrick, Corey Conners</div>
+          </div>
+          <div class="archetype-card" style="border-left-color: var(--coral);">
+            <div class="archetype-card-title" style="color: var(--coral);">Fragile Favorites</div>
+            <div class="archetype-card-desc">Big names the market loves but whose games have Harbour Town mismatches</div>
+            <div class="archetype-card-players">Viktor Hovland, Ludvig &Aring;berg, Justin Thomas, Wyndham Clark, Patrick Cantlay</div>
+          </div>
+          <div class="archetype-card" style="border-left-color: var(--green-bright);">
+            <div class="archetype-card-title" style="color: var(--green-bright);">Silent Climbers</div>
+            <div class="archetype-card-desc">Under-the-radar players with structural advantages at this course</div>
+            <div class="archetype-card-players">Russell Henley, J.T. Poston, Denny McCarthy, Sepp Straka, Andrew Putnam</div>
+          </div>
+          <div class="archetype-card" style="border-left-color: var(--sand);">
+            <div class="archetype-card-title" style="color: var(--sand);">Harbour Town Specialists</div>
+            <div class="archetype-card-desc">Strong course history and Dye-course comfort</div>
+            <div class="archetype-card-players">Shane Lowry, Matt Fitzpatrick, Jordan Spieth, Billy Horschel, Jason Day</div>
+          </div>
+          <div class="archetype-card" style="border-left-color: var(--text-dim);">
+            <div class="archetype-card-title" style="color: var(--text-dim);">Placement Machines</div>
+            <div class="archetype-card-desc">Won&rsquo;t win but stable for top-10/top-20 value</div>
+            <div class="archetype-card-players">Brian Harman, Tom Hoge, Harris English, Alex Noren, Sungjae Im</div>
+          </div>
+          <div class="archetype-card" style="border-left-color: hsl(0 60% 50%);">
+            <div class="archetype-card-title" style="color: hsl(0 60% 55%);">False Signals</div>
+            <div class="archetype-card-desc">Recent form looks good but doesn&rsquo;t transfer to this test</div>
+            <div class="archetype-card-players">Rickie Fowler, Daniel Berger, Max Homa, Akshay Bhatia, Kurt Kitayama</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 6: CTA -->
+      <section class="cta-section">
+        <a href="#/leaderboard" class="cta-btn">
+          Enter Dashboard
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path>
+          </svg>
+        </a>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       VIEW 2: DASHBOARD
+       ═══════════════════════════════════════════════════════════════ -->
+  <div id="dashboard-view">
+    <header class="dash-header">
+      <div class="dash-header-inner">
+        <img src="/rbc/assets/edge-logo-new.png" alt="Edge Intelligence" class="dash-logo" />
+        <div class="dash-divider"></div>
+        <span class="dash-title">RBC Heritage</span>
+        <div id="dash-status"></div>
+        <a href="#/" class="dash-back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5"></path><path d="m12 19-7-7 7-7"></path>
+          </svg>
+          Briefing
+        </a>
+      </div>
+      <div class="dash-header-inner">
+        <div class="tournament-meta-dash" id="dash-meta"></div>
+      </div>
+    </header>
+
+    <nav class="dash-nav" id="dash-nav">
+      <a href="#/leaderboard" data-tab="leaderboard">Leaderboard</a>
+      <a href="#/scorecard" data-tab="scorecard">Scorecard</a>
+      <a href="#/field" data-tab="field">Field</a>
+    </nav>
+
+    <div class="dash-content">
+      <div id="dash-tab-content">
+        <div class="loading-state"><div class="loading-spinner"></div>Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SCRIPTS ═══ -->
+  <script>
+    // ── Constants ──
+    const SUPABASE_URL = 'https://siwoqfzzcxmngnseyzpv.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpd29xZnp6Y3htbmduc2V5enB2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc2NDk0ODAsImV4cCI6MjA4MzIyNTQ4MH0.PzeJ6OG2ofjLWSpJ2UmI-1aXVrHnh3ar6eTgph4uJgc';
+    const EVENT_ID = '401811942';
+    const FALLBACK_API = 'https://datalab.sportsmockery.com/api/golf';
+
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    // Harbour Town Golf Links par (par 71)
+    const HARBOUR_TOWN_PAR = [4, 5, 4, 3, 5, 4, 3, 4, 4, 4, 4, 4, 4, 3, 5, 4, 3, 4];
+    const FRONT_PAR = HARBOUR_TOWN_PAR.slice(0, 9).reduce((s, p) => s + p, 0); // 36
+    const BACK_PAR = HARBOUR_TOWN_PAR.slice(9).reduce((s, p) => s + p, 0);     // 35
+    const COURSE_PAR = 71;
+
+    const POLL_MS = { scheduled: 60000, in_progress: 30000, final: null };
+    let pollTimer = null;
+    let expandedPlayerId = null;
+    let currentTournament = null;
+    let currentLeaderboard = [];
+    let currentTab = 'leaderboard';
+    let selectedScorecardPlayer = null;
+    let fieldSort = 'position';
+    let fieldSearch = '';
+
+    // ── Data Fetching ──
+    async function fetchTournament() {
+      try {
+        const { data, error } = await sb
+          .from('golf_tournaments')
+          .select('*')
+          .eq('espn_event_id', EVENT_ID)
+          .single();
+        if (error) throw error;
+        return data;
+      } catch (e) {
+        console.error('Supabase tournament fetch failed, trying API fallback:', e);
+        const res = await fetch(FALLBACK_API + '/leaderboard?event=' + EVENT_ID);
+        const json = await res.json();
+        return json.tournament || null;
+      }
+    }
+
+    async function fetchLeaderboard() {
+      try {
+        const { data, error } = await sb
+          .from('golf_leaderboard')
+          .select('*')
+          .eq('espn_event_id', EVENT_ID)
+          .order('position', { ascending: true });
+        if (error) throw error;
+        return data || [];
+      } catch (e) {
+        console.error('Supabase leaderboard fetch failed, trying API fallback:', e);
+        try {
+          const res = await fetch(FALLBACK_API + '/leaderboard?event=' + EVENT_ID);
+          const json = await res.json();
+          return json.leaderboard || json.players || [];
+        } catch (e2) {
+          console.error('Fallback also failed:', e2);
+          return [];
+        }
+      }
+    }
+
+    async function fetchHoleScores(playerId) {
+      try {
+        const { data, error } = await sb
+          .from('golf_hole_scores')
+          .select('*')
+          .eq('espn_event_id', EVENT_ID)
+          .eq('espn_player_id', playerId)
+          .order('round_number', { ascending: true })
+          .order('hole_number', { ascending: true });
+        if (error) throw error;
+        return data || [];
+      } catch (e) {
+        console.error('Supabase hole scores failed, trying API fallback:', e);
+        try {
+          const res = await fetch(FALLBACK_API + '/scorecard?player=' + playerId + '&event=' + EVENT_ID);
+          const json = await res.json();
+          return json.holes || json.scores || [];
+        } catch (e2) {
+          return [];
+        }
+      }
+    }
+
+    // ── Status Detection ──
+    function getTournamentStatus(t) {
+      if (!t) return 'scheduled';
+      if (t.raw_status && t.raw_status.type) {
+        const rs = t.raw_status.type;
+        if (rs.state === 'in') return 'in_progress';
+        if (rs.state === 'post' && rs.completed) {
+          if (t.current_round >= 4) return 'final';
+          return 'in_progress';
+        }
+        if (rs.state === 'pre') return 'scheduled';
+      }
+      return t.status || 'scheduled';
+    }
+
+    // ── Score Helpers ──
+    function scoreClass(num) {
+      if (num < 0) return 'score-under';
+      if (num > 0) return 'score-over';
+      return 'score-even';
+    }
+
+    function formatScoreToPar(num) {
+      if (num === 0) return 'E';
+      if (num < 0) return String(num);
+      return '+' + num;
+    }
+
+    function thruDisplay(thru) {
+      if (thru === 18) return 'F';
+      if (thru === 0 || thru == null) return '-';
+      return thru;
+    }
+
+    function roundStroke(roundScores, roundNum) {
+      if (!roundScores) return '-';
+      let parsed = roundScores;
+      if (typeof parsed === 'string') {
+        try { parsed = JSON.parse(parsed); } catch { return '-'; }
+      }
+      const r = parsed.find(function(rs) { return rs.round === roundNum; });
+      return r && r.strokes > 0 ? r.strokes : '-';
+    }
+
+    function holeScoreHtml(strokes, scoreType) {
+      if (!strokes || strokes === 0) return '<span class="sc-score">&ndash;</span>';
+      var num = parseInt(scoreType);
+      var cls = '';
+      if (scoreType === 'E' || num === 0) cls = '';
+      else if (num <= -2) cls = 'sc-eagle';
+      else if (num === -1) cls = 'sc-birdie';
+      else if (num === 1) cls = 'sc-bogey';
+      else if (num >= 2) cls = 'sc-double';
+      return '<span class="sc-score ' + cls + '">' + strokes + '</span>';
+    }
+
+    // ── Mini Leaderboard (Briefing View) ──
+    function renderMiniLeaderboard(players, status) {
+      var container = document.getElementById('mini-lb-container');
+      var titleEl = document.getElementById('mini-lb-title');
+
+      if (status === 'scheduled' || !players.length) {
+        titleEl.textContent = 'Field Preview — ' + (players.length || 82) + ' Players';
+        container.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-dim)">Leaderboard will populate when Round 1 begins &mdash; April 16</div>';
+        return;
+      }
+
+      titleEl.textContent = 'Top 10';
+      var top10 = players.slice(0, 10);
+      var rows = '';
+      top10.forEach(function(p) {
+        var posDisplay = p.tied ? 'T' + p.position : '' + p.position;
+        var totalClass = scoreClass(p.score_to_par_num || 0);
+        var totalDisplay = formatScoreToPar(p.score_to_par_num || 0);
+        var todayClass = p.today_num != null ? scoreClass(p.today_num) : 'score-even';
+        rows += '<tr>' +
+          '<td style="font-weight:700;color:var(--text-dim);width:44px">' + posDisplay + '</td>' +
+          '<td><div class="mini-player-cell">' +
+            (p.headshot_url ? '<img src="' + p.headshot_url + '" class="mini-headshot" loading="lazy" onerror="this.style.display=\'none\'" />' : '') +
+            '<span style="font-weight:600;font-size:14px">' + p.player_name + '</span>' +
+            (p.country_flag_url ? '<img src="' + p.country_flag_url + '" class="mini-flag" loading="lazy" />' : '') +
+          '</div></td>' +
+          '<td class="' + totalClass + '" style="font-weight:700">' + totalDisplay + '</td>' +
+          '<td style="font-size:13px">' + thruDisplay(p.thru) + '</td>' +
+          '<td class="' + todayClass + '" style="font-size:13px">' + (p.today || '-') + '</td>' +
+        '</tr>';
+      });
+
+      container.innerHTML =
+        '<table class="mini-lb-table"><thead><tr>' +
+          '<th style="width:44px">Pos</th><th>Player</th><th>Total</th><th>Thru</th><th>Today</th>' +
+        '</tr></thead><tbody>' + rows + '</tbody></table>';
+    }
+
+    // ── Dashboard Status Badge ──
+    function renderDashStatus(t) {
+      var status = getTournamentStatus(t);
+      var badge = '';
+      if (status === 'in_progress') {
+        var detail = (t.raw_status && t.raw_status.type && t.raw_status.type.detail) || 'LIVE';
+        badge = '<span class="status-badge status-live">' + detail + '</span>';
+      } else if (status === 'final') {
+        badge = '<span class="status-badge status-final">FINAL RESULTS</span>';
+      } else {
+        badge = '<span class="status-badge status-scheduled">Starts April 16</span>';
+      }
+      document.getElementById('dash-status').innerHTML = badge;
+
+      var venue = (t.venue || 'Harbour Town Golf Links') + ' &bull; ' + (t.venue_city || 'Hilton Head Island') + ', ' + (t.venue_state || 'SC');
+      document.getElementById('dash-meta').innerHTML =
+        '<span>' + venue + '</span>' +
+        '<span>Par ' + (t.course_par || 71) + '</span>' +
+        '<span>' + (t.total_players || 82) + ' Players</span>' +
+        '<span>No Cut (Signature Event)</span>' +
+        (t.purse ? '<span>Purse: ' + t.purse + '</span>' : '');
+
+      return status;
+    }
+
+    // ── Dashboard: Full Leaderboard ──
+    function renderFullLeaderboard(players, status) {
+      if (!players.length) {
+        document.getElementById('dash-tab-content').innerHTML =
+          '<div class="loading-state">No leaderboard data yet. Check back when the tournament begins.</div>';
+        return;
+      }
+
+      var maxRound = Math.max.apply(null, players.map(function(p) { return p.current_round || 1; }));
+      var showR3 = maxRound >= 3;
+      var showR4 = maxRound >= 4;
+      var isChampion = status === 'final';
+
+      var rows = '';
+      players.forEach(function(p, i) {
+        var posDisplay = p.tied ? 'T' + p.position : '' + p.position;
+        var isWD = p.is_withdrawn;
+        var rowClass = isWD ? 'is-withdrawn' : '';
+        if (isChampion && p.position === 1) rowClass += ' champion-row';
+        var todayText = isWD ? 'WD' : (p.today || '-');
+        var todayClass = isWD ? 'score-cut' : (p.today_num != null ? scoreClass(p.today_num) : 'score-even');
+        var totalClass = scoreClass(p.score_to_par_num || 0);
+        var totalDisplay = formatScoreToPar(p.score_to_par_num || 0);
+
+        rows += '<tr class="' + rowClass + '" data-player-id="' + p.espn_player_id + '">' +
+          '<td>' + posDisplay + '</td>' +
+          '<td><div class="player-cell">' +
+            '<img src="' + (p.headshot_url || '') + '" alt="" class="player-headshot" loading="lazy" onerror="this.style.display=\'none\'" />' +
+            '<div class="player-info">' +
+              '<span class="player-name">' + p.player_name + '</span>' +
+              '<span class="player-country">' +
+                (p.country_flag_url ? '<img src="' + p.country_flag_url + '" alt="" class="country-flag" loading="lazy" />' : '') +
+                (p.country || '') +
+              '</span>' +
+            '</div>' +
+          '</div></td>' +
+          '<td class="' + totalClass + '" style="font-weight:700">' + totalDisplay + '</td>' +
+          '<td class="' + todayClass + '">' + todayText + '</td>' +
+          '<td>' + thruDisplay(p.thru) + '</td>' +
+          '<td>' + roundStroke(p.round_scores, 1) + '</td>' +
+          '<td>' + roundStroke(p.round_scores, 2) + '</td>' +
+          (showR3 ? '<td class="round-col-3">' + roundStroke(p.round_scores, 3) + '</td>' : '') +
+          (showR4 ? '<td class="round-col-4">' + roundStroke(p.round_scores, 4) + '</td>' : '') +
+        '</tr>';
+
+        // Expanded scorecard row
+        if (p.espn_player_id === expandedPlayerId) {
+          var colSpan = 5 + 2 + (showR3 ? 1 : 0) + (showR4 ? 1 : 0);
+          rows += '<tr class="scorecard-row"><td colspan="' + colSpan + '"><div class="scorecard-container" id="scorecard-' + p.espn_player_id + '">' +
+            '<div class="loading-state"><div class="loading-spinner"></div>Loading scorecard...</div>' +
+          '</div></td></tr>';
+        }
+      });
+
+      var pollHtml = status === 'in_progress'
+        ? '<div class="poll-indicator"><span class="poll-dot"></span>Live — updating every 30s</div>'
+        : status === 'scheduled'
+        ? '<div class="poll-indicator">Checking for updates every 60s</div>'
+        : '';
+
+      document.getElementById('dash-tab-content').innerHTML =
+        '<div class="leaderboard-card">' +
+          '<table class="leaderboard-table">' +
+            '<thead><tr>' +
+              '<th>Pos</th><th>Player</th><th>Total</th><th>Today</th><th>Thru</th>' +
+              '<th>R1</th><th>R2</th>' +
+              (showR3 ? '<th class="round-col-3">R3</th>' : '') +
+              (showR4 ? '<th class="round-col-4">R4</th>' : '') +
+            '</tr></thead>' +
+            '<tbody>' + rows + '</tbody>' +
+          '</table>' +
+          pollHtml +
+        '</div>';
+
+      // Bind row clicks
+      document.querySelectorAll('#dash-tab-content tr[data-player-id]').forEach(function(tr) {
+        tr.addEventListener('click', function() { handleRowClick(tr.dataset.playerId); });
+      });
+
+      if (expandedPlayerId) {
+        loadScorecard(expandedPlayerId);
+      }
+    }
+
+    function handleRowClick(playerId) {
+      if (expandedPlayerId === playerId) {
+        expandedPlayerId = null;
+      } else {
+        expandedPlayerId = playerId;
+      }
+      renderFullLeaderboard(currentLeaderboard, getTournamentStatus(currentTournament));
+    }
+
+    async function loadScorecard(playerId) {
+      var container = document.getElementById('scorecard-' + playerId);
+      if (!container) return;
+
+      try {
+        var holes = await fetchHoleScores(playerId);
+        var player = currentLeaderboard.find(function(p) { return p.espn_player_id === playerId; });
+        if (!holes.length) {
+          container.innerHTML = '<div style="padding:16px;color:var(--text-dim);text-align:center">No hole-by-hole data available yet</div>';
+          return;
+        }
+
+        var rounds = {};
+        holes.forEach(function(h) {
+          if (!rounds[h.round_number]) rounds[h.round_number] = [];
+          rounds[h.round_number].push(h);
+        });
+
+        var html = '<div class="scorecard-header">' +
+          (player && player.headshot_url ? '<img src="' + player.headshot_url + '" class="scorecard-player-img" alt="" />' : '') +
+          '<div>' +
+            '<div class="scorecard-player-name">' + (player ? player.player_name : 'Player') + '</div>' +
+            '<div style="font-size:12px;color:var(--text-dim)">' + (player ? player.country || '' : '') + '</div>' +
+          '</div>' +
+        '</div><div class="scorecard-rounds">';
+
+        var roundKeys = Object.keys(rounds).sort(function(a,b) { return a - b; });
+        roundKeys.forEach(function(roundNum) {
+          var roundHoles = rounds[roundNum];
+          var front9 = roundHoles.filter(function(h) { return h.hole_number <= 9; }).sort(function(a,b) { return a.hole_number - b.hole_number; });
+          var back9 = roundHoles.filter(function(h) { return h.hole_number > 9; }).sort(function(a,b) { return a.hole_number - b.hole_number; });
+          var frontTotal = front9.reduce(function(s,h) { return s + (h.strokes || 0); }, 0);
+          var backTotal = back9.reduce(function(s,h) { return s + (h.strokes || 0); }, 0);
+          var roundTotal = frontTotal + backTotal;
+
+          html += '<div><div class="scorecard-round-label">Round ' + roundNum + '</div>';
+
+          // Front 9
+          html += '<div class="scorecard-grid">';
+          html += '<div class="sc-cell sc-header sc-label">HOLE</div>';
+          for (var n = 1; n <= 9; n++) html += '<div class="sc-cell sc-header">' + n + '</div>';
+          html += '<div class="sc-cell sc-header sc-label">OUT</div>';
+
+          html += '<div class="sc-cell sc-par sc-label">PAR</div>';
+          for (var n = 0; n < 9; n++) html += '<div class="sc-cell sc-par">' + HARBOUR_TOWN_PAR[n] + '</div>';
+          html += '<div class="sc-cell sc-par sc-total">' + FRONT_PAR + '</div>';
+
+          html += '<div class="sc-cell sc-label">SCORE</div>';
+          for (var n = 1; n <= 9; n++) {
+            var h = front9.find(function(x) { return x.hole_number === n; });
+            html += '<div class="sc-cell">' + (h ? holeScoreHtml(h.strokes, h.score_type) : '&ndash;') + '</div>';
+          }
+          html += '<div class="sc-cell sc-total">' + (frontTotal || '-') + '</div>';
+          html += '</div>';
+
+          // Back 9
+          html += '<div class="scorecard-grid" style="margin-top:6px">';
+          html += '<div class="sc-cell sc-header sc-label">HOLE</div>';
+          for (var n = 10; n <= 18; n++) html += '<div class="sc-cell sc-header">' + n + '</div>';
+          html += '<div class="sc-cell sc-header sc-label">IN</div>';
+
+          html += '<div class="sc-cell sc-par sc-label">PAR</div>';
+          for (var n = 9; n < 18; n++) html += '<div class="sc-cell sc-par">' + HARBOUR_TOWN_PAR[n] + '</div>';
+          html += '<div class="sc-cell sc-par sc-total">' + BACK_PAR + '</div>';
+
+          html += '<div class="sc-cell sc-label">SCORE</div>';
+          for (var n = 10; n <= 18; n++) {
+            var h = back9.find(function(x) { return x.hole_number === n; });
+            html += '<div class="sc-cell">' + (h ? holeScoreHtml(h.strokes, h.score_type) : '&ndash;') + '</div>';
+          }
+          html += '<div class="sc-cell sc-total">' + (backTotal || '-') + '</div>';
+          html += '</div>';
+
+          if (roundTotal) {
+            var toPar = roundTotal - COURSE_PAR;
+            var toParStr = toPar === 0 ? 'E' : (toPar > 0 ? '+' + toPar : '' + toPar);
+            html += '<div style="text-align:right;font-size:13px;color:var(--text-dim);margin-top:4px;font-weight:600">Total: ' + roundTotal + ' (' + toParStr + ')</div>';
+          }
+          html += '</div>';
+        });
+
+        html += '</div>';
+        container.innerHTML = html;
+      } catch (err) {
+        container.innerHTML = '<div style="padding:16px;color:hsl(0 60% 60%);text-align:center">Failed to load scorecard</div>';
+        console.error('Scorecard error:', err);
+      }
+    }
+
+    // ── Dashboard: Scorecard Tab ──
+    function renderScorecardTab(players, status) {
+      if (status === 'scheduled') {
+        document.getElementById('dash-tab-content').innerHTML =
+          '<div class="scorecard-tab-content"><div style="text-align:center;color:var(--text-dim);padding:40px">Scoring begins Thursday, April 16</div></div>';
+        return;
+      }
+
+      var options = players.map(function(p) {
+        var posDisplay = p.tied ? 'T' + p.position : '' + p.position;
+        var score = formatScoreToPar(p.score_to_par_num || 0);
+        return '<option value="' + p.espn_player_id + '"' + (selectedScorecardPlayer === p.espn_player_id ? ' selected' : '') + '>' +
+          posDisplay + '. ' + p.player_name + ' (' + score + ')' +
+        '</option>';
+      }).join('');
+
+      document.getElementById('dash-tab-content').innerHTML =
+        '<div class="scorecard-tab-content">' +
+          '<div class="player-selector">' +
+            '<label style="font-size:13px;color:var(--text-dim);font-weight:600">Select Player:</label>' +
+            '<select id="scorecard-player-select">' +
+              '<option value="">Choose a player...</option>' +
+              options +
+            '</select>' +
+          '</div>' +
+          '<div id="scorecard-tab-display">' +
+            (selectedScorecardPlayer ? '<div class="loading-state"><div class="loading-spinner"></div>Loading scorecard...</div>' : '<div style="text-align:center;color:var(--text-dim);padding:40px">Select a player to view their scorecard</div>') +
+          '</div>' +
+        '</div>';
+
+      document.getElementById('scorecard-player-select').addEventListener('change', function(e) {
+        selectedScorecardPlayer = e.target.value || null;
+        if (selectedScorecardPlayer) {
+          loadScorecardTab(selectedScorecardPlayer);
+        } else {
+          document.getElementById('scorecard-tab-display').innerHTML =
+            '<div style="text-align:center;color:var(--text-dim);padding:40px">Select a player to view their scorecard</div>';
+        }
+      });
+
+      if (selectedScorecardPlayer) {
+        loadScorecardTab(selectedScorecardPlayer);
+      }
+    }
+
+    async function loadScorecardTab(playerId) {
+      var display = document.getElementById('scorecard-tab-display');
+      if (!display) return;
+      display.innerHTML = '<div class="loading-state"><div class="loading-spinner"></div>Loading scorecard...</div>';
+
+      try {
+        var holes = await fetchHoleScores(playerId);
+        var player = currentLeaderboard.find(function(p) { return p.espn_player_id === playerId; });
+
+        if (!holes.length) {
+          display.innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:40px">No hole-by-hole data available yet for this player</div>';
+          return;
+        }
+
+        // Reuse scorecard rendering
+        var tempId = 'scorecard-tab-temp';
+        display.innerHTML = '<div id="' + tempId + '"></div>';
+        expandedPlayerId = null; // Don't interfere with leaderboard expansion
+        var container = document.getElementById(tempId);
+
+        var rounds = {};
+        holes.forEach(function(h) {
+          if (!rounds[h.round_number]) rounds[h.round_number] = [];
+          rounds[h.round_number].push(h);
+        });
+
+        var totalClass = player ? scoreClass(player.score_to_par_num || 0) : '';
+        var totalDisplay = player ? formatScoreToPar(player.score_to_par_num || 0) : 'E';
+
+        var html = '<div class="scorecard-header">' +
+          (player && player.headshot_url ? '<img src="' + player.headshot_url + '" class="scorecard-player-img" alt="" />' : '') +
+          '<div>' +
+            '<div class="scorecard-player-name">' + (player ? player.player_name : 'Player') + '</div>' +
+            '<div style="font-size:13px;color:var(--text-dim);margin-top:2px">' +
+              (player ? (player.country || '') : '') +
+              ' &bull; ' +
+              (player ? (player.tied ? 'T' : '') + player.position : '') +
+              ' &bull; <span class="' + totalClass + '" style="font-weight:700">' + totalDisplay + '</span>' +
+            '</div>' +
+          '</div>' +
+        '</div><div class="scorecard-rounds">';
+
+        var roundKeys = Object.keys(rounds).sort(function(a,b) { return a - b; });
+        roundKeys.forEach(function(roundNum) {
+          var roundHoles = rounds[roundNum];
+          var front9 = roundHoles.filter(function(h) { return h.hole_number <= 9; }).sort(function(a,b) { return a.hole_number - b.hole_number; });
+          var back9 = roundHoles.filter(function(h) { return h.hole_number > 9; }).sort(function(a,b) { return a.hole_number - b.hole_number; });
+          var frontTotal = front9.reduce(function(s,h) { return s + (h.strokes || 0); }, 0);
+          var backTotal = back9.reduce(function(s,h) { return s + (h.strokes || 0); }, 0);
+          var roundTotal = frontTotal + backTotal;
+
+          html += '<div><div class="scorecard-round-label">Round ' + roundNum + '</div>';
+          html += '<div class="scorecard-grid">';
+          html += '<div class="sc-cell sc-header sc-label">HOLE</div>';
+          for (var n = 1; n <= 9; n++) html += '<div class="sc-cell sc-header">' + n + '</div>';
+          html += '<div class="sc-cell sc-header sc-label">OUT</div>';
+          html += '<div class="sc-cell sc-par sc-label">PAR</div>';
+          for (var n = 0; n < 9; n++) html += '<div class="sc-cell sc-par">' + HARBOUR_TOWN_PAR[n] + '</div>';
+          html += '<div class="sc-cell sc-par sc-total">' + FRONT_PAR + '</div>';
+          html += '<div class="sc-cell sc-label">SCORE</div>';
+          for (var n = 1; n <= 9; n++) {
+            var h = front9.find(function(x) { return x.hole_number === n; });
+            html += '<div class="sc-cell">' + (h ? holeScoreHtml(h.strokes, h.score_type) : '&ndash;') + '</div>';
+          }
+          html += '<div class="sc-cell sc-total">' + (frontTotal || '-') + '</div></div>';
+
+          html += '<div class="scorecard-grid" style="margin-top:6px">';
+          html += '<div class="sc-cell sc-header sc-label">HOLE</div>';
+          for (var n = 10; n <= 18; n++) html += '<div class="sc-cell sc-header">' + n + '</div>';
+          html += '<div class="sc-cell sc-header sc-label">IN</div>';
+          html += '<div class="sc-cell sc-par sc-label">PAR</div>';
+          for (var n = 9; n < 18; n++) html += '<div class="sc-cell sc-par">' + HARBOUR_TOWN_PAR[n] + '</div>';
+          html += '<div class="sc-cell sc-par sc-total">' + BACK_PAR + '</div>';
+          html += '<div class="sc-cell sc-label">SCORE</div>';
+          for (var n = 10; n <= 18; n++) {
+            var h = back9.find(function(x) { return x.hole_number === n; });
+            html += '<div class="sc-cell">' + (h ? holeScoreHtml(h.strokes, h.score_type) : '&ndash;') + '</div>';
+          }
+          html += '<div class="sc-cell sc-total">' + (backTotal || '-') + '</div></div>';
+
+          if (roundTotal) {
+            var toPar = roundTotal - COURSE_PAR;
+            var toParStr = toPar === 0 ? 'E' : (toPar > 0 ? '+' + toPar : '' + toPar);
+            html += '<div style="text-align:right;font-size:13px;color:var(--text-dim);margin-top:4px;font-weight:600">Total: ' + roundTotal + ' (' + toParStr + ')</div>';
+          }
+          html += '</div>';
+        });
+
+        html += '</div>';
+        container.innerHTML = html;
+      } catch (err) {
+        display.innerHTML = '<div style="text-align:center;color:hsl(0 60% 60%);padding:40px">Failed to load scorecard</div>';
+        console.error('Scorecard tab error:', err);
+      }
+    }
+
+    // ── Dashboard: Field Tab ──
+    function renderFieldTab(players, status) {
+      var sorted = players.slice();
+      if (fieldSort === 'name') {
+        sorted.sort(function(a, b) { return a.player_name.localeCompare(b.player_name); });
+      } else if (fieldSort === 'country') {
+        sorted.sort(function(a, b) { return (a.country || '').localeCompare(b.country || ''); });
+      }
+      // Default is position (already sorted)
+
+      if (fieldSearch) {
+        var q = fieldSearch.toLowerCase();
+        sorted = sorted.filter(function(p) {
+          return p.player_name.toLowerCase().indexOf(q) !== -1 || (p.country || '').toLowerCase().indexOf(q) !== -1;
+        });
+      }
+
+      var sortBtns = ['position', 'name', 'country'].map(function(s) {
+        return '<button class="field-sort-btn' + (fieldSort === s ? ' active' : '') + '" data-sort="' + s + '">' +
+          s.charAt(0).toUpperCase() + s.slice(1) + '</button>';
+      }).join('');
+
+      var cards = sorted.map(function(p) {
+        var totalClass = scoreClass(p.score_to_par_num || 0);
+        var totalDisplay = status === 'scheduled' ? 'E' : formatScoreToPar(p.score_to_par_num || 0);
+        return '<div class="field-card">' +
+          '<img src="' + (p.headshot_url || '') + '" alt="" class="field-headshot" loading="lazy" onerror="this.style.display=\'none\'" />' +
+          '<div class="field-card-info">' +
+            '<div class="field-card-name">' + p.player_name + '</div>' +
+            '<div class="field-card-meta">' +
+              (p.country_flag_url ? '<img src="' + p.country_flag_url + '" alt="" style="width:14px;height:10px;border-radius:1px" />' : '') +
+              '<span>' + (p.country || '') + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<div class="field-card-score ' + totalClass + '">' + totalDisplay + '</div>' +
+        '</div>';
+      }).join('');
+
+      document.getElementById('dash-tab-content').innerHTML =
+        '<div class="field-controls">' +
+          '<input type="text" class="field-search" placeholder="Search players..." id="field-search-input" value="' + (fieldSearch || '') + '" />' +
+          sortBtns +
+        '</div>' +
+        '<div style="font-size:13px;color:var(--text-dim);margin-bottom:12px">' + sorted.length + ' players</div>' +
+        '<div class="field-grid">' + cards + '</div>';
+
+      // Bind sort buttons
+      document.querySelectorAll('.field-sort-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          fieldSort = btn.dataset.sort;
+          renderFieldTab(currentLeaderboard, getTournamentStatus(currentTournament));
+        });
+      });
+
+      // Bind search
+      document.getElementById('field-search-input').addEventListener('input', function(e) {
+        fieldSearch = e.target.value;
+        renderFieldTab(currentLeaderboard, getTournamentStatus(currentTournament));
+      });
+    }
+
+    // ── Tab Rendering ──
+    function renderCurrentTab() {
+      var status = getTournamentStatus(currentTournament);
+
+      // Update nav active state
+      document.querySelectorAll('#dash-nav a').forEach(function(a) {
+        a.classList.toggle('active', a.dataset.tab === currentTab);
+      });
+
+      if (currentTab === 'leaderboard') {
+        renderFullLeaderboard(currentLeaderboard, status);
+      } else if (currentTab === 'scorecard') {
+        renderScorecardTab(currentLeaderboard, status);
+      } else if (currentTab === 'field') {
+        renderFieldTab(currentLeaderboard, status);
+      }
+    }
+
+    // ── Hash Routing ──
+    function checkRoute() {
+      var hash = window.location.hash;
+      var isBriefing = !hash || hash === '#' || hash === '#/' || hash === '#/briefing' || hash === '#/briefing/';
+
+      if (isBriefing) {
+        document.body.classList.remove('on-dashboard');
+      } else {
+        document.body.classList.add('on-dashboard');
+        // Determine which tab
+        if (hash.indexOf('#/scorecard') === 0) {
+          currentTab = 'scorecard';
+        } else if (hash.indexOf('#/field') === 0) {
+          currentTab = 'field';
+        } else {
+          currentTab = 'leaderboard';
+        }
+
+        if (currentTournament) {
+          renderDashStatus(currentTournament);
+          renderCurrentTab();
+        }
+      }
+    }
+
+    window.addEventListener('hashchange', checkRoute);
+
+    // ── Scroll-based logo fade ──
+    (function() {
+      var logo = document.querySelector('.edge-top-logo');
+      if (!logo) return;
+      window.addEventListener('scroll', function() {
+        if (window.scrollY > 80) {
+          logo.classList.add('scrolled');
+        } else {
+          logo.classList.remove('scrolled');
+        }
+      }, { passive: true });
+    })();
+
+    // ── Intersection Observer for edge-block fade-in ──
+    (function() {
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      }, { threshold: 0.15 });
+
+      document.querySelectorAll('.edge-block').forEach(function(block) {
+        observer.observe(block);
+      });
+    })();
+
+    // ── Generate comets ──
+    (function() {
+      var container = document.getElementById('comets');
+      if (!container || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+      // 40 cyan comets
+      for (var i = 0; i < 40; i++) {
+        var angle = -30 - 30 * Math.random();
+        var rad = angle * Math.PI / 180;
+        var travel = 120 + 80 * Math.random();
+        var el = document.createElement('div');
+        el.className = 'comet';
+        el.style.setProperty('--duration', (8 + 12 * Math.random()) + 's');
+        el.style.setProperty('--delay', (30 * Math.random()) + 's');
+        el.style.setProperty('--start-x', (70 * Math.random()) + '%');
+        el.style.setProperty('--start-y', (50 + 50 * Math.random()) + '%');
+        el.style.setProperty('--angle', angle + 'deg');
+        el.style.setProperty('--travel-x', (Math.cos(rad) * travel) + 'vw');
+        el.style.setProperty('--travel-y', (Math.sin(rad) * travel) + 'vh');
+        container.appendChild(el);
+      }
+
+      // 10 coral comets (replaces gold for RBC)
+      for (var j = 0; j < 10; j++) {
+        var angle2 = -20 - 140 * Math.random();
+        var rad2 = angle2 * Math.PI / 180;
+        var travel2 = 100 + 100 * Math.random();
+        var el2 = document.createElement('div');
+        el2.className = 'comet coral';
+        el2.style.setProperty('--duration', (10 + 10 * Math.random()) + 's');
+        el2.style.setProperty('--delay', (35 * Math.random()) + 's');
+        el2.style.setProperty('--start-x', (80 * Math.random()) + '%');
+        el2.style.setProperty('--start-y', (100 * Math.random()) + '%');
+        el2.style.setProperty('--angle', angle2 + 'deg');
+        el2.style.setProperty('--travel-x', (Math.cos(rad2) * travel2) + 'vw');
+        el2.style.setProperty('--travel-y', (Math.sin(rad2) * travel2) + 'vh');
+        container.appendChild(el2);
+      }
+    })();
+
+    // ── Main Load + Polling ──
+    async function loadAll() {
+      try {
+        currentTournament = await fetchTournament();
+        var status = getTournamentStatus(currentTournament);
+        currentLeaderboard = await fetchLeaderboard();
+
+        // Render briefing mini leaderboard
+        renderMiniLeaderboard(currentLeaderboard, status);
+
+        // If on dashboard, render it
+        checkRoute();
+
+        // Set up polling
+        if (pollTimer) clearInterval(pollTimer);
+        var interval = POLL_MS[status];
+        if (interval) {
+          pollTimer = setInterval(async function() {
+            try {
+              currentTournament = await fetchTournament();
+              var newStatus = getTournamentStatus(currentTournament);
+              currentLeaderboard = await fetchLeaderboard();
+
+              renderMiniLeaderboard(currentLeaderboard, newStatus);
+
+              if (document.body.classList.contains('on-dashboard')) {
+                renderDashStatus(currentTournament);
+                renderCurrentTab();
+              }
+
+              var newInterval = POLL_MS[newStatus];
+              if (newInterval !== interval) {
+                clearInterval(pollTimer);
+                if (newInterval) {
+                  pollTimer = setInterval(arguments.callee, newInterval);
+                }
+              }
+            } catch (e) { console.error('Poll error:', e); }
+          }, interval);
+        }
+      } catch (err) {
+        console.error('Load error:', err);
+        document.getElementById('mini-lb-container').innerHTML =
+          '<div style="padding:24px;text-align:center;color:var(--text-dim)">Tournament data loading... check back soon.</div>';
+      }
+    }
+
+    loadAll();
+  </script>
+</body>
+</html>
