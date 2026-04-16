@@ -101,7 +101,8 @@ await testPage('bears', 'Scores (/chicago-bears/scores)', async () => {
 
 // Stats Page
 await testPage('bears', 'Stats (/chicago-bears/stats)', async () => {
-  const { data: teamStats } = await supabase.from('bears_team_season_stats').select('*').eq('season', SEASONS.bears).single()
+  const { data: bearsTeamStatsArr } = await supabase.from('bears_team_season_stats').select('*').eq('season', SEASONS.bears).eq('game_type', 'regular')
+  const teamStats = bearsTeamStatsArr?.[0]
   const { data: playerStats, count } = await supabase.from('bears_player_game_stats').select('player_id', { count: 'exact' }).eq('season', SEASONS.bears)
   const uniquePlayers = [...new Set(playerStats?.map(s => s.player_id) || [])]
 
@@ -255,7 +256,8 @@ console.log('══════════════════════�
 
 // Overview Page
 await testPage('cubs', 'Overview (/chicago-cubs)', async () => {
-  const { data: record } = await supabase.from('cubs_seasons').select('*').eq('season', SEASONS.cubs).single()
+  const { data: records } = await supabase.from('cubs_seasons').select('*').eq('season', SEASONS.cubs).eq('game_type', 'regular')
+  const record = records?.[0]
 
   return {
     status: record ? '✅' : '❌',
@@ -289,7 +291,8 @@ await testPage('cubs', 'Stats (/chicago-cubs/stats)', async () => {
   const uniquePlayers = [...new Set(playerStats?.map(s => s.player_id) || [])]
 
   // Check team stats with correct column names: batting_average, era, ops
-  const { data: cubsTeamStats, error: teamStatsErr } = await supabase.from('cubs_team_season_stats').select('*').eq('season', SEASONS.cubs).single()
+  const { data: cubsTeamStatsArr, error: teamStatsErr } = await supabase.from('cubs_team_season_stats').select('*').eq('season', SEASONS.cubs).eq('game_type', 'regular')
+  const cubsTeamStats = cubsTeamStatsArr?.[0]
   const cubsNullCols = cubsTeamStats ? ['batting_average', 'era', 'ops'].filter(c => cubsTeamStats[c] == null) : []
 
   return {
@@ -303,11 +306,11 @@ await testPage('cubs', 'Stats (/chicago-cubs/stats)', async () => {
   }
 })
 
-// Roster Page (using espn_id join)
+// Roster Page (using contracts as source of truth)
 await testPage('cubs', 'Roster (/chicago-cubs/roster)', async () => {
-  const { data: statsPlayers } = await supabase.from('cubs_player_game_stats').select('player_id').eq('season', SEASONS.cubs)
-  const espnIds = [...new Set(statsPlayers?.map(s => String(s.player_id)) || [])]
-  const { data: players, count } = await supabase.from('cubs_players').select('*', { count: 'exact' }).in('espn_id', espnIds.length > 0 ? espnIds : ['0'])
+  const { data: contracts, count } = await supabase.from('cubs_contracts').select('*', { count: 'exact' }).eq('season', 2026)
+  const playerIds = contracts?.map(c => String(c.player_id)) || []
+  const { data: players } = await supabase.from('cubs_players').select('espn_id, headshot_url').in('espn_id', playerIds.length > 0 ? playerIds : ['0'])
   const withHeadshots = players?.filter(p => p.headshot_url).length || 0
 
   return {
@@ -316,15 +319,13 @@ await testPage('cubs', 'Roster (/chicago-cubs/roster)', async () => {
   }
 })
 
-// Players Page
+// Players Page (using contracts as source of truth)
 await testPage('cubs', 'Players (/chicago-cubs/players)', async () => {
-  const { data: statsPlayers } = await supabase.from('cubs_player_game_stats').select('player_id').eq('season', SEASONS.cubs)
-  const espnIds = [...new Set(statsPlayers?.map(s => String(s.player_id)) || [])]
-  const { data: players, count } = await supabase.from('cubs_players').select('*', { count: 'exact' }).in('espn_id', espnIds.length > 0 ? espnIds : ['0'])
+  const { data: contracts, count } = await supabase.from('cubs_contracts').select('player_id, player_name', { count: 'exact' }).eq('season', 2026)
 
   return {
     status: count > 0 ? '✅' : '❌',
-    data: { totalPlayers: count, samplePlayer: players?.[0]?.name || 'None' }
+    data: { totalPlayers: count, samplePlayer: contracts?.[0]?.player_name || 'None' }
   }
 })
 
@@ -348,7 +349,8 @@ console.log('══════════════════════�
 
 // Overview Page
 await testPage('whitesox', 'Overview (/chicago-white-sox)', async () => {
-  const { data: record } = await supabase.from('whitesox_seasons').select('*').eq('season', SEASONS.whitesox).single()
+  const { data: records } = await supabase.from('whitesox_seasons').select('*').eq('season', SEASONS.whitesox).eq('game_type', 'regular')
+  const record = records?.[0]
 
   return {
     status: record ? '✅' : '❌',
@@ -382,7 +384,8 @@ await testPage('whitesox', 'Stats (/chicago-white-sox/stats)', async () => {
   const uniquePlayers = [...new Set(playerStats?.map(s => s.player_id) || [])]
 
   // Check team stats with correct column names: batting_average, era, ops
-  const { data: wsTeamStats, error: teamStatsErr } = await supabase.from('whitesox_team_season_stats').select('*').eq('season', SEASONS.whitesox).single()
+  const { data: wsTeamStatsArr, error: teamStatsErr } = await supabase.from('whitesox_team_season_stats').select('*').eq('season', SEASONS.whitesox).eq('game_type', 'regular')
+  const wsTeamStats = wsTeamStatsArr?.[0]
   const wsNullCols = wsTeamStats ? ['batting_average', 'era', 'ops'].filter(c => wsTeamStats[c] == null) : []
 
   return {
@@ -396,11 +399,11 @@ await testPage('whitesox', 'Stats (/chicago-white-sox/stats)', async () => {
   }
 })
 
-// Roster Page (using espn_id join)
+// Roster Page (using contracts as source of truth)
 await testPage('whitesox', 'Roster (/chicago-white-sox/roster)', async () => {
-  const { data: statsPlayers } = await supabase.from('whitesox_player_game_stats').select('player_id').eq('season', SEASONS.whitesox)
-  const espnIds = [...new Set(statsPlayers?.map(s => String(s.player_id)) || [])]
-  const { data: players, count } = await supabase.from('whitesox_players').select('*', { count: 'exact' }).in('espn_id', espnIds.length > 0 ? espnIds : ['0'])
+  const { data: contracts, count } = await supabase.from('whitesox_contracts').select('*', { count: 'exact' }).eq('season', 2026)
+  const playerIds = contracts?.map(c => String(c.player_id)) || []
+  const { data: players } = await supabase.from('whitesox_players').select('espn_id, headshot_url').in('espn_id', playerIds.length > 0 ? playerIds : ['0'])
   const withHeadshots = players?.filter(p => p.headshot_url).length || 0
 
   return {
@@ -409,15 +412,13 @@ await testPage('whitesox', 'Roster (/chicago-white-sox/roster)', async () => {
   }
 })
 
-// Players Page
+// Players Page (using contracts as source of truth)
 await testPage('whitesox', 'Players (/chicago-white-sox/players)', async () => {
-  const { data: statsPlayers } = await supabase.from('whitesox_player_game_stats').select('player_id').eq('season', SEASONS.whitesox)
-  const espnIds = [...new Set(statsPlayers?.map(s => String(s.player_id)) || [])]
-  const { data: players, count } = await supabase.from('whitesox_players').select('*', { count: 'exact' }).in('espn_id', espnIds.length > 0 ? espnIds : ['0'])
+  const { data: contracts, count } = await supabase.from('whitesox_contracts').select('player_id, player_name', { count: 'exact' }).eq('season', 2026)
 
   return {
     status: count > 0 ? '✅' : '❌',
-    data: { totalPlayers: count, samplePlayer: players?.[0]?.name || 'None' }
+    data: { totalPlayers: count, samplePlayer: contracts?.[0]?.player_name || 'None' }
   }
 })
 
