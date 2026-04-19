@@ -1,8 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
-import { ArrowRightLeft } from 'lucide-react';
+import { ArrowRightLeft, ThumbsUp, ThumbsDown } from 'lucide-react';
 
 interface TradeItem {
   type: 'player' | 'pick';
@@ -96,6 +96,19 @@ function TradeColumn({ team, teamLogo, receives }: { team: string; teamLogo?: st
 }
 
 export function TradeScenarioCard({ teamA, teamB, teamALogo, teamBLogo, teamAReceives, teamBReceives }: TradeScenarioCardProps) {
+  const [vote, setVote] = useState<'agree' | 'disagree' | null>(null);
+  const [counts, setCounts] = useState({ agree: 0, disagree: 0 });
+
+  const handleVote = (choice: 'agree' | 'disagree') => {
+    if (vote) return; // Already voted
+    setVote(choice);
+    setCounts(prev => ({ ...prev, [choice]: prev[choice] + 1 }));
+  };
+
+  const totalVotes = counts.agree + counts.disagree;
+  const agreePct = totalVotes > 0 ? Math.round((counts.agree / totalVotes) * 100) : 0;
+  const disagreePct = totalVotes > 0 ? 100 - agreePct : 0;
+
   return (
     <div
       className="rounded-xl p-5 my-8"
@@ -120,6 +133,54 @@ export function TradeScenarioCard({ teamA, teamB, teamALogo, teamBLogo, teamARec
           <ArrowRightLeft size={20} className="text-slate-600 rotate-90" />
         </div>
         <TradeColumn team={teamB} teamLogo={teamBLogo} receives={teamBReceives} />
+      </div>
+
+      {/* Vote bar */}
+      <div className="mt-5 pt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+        <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">Would you make this trade?</p>
+        {!vote ? (
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => handleVote('agree')}
+              className="flex-1 flex items-center justify-center gap-2 rounded-lg py-3 text-sm font-semibold transition-all hover:scale-[1.02]"
+              style={{ backgroundColor: 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.25)', color: '#00D4FF' }}
+            >
+              <ThumbsUp size={16} /> I&apos;d do it
+            </button>
+            <button
+              type="button"
+              onClick={() => handleVote('disagree')}
+              className="flex-1 flex items-center justify-center gap-2 rounded-lg py-3 text-sm font-semibold transition-all hover:scale-[1.02]"
+              style={{ backgroundColor: 'rgba(188,0,0,0.1)', border: '1px solid rgba(188,0,0,0.25)', color: '#BC0000' }}
+            >
+              <ThumbsDown size={16} /> No way
+            </button>
+          </div>
+        ) : (
+          <div>
+            <div className="flex gap-1 h-3 rounded-full overflow-hidden mb-2">
+              <div
+                className="rounded-l-full transition-all duration-500"
+                style={{ width: `${agreePct}%`, backgroundColor: '#00D4FF', minWidth: totalVotes > 0 ? '4px' : 0 }}
+              />
+              <div
+                className="rounded-r-full transition-all duration-500"
+                style={{ width: `${disagreePct}%`, backgroundColor: '#BC0000', minWidth: totalVotes > 0 ? '4px' : 0 }}
+              />
+            </div>
+            <div className="flex justify-between text-xs">
+              <span style={{ color: vote === 'agree' ? '#00D4FF' : '#64748b', fontWeight: vote === 'agree' ? 700 : 400 }}>
+                <ThumbsUp size={12} className="inline mr-1" style={{ verticalAlign: '-2px' }} />
+                I&apos;d do it {agreePct}%
+              </span>
+              <span style={{ color: vote === 'disagree' ? '#BC0000' : '#64748b', fontWeight: vote === 'disagree' ? 700 : 400 }}>
+                No way {disagreePct}%
+                <ThumbsDown size={12} className="inline ml-1" style={{ verticalAlign: '-2px' }} />
+              </span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
