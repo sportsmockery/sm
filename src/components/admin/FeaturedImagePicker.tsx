@@ -1,11 +1,20 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
+
+interface MediaItem {
+  id: string
+  url: string
+  alt_text?: string
+  description?: string
+  filename?: string
+  created_at?: string
+}
 
 interface FeaturedImagePickerProps {
   currentImage: string | null
-  onImageSelect: (url: string) => void
+  onImageSelect: (url: string, altText?: string) => void
   onRemove: () => void
 }
 
@@ -17,7 +26,23 @@ export default function FeaturedImagePicker({
   const [isUploading, setIsUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [showMediaModal, setShowMediaModal] = useState(false)
+  const [mediaItems, setMediaItems] = useState<MediaItem[]>([])
+  const [mediaLoading, setMediaLoading] = useState(false)
+  const [mediaSearch, setMediaSearch] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Fetch media library when modal opens
+  useEffect(() => {
+    if (!showMediaModal) return
+    setMediaLoading(true)
+    const params = new URLSearchParams({ limit: '30', type: 'image' })
+    if (mediaSearch) params.set('search', mediaSearch)
+    fetch(`/api/admin/media?${params}`)
+      .then(r => r.ok ? r.json() : { media: [] })
+      .then(data => setMediaItems(data.media || data || []))
+      .catch(() => setMediaItems([]))
+      .finally(() => setMediaLoading(false))
+  }, [showMediaModal, mediaSearch])
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -169,14 +194,14 @@ export default function FeaturedImagePicker({
         Recommended: 1200x630px (PNG, JPG, or WebP)
       </p>
 
-      {/* Media Modal would go here */}
+      {/* Media Library Modal */}
       {showMediaModal && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
           onClick={() => setShowMediaModal(false)}
         >
           <div
-            className="w-full max-w-4xl rounded-xl bg-white p-6 dark:bg-zinc-900"
+            className="w-full max-w-4xl max-h-[80vh] rounded-xl bg-white p-6 dark:bg-zinc-900 flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-center justify-between">
@@ -190,9 +215,56 @@ export default function FeaturedImagePicker({
                 </svg>
               </button>
             </div>
-            <p className="text-center text-zinc-500 dark:text-zinc-400">
-              Media library component would load here
-            </p>
+
+            {/* Search */}
+            <input
+              type="text"
+              placeholder="Search media..."
+              value={mediaSearch}
+              onChange={(e) => setMediaSearch(e.target.value)}
+              className="mb-4 w-full rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
+            />
+
+            {/* Media Grid */}
+            <div className="flex-1 overflow-y-auto">
+              {mediaLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-300 border-t-[#BC0000]" />
+                </div>
+              ) : mediaItems.length === 0 ? (
+                <p className="py-12 text-center text-sm text-zinc-500 dark:text-zinc-400">
+                  No media found. Upload images to build your library.
+                </p>
+              ) : (
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                  {mediaItems.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => {
+                        onImageSelect(item.url, item.alt_text || item.description || '')
+                        setShowMediaModal(false)
+                      }}
+                      className="group relative aspect-square overflow-hidden rounded-lg border-2 border-transparent transition-all hover:border-[#00D4FF] focus:border-[#00D4FF] focus:outline-none"
+                    >
+                      <Image
+                        src={item.url}
+                        alt={item.alt_text || item.filename || 'Media'}
+                        fill
+                        className="object-cover"
+                        sizes="150px"
+                      />
+                      <div className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/20" />
+                      {item.filename && (
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent px-1.5 pb-1 pt-4">
+                          <span className="block truncate text-[10px] text-white">{item.filename}</span>
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

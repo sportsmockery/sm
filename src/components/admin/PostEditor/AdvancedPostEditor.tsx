@@ -13,6 +13,7 @@ import StoryUniversePanel from './StoryUniversePanel'
 import { BlockEditor } from '@/components/admin/BlockEditor'
 import type { ArticleDocument } from '@/components/admin/BlockEditor'
 import { isBlockContent, parseDocument, serializeDocument, blocksToHtml } from '@/components/admin/BlockEditor/serializer'
+import { BlockPreviewRenderer } from '@/components/admin/BlockEditor/BlockPreviewRenderer'
 
 interface Category {
   id: string
@@ -99,6 +100,10 @@ export default function AdvancedPostEditor({
   const [aiLoading, setAiLoading] = useState<string | null>(null)
   const [showTeamPicker, setShowTeamPicker] = useState(false)
   const [uploadingImage, setUploadingImage] = useState(false)
+  const [showMediaLibrary, setShowMediaLibrary] = useState(false)
+  const [mediaLibraryItems, setMediaLibraryItems] = useState<Array<{ id: string; url: string; alt_text?: string; filename?: string }>>([])
+  const [mediaLibraryLoading, setMediaLibraryLoading] = useState(false)
+  const [mediaLibrarySearch, setMediaLibrarySearch] = useState('')
   const [headlines, setHeadlines] = useState<string[]>([])
   const [ideas, setIdeas] = useState<ArticleIdea[]>([])
   const [showIdeasModal, setShowIdeasModal] = useState(false)
@@ -261,6 +266,19 @@ export default function AdvancedPostEditor({
     }
   }, [sendPushNotification, formData.title, pushTitle])
 
+  // Fetch media library when modal opens
+  useEffect(() => {
+    if (!showMediaLibrary) return
+    setMediaLibraryLoading(true)
+    const params = new URLSearchParams({ limit: '30', type: 'image' })
+    if (mediaLibrarySearch) params.set('search', mediaLibrarySearch)
+    fetch(`/api/admin/media?${params}`)
+      .then(r => r.ok ? r.json() : { media: [] })
+      .then(data => setMediaLibraryItems(data.media || data || []))
+      .catch(() => setMediaLibraryItems([]))
+      .finally(() => setMediaLibraryLoading(false))
+  }, [showMediaLibrary, mediaLibrarySearch])
+
   // Word count calculation
   const wordCount = formData.content.replace(/<[^>]*>/g, ' ').split(/\s+/).filter(w => w).length
 
@@ -292,11 +310,12 @@ export default function AdvancedPostEditor({
           })
           if (response.ok) {
             const data = await response.json()
+            const keywords = data.keywords || [data.focusKeyword, ...(data.secondaryKeywords || [])].filter(Boolean).join(', ')
             setFormData(prev => ({
               ...prev,
               seo_title: prev.seo_title || data.seoTitle || '',
               seo_description: prev.seo_description || data.metaDescription || '',
-              seo_keywords: prev.seo_keywords || data.keywords || '',
+              seo_keywords: prev.seo_keywords || keywords || '',
               excerpt: prev.excerpt || data.excerpt || '',
             }))
             setSeoGenerated(true)
@@ -472,11 +491,12 @@ export default function AdvancedPostEditor({
       if (response.ok) {
         const data = await response.json()
         if ((action === 'seo' || action === 'generate_seo') && data.seoTitle) {
+          const aiKeywords = data.keywords || [data.focusKeyword, ...(data.secondaryKeywords || [])].filter(Boolean).join(', ')
           setFormData(prev => ({
             ...prev,
             seo_title: data.seoTitle,
             seo_description: data.metaDescription || '',
-            seo_keywords: data.keywords || '',
+            seo_keywords: aiKeywords || '',
             excerpt: data.excerpt || prev.excerpt,
           }))
           setSeoGenerated(true)
@@ -600,11 +620,12 @@ export default function AdvancedPostEditor({
       })
       if (response.ok) {
         const data = await response.json()
+        const regenKeywords = data.keywords || [data.focusKeyword, ...(data.secondaryKeywords || [])].filter(Boolean).join(', ')
         setFormData(prev => ({
           ...prev,
           seo_title: data.seoTitle || '',
           seo_description: data.metaDescription || '',
-          seo_keywords: data.keywords || '',
+          seo_keywords: regenKeywords || '',
           excerpt: data.excerpt || '',
         }))
         setSeoGenerated(true)
@@ -1542,13 +1563,36 @@ export default function AdvancedPostEditor({
                 <div className="border-t border-[var(--border-default)] p-4 space-y-4">
                   {wordCount < 150 && !seoGenerated && (
                     <p className="rounded-lg bg-amber-500/10 px-3 py-2 text-xs text-amber-600 dark:text-amber-400">
-                      SEO fields will auto-generate when content reaches 150+ words ({wordCount}/150)
+                      SEO fields will auto-generate when content reaches 150+ words ({wordCount}/150).
+                      {wordCount >= 50 && (
+                        <button
+                          type="button"
+                          onClick={regenerateSEO}
+                          disabled={generatingSEO}
+                          className="ml-2 underline hover:no-underline"
+                        >
+                          Generate now
+                        </button>
+                      )}
                     </p>
+                  )}
+                  {!seoGenerated && wordCount >= 150 && !formData.seo_title && !formData.seo_description && (
+                    <div className="flex items-center gap-2 rounded-lg bg-[#00D4FF]/10 px-3 py-2">
+                      <span className="text-xs text-[#00D4FF]">PostIQ can auto-fill SEO, excerpt, and tags.</span>
+                      <button
+                        type="button"
+                        onClick={regenerateSEO}
+                        disabled={generatingSEO}
+                        className="rounded bg-[#00D4FF] px-2 py-1 text-xs font-medium text-white hover:bg-[#00bfe0] disabled:opacity-50"
+                      >
+                        {generatingSEO ? 'Generating...' : 'Generate All'}
+                      </button>
+                    </div>
                   )}
 
                   <div className="grid gap-4 md:grid-cols-2">
                     <div>
-                      <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">SEO Title</label>
+                      <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">SEO Title <span className="font-normal text-[var(--text-dim)]">(50-60 chars ideal)</span></label>
                       <input
                         type="text"
                         value={formData.seo_title}
@@ -1574,7 +1618,7 @@ export default function AdvancedPostEditor({
                   </div>
 
                   <div>
-                    <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Meta Description</label>
+                    <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Meta Description <span className="font-normal text-[var(--text-dim)]">(150-160 chars ideal)</span></label>
                     <textarea
                       value={formData.seo_description}
                       onChange={(e) => updateField('seo_description', e.target.value)}
@@ -1588,12 +1632,12 @@ export default function AdvancedPostEditor({
                   </div>
 
                   <div>
-                    <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Excerpt</label>
+                    <label className="mb-1.5 block text-xs font-medium text-[var(--text-muted)]">Excerpt <span className="font-normal text-[var(--text-dim)]">(shows on feed cards)</span></label>
                     <textarea
                       value={formData.excerpt}
                       onChange={(e) => updateField('excerpt', e.target.value)}
                       rows={2}
-                      placeholder="Brief summary for article cards..."
+                      placeholder="Brief summary for article cards — auto-generated with SEO if left blank"
                       className="w-full resize-none rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-[var(--accent-red)] focus:outline-none"
                     />
                   </div>
@@ -1670,29 +1714,41 @@ export default function AdvancedPostEditor({
                     </div>
                   </div>
                 ) : (
-                  <div className="relative">
-                    <input
-                      type="file"
-                      id="featured-image-upload-top"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                    />
-                    <div className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-[var(--border-default)] bg-[var(--bg-tertiary)] py-4 hover:border-[var(--accent-red)] transition-colors">
-                      {uploadingImage ? (
-                        <svg className="h-5 w-5 animate-spin text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                        </svg>
-                      ) : (
-                        <>
-                          <svg className="h-5 w-5 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                  <div className="space-y-2">
+                    <div className="relative">
+                      <input
+                        type="file"
+                        id="featured-image-upload-top"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                      />
+                      <div className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-[var(--border-default)] bg-[var(--bg-tertiary)] py-4 hover:border-[var(--accent-red)] transition-colors">
+                        {uploadingImage ? (
+                          <svg className="h-5 w-5 animate-spin text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                           </svg>
-                          <p className="mt-1 text-xs text-[var(--text-muted)]">Add image</p>
-                        </>
-                      )}
+                        ) : (
+                          <>
+                            <svg className="h-5 w-5 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                            </svg>
+                            <p className="mt-1 text-xs text-[var(--text-muted)]">Upload image</p>
+                          </>
+                        )}
+                      </div>
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowMediaLibrary(true)}
+                      className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-[var(--border-default)] bg-[var(--bg-card)] px-3 py-2 text-xs font-medium text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)] transition-colors"
+                    >
+                      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                      </svg>
+                      Browse Library
+                    </button>
                   </div>
                 )}
               </div>
@@ -2287,10 +2343,67 @@ export default function AdvancedPostEditor({
               )}
 
               {/* Content */}
-              <div
-                className="prose prose-lg max-w-none dark:prose-invert prose-headings:font-bold prose-p:text-gray-700 dark:prose-p:text-gray-300"
-                dangerouslySetInnerHTML={{ __html: formData.content || '<p class="text-gray-400">No content yet...</p>' }}
-              />
+              {blockDoc && blockDoc.blocks.length > 0 ? (
+                <div className="max-w-[720px] mx-auto">
+                  <BlockPreviewRenderer blocks={blockDoc.blocks} />
+                </div>
+              ) : (
+                <div
+                  className="prose prose-lg max-w-none dark:prose-invert prose-headings:font-bold prose-p:text-gray-700 dark:prose-p:text-gray-300"
+                  dangerouslySetInnerHTML={{ __html: formData.content || '<p class="text-gray-400">No content yet...</p>' }}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Media Library Modal */}
+      {showMediaLibrary && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/50" onClick={() => setShowMediaLibrary(false)}>
+          <div className="w-full max-w-4xl max-h-[80vh] rounded-xl bg-white p-6 dark:bg-zinc-900 flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">Select from Media Library</h3>
+              <button onClick={() => setShowMediaLibrary(false)} className="rounded-lg p-2 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800">
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <input
+              type="text"
+              placeholder="Search media..."
+              value={mediaLibrarySearch}
+              onChange={(e) => setMediaLibrarySearch(e.target.value)}
+              className="mb-4 w-full rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
+            />
+            <div className="flex-1 overflow-y-auto">
+              {mediaLibraryLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-300 border-t-[#BC0000]" />
+                </div>
+              ) : mediaLibraryItems.length === 0 ? (
+                <p className="py-12 text-center text-sm text-zinc-500">No media found.</p>
+              ) : (
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                  {mediaLibraryItems.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => { updateField('featured_image', item.url); setShowMediaLibrary(false) }}
+                      className="group relative aspect-square overflow-hidden rounded-lg border-2 border-transparent transition-all hover:border-[#00D4FF] focus:border-[#00D4FF] focus:outline-none"
+                    >
+                      <Image src={item.url} alt={item.alt_text || item.filename || 'Media'} fill className="object-cover" sizes="150px" />
+                      <div className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/20" />
+                      {item.filename && (
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent px-1.5 pb-1 pt-4">
+                          <span className="block truncate text-[10px] text-white">{item.filename}</span>
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>

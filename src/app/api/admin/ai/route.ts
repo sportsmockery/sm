@@ -385,6 +385,8 @@ Return a JSON object with:
     "lol": 0-100,
     "nostalgia": 0-100
   },
+  "excerpt": "1-2 sentence summary for feed cards (under 200 chars) - engaging, captures the key angle",
+  "keywords": "comma-separated keyword string for tags/meta",
   "improvements": ["array of specific improvements for SM voice and engagement"],
   "internalLinkSuggestions": ["suggested topics to link to"]
 }

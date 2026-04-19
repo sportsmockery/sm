@@ -1028,11 +1028,25 @@ main {
 .ProseMirror {
   background-color: var(--bg-page, #FAFAFB) !important;
   color: var(--text-primary, #222222) !important;
+  text-align: left;
+}
+.ProseMirror h2,
+.ProseMirror h3,
+.ProseMirror h4 {
+  color: var(--text-primary, #222222) !important;
 }
 
 .dark .ProseMirror,
 :root[data-theme="dark"] .ProseMirror {
   background-color: var(--bg-page, #0B0F14) !important;
+  color: var(--text-primary, #FAFAFB) !important;
+}
+.dark .ProseMirror h2,
+.dark .ProseMirror h3,
+.dark .ProseMirror h4,
+:root[data-theme="dark"] .ProseMirror h2,
+:root[data-theme="dark"] .ProseMirror h3,
+:root[data-theme="dark"] .ProseMirror h4 {
   color: var(--text-primary, #FAFAFB) !important;
 }
 
@@ -5708,8 +5722,9 @@ a.glass-card-sm:active,
   color: #94a3b8;
   pointer-events: none;
 }
-.sm-richtext-editor h2 { font-size: 1.25rem; font-weight: 600; margin: 0.5em 0; }
-.sm-richtext-editor h3 { font-size: 1.1rem; font-weight: 600; margin: 0.5em 0; }
+.sm-richtext-editor { text-align: left; }
+.sm-richtext-editor h2 { font-size: 1.25rem; font-weight: 600; margin: 0.5em 0; color: #0B0F14; }
+.sm-richtext-editor h3 { font-size: 1.1rem; font-weight: 600; margin: 0.5em 0; color: #0B0F14; }
 .sm-richtext-editor blockquote { border-left: 3px solid #00D4FF; padding-left: 12px; margin: 0.5em 0; color: #475569; }
 .sm-richtext-editor a { color: #00D4FF; text-decoration: underline; }
 .sm-richtext-editor ul, .sm-richtext-editor ol { padding-left: 1.5em; margin: 0.5em 0; }
@@ -5719,6 +5734,10 @@ a.glass-card-sm:active,
 .sm-richtext-editor td, .sm-richtext-editor th { border: 1px solid #d1d5db; padding: 6px 8px; }
 .sm-richtext-editor img { max-width: 100%; border-radius: 8px; margin: 0.5em 0; }
 .sm-richtext-editor hr { border: none; border-top: 1px solid #d1d5db; margin: 1em 0; }
+.dark .sm-richtext-editor h2,
+:root[data-theme="dark"] .sm-richtext-editor h2 { color: #FAFAFB; }
+.dark .sm-richtext-editor h3,
+:root[data-theme="dark"] .sm-richtext-editor h3 { color: #FAFAFB; }
 
 /* ===== ADMIN / STUDIO MOBILE OPTIMIZATIONS (below lg breakpoint) ===== */
 @media (max-width: 1023px) {

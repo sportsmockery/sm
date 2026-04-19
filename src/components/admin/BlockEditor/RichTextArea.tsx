@@ -68,13 +68,16 @@ function ToolbarSep() {
 export function RichTextArea({ value, onChange, placeholder = 'Write here...', minHeight = 120 }: RichTextAreaProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const isInternalChange = useRef(false);
+  const isFocused = useRef(false);
 
   // Sync value prop to contentEditable when value changes externally
+  // Skip sync while the editor is focused to prevent cursor jumps
   useEffect(() => {
     if (isInternalChange.current) {
       isInternalChange.current = false;
       return;
     }
+    if (isFocused.current) return;
     if (editorRef.current && editorRef.current.innerHTML !== value) {
       editorRef.current.innerHTML = value;
     }
@@ -229,6 +232,8 @@ export function RichTextArea({ value, onChange, placeholder = 'Write here...', m
         ref={editorRef}
         contentEditable
         suppressContentEditableWarning
+        onFocus={() => { isFocused.current = true; }}
+        onBlur={() => { isFocused.current = false; }}
         onInput={handleInput}
         onPaste={(e) => {
           e.preventDefault();

@@ -18,6 +18,63 @@ const VOICE_IDS: Record<string, string> = {
 // ElevenLabs model - eleven_turbo_v2_5 is fast and high quality
 const ELEVENLABS_MODEL = "eleven_turbo_v2_5";
 
+// Extract readable text from SM_BLOCKS JSON content
+function extractTextFromBlocks(content: string): string {
+  try {
+    const json = content.replace('<!-- SM_BLOCKS -->', '').replace('<!-- /SM_BLOCKS -->', '').trim();
+    const doc = JSON.parse(json);
+    const blocks = doc.blocks || [];
+    const textParts: string[] = [];
+
+    for (const block of blocks) {
+      switch (block.type) {
+        case 'paragraph':
+          if (block.data?.html) textParts.push(stripHtmlTags(block.data.html));
+          break;
+        case 'heading':
+          if (block.data?.text) textParts.push(stripHtmlTags(block.data.text));
+          break;
+        case 'quote':
+          if (block.data?.text) {
+            const speaker = block.data.speaker ? `, ${block.data.speaker} said` : '';
+            textParts.push(`Quote: ${stripHtmlTags(block.data.text)}${speaker}.`);
+          }
+          break;
+        case 'scout-insight':
+          if (block.data?.insight) textParts.push(`Scout's Take: ${stripHtmlTags(block.data.insight)}`);
+          break;
+        case 'hot-take':
+          if (block.data?.text) textParts.push(stripHtmlTags(block.data.text));
+          break;
+        case 'update':
+          if (block.data?.text) textParts.push(`Update: ${stripHtmlTags(block.data.text)}`);
+          break;
+        // Skip interactive/visual blocks (charts, polls, trades, etc.)
+        default:
+          break;
+      }
+    }
+
+    return textParts.join('. ');
+  } catch {
+    // If JSON parsing fails, fall back to HTML stripping
+    return stripHtmlForTTS(content);
+  }
+}
+
+// Strip HTML tags from a string, preserving text content
+function stripHtmlTags(html: string): string {
+  let text = html.replace(/<[^>]+>/g, ' ');
+  text = text.replace(/&nbsp;/g, ' ');
+  text = text.replace(/&amp;/g, '&');
+  text = text.replace(/&lt;/g, '<');
+  text = text.replace(/&gt;/g, '>');
+  text = text.replace(/&quot;/g, '"');
+  text = text.replace(/&#39;/g, "'");
+  text = text.replace(/\s+/g, ' ').trim();
+  return text;
+}
+
 // Strip HTML tags and clean text for TTS
 function stripHtmlForTTS(html: string): string {
   // Remove script and style tags completely
@@ -151,7 +208,11 @@ export async function GET(
         : 'recently';
 
       const introduction = `Article Headline: ${post.title}. Written ${publishDate}.`;
-      plainText = `${introduction} ${stripHtmlForTTS(post.content || '')}`;
+      const rawContent = post.content || '';
+      const bodyText = rawContent.trimStart().startsWith('<!-- SM_BLOCKS -->')
+        ? extractTextFromBlocks(rawContent)
+        : stripHtmlForTTS(rawContent);
+      plainText = `${introduction} ${bodyText}`;
     }
 
     // Limit text length (ElevenLabs has limits)
