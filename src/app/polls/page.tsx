@@ -2,8 +2,8 @@ import { Metadata } from 'next'
 import PollList from '@/components/admin/polls/PollList'
 
 export const metadata: Metadata = {
-  title: 'Polls Management | SportsMockery',
-  description: 'Create and manage interactive polls for SportsMockery articles',
+  title: 'Polls | SportsMockery',
+  description: 'View and vote on interactive polls at SportsMockery',
 }
 
 export default function PollsPage() {

@@ -159,7 +159,7 @@ Stage 1: Full-Screen Hero (100vh) → user scrolls → Stage 2: Infinite Feed
 
 **Hero Layout Rules:**
 - Keep the hero vertically balanced — not too high or too low
-- Blitz logo (`/blitz_logo.svg`, 240x88) stays top-left, visually light, does not dominate
+- Edge logo (`/edge_logo.svg`, 240x88) stays top-left, visually light, does not dominate
 - Scout identity pill must feel attached to the headline, not floating separately
 - Search input is the clear action point — the thing the eye lands on
 - **DO NOT:** add giant cards wrapping the hero, side panels, charts, tabs, stats, dashboard widgets, feed cards, giant gradients, or animated gimmicks

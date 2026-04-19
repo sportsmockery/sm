@@ -8,6 +8,7 @@ import { getTeamColors, TEAM_COLORS } from '@/types/polls'
 
 interface PollListProps {
   initialPolls?: Poll[]
+  isAdmin?: boolean
 }
 
 const STATUS_COLORS: Record<PollStatus, { bg: string; text: string; dot: string }> = {
@@ -25,10 +26,24 @@ const POLL_TYPE_ICONS: Record<PollType, string> = {
   emoji: '😊',
 }
 
-export default function PollList({ initialPolls = [] }: PollListProps) {
+export default function PollList({ initialPolls = [], isAdmin: isAdminProp }: PollListProps) {
   const [polls, setPolls] = useState<Poll[]>(initialPolls)
   const [loading, setLoading] = useState(!initialPolls.length)
   const [error, setError] = useState<string | null>(null)
+  const [isAdmin, setIsAdmin] = useState(isAdminProp ?? false)
+
+  // Check user role on mount if isAdmin prop not explicitly provided
+  useEffect(() => {
+    if (isAdminProp !== undefined) return
+    fetch('/api/user/role')
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data?.role === 'admin' || data?.role === 'editor') {
+          setIsAdmin(true)
+        }
+      })
+      .catch(() => {})
+  }, [isAdminProp])
 
   // Filters
   const [statusFilter, setStatusFilter] = useState<PollStatus | 'all'>('all')
@@ -125,15 +140,17 @@ export default function PollList({ initialPolls = [] }: PollListProps) {
             Create and manage interactive polls for your articles
           </p>
         </div>
-        <Link
-          href="/polls/new"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg font-medium hover:from-purple-700 hover:to-indigo-700 transition-all shadow-lg"
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
-          New Poll
-        </Link>
+        {isAdmin && (
+          <Link
+            href="/polls/new"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg font-medium hover:from-purple-700 hover:to-indigo-700 transition-all shadow-lg"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            New Poll
+          </Link>
+        )}
       </div>
 
       {/* Filters */}
@@ -222,7 +239,7 @@ export default function PollList({ initialPolls = [] }: PollListProps) {
               ? 'Try adjusting your filters'
               : 'Get started by creating your first poll'}
           </p>
-          {!searchQuery && statusFilter === 'all' && typeFilter === 'all' && teamFilter === 'all' && (
+          {isAdmin && !searchQuery && statusFilter === 'all' && typeFilter === 'all' && teamFilter === 'all' && (
             <Link
               href="/polls/new"
               className="inline-flex items-center gap-2 px-4 py-2 bg-[#D6B05E] text-white rounded-lg font-medium hover:bg-[#D6B05E] transition-colors"
@@ -252,9 +269,11 @@ export default function PollList({ initialPolls = [] }: PollListProps) {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Created
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Actions
-                  </th>
+                  {isAdmin && (
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -315,6 +334,7 @@ export default function PollList({ initialPolls = [] }: PollListProps) {
                         <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                           {new Date(poll.created_at).toLocaleDateString()}
                         </td>
+                        {isAdmin && (
                         <td className="px-6 py-4">
                           <div className="flex items-center justify-end gap-2">
                             {/* Copy shortcode */}
@@ -394,6 +414,7 @@ export default function PollList({ initialPolls = [] }: PollListProps) {
                             </div>
                           </div>
                         </td>
+                        )}
                       </motion.tr>
                     )
                   })}
