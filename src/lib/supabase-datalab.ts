@@ -7,8 +7,8 @@ import { createClient } from '@supabase/supabase-js'
 const DATALAB_URL = process.env.DATALAB_SUPABASE_URL!
 const DATALAB_ANON_KEY = process.env.DATALAB_SUPABASE_ANON_KEY!
 
-// 15-second global fetch timeout to prevent build hangs
-const DATALAB_FETCH_TIMEOUT_MS = 15_000
+// 10-second global fetch timeout to prevent build/runtime hangs
+const DATALAB_FETCH_TIMEOUT_MS = 10_000
 
 const globalFetchWithTimeout: typeof fetch = (input, init) => {
   return fetch(input, {
