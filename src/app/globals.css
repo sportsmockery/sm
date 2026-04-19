@@ -4425,7 +4425,7 @@ main, .page-content, [role="main"] {
   color: var(--sm-red-light);
   text-decoration: underline;
 }
-.article-body-2030 img {
+.article-body-2030 img:not(.rounded-full):not(.object-cover) {
   border-radius: 16px;
   width: 100%;
   margin: 24px 0;
