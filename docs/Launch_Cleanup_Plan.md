@@ -92,7 +92,7 @@ Check before deleting — grep each to confirm no live references:
 |------|-------------|----------------|-----------|----------------|
 | `/chat` | Feb 19 | 3 links (FloatingChatButton, FanControlCenter, subscription success) | Old chat page — superseded by `/fan-chat` | **DELETE** — fan-chat is the live version |
 | `/datahub` | Mar 11 | 1 link (HomeFooter) | Data hub landing — team datahubs exist at `/{category}/datahub` | **DELETE** if team datahubs are the real product |
-| `/vision-theater` | Feb 22 | 1 self-link + home1 link | YouTube/video theater | **DELETE** — `/bears-film-room` and `/pinwheels-and-ivy` serve video |
+| `/vision-theater` | Feb 22 | 1 self-link + home1 link | YouTube/video theater | **DELETE** — `/pinwheels-and-ivy` serves video |
 | `/home/premium` | Mar 11 | 1 link | Premium marketing page | **DELETE** — `/pricing` exists |
 | `/home/login` | Mar 11 | 10 links | Marketing login page | **REVIEW** — may redirect to `/login`? |
 | `/home/signup` | Mar 11 | 2 links | Marketing signup page | **REVIEW** — `/signup` exists |

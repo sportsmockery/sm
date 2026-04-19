@@ -524,7 +524,6 @@ const SECTIONS: Section[] = [
       { id: 'audio-speed', label: 'Speed control lets you change playback speed (0.75x, 1x, 1.5x)', route: '/audio' },
       { id: 'audio-advance', label: 'When one article finishes, the next one starts automatically', route: '/audio' },
       { id: 'audio-mini', label: 'Mini audio player stays visible as you browse other pages', route: '/' },
-      { id: 'video-film-room', label: 'Bears Film Room page loads', route: '/bears-film-room' },
       { id: 'video-pi', label: 'Pinwheels & Ivy page loads', route: '/pinwheels-and-ivy' },
       { id: 'video-untold', label: 'Untold Chicago Stories page loads', route: '/untold-chicago-stories' },
       { id: 'video-southside', label: 'Southside Behavior page loads', route: '/southside-behavior' },

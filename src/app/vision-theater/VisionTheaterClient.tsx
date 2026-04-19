@@ -29,7 +29,6 @@ interface Comment {
 
 const CHANNEL_FILTERS = [
   { slug: 'all', label: 'All Videos' },
-  { slug: 'bears-film-room', label: 'Bears Film Room' },
   { slug: 'pinwheels-and-ivy', label: 'Pinwheels & Ivy' },
   { slug: 'untold-chicago', label: 'Untold Chicago Stories' },
 ] as const

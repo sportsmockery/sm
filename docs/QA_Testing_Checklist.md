@@ -30,7 +30,7 @@
 20. [Accessibility Testing](#20-accessibility-testing)
 21. [Security Testing](#21-security-testing)
 22. [Automated Test Scripts](#22-automated-test-scripts)
-23. [Video Sections](#23-video-sections-bears-film-room--pinwheels--ivy)
+23. [Video Sections](#23-video-sections-pinwheels--ivy)
 24. [Internal Auto-Linking](#24-internal-auto-linking)
 25. [Cron Jobs & Background Tasks](#25-cron-jobs--background-tasks)
 26. [Audit Scripts & Logging](#26-audit-scripts--logging)
@@ -1298,28 +1298,9 @@ npx lighthouse https://test.sportsmockery.com --output=html --output-path=./ligh
 
 ---
 
-## 23. Video Sections (Bears Film Room & Pinwheels & Ivy)
+## 23. Video Sections (Pinwheels & Ivy)
 
-### 23.1 Bears Film Room (/bears-film-room)
-| Test Case | Steps | Expected Result | Pass/Fail | Notes |
-|-----------|-------|-----------------|-----------|-------|
-| Page loads | Navigate to /bears-film-room | Page loads < 3s | | |
-| Hero section | Check top area | BFR wide logo, title, description | | |
-| Latest video | Check main video | Most recent episode embedded | | |
-| Video plays | Click play on embed | YouTube video plays | | |
-| Published date | Check metadata | Date + "Latest episode" label | | |
-| Description | Check text | Truncated to ~220 chars | | |
-| Social links | Check icons | YouTube, Apple Podcasts, Spotify, X | | |
-| YouTube link | Click YouTube | Opens channel with sub confirmation | | |
-| Podcast links | Click Apple/Spotify | Opens podcast pages | | |
-| Recent episodes | Scroll down | Grid of episode cards | | |
-| Episode thumbnail | Check cards | Thumbnail with play icon overlay | | |
-| Click episode | Click thumbnail | Main video changes to selected | | |
-| Episode metadata | Check cards | Title + publish date | | |
-| CTA section | Check bottom | "Want more..." text + button | | |
-| Archive button | Click button | Navigates to video archive | | |
-
-### 23.2 Pinwheels & Ivy (/pinwheels-and-ivy)
+### 23.1 Pinwheels & Ivy (/pinwheels-and-ivy)
 | Test Case | Steps | Expected Result | Pass/Fail | Notes |
 |-----------|-------|-----------------|-----------|-------|
 | Page loads | Navigate to /pinwheels-and-ivy | Page loads < 3s | | |

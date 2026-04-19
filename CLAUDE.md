@@ -770,7 +770,7 @@ POST /api/admin/ai { action, title, content, category, team }
 
 - **Profile / Favorites:** `sm_user_preferences` table, `eliminate_other_teams` column
 - **Fan Chat:** AI personalities per team channel + Chicago Lounge. API: `/api/fan-chat/ai-response`
-- **Video:** Bears Film Room (`/bears-film-room`), Pinwheels & Ivy (`/pinwheels-and-ivy`)
+- **Video:** Pinwheels & Ivy (`/pinwheels-and-ivy`)
 
 ---
 

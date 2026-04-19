@@ -82,9 +82,9 @@ const FEATURES = [
       </svg>
     ),
     title: 'Original Shows',
-    description: "Bears Film Room, Pinwheels & Ivy, Southside Behavior, Untold Chicago Stories — deep dives you won't find anywhere else.",
+    description: "Pinwheels & Ivy, Southside Behavior, Untold Chicago Stories — deep dives you won't find anywhere else.",
     tag: 'Watch Now',
-    href: '/bears-film-room',
+    href: '/pinwheels-and-ivy',
   },
 ]
 

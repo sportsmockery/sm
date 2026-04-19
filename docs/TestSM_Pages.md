@@ -41,7 +41,6 @@ https://test.sportsmockery.com/chicago-bears/players/montez-sweat
 https://test.sportsmockery.com/bears
 https://test.sportsmockery.com/bears/subscribe
 https://test.sportsmockery.com/bears/datahub
-https://test.sportsmockery.com/bears-film-room
 ```
 
 ## Chicago Bulls
@@ -122,7 +121,6 @@ https://test.sportsmockery.com/teams/chicago-white-sox/standings
 ## Video/Podcast Content
 
 ```
-https://test.sportsmockery.com/bears-film-room
 https://test.sportsmockery.com/pinwheels-and-ivy
 ```
 
