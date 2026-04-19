@@ -28,8 +28,14 @@ async function fetchScoutCommentary(teamSlug?: string) {
 }
 
 export const metadata = {
-  title: 'Owner & GM Report Cards | Sports Mockery',
+  title: 'Owner & GM Report Cards',
   description: 'Data-backed grades on every Chicago ownership group — Spending, Results, Fan Sentiment, and Loyalty Tax.',
+  alternates: { canonical: 'https://sportsmockery.com/owner' },
+  openGraph: {
+    title: 'Owner & GM Report Cards | Sports Mockery',
+    description: 'Data-backed grades on every Chicago ownership group — Spending, Results, Fan Sentiment, and Loyalty Tax.',
+    images: [{ url: 'https://sportsmockery.com/og-image.png', width: 1200, height: 630 }],
+  },
 }
 
 export default async function OwnerPage() {

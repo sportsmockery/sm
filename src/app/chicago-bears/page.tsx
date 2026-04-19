@@ -16,12 +16,22 @@ import {
 } from '@/lib/bears'
 
 export const metadata: Metadata = {
-  title: 'Chicago Bears | News, Stats, Schedule & Roster | SportsMockery',
+  title: 'Chicago Bears | News, Stats, Schedule & Roster',
   description: 'Complete Chicago Bears coverage including latest news, team stats, schedule, roster, player profiles, and expert analysis.',
+  alternates: { canonical: 'https://sportsmockery.com/chicago-bears' },
   openGraph: {
-    title: 'Chicago Bears Hub | Sports Mockery',
+    title: 'Chicago Bears | News, Stats, Schedule & Roster | Sports Mockery',
     description: 'Your #1 source for Chicago Bears news, stats, schedule, and analysis',
     type: 'website',
+    url: 'https://sportsmockery.com/chicago-bears',
+    siteName: 'Sports Mockery',
+    images: [{ url: 'https://sportsmockery.com/og-image.png', width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Chicago Bears | News, Stats, Schedule & Roster | Sports Mockery',
+    description: 'Your #1 source for Chicago Bears news, stats, schedule, and analysis',
+    images: ['https://sportsmockery.com/og-image.png'],
   },
 }
 

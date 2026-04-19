@@ -12,12 +12,22 @@ import { supabaseAdmin } from '@/lib/supabase-server'
 export const revalidate = 300
 
 export const metadata: Metadata = {
-  title: 'Chicago Bulls | News, Stats, Schedule & Roster | SportsMockery',
+  title: 'Chicago Bulls | News, Stats, Schedule & Roster',
   description: 'Complete Chicago Bulls coverage including latest news, team stats, schedule, roster, and expert analysis.',
+  alternates: { canonical: 'https://sportsmockery.com/chicago-bulls' },
   openGraph: {
-    title: 'Chicago Bulls Hub | Sports Mockery',
+    title: 'Chicago Bulls | News, Stats, Schedule & Roster | Sports Mockery',
     description: 'Your #1 source for Chicago Bulls news, stats, schedule, and analysis',
     type: 'website',
+    url: 'https://sportsmockery.com/chicago-bulls',
+    siteName: 'Sports Mockery',
+    images: [{ url: 'https://sportsmockery.com/og-image.png', width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Chicago Bulls | News, Stats, Schedule & Roster | Sports Mockery',
+    description: 'Your #1 source for Chicago Bulls news, stats, schedule, and analysis',
+    images: ['https://sportsmockery.com/og-image.png'],
   },
 }
 

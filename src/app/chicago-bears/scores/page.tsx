@@ -11,8 +11,14 @@ import SportsEventSchema, { type SportsEventGame } from '@/components/seo/Sports
 const BEARS_LOGO = 'https://a.espncdn.com/i/teamlogos/nfl/500/chi.png'
 
 export const metadata: Metadata = {
-  title: 'Chicago Bears Scores 2025 | Box Scores & Results | SportsMockery',
+  title: 'Chicago Bears Scores 2025 | Box Scores & Results',
   description: 'Full Chicago Bears box scores with detailed player stats. View passing, rushing, receiving, and defensive stats for every game.',
+  alternates: { canonical: 'https://sportsmockery.com/chicago-bears/scores' },
+  openGraph: {
+    title: 'Chicago Bears Scores 2025 | Sports Mockery',
+    description: 'Full Chicago Bears box scores with detailed player stats for every game.',
+    images: [{ url: 'https://sportsmockery.com/og-image.png', width: 1200, height: 630 }],
+  },
 }
 
 export const revalidate = 120

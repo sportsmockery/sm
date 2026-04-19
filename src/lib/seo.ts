@@ -52,18 +52,27 @@ export function generateTeamMetadata(
     `Complete ${team.fullName}${subPageTitle ? ` ${subPage}` : ''} coverage including latest news, stats, schedule, roster, and expert analysis on Sports Mockery.`,
   )
 
+  const path = subPage
+    ? `${SITE_URL}/${teamSlug}/${subPage}`
+    : `${SITE_URL}/${teamSlug}`
+
   return {
     title,
     description,
+    alternates: { canonical: path },
     openGraph: {
       title: `${team.fullName}${subPageTitle} | ${SITE_NAME}`,
       description,
       type: 'website',
+      url: path,
+      siteName: SITE_NAME,
+      images: [{ url: `${SITE_URL}${DEFAULT_OG_IMAGE}`, width: 1200, height: 630 }],
     },
     twitter: {
       card: 'summary_large_image',
       title: `${team.fullName}${subPageTitle} | ${SITE_NAME}`,
       description,
+      images: [`${SITE_URL}${DEFAULT_OG_IMAGE}`],
     },
   }
 }

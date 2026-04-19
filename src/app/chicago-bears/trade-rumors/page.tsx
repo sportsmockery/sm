@@ -8,19 +8,18 @@ import { getBearsPosts, getBearsPostsByType } from '@/lib/bears'
 import { HubUpdatesFeed, RumorTicker } from '@/components/hub'
 
 export const metadata: Metadata = {
-  title: 'Chicago Bears Trade Rumors (Live) | Sports Mockery',
-  description:
-    'Live Bears trade tracker, rumor mill, cap analysis. Ryan Poles rumors hourly.',
+  title: 'Chicago Bears Trade Rumors (Live)',
+  description: 'Live Bears trade tracker, rumor mill, cap analysis. Ryan Poles rumors hourly.',
+  alternates: { canonical: 'https://sportsmockery.com/chicago-bears/trade-rumors' },
   openGraph: {
-    title: 'Chicago Bears Trade Rumors (Live)',
-    description:
-      'Live Bears trade tracker, rumor mill, cap analysis. Ryan Poles rumors hourly.',
+    title: 'Chicago Bears Trade Rumors (Live) | Sports Mockery',
+    description: 'Live Bears trade tracker, rumor mill, cap analysis. Ryan Poles rumors hourly.',
     type: 'website',
+    images: [{ url: 'https://sportsmockery.com/og-image.png', width: 1200, height: 630 }],
   },
   twitter: {
-    title: 'Chicago Bears Trade Rumors (Live)',
-    description:
-      'Live Bears trade tracker, rumor mill, cap analysis. Ryan Poles rumors hourly.',
+    title: 'Chicago Bears Trade Rumors (Live) | Sports Mockery',
+    description: 'Live Bears trade tracker, rumor mill, cap analysis. Ryan Poles rumors hourly.',
   },
 }
 

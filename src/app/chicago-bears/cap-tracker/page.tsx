@@ -9,16 +9,17 @@ import { buildSafeFetch } from '@/lib/build-safe-fetch'
 import { HubUpdatesFeed } from '@/components/hub'
 
 export const metadata: Metadata = {
-  title: 'Chicago Bears Salary Cap 2026 | Sports Mockery',
-  description:
-    'Live cap space, contracts, cut/trade simulator.',
+  title: 'Chicago Bears Salary Cap 2026',
+  description: 'Live cap space, contracts, cut/trade simulator.',
+  alternates: { canonical: 'https://sportsmockery.com/chicago-bears/cap-tracker' },
   openGraph: {
-    title: 'Chicago Bears Salary Cap 2026',
+    title: 'Chicago Bears Salary Cap 2026 | Sports Mockery',
     description: 'Live cap space, contracts, cut/trade simulator.',
     type: 'website',
+    images: [{ url: 'https://sportsmockery.com/og-image.png', width: 1200, height: 630 }],
   },
   twitter: {
-    title: 'Chicago Bears Salary Cap 2026',
+    title: 'Chicago Bears Salary Cap 2026 | Sports Mockery',
     description: 'Live cap space, contracts, cut/trade simulator.',
   },
 }

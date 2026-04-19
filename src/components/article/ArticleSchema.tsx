@@ -38,7 +38,7 @@ export default function ArticleSchema({ article, url }: ArticleSchemaProps) {
     },
     publisher: {
       '@type': 'Organization',
-      name: 'SportsMockery.com',
+      name: 'Sports Mockery',
       logo: {
         '@type': 'ImageObject',
         url: 'https://sportsmockery.com/logo.png',

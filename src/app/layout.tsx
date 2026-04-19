@@ -63,8 +63,8 @@ export const metadata: Metadata = {
   publisher: "Sports Mockery",
   metadataBase: new URL("https://sportsmockery.com"),
   openGraph: {
-    title: "Sports Mockery | Bears-First Chicago Sports Coverage",
-    description: "Your #1 source for Chicago Bears news and all Chicago sports. In-depth analysis, breaking rumors, and fan perspectives.",
+    title: "Sports Mockery | Where Chicago Fans Come First",
+    description: "Your #1 source for Chicago Bears news, analysis, and rumors. Plus complete coverage of Bulls, Cubs, White Sox, and Blackhawks.",
     url: "https://sportsmockery.com",
     siteName: "Sports Mockery",
     type: "website",
@@ -80,11 +80,11 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Sports Mockery | Bears-First Chicago Sports",
-    description: "Your #1 source for Chicago Bears news and all Chicago sports coverage.",
+    title: "Sports Mockery | Where Chicago Fans Come First",
+    description: "Your #1 source for Chicago Bears news, analysis, and rumors. Plus complete coverage of Bulls, Cubs, White Sox, and Blackhawks.",
     site: "@sportsmockery",
     creator: "@sportsmockery",
-    images: ["/twitter-image.png"],
+    images: ["/og-image.png"],
   },
   robots: {
     index: true,

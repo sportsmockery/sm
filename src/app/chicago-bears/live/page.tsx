@@ -10,12 +10,14 @@ import {
 } from '@/lib/team-config'
 
 export const metadata: Metadata = {
-  title: 'Chicago Bears Live Game | SportsMockery',
+  title: 'Chicago Bears Live Game',
   description: 'Watch live Chicago Bears game scores, stats, and play-by-play updates in real-time.',
+  alternates: { canonical: 'https://sportsmockery.com/chicago-bears/live' },
   openGraph: {
     title: 'Chicago Bears Live Game | Sports Mockery',
     description: 'Live Bears game scores, stats, and play-by-play updates',
     type: 'website',
+    images: [{ url: 'https://sportsmockery.com/og-image.png', width: 1200, height: 630 }],
   },
 }
 

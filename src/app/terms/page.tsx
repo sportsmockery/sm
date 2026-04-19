@@ -1,8 +1,13 @@
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Terms of Service - Sports Mockery',
+  title: 'Terms of Service',
   description: 'Sports Mockery terms of service and conditions of use.',
+  alternates: { canonical: 'https://sportsmockery.com/terms' },
+  openGraph: {
+    title: 'Terms of Service | Sports Mockery',
+    description: 'Sports Mockery terms of service and conditions of use.',
+  },
 }
 
 export default function TermsPage() {

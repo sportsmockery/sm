@@ -32,6 +32,7 @@ const publicPaths = [
   '/contact',
   '/privacy',
   '/terms',
+  '/cookies',
   '/predictions',
   '/players',
   '/teams',
@@ -40,7 +41,6 @@ const publicPaths = [
   '/fan-zone',
   '/polls',
   '/mock-draft',
-  '/bears-film-room',       // Show pages
   '/pinwheels-and-ivy',
   '/southside-behavior',
   '/untold-chicago-stories',

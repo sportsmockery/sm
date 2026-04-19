@@ -7,8 +7,14 @@ import { getBlackhawksSchedule, getBlackhawksRecord, type BlackhawksGame } from 
 const BLACKHAWKS_LOGO = 'https://a.espncdn.com/i/teamlogos/nhl/500/chi.png'
 
 export const metadata: Metadata = {
-  title: 'Chicago Blackhawks Schedule 2025-26 | Game Dates & Results | SportsMockery',
+  title: 'Chicago Blackhawks Schedule 2025-26 | Game Dates & Results',
   description: 'Complete Chicago Blackhawks 2025-26 schedule with game dates, times, opponents, scores, and results. View upcoming games and past results.',
+  alternates: { canonical: 'https://sportsmockery.com/chicago-blackhawks/schedule' },
+  openGraph: {
+    title: 'Chicago Blackhawks Schedule 2025-26 | Sports Mockery',
+    description: 'Complete Chicago Blackhawks 2025-26 schedule with game dates, times, opponents, scores, and results.',
+    images: [{ url: 'https://sportsmockery.com/og-image.png', width: 1200, height: 630 }],
+  },
 }
 
 export const revalidate = 120

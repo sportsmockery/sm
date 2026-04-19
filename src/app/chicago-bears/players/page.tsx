@@ -5,8 +5,14 @@ import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
 import PlayerProfileClient from './PlayerProfileClient'
 
 export const metadata: Metadata = {
-  title: 'Chicago Bears Players 2025 | Full Roster | SportsMockery',
+  title: 'Chicago Bears Players 2026 | Full Roster',
   description: 'Complete list of Chicago Bears players with photos, positions, stats, and player profiles.',
+  alternates: { canonical: 'https://sportsmockery.com/chicago-bears/players' },
+  openGraph: {
+    title: 'Chicago Bears Players 2026 | Sports Mockery',
+    description: 'Complete list of Chicago Bears players with photos, positions, stats, and player profiles.',
+    images: [{ url: 'https://sportsmockery.com/og-image.png', width: 1200, height: 630 }],
+  },
 }
 
 export const revalidate = 600

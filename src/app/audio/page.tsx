@@ -5,8 +5,14 @@ import HandsFreeAudioClient from './HandsFreeAudioClient'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'Hands-Free Audio | SM Edge',
+  title: 'Hands-Free Audio',
   description: 'Listen to Chicago sports articles read aloud. Continuous playback by team or latest articles.',
+  alternates: { canonical: 'https://sportsmockery.com/audio' },
+  openGraph: {
+    title: 'Hands-Free Audio | Sports Mockery',
+    description: 'Listen to Chicago sports articles read aloud. Continuous playback by team or latest articles.',
+    images: [{ url: 'https://sportsmockery.com/og-image.png', width: 1200, height: 630 }],
+  },
 }
 
 const TEAM_CATEGORY_SLUGS = [

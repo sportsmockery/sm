@@ -1,8 +1,13 @@
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy - Sports Mockery',
+  title: 'Privacy Policy',
   description: 'Sports Mockery privacy policy and data handling practices.',
+  alternates: { canonical: 'https://sportsmockery.com/privacy' },
+  openGraph: {
+    title: 'Privacy Policy | Sports Mockery',
+    description: 'Sports Mockery privacy policy and data handling practices.',
+  },
 }
 
 export default function PrivacyPage() {

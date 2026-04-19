@@ -4,11 +4,12 @@ import VisionTheaterClient from './VisionTheaterClient'
 
 export const metadata: Metadata = {
   title: 'Vision Theater',
-  description:
-    'Watch the latest Chicago sports videos from Bears Film Room, Pinwheels & Ivy, and Untold Chicago Stories.',
+  description: 'Watch the latest Chicago sports videos from Bears Film Room, Pinwheels & Ivy, and Untold Chicago Stories.',
+  alternates: { canonical: 'https://sportsmockery.com/vision-theater' },
   openGraph: {
     title: 'Vision Theater | Sports Mockery',
-    description: 'Your Chicago sports video hub.',
+    description: 'Watch the latest Chicago sports videos from Bears Film Room, Pinwheels & Ivy, and Untold Chicago Stories.',
+    images: [{ url: 'https://sportsmockery.com/og-image.png', width: 1200, height: 630 }],
   },
 }
 

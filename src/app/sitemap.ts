@@ -11,7 +11,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Static pages
   // Team slugs for sub-page generation
   const teams = ['chicago-bears', 'chicago-bulls', 'chicago-cubs', 'chicago-white-sox', 'chicago-blackhawks']
-  const teamSubPages = ['schedule', 'scores', 'stats', 'roster']
+  const teamSubPages = ['schedule', 'scores', 'stats', 'roster', 'players', 'cap-tracker', 'depth-chart', 'draft-tracker', 'trade-rumors', 'live']
 
   const staticPages: MetadataRoute.Sitemap = [
     {
@@ -91,12 +91,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
     },
     // Podcast pages
-    {
-      url: `${BASE_URL}/bears-film-room`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.6,
-    },
     {
       url: `${BASE_URL}/pinwheels-and-ivy`,
       lastModified: new Date(),

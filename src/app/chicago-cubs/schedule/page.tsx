@@ -7,8 +7,14 @@ import { getCubsSchedule, getCubsSeparatedRecord, type CubsGame } from '@/lib/cu
 const CUBS_LOGO = 'https://a.espncdn.com/i/teamlogos/mlb/500/chc.png'
 
 export const metadata: Metadata = {
-  title: 'Chicago Cubs Schedule 2025 | Game Dates & Results | SportsMockery',
-  description: 'Complete Chicago Cubs 2025 schedule with game dates, times, opponents, scores, and results. View upcoming games and past results.',
+  title: 'Chicago Cubs Schedule 2026 | Game Dates & Results',
+  description: 'Complete Chicago Cubs 2026 schedule with game dates, times, opponents, scores, and results. View upcoming games and past results.',
+  alternates: { canonical: 'https://sportsmockery.com/chicago-cubs/schedule' },
+  openGraph: {
+    title: 'Chicago Cubs Schedule 2026 | Sports Mockery',
+    description: 'Complete Chicago Cubs 2026 schedule with game dates, times, opponents, scores, and results.',
+    images: [{ url: 'https://sportsmockery.com/og-image.png', width: 1200, height: 630 }],
+  },
 }
 
 export const revalidate = 120

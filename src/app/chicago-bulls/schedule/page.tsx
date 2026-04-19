@@ -7,8 +7,14 @@ import { getBullsSchedule, getBullsRecord, type BullsGame } from '@/lib/bullsDat
 const BULLS_LOGO = 'https://a.espncdn.com/i/teamlogos/nba/500/chi.png'
 
 export const metadata: Metadata = {
-  title: 'Chicago Bulls Schedule 2025-26 | Game Dates & Results | SportsMockery',
+  title: 'Chicago Bulls Schedule 2025-26 | Game Dates & Results',
   description: 'Complete Chicago Bulls 2025-26 schedule with game dates, times, opponents, scores, and results. View upcoming games and past results.',
+  alternates: { canonical: 'https://sportsmockery.com/chicago-bulls/schedule' },
+  openGraph: {
+    title: 'Chicago Bulls Schedule 2025-26 | Sports Mockery',
+    description: 'Complete Chicago Bulls 2025-26 schedule with game dates, times, opponents, scores, and results.',
+    images: [{ url: 'https://sportsmockery.com/og-image.png', width: 1200, height: 630 }],
+  },
 }
 
 export const revalidate = 120

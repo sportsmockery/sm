@@ -9,20 +9,19 @@ import HubUpdatesFeed from '@/components/hub/HubUpdatesFeed'
 import DraftNewsList from '@/components/hub/DraftNewsList'
 
 export const metadata: Metadata = {
-  title: 'Chicago Bears Draft Tracker & Mock Drafts 2026 | Sports Mockery',
-  description:
-    'Bears 2026 draft prospects, mock drafts, trade scenarios. Build your draft.',
+  title: 'Chicago Bears Draft Tracker & Mock Drafts 2026',
+  description: 'Bears 2026 draft prospects, mock drafts, trade scenarios. Build your draft.',
   keywords: 'Chicago Bears mock draft, Bears draft prospects 2026, NFL Draft Bears picks, Bears draft news',
+  alternates: { canonical: 'https://sportsmockery.com/chicago-bears/draft-tracker' },
   openGraph: {
-    title: 'Chicago Bears Draft Tracker & Mock Drafts 2026',
-    description:
-      'Build your Bears mock draft. Latest 2026 draft news, prospect rankings, trade scenarios.',
+    title: 'Chicago Bears Draft Tracker & Mock Drafts 2026 | Sports Mockery',
+    description: 'Build your Bears mock draft. Latest 2026 draft news, prospect rankings, trade scenarios.',
     type: 'website',
+    images: [{ url: 'https://sportsmockery.com/og-image.png', width: 1200, height: 630 }],
   },
   twitter: {
-    title: 'Bears 2026 Mock Draft Simulator',
-    description:
-      'Create your Chicago Bears mock draft. Latest draft news and prospect rankings.',
+    title: 'Bears 2026 Mock Draft Simulator | Sports Mockery',
+    description: 'Create your Chicago Bears mock draft. Latest draft news and prospect rankings.',
   },
 }
 

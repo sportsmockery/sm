@@ -51,20 +51,27 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
   const description = categoryDescriptions[categorySlug] ||
     `Latest ${category.name} news, rumors, and analysis from Sports Mockery.`
 
+  const categoryUrl = `https://sportsmockery.com/${category.slug}`
+
   return {
-    title: `${category.name} News & Rumors | Sports Mockery`,
+    title: `${category.name} News & Rumors`,
     description,
+    alternates: {
+      canonical: categoryUrl,
+    },
     openGraph: {
       title: `${category.name} News & Rumors | Sports Mockery`,
       description,
       type: 'website',
-      url: `https://sportsmockery.com/${category.slug}`,
-      siteName: 'SportsMockery.com',
+      url: categoryUrl,
+      siteName: 'Sports Mockery',
+      images: [{ url: 'https://sportsmockery.com/og-image.png', width: 1200, height: 630 }],
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${category.name} News & Rumors`,
+      title: `${category.name} News & Rumors | Sports Mockery`,
       description,
+      images: ['https://sportsmockery.com/og-image.png'],
     },
   }
 }

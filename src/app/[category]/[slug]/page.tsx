@@ -87,34 +87,49 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
 
   const title = post.seo_title || post.title
   const description = post.seo_description || post.excerpt || ''
+  const articleUrl = `https://sportsmockery.com/${category}/${slug}`
+
+  // Prevent test/showcase articles from being indexed
+  const isTestArticle = slug.includes('block-type-showcase') || slug.includes('test-article')
+
+  // Validate featured_image is actually a URL (not description text from bad data)
+  const isValidImageUrl = post.featured_image &&
+    (post.featured_image.startsWith('http://') ||
+     post.featured_image.startsWith('https://') ||
+     post.featured_image.startsWith('/'))
+  const ogImage = isValidImageUrl
+    ? post.featured_image
+    : 'https://sportsmockery.com/og-image.png'
 
   return {
     title,
     description,
+    ...(isTestArticle && { robots: { index: false, follow: false } }),
+    alternates: {
+      canonical: articleUrl,
+    },
     openGraph: {
       title,
       description,
       type: 'article',
       publishedTime: post.published_at,
       modifiedTime: post.updated_at || post.published_at,
-      url: `https://sportsmockery.com/${category}/${slug}`,
-      images: post.featured_image
-        ? [
-            {
-              url: post.featured_image,
-              width: 1200,
-              height: 630,
-              alt: post.title,
-            },
-          ]
-        : [],
-      siteName: 'SportsMockery.com',
+      url: articleUrl,
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: post.title,
+        },
+      ],
+      siteName: 'Sports Mockery',
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: post.featured_image ? [post.featured_image] : [],
+      images: [ogImage],
       site: '@sportsmockery',
     },
   }

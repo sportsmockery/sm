@@ -6,8 +6,14 @@ import { TeamHubLayout } from '@/components/team'
 import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
 
 export const metadata: Metadata = {
-  title: 'Chicago Bears Stats 2025 | Team & Player Statistics | SportsMockery',
+  title: 'Chicago Bears Stats 2025 | Team & Player Statistics',
   description: 'Chicago Bears 2025 team and player statistics. View passing, rushing, receiving, and defensive leaderboards plus team stats.',
+  alternates: { canonical: 'https://sportsmockery.com/chicago-bears/stats' },
+  openGraph: {
+    title: 'Chicago Bears Stats 2025 | Sports Mockery',
+    description: 'Chicago Bears 2025 team and player statistics including passing, rushing, receiving, and defensive leaderboards.',
+    images: [{ url: 'https://sportsmockery.com/og-image.png', width: 1200, height: 630 }],
+  },
 }
 
 export const revalidate = 600

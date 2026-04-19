@@ -96,6 +96,12 @@ const nextConfig: NextConfig = {
       { source: '/war-room', destination: '/gm', permanent: false },
       { source: '/bears', destination: '/chicago-bears', permanent: true },
       { source: '/bears/:path*', destination: '/chicago-bears/:path*', permanent: true },
+      // Redirect /team/news to team category pages (prevent "Article Not Found" soft 404)
+      { source: '/chicago-bears/news', destination: '/chicago-bears', permanent: true },
+      { source: '/chicago-bulls/news', destination: '/chicago-bulls', permanent: true },
+      { source: '/chicago-cubs/news', destination: '/chicago-cubs', permanent: true },
+      { source: '/chicago-white-sox/news', destination: '/chicago-white-sox', permanent: true },
+      { source: '/chicago-blackhawks/news', destination: '/chicago-blackhawks', permanent: true },
     ]
   },
 

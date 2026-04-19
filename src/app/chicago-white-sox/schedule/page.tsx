@@ -7,8 +7,14 @@ import { getWhiteSoxSchedule, getWhiteSoxRecord, type WhiteSoxGame } from '@/lib
 const WHITE_SOX_LOGO = 'https://a.espncdn.com/i/teamlogos/mlb/500/chw.png'
 
 export const metadata: Metadata = {
-  title: 'Chicago White Sox Schedule 2025 | Game Dates & Results | SportsMockery',
-  description: 'Complete Chicago White Sox 2025 schedule with game dates, times, opponents, scores, and results. View upcoming games and past results.',
+  title: 'Chicago White Sox Schedule 2026 | Game Dates & Results',
+  description: 'Complete Chicago White Sox 2026 schedule with game dates, times, opponents, scores, and results. View upcoming games and past results.',
+  alternates: { canonical: 'https://sportsmockery.com/chicago-white-sox/schedule' },
+  openGraph: {
+    title: 'Chicago White Sox Schedule 2026 | Sports Mockery',
+    description: 'Complete Chicago White Sox 2026 schedule with game dates, times, opponents, scores, and results.',
+    images: [{ url: 'https://sportsmockery.com/og-image.png', width: 1200, height: 630 }],
+  },
 }
 
 export const revalidate = 120

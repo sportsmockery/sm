@@ -7,16 +7,17 @@ import DepthChartClient from './DepthChartClient'
 import { HubUpdatesFeed } from '@/components/hub'
 
 export const metadata: Metadata = {
-  title: 'Chicago Bears Depth Chart 2026 | Sports Mockery',
-  description:
-    'Interactive 53-man roster, starters/backups.',
+  title: 'Chicago Bears Depth Chart 2026',
+  description: 'Interactive 53-man roster, starters/backups.',
+  alternates: { canonical: 'https://sportsmockery.com/chicago-bears/depth-chart' },
   openGraph: {
-    title: 'Chicago Bears Depth Chart 2026',
+    title: 'Chicago Bears Depth Chart 2026 | Sports Mockery',
     description: 'Interactive 53-man roster, starters/backups.',
     type: 'website',
+    images: [{ url: 'https://sportsmockery.com/og-image.png', width: 1200, height: 630 }],
   },
   twitter: {
-    title: 'Chicago Bears Depth Chart 2026',
+    title: 'Chicago Bears Depth Chart 2026 | Sports Mockery',
     description: 'Interactive 53-man roster, starters/backups.',
   },
 }
