@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
-import { datalabClient } from '@/lib/supabase-datalab'
+// Realtime uses polling via API instead of direct Supabase client
+// (DataLab env vars are server-only, not available in client components)
 
 // Message type for display
 interface ChatMessage {
@@ -171,9 +172,8 @@ export default function FanChatPage() {
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const currentChannel = channels.find(c => c.id === activeChannel) || channels[0]
 
-  // DataLab Supabase client for realtime on fan_chat_messages (singleton)
-  const datalabClientRef = useRef(datalabClient)
-  const realtimeChannelRef = useRef<ReturnType<typeof datalabClient.channel> | null>(null)
+  // Track latest message ID for polling
+  const latestMsgIdRef = useRef<string>('')
 
   // Scroll to bottom within container only
   const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
@@ -258,57 +258,32 @@ export default function FanChatPage() {
     return () => { cancelled = true }
   }, [activeChannel])
 
-  // Set up DataLab Supabase realtime subscription for fan_chat_messages
+  // Poll for new messages every 3 seconds (replaces Supabase realtime which
+  // requires server-only env vars not available in client components)
   useEffect(() => {
-    // Clean up previous subscription
-    if (realtimeChannelRef.current) {
-      datalabClientRef.current.removeChannel(realtimeChannelRef.current)
-      realtimeChannelRef.current = null
+    const poll = async () => {
+      try {
+        const res = await fetch(`/api/fan-chat/messages?channel=${activeChannel}&limit=200`)
+        if (!res.ok) return
+        const data = await res.json()
+        if (!data.messages || data.messages.length === 0) return
+
+        const lastMsg = data.messages[data.messages.length - 1]
+        if (lastMsg.id === latestMsgIdRef.current) return // No new messages
+
+        latestMsgIdRef.current = lastMsg.id
+        const converted = data.messages.map((m: APIMessage) =>
+          apiMessageToChatMessage(m, userIdRef.current)
+        )
+        setMessages(converted)
+        channelCacheRef.current[activeChannel] = converted
+      } catch {
+        // Silently fail on poll errors
+      }
     }
 
-    const channel = datalabClientRef.current
-      .channel(`fan-chat-${activeChannel}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'fan_chat_messages',
-          filter: `team_key=eq.${activeChannel}`,
-        },
-        (payload: { new: Record<string, unknown> }) => {
-          const raw = payload.new as Record<string, unknown>
-
-          const isOwnMessage = raw.sender_id === userIdRef.current
-          const isAI = raw.sender_type === 'ai'
-
-          const newMsg: ChatMessage = {
-            id: String(raw.id),
-            user: isOwnMessage ? 'You' : (raw.sender_name as string) || 'Fan',
-            content: (raw.message as string) || '',
-            time: formatRelativeTime(raw.created_at as string),
-            isOwn: isOwnMessage,
-            isAI,
-          }
-
-          setMessages(prev => {
-            // Avoid duplicates
-            if (prev.some(m => m.id === newMsg.id)) return prev
-            const updated = [...prev, newMsg]
-            channelCacheRef.current[activeChannel] = updated
-            return updated
-          })
-        }
-      )
-      .subscribe()
-
-    realtimeChannelRef.current = channel
-    const client = datalabClientRef.current
-
-    return () => {
-      client.removeChannel(channel)
-      realtimeChannelRef.current = null
-    }
+    const interval = setInterval(poll, 3000)
+    return () => clearInterval(interval)
   }, [activeChannel])
 
   // Per-channel online counts for sidebar
