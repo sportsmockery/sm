@@ -4453,11 +4453,11 @@ main, .page-content, [role="main"] {
   .article-body-2030 blockquote { padding: 20px 24px; font-size: 17px; margin: 28px 0; }
 }
 
-/* Article body wrapper — wider desktop margins (15% each side) */
+/* Article body wrapper — moderate desktop margins */
 @media (min-width: 1280px) {
   .article-body-wrapper {
-    padding-left: 15% !important;
-    padding-right: 15% !important;
+    padding-left: 48px !important;
+    padding-right: 48px !important;
   }
 }
 
