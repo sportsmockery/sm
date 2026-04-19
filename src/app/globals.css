@@ -4366,7 +4366,7 @@ main, .page-content, [role="main"] {
 
 /* ===== 2030 ARTICLE BODY OVERRIDES ===== */
 .article-body-2030 {
-  max-width: 775px;
+  max-width: 860px;
   margin: 0;
   font-family: var(--sm-font-body);
 }

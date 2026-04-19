@@ -424,7 +424,7 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
           </aside>
 
           {/* Main article column */}
-          <div style={{ width: '100%', maxWidth: 775, borderColor: 'var(--sm-border)' }}>
+          <div style={{ width: '100%', maxWidth: 860, borderColor: 'var(--sm-border)' }}>
 
             <article className="article-body-2030" suppressHydrationWarning>
               {blockDocument ? (
