@@ -123,6 +123,98 @@ function NumberInput({ value, onChange, min, max }: { value: number; onChange: (
   );
 }
 
+interface PlayerSearchResult {
+  name: string;
+  team: string;
+  position: string;
+  headshot_url: string;
+  espn_id: string;
+}
+
+function PlayerSearchInput({ onSelect, placeholder }: { onSelect: (p: PlayerSearchResult) => void; placeholder?: string }) {
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<PlayerSearchResult[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  // Debounced search
+  useEffect(() => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    if (query.length < 2) { setResults([]); setOpen(false); return; }
+    timerRef.current = setTimeout(async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/admin/player-search?q=${encodeURIComponent(query)}`);
+        if (res.ok) {
+          const data = await res.json();
+          setResults(data.players || []);
+          setOpen(true);
+        }
+      } catch { /* ignore */ }
+      setLoading(false);
+    }, 300);
+  }, [query]);
+
+  return (
+    <div ref={containerRef} className="relative">
+      <div className="relative">
+        <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onFocus={() => results.length > 0 && setOpen(true)}
+          placeholder={placeholder || 'Search player name...'}
+          className="w-full bg-white border border-gray-300 rounded-lg pl-8 pr-3 py-2 text-sm text-[#0B0F14] placeholder-slate-400 outline-none focus:border-[#00D4FF]/50"
+        />
+        {loading && (
+          <div className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 border-2 border-slate-300 border-t-[#00D4FF] rounded-full animate-spin" />
+        )}
+      </div>
+      {open && results.length > 0 && (
+        <div className="absolute z-50 top-full mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+          {results.map((p) => (
+            <button
+              key={p.espn_id}
+              type="button"
+              className="w-full flex items-center gap-2.5 px-3 py-2 text-left hover:bg-slate-50 transition-colors"
+              onClick={() => { onSelect(p); setQuery(''); setOpen(false); setResults([]); }}
+            >
+              {p.headshot_url ? (
+                <img src={p.headshot_url} alt={p.name} className="w-8 h-8 rounded-full object-cover bg-slate-100" />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-500">
+                  {p.name.split(' ').map(w => w[0]).join('').slice(0, 2)}
+                </div>
+              )}
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-medium text-[#0B0F14] truncate">{p.name}</div>
+                <div className="text-[11px] text-slate-400 truncate">{[p.position, p.team].filter(Boolean).join(' · ')}</div>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+      {open && results.length === 0 && query.length >= 2 && !loading && (
+        <div className="absolute z-50 top-full mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg px-3 py-2 text-xs text-slate-400">
+          No players found
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ToggleChips({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: { value: string; label: string }[] }) {
   return (
     <div className="flex gap-2 flex-wrap">
@@ -393,9 +485,14 @@ export function PlayerComparisonPanel({ block, onChange, onDelete, onMoveUp, onM
                 </div>
               )}
             </div>
+            <Field label="Search Player">
+              <PlayerSearchInput
+                placeholder="Search by name..."
+                onSelect={(p) => updatePlayer(side, { name: p.name, team: p.team, headshot: p.headshot_url })}
+              />
+            </Field>
             <Field label="Name"><TextInput value={d[side].name} onChange={(v) => updatePlayer(side, { name: v })} /></Field>
             <Field label="Team"><TextInput value={d[side].team} onChange={(v) => updatePlayer(side, { team: v })} /></Field>
-            <Field label="Headshot URL"><TextInput value={d[side].headshot} onChange={(v) => updatePlayer(side, { headshot: v })} placeholder="https://a.espncdn.com/..." /></Field>
           </div>
         ))}
       </div>
