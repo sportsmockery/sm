@@ -23,8 +23,8 @@ export const IS_BUILD_TIME =
   (process.env.NODE_ENV === 'production' && !process.env.VERCEL_URL && !process.env.VERCEL_ENV)
 
 /** Default timeout in ms — keep well under Vercel's 60s page gen limit */
-const DEFAULT_TIMEOUT_MS = 12_000
-const BUILD_TIMEOUT_MS = 8_000
+const DEFAULT_TIMEOUT_MS = 20_000
+const BUILD_TIMEOUT_MS = 12_000
 
 interface BuildSafeFetchOptions {
   /** Timeout in ms (defaults to 12s at runtime, 8s at build) */
