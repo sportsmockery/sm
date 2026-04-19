@@ -368,12 +368,24 @@ export interface SimulationResult {
     conference2Name: string
   } | Array<{ team: string; wins: number; losses: number; winPct: number; rank: number; ties?: number }>
   playoffs?: {
-    bracket: PlayoffMatchup[]
+    bracket?: PlayoffMatchup[]
+    // V3 DataLab format: rounds[][] with PlayoffSeriesResult
+    rounds?: Array<Array<{
+      highSeed: string; lowSeed: string; highSeedNum: number; lowSeedNum: number
+      winner: string; loser: string; seriesScore: string; roundName?: string
+      games: Array<{ homeScore: number; awayScore: number }>
+    }>>
+    champion?: string
+    runnerUp?: string
     userTeamResult?: {
       madePlayoffs: boolean
-      eliminatedRound?: number
+      eliminatedRound?: number | string
       eliminatedBy?: string
-      wonChampionship: boolean
+      wonChampionship?: boolean
+      // V3 fields
+      isChampion?: boolean
+      seed?: number | null
+      furthestRound?: string
     }
   }
   championship?: ChampionshipResult

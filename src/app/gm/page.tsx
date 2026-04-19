@@ -1776,14 +1776,21 @@ export default function GMPage() {
 
                 {/* Season Simulation - inside center column, show for accepted trades */}
                 {activeSession && (activeSession.num_approved > 0 || (gradeResult && gradeResult.grade >= 70)) && (
-                  <SimulationTrigger
-                    tradeCount={Math.max(activeSession.num_approved, (gradeResult && gradeResult.grade >= 70) ? 1 : 0)}
-                    sport={sport}
-                    onSimulate={handleSimulateSeason}
-                    isSimulating={isSimulating}
-                    simPhase={simPhase}
-                    teamColor={teamColor}
-                  />
+                  <>
+                    <SimulationTrigger
+                      tradeCount={Math.max(activeSession.num_approved, (gradeResult && gradeResult.grade >= 70) ? 1 : 0)}
+                      sport={sport}
+                      onSimulate={handleSimulateSeason}
+                      isSimulating={isSimulating}
+                      simPhase={simPhase}
+                      teamColor={teamColor}
+                    />
+                    {simulationError && (
+                      <div style={{ marginTop: 8, padding: '10px 14px', borderRadius: 8, backgroundColor: 'rgba(188,0,0,0.1)', border: '1px solid rgba(188,0,0,0.3)', fontSize: 13, color: '#BC0000' }}>
+                        Simulation failed: {simulationError}
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
 
@@ -2044,14 +2051,21 @@ export default function GMPage() {
 
                 {/* Season Simulation - mobile, show for accepted trades */}
                 {activeSession && (activeSession.num_approved > 0 || (gradeResult && gradeResult.grade >= 70)) && (
-                  <SimulationTrigger
-                    tradeCount={Math.max(activeSession.num_approved, (gradeResult && gradeResult.grade >= 70) ? 1 : 0)}
-                    sport={sport}
-                    onSimulate={handleSimulateSeason}
-                    isSimulating={isSimulating}
-                    simPhase={simPhase}
-                    teamColor={teamColor}
-                  />
+                  <>
+                    <SimulationTrigger
+                      tradeCount={Math.max(activeSession.num_approved, (gradeResult && gradeResult.grade >= 70) ? 1 : 0)}
+                      sport={sport}
+                      onSimulate={handleSimulateSeason}
+                      isSimulating={isSimulating}
+                      simPhase={simPhase}
+                      teamColor={teamColor}
+                    />
+                    {simulationError && (
+                      <div style={{ marginTop: 8, padding: '10px 14px', borderRadius: 8, backgroundColor: 'rgba(188,0,0,0.1)', border: '1px solid rgba(188,0,0,0.3)', fontSize: 13, color: '#BC0000' }}>
+                        Simulation failed: {simulationError}
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
 

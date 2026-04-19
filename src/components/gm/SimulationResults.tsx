@@ -115,16 +115,16 @@ export function SimulationResults({
         }}
       />
 
-      {/* Modal */}
+      {/* Modal — use framer-motion x for centering so scale/y animations don't overwrite transform */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        initial={{ opacity: 0, scale: 0.95, y: 20, x: '-50%' }}
+        animate={{ opacity: 1, scale: 1, y: 0, x: '-50%' }}
+        exit={{ opacity: 0, scale: 0.95, y: 20, x: '-50%' }}
+        onClick={e => e.stopPropagation()}
         style={{
           position: 'fixed',
           top: 20,
           left: '50%',
-          transform: 'translateX(-50%)',
           width: '95%',
           maxWidth: 900,
           maxHeight: 'calc(100vh - 40px)',
@@ -968,17 +968,17 @@ export function SimulationResults({
                   </div>
                 ) : (
                   <>
-                    {/* User team result */}
+                    {/* User team result — handle both V3 (isChampion) and legacy (wonChampionship) */}
                     {playoffs.userTeamResult && (
                       <div style={{
                         padding: 16,
                         borderRadius: 12,
-                        backgroundColor: playoffs.userTeamResult.wonChampionship ? `${teamColor}20` : surfaceBg,
-                        border: playoffs.userTeamResult.wonChampionship ? `2px solid ${teamColor}` : `1px solid ${borderColor}`,
+                        backgroundColor: (playoffs.userTeamResult.wonChampionship || playoffs.userTeamResult.isChampion) ? `${teamColor}20` : surfaceBg,
+                        border: (playoffs.userTeamResult.wonChampionship || playoffs.userTeamResult.isChampion) ? `2px solid ${teamColor}` : `1px solid ${borderColor}`,
                         marginBottom: 20,
                         textAlign: 'center',
                       }}>
-                        {playoffs.userTeamResult.wonChampionship ? (
+                        {(playoffs.userTeamResult.wonChampionship || playoffs.userTeamResult.isChampion) ? (
                           <>
                             <div style={{ fontSize: 40, marginBottom: 8 }}>🏆</div>
                             <div style={{ fontSize: 18, fontWeight: 800, color: teamColor }}>CHAMPIONS!</div>
@@ -987,7 +987,7 @@ export function SimulationResults({
                           <>
                             <div style={{ fontSize: 32, marginBottom: 8 }}>💔</div>
                             <div style={{ fontSize: 16, fontWeight: 700, color: textColor }}>
-                              Eliminated in Round {playoffs.userTeamResult.eliminatedRound}
+                              Eliminated in {playoffs.userTeamResult.eliminatedRound}
                             </div>
                             <div style={{ fontSize: 13, color: subText, marginTop: 4 }}>
                               Lost to {playoffs.userTeamResult.eliminatedBy}
@@ -999,54 +999,56 @@ export function SimulationResults({
                       </div>
                     )}
 
-                    {/* Bracket */}
+                    {/* Bracket — handle both legacy (bracket[]) and V3 (rounds[][]) formats */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                      {Array.from(new Set(playoffs.bracket.map((m: PlayoffMatchup) => m.round))).map((round: number) => {
-                        const roundMatches = playoffs.bracket.filter((m: PlayoffMatchup) => m.round === round)
-                        const roundName = roundMatches[0]?.roundName.split(' - ')[0] || `Round ${round}`
-                        return (
-                          <div key={round}>
-                            <h4 style={{ fontSize: 13, fontWeight: 700, color: subText, marginBottom: 8, textTransform: 'uppercase' }}>
-                              {roundName}
-                            </h4>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 8 }}>
-                              {roundMatches.map((match: PlayoffMatchup, idx: number) => (
-                                <div
-                                  key={idx}
-                                  style={{
-                                    padding: 12,
-                                    borderRadius: 8,
-                                    backgroundColor: match.userTeamInvolved ? `${teamColor}10` : surfaceBg,
-                                    border: match.userTeamInvolved ? `2px solid ${teamColor}` : `1px solid ${borderColor}`,
-                                  }}
-                                >
-                                  {/* Home team */}
-                                  <div style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'space-between',
-                                    padding: '6px 0',
-                                    borderBottom: `1px solid ${borderColor}`,
-                                    opacity: match.winner === 'away' ? 0.5 : 1,
-                                  }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                      <span style={{ fontSize: 10, color: subText, width: 16 }}>({match.homeTeam.seed})</span>
-                                      <Image src={match.homeTeam.logoUrl} alt="" width={18} height={18} style={{ objectFit: 'contain' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
-                                      <span style={{ fontSize: 12, fontWeight: match.winner === 'home' ? 700 : 500 }}>
-                                        {match.homeTeam.abbreviation}
+                      {playoffs.bracket ? (
+                        /* Legacy format: flat bracket array */
+                        Array.from(new Set(playoffs.bracket.map((m: PlayoffMatchup) => m.round))).map((round: number) => {
+                          const roundMatches = playoffs.bracket!.filter((m: PlayoffMatchup) => m.round === round)
+                          const roundName = roundMatches[0]?.roundName?.split(' - ')[0] || `Round ${round}`
+                          return (
+                            <div key={round}>
+                              <h4 style={{ fontSize: 13, fontWeight: 700, color: subText, marginBottom: 8, textTransform: 'uppercase' }}>
+                                {roundName}
+                              </h4>
+                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 8 }}>
+                                {roundMatches.map((match: PlayoffMatchup, idx: number) => (
+                                  <div
+                                    key={idx}
+                                    style={{
+                                      padding: 12,
+                                      borderRadius: 8,
+                                      backgroundColor: match.userTeamInvolved ? `${teamColor}10` : surfaceBg,
+                                      border: match.userTeamInvolved ? `2px solid ${teamColor}` : `1px solid ${borderColor}`,
+                                    }}
+                                  >
+                                    {/* Home team */}
+                                    <div style={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'space-between',
+                                      padding: '6px 0',
+                                      borderBottom: `1px solid ${borderColor}`,
+                                      opacity: match.winner === 'away' ? 0.5 : 1,
+                                    }}>
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                        <span style={{ fontSize: 10, color: subText, width: 16 }}>({match.homeTeam.seed})</span>
+                                        <Image src={match.homeTeam.logoUrl} alt="" width={18} height={18} style={{ objectFit: 'contain' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
+                                        <span style={{ fontSize: 12, fontWeight: match.winner === 'home' ? 700 : 500 }}>
+                                          {match.homeTeam.abbreviation}
+                                        </span>
+                                      </div>
+                                      <span style={{ fontSize: 14, fontWeight: 700, color: match.winner === 'home' ? '#00D4FF' : textColor }}>
+                                        {match.seriesWins[0]}
                                       </span>
                                     </div>
-                                    <span style={{ fontSize: 14, fontWeight: 700, color: match.winner === 'home' ? '#00D4FF' : textColor }}>
-                                      {match.seriesWins[0]}
-                                    </span>
-                                  </div>
-                                  {/* Away team */}
-                                  <div style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'space-between',
-                                    padding: '6px 0',
-                                    opacity: match.winner === 'home' ? 0.5 : 1,
+                                    {/* Away team */}
+                                    <div style={{
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'space-between',
+                                      padding: '6px 0',
+                                      opacity: match.winner === 'home' ? 0.5 : 1,
                                   }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                       <span style={{ fontSize: 10, color: subText, width: 16 }}>({match.awayTeam.seed})</span>
@@ -1064,17 +1066,66 @@ export function SimulationResults({
                             </div>
                           </div>
                         )
-                      })}
+                      })
+                      ) : playoffs.rounds ? (
+                        /* V3 format: rounds[][] from DataLab PlayoffResult */
+                        (playoffs.rounds as any[][]).map((roundSeries: any[], roundIdx: number) => {
+                          const roundLabel = roundSeries[0]?.roundName || `Round ${roundIdx + 1}`
+                          return (
+                            <div key={roundIdx}>
+                              <h4 style={{ fontSize: 13, fontWeight: 700, color: subText, marginBottom: 8, textTransform: 'uppercase' }}>
+                                {roundLabel}
+                              </h4>
+                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 8 }}>
+                                {roundSeries.map((series: any, idx: number) => {
+                                  const userKey = teamName.toLowerCase().replace('chicago ', '')
+                                  const userInvolved = series.highSeed?.toLowerCase().includes(userKey) || series.lowSeed?.toLowerCase().includes(userKey)
+                                  return (
+                                    <div key={idx} style={{
+                                      padding: 12, borderRadius: 8,
+                                      backgroundColor: userInvolved ? `${teamColor}10` : surfaceBg,
+                                      border: userInvolved ? `2px solid ${teamColor}` : `1px solid ${borderColor}`,
+                                    }}>
+                                      <div style={{
+                                        display: 'flex', justifyContent: 'space-between', padding: '6px 0',
+                                        borderBottom: `1px solid ${borderColor}`,
+                                        opacity: series.winner === series.lowSeed ? 0.5 : 1,
+                                      }}>
+                                        <span style={{ fontSize: 12, fontWeight: series.winner === series.highSeed ? 700 : 500, color: textColor }}>
+                                          ({series.highSeedNum}) {series.highSeed?.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())}
+                                        </span>
+                                      </div>
+                                      <div style={{
+                                        display: 'flex', justifyContent: 'space-between', padding: '6px 0',
+                                        opacity: series.winner === series.highSeed ? 0.5 : 1,
+                                      }}>
+                                        <span style={{ fontSize: 12, fontWeight: series.winner === series.lowSeed ? 700 : 500, color: textColor }}>
+                                          ({series.lowSeedNum}) {series.lowSeed?.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())}
+                                        </span>
+                                      </div>
+                                      <div style={{ fontSize: 11, color: subText, marginTop: 4, textAlign: 'center' }}>
+                                        {series.seriesScore}
+                                      </div>
+                                    </div>
+                                  )
+                                })}
+                              </div>
+                            </div>
+                          )
+                        })
+                      ) : (
+                        <div style={{ textAlign: 'center', padding: 20, color: subText }}>No bracket data available</div>
+                      )}
                     </div>
 
-                    {/* Championship Result */}
-                    {championship && (
+                    {/* Championship Result — legacy format */}
+                    {championship && championship.winner && (
                       <div style={{
                         marginTop: 20,
                         padding: 20,
                         borderRadius: 12,
-                        background: `linear-gradient(135deg, ${championship.winner.primaryColor}20, ${championship.winner.primaryColor}40)`,
-                        border: `2px solid ${championship.winner.primaryColor}`,
+                        background: `linear-gradient(135deg, ${championship.winner.primaryColor || teamColor}20, ${championship.winner.primaryColor || teamColor}40)`,
+                        border: `2px solid ${championship.winner.primaryColor || teamColor}`,
                         textAlign: 'center',
                       }}>
                         <div style={{ fontSize: 32, marginBottom: 8 }}>🏆</div>
@@ -1082,14 +1133,33 @@ export function SimulationResults({
                           Champion
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
-                          <Image src={championship.winner.logoUrl} alt="" width={40} height={40} style={{ objectFit: 'contain' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
-                          <span style={{ fontSize: 20, fontWeight: 800, color: championship.winner.primaryColor }}>
+                          {championship.winner.logoUrl && <Image src={championship.winner.logoUrl} alt="" width={40} height={40} style={{ objectFit: 'contain' }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />}
+                          <span style={{ fontSize: 20, fontWeight: 800, color: championship.winner.primaryColor || teamColor }}>
                             {championship.winner.teamName}
                           </span>
                         </div>
                         <div style={{ fontSize: 13, color: subText, marginTop: 8 }}>
-                          Defeated {championship.runnerUp.teamName} {championship.seriesScore}
+                          Defeated {championship.runnerUp?.teamName} {championship.seriesScore}
                         </div>
+                      </div>
+                    )}
+                    {/* V3 champion (simple string) — show when no legacy championship object */}
+                    {!championship && playoffs.champion && (
+                      <div style={{
+                        marginTop: 20, padding: 20, borderRadius: 12,
+                        background: `linear-gradient(135deg, ${teamColor}20, ${teamColor}40)`,
+                        border: `2px solid ${teamColor}`, textAlign: 'center',
+                      }}>
+                        <div style={{ fontSize: 32, marginBottom: 8 }}>🏆</div>
+                        <div style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.1em', color: subText, marginBottom: 4 }}>Champion</div>
+                        <div style={{ fontSize: 20, fontWeight: 800, color: teamColor }}>
+                          {playoffs.champion.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())}
+                        </div>
+                        {playoffs.runnerUp && (
+                          <div style={{ fontSize: 13, color: subText, marginTop: 8 }}>
+                            Defeated {playoffs.runnerUp.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase())}
+                          </div>
+                        )}
                       </div>
                     )}
                   </>
