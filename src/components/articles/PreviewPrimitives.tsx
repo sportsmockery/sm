@@ -59,9 +59,9 @@ export function ArticleMeta() {
   );
 }
 
-/** ArticleBody — constrains content to readable article width */
+/** ArticleBody — wraps article content; parent container handles max-width */
 export function ArticleBody({ children }: { children: React.ReactNode }) {
-  return <div className="max-w-[720px] mx-auto">{children}</div>;
+  return <div className="w-full">{children}</div>;
 }
 
 /* ─── Intelligence Primitives (cyan) ─── */
