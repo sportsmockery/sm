@@ -3,6 +3,7 @@ import type {
   EmailStory,
   ScoreboardGame,
   NetworkItem,
+  ChannelVideo,
 } from '@/types/daily-email';
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || 'https://test.sportsmockery.com';
@@ -277,10 +278,19 @@ const NETWORK: NetworkItem[] = [
 // Main: prepare all email variables
 // =============================================================================
 
+type RawChannelVideo = {
+  title: string;
+  url: string;
+  thumbnail_url: string;
+  channel_name: string;
+  published_at: string;
+};
+
 export function prepareDailyEmailVariables(
   rawStories: RawStory[],
   rawGames: RawGame[],
   sendDate: Date = new Date(),
+  rawVideos: RawChannelVideo[] = [],
 ): DailyEdgeEmailVariables {
   // Sort by views, transform
   const sorted = [...rawStories].sort((a, b) => b.views - a.views);
@@ -319,6 +329,16 @@ export function prepareDailyEmailVariables(
 
     // Network
     network_items: NETWORK,
+
+    // Channel videos from last 24h
+    channel_videos: rawVideos.slice(0, 4).map((v): ChannelVideo => ({
+      title: truncate(v.title, 80),
+      url: v.url,
+      thumbnail_url: v.thumbnail_url,
+      channel_name: v.channel_name,
+      published_at: v.published_at,
+      relative_time: relativeTime(v.published_at),
+    })),
 
     // App
     app_bullets: [

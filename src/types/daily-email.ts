@@ -33,6 +33,15 @@ export interface NetworkItem {
   color: string; // brand accent
 }
 
+export interface ChannelVideo {
+  title: string;
+  url: string;
+  thumbnail_url: string;
+  channel_name: string;
+  published_at: string;
+  relative_time: string;
+}
+
 export interface DailyEdgeEmailVariables {
   // Header
   date_label: string;             // "Mon, Apr 20 · 6:00 AM CT"
@@ -61,6 +70,9 @@ export interface DailyEdgeEmailVariables {
 
   // Network
   network_items: NetworkItem[];
+
+  // Recent videos from our channels
+  channel_videos: ChannelVideo[];
 
   // App
   app_bullets: string[];          // 3 short strings

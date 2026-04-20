@@ -338,6 +338,42 @@ export function ChicagoDailyEmail(v: DailyEdgeEmailVariables) {
   </td></tr>
 </table>
 
+{/* ─── 6b. RECENT VIDEOS ──────────────────────────────────────────────── */}
+{v.channel_videos.length > 0 && (
+<>
+<div style={{ height: '1px', backgroundColor: BD, margin: '0 36px' }} />
+<table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ padding: '20px 36px 16px' }} className="px">
+  <tr><td>
+    <div style={{ ...heading16, fontSize: '15px', marginBottom: '1px' }}>New from our channels</div>
+    <div style={{ ...meta11, color: W30, marginBottom: '12px' }}>Latest videos uploaded yesterday</div>
+
+    {v.channel_videos.map((vid, i) => (
+      <Link key={i} href={vid.url} style={{ textDecoration: 'none', display: 'block', marginBottom: i < v.channel_videos.length - 1 ? '10px' : '0' }}>
+        <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} className="stack">
+          <tr>
+            <td width="35%" valign="top" style={{ paddingRight: '12px' }} className="si">
+              {/* YouTube thumbnail with play overlay */}
+              <div style={{ position: 'relative' as const }}>
+                <Img src={vid.thumbnail_url} alt="" width="100%"
+                  style={{ display: 'block', borderRadius: '6px', maxHeight: '80px', objectFit: 'cover' as const }} />
+              </div>
+            </td>
+            <td valign="top">
+              <div style={{ ...label10, color: W30, marginBottom: '2px' }}>{vid.channel_name}</div>
+              <div style={{ fontSize: '14px', fontWeight: 600, lineHeight: '1.3', color: W, fontFamily: F, marginBottom: '2px' }}>
+                {vid.title}
+              </div>
+              <div style={meta11}>{vid.relative_time}</div>
+            </td>
+          </tr>
+        </table>
+      </Link>
+    ))}
+  </td></tr>
+</table>
+</>
+)}
+
 <div style={{ height: '1px', backgroundColor: BD, margin: '0 36px' }} />
 
 {/* ─── 7. APP ────────────────────────────────────────────────────────────── */}

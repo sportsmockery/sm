@@ -183,6 +183,77 @@ async function fetchGameResults(dateStr: string, baseUrl: string): Promise<GameR
 }
 
 // =============================================================================
+// YouTube Channel Videos (last 24h)
+// =============================================================================
+
+const YT_CHANNELS = [
+  { handle: '@untoldchicago', name: 'Untold Chicago Stories' },
+  { handle: '@PinwheelsandIvyPodcast', name: 'Pinwheels & Ivy' },
+  { handle: '@nostrokes', name: 'No Strokes Golf' },
+];
+
+type ChannelVideoRaw = {
+  title: string;
+  videoId: string;
+  thumbnail: string;
+  channelName: string;
+  publishedAt: string;
+};
+
+async function fetchRecentChannelVideos(since: string): Promise<ChannelVideoRaw[]> {
+  const apiKey = process.env.YOUTUBE_API_KEY;
+  if (!apiKey) return [];
+
+  const results: ChannelVideoRaw[] = [];
+
+  await Promise.all(
+    YT_CHANNELS.map(async (ch) => {
+      try {
+        // 1) Get channel's uploads playlist
+        const chUrl = new URL('https://www.googleapis.com/youtube/v3/channels');
+        chUrl.searchParams.set('part', 'contentDetails');
+        chUrl.searchParams.set('forHandle', ch.handle);
+        chUrl.searchParams.set('key', apiKey);
+        const chRes = await fetch(chUrl.toString(), { next: { revalidate: 0 } });
+        if (!chRes.ok) return;
+        const chJson = await chRes.json();
+        const playlistId = chJson.items?.[0]?.contentDetails?.relatedPlaylists?.uploads;
+        if (!playlistId) return;
+
+        // 2) Get recent playlist items
+        const plUrl = new URL('https://www.googleapis.com/youtube/v3/playlistItems');
+        plUrl.searchParams.set('part', 'snippet,contentDetails');
+        plUrl.searchParams.set('playlistId', playlistId);
+        plUrl.searchParams.set('maxResults', '5');
+        plUrl.searchParams.set('key', apiKey);
+        const plRes = await fetch(plUrl.toString(), { next: { revalidate: 0 } });
+        if (!plRes.ok) return;
+        const plJson = await plRes.json();
+
+        const sinceDate = new Date(since);
+        for (const item of plJson.items || []) {
+          const pub = item.snippet?.publishedAt;
+          if (!pub || new Date(pub) < sinceDate) continue;
+          const thumbs = item.snippet?.thumbnails || {};
+          const thumb = thumbs.high?.url || thumbs.medium?.url || thumbs.default?.url || '';
+          results.push({
+            title: item.snippet?.title || '',
+            videoId: item.contentDetails?.videoId || '',
+            thumbnail: thumb,
+            channelName: ch.name,
+            publishedAt: pub,
+          });
+        }
+      } catch (err) {
+        console.error(`[Daily API] YouTube ${ch.name} error:`, err);
+      }
+    })
+  );
+
+  return results.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+}
+
+// =============================================================================
 // GET /api/daily?date=YYYY-MM-DD
 // =============================================================================
 
@@ -217,8 +288,8 @@ export async function GET(request: NextRequest) {
     const baseUrl =
       process.env.NEXT_PUBLIC_SITE_URL || 'https://test.sportsmockery.com';
 
-    // Fetch stories + game results in parallel
-    const [postsResult, gameResults] = await Promise.all([
+    // Fetch stories + game results + channel videos in parallel
+    const [postsResult, gameResults, channelVideos] = await Promise.all([
       supabaseAdmin
         .from('sm_posts')
         .select(
@@ -238,6 +309,7 @@ export async function GET(request: NextRequest) {
         .lte('published_at', endOfDay.toISOString())
         .order('views', { ascending: false }),
       fetchGameResults(dateStr, baseUrl),
+      fetchRecentChannelVideos(startOfDay.toISOString()),
     ]);
 
     const { data: posts, error } = postsResult;
@@ -260,11 +332,21 @@ export async function GET(request: NextRequest) {
       views: post.views || 0,
     }));
 
+    // Map channel videos
+    const videos = channelVideos.map((v) => ({
+      title: v.title,
+      url: `https://www.youtube.com/watch?v=${v.videoId}`,
+      thumbnail_url: v.thumbnail,
+      channel_name: v.channelName,
+      published_at: v.publishedAt,
+    }));
+
     // Return combined response
     return NextResponse.json(
       {
         stories,
         gameResults,
+        channelVideos: videos,
         date: dateStr,
       },
       {

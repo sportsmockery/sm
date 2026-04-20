@@ -91,12 +91,13 @@ export async function fetchDailyContent(date: Date): Promise<DailyEdgeEmailVaria
   const data = await res.json();
   const rawStories = Array.isArray(data) ? data : (data.stories || []);
   const rawGames = Array.isArray(data) ? [] : (data.gameResults || []);
+  const rawVideos = Array.isArray(data) ? [] : (data.channelVideos || []);
 
   if (rawStories.length === 0 && rawGames.length === 0) {
     throw new Error(`No content for ${dateStr}`);
   }
 
-  return prepareDailyEmailVariables(rawStories, rawGames, new Date());
+  return prepareDailyEmailVariables(rawStories, rawGames, new Date(), rawVideos);
 }
 
 // backward compat
