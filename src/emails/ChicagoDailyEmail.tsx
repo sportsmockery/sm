@@ -28,7 +28,7 @@ const F    = "-apple-system,BlinkMacSystemFont,'Helvetica Neue',Helvetica,Arial,
 const NET = [
   { n: 'Untold Chicago Stories', d: 'Raw documentaries from across the city', l: `${B}/downloads/untold-logo-white.png`, u: 'https://www.youtube.com/@untoldchicago', w: 48, bg: false },
   { n: 'Pinwheels & Ivy', d: 'Your daily Cubs podcast', l: `${B}/downloads/pinwheels-ivy-logo-white.png`, u: 'https://www.youtube.com/c/PinwheelsandIvyPodcast', w: 80, bg: false },
-  { n: 'No Strokes Golf', d: 'Golf without the handicap', l: `${B}/downloads/nostrokes-logo.png`, u: 'https://www.youtube.com/@nostrokes', w: 80, bg: true },
+  { n: 'No Strokes Golf', d: 'Golf without the handicap', l: `${B}/downloads/nostrokes-logo.png`, u: 'https://www.youtube.com/@nostrokes', w: 80, bg: false },
 ];
 
 /* ═══════ RESPONSIVE ═══════ */
