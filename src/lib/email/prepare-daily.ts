@@ -140,26 +140,92 @@ function generateIntroBlurb(hero: EmailStory, stories: EmailStory[]): string {
 }
 
 function generateScoutExamples(stories: EmailStory[]): string[] {
-  const teams = [...new Set(stories.map((s) => s.category).filter((t) => t !== 'Other'))];
-  const examples: string[] = [];
-
-  if (teams.includes('Bears')) examples.push("Who should the Bears draft at #10?");
-  if (teams.includes('Cubs')) examples.push("How are the Cubs' starters performing this season?");
-  if (teams.includes('Bulls')) examples.push("What's the Bulls' best trade package for the draft?");
-  if (teams.includes('White Sox')) examples.push("Which White Sox prospects are closest to the majors?");
-  if (teams.includes('Blackhawks')) examples.push("What does Bedard's development timeline look like?");
-
-  // Fill to 3
-  const fallbacks = [
-    "What are the biggest storylines in Chicago sports right now?",
-    "Compare the Bears' and Bulls' offseason strategies.",
-    "Which Chicago team has the brightest future?",
-  ];
-  while (examples.length < 3) {
-    examples.push(fallbacks[examples.length] || fallbacks[0]);
+  // Reorder stories to prioritize team diversity
+  const byTeam = new Map<string, EmailStory[]>();
+  for (const s of stories) {
+    const arr = byTeam.get(s.category) || [];
+    arr.push(s);
+    byTeam.set(s.category, arr);
+  }
+  // Round-robin: take 1 from each team, then repeat
+  const diverseOrder: EmailStory[] = [];
+  let hasMore = true;
+  let idx = 0;
+  const teams = [...byTeam.keys()];
+  while (hasMore && diverseOrder.length < stories.length) {
+    hasMore = false;
+    for (const team of teams) {
+      const arr = byTeam.get(team)!;
+      if (idx < arr.length) {
+        diverseOrder.push(arr[idx]);
+        hasMore = true;
+      }
+    }
+    idx++;
   }
 
-  return examples.slice(0, 3);
+  const examples: string[] = [];
+
+  for (const s of diverseOrder) {
+    if (examples.length >= 3) break;
+    const t = s.title.toLowerCase();
+    const team = s.category;
+
+    // Create a specific question based on each story's actual content
+    if (t.includes('should') && t.includes('trade')) {
+      // Debate-style article
+      const playerMatch = s.title.match(/Trade\s+([A-Z][a-zA-Z]+\s+[A-Z][a-zA-Z]+)/);
+      examples.push(playerMatch ? `What's ${playerMatch[1]}'s trade value right now?` : `Should the ${team} be buyers or sellers?`);
+    } else if (t.includes('trade')) {
+      examples.push(`Why did the ${team} make this trade instead of standing pat?`);
+    } else if (t.includes('draft') && t.includes('move down')) {
+      examples.push(`What picks could the ${team} get by trading down?`);
+    } else if (t.includes('draft')) {
+      examples.push(`Who should the ${team} target in the draft?`);
+    } else if (t.includes('interest') || t.includes('obsess')) {
+      // Extract player name from title if possible
+      const nameMatch = s.title.match(/(?:In|With)\s+([A-Z][a-z]+\s+[A-Z][a-z]+)/);
+      if (nameMatch) {
+        examples.push(`What does ${nameMatch[1]} bring to the ${team}?`);
+      } else {
+        examples.push(`Who are the ${team} targeting and why?`);
+      }
+    } else if (t.includes('offensive line') || t.includes('o-line')) {
+      examples.push(`How much better is the ${team} offensive line now?`);
+    } else if (t.includes('lavine') || t.includes('trade zach')) {
+      examples.push(`What's LaVine's trade value right now?`);
+    } else if (t.includes('pitcher') || t.includes('ace')) {
+      examples.push(`How does this pitching move change the ${team} rotation?`);
+    } else if (t.includes('breakout') || t.includes('williams')) {
+      examples.push(`Is Caleb Williams on track for a breakout year?`);
+    } else {
+      examples.push(`What's the latest on the ${team}?`);
+    }
+  }
+
+  // Deduplicate by team — prefer variety across teams
+  const seenTeams = new Set<string>();
+  const diverse: string[] = [];
+  const sameTeam: string[] = [];
+  for (const q of examples) {
+    // Extract team name from question
+    const teamMatch = q.match(/the (Bears|Bulls|Cubs|White Sox|Blackhawks)/);
+    const team = teamMatch ? teamMatch[1] : q;
+    if (!seenTeams.has(team)) {
+      seenTeams.add(team);
+      diverse.push(q);
+    } else {
+      sameTeam.push(q);
+    }
+  }
+  const deduped = [...diverse, ...sameTeam];
+
+  // Fill to 3 if needed
+  while (deduped.length < 3) {
+    deduped.push("What are the biggest storylines in Chicago sports today?");
+  }
+
+  return deduped.slice(0, 3);
 }
 
 function generateScoutDescription(stories: EmailStory[]): string {

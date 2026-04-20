@@ -274,10 +274,10 @@ export function ChicagoDailyEmail(v: DailyEdgeEmailVariables) {
       backgroundColor: CARD, borderRadius: '10px', border: `1px solid ${BD}`, padding: '16px 16px',
     }}>
       <tr>
-        <td width="46" valign="top">
-          <Img src={`${B}/downloads/scout-v2.png`} alt="" width={38} height={38} style={{ borderRadius: '9px', display: 'block' }} />
+        <td width="56" valign="middle">
+          <Img src={`${B}/downloads/scout-v2.png`} alt="" width={48} height={48} style={{ borderRadius: '12px', display: 'block' }} />
         </td>
-        <td valign="top" style={{ paddingLeft: '12px' }}>
+        <td valign="middle" style={{ paddingLeft: '14px' }}>
           <div style={{ ...heading16, fontSize: '15px', marginBottom: '2px' }}>{v.scout_title}</div>
           <div style={{ ...body13, marginBottom: '7px' }}>{v.scout_description}</div>
           {v.scout_examples.map((q, i) => (
