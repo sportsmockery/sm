@@ -3,6 +3,7 @@ import {
   ChicagoDailyEmail,
   ChicagoDailyEmailProps,
   Story,
+  GameResult,
 } from '@/emails/ChicagoDailyEmail';
 
 // =============================================================================
@@ -12,7 +13,7 @@ import {
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const CONFIG = {
-  fromEmail: 'Sports Mockery <info@sportsmockery.com>',
+  fromEmail: 'Edge by SportsMockery <info@sportsmockery.com>',
   replyTo: 'info@sportsmockery.com',
   apiBaseUrl:
     process.env.NEXT_PUBLIC_SITE_URL
@@ -55,41 +56,36 @@ export type ABVariant = {
 // =============================================================================
 
 const SUBJECT_PATTERNS: SubjectPattern[] = [
-  // Pattern 1: [Team] hook | Chicago Sports Daily
+  // Pattern 1: Clean Edge branding
   (story, _date) =>
-    `${story.team}: ${truncateForSubject(story.title, 40)} | Chicago Sports Daily`,
+    `${story.team}: ${truncateForSubject(story.title, 40)} | Edge Daily`,
 
-  // Pattern 2: Emoji + headline excerpt
+  // Pattern 2: Emoji + headline
   (story, _date) => `🔥 ${truncateForSubject(story.title, 55)}`,
 
-  // Pattern 3: [Team]: Action + outcome
+  // Pattern 3: Team focus
   (story, _date) => `${story.team}: ${truncateForSubject(story.title, 50)}`,
 
-  // Pattern 4: Breaking style
+  // Pattern 4: Breaking
   (story, _date) => `Breaking: ${truncateForSubject(story.title, 50)}`,
 
   // Pattern 5: Date recap
-  (story, date) => `${date} Recap: ${truncateForSubject(story.title, 35)}`,
+  (story, date) => `${date} — ${truncateForSubject(story.title, 40)} | Edge`,
 ];
 
 const PREHEADER_PATTERNS: PreheaderPattern[] = [
-  // Pattern 1: Plus stories teaser
   (_story, count) =>
-    `Plus ${count - 1} more stories from Bears, Bulls, Cubs, and Sox.`,
+    `Plus ${count - 1} more stories across Bears, Bulls, Cubs, Sox & Hawks.`,
 
-  // Pattern 2: Time-based
   (_story, count) =>
-    `Your daily Chicago sports briefing — ${count} stories in 2 minutes.`,
+    `Your daily Chicago sports intelligence — ${count} stories.`,
 
-  // Pattern 3: Hero summary
   (story, _count) =>
     truncateForPreheader(story.summary || story.title, 85) + '…',
 
-  // Pattern 4: All teams
   (_story, _count) =>
-    'Bears, Bulls, Cubs, Sox — everything you need to know today.',
+    'Bears · Bulls · Cubs · Sox · Hawks — your daily edge.',
 
-  // Pattern 5: Top story hook
   (story, _count) =>
     `Top story: ${truncateForPreheader(story.summary || story.title, 60)}. More inside.`,
 ];
@@ -135,6 +131,7 @@ function truncateForPreheader(text: string, maxLength: number): string {
 
 function formatDate(date: Date): string {
   return date.toLocaleDateString('en-US', {
+    weekday: 'long',
     month: 'long',
     day: 'numeric',
     year: 'numeric',
@@ -142,7 +139,7 @@ function formatDate(date: Date): string {
 }
 
 function formatDateForApi(date: Date): string {
-  return date.toISOString().split('T')[0]; // YYYY-MM-DD
+  return date.toISOString().split('T')[0];
 }
 
 function getYesterday(): Date {
@@ -151,19 +148,15 @@ function getYesterday(): Date {
   return d;
 }
 
-/**
- * Returns yesterday's date as a label for the email subject.
- * Format: "Jan 22, 2026"
- */
 function getYesterdayLabel(): string {
   const now = new Date();
   const yesterday = new Date(now);
   yesterday.setDate(now.getDate() - 1);
 
   return yesterday.toLocaleDateString('en-US', {
-    month: 'short',  // "Jan"
-    day: '2-digit',  // "22"
-    year: 'numeric', // "2026"
+    month: 'short',
+    day: '2-digit',
+    year: 'numeric',
   });
 }
 
@@ -188,9 +181,23 @@ type ApiStory = {
   view_count?: number;
 };
 
+type ApiGameResult = {
+  id: string;
+  team: string;
+  teamSlug: string;
+  opponent: string;
+  opponentFull: string;
+  teamScore: number;
+  opponentScore: number;
+  isHome: boolean;
+  result: 'W' | 'L' | 'OTL' | null;
+  gameDate: string;
+  scoresUrl: string;
+};
+
 function mapTeam(
   team?: string
-): 'Bears' | 'Bulls' | 'Cubs' | 'White Sox' | 'Other' {
+): Story['team'] {
   if (!team) return 'Other';
   const normalized = team.toLowerCase();
   if (normalized.includes('bear')) return 'Bears';
@@ -198,6 +205,8 @@ function mapTeam(
   if (normalized.includes('cub')) return 'Cubs';
   if (normalized.includes('white') || normalized.includes('sox'))
     return 'White Sox';
+  if (normalized.includes('hawk') || normalized.includes('blackhawk'))
+    return 'Blackhawks';
   return 'Other';
 }
 
@@ -210,7 +219,7 @@ function mapApiStoryToStory(apiStory: ApiStory): Story {
       apiStory.imageUrl ||
       apiStory.image_url ||
       apiStory.featured_image ||
-      'https://sportsmockery.com/placeholder.jpg',
+      'https://test.sportsmockery.com/placeholder.jpg',
     team: mapTeam(apiStory.team || apiStory.category),
     summary: apiStory.summary || apiStory.excerpt,
     publishedAt: apiStory.publishedAt || apiStory.published_at || '',
@@ -218,33 +227,53 @@ function mapApiStoryToStory(apiStory: ApiStory): Story {
   };
 }
 
-export async function fetchDailyStories(date: Date): Promise<Story[]> {
+export async function fetchDailyContent(
+  date: Date
+): Promise<{ stories: Story[]; gameResults: GameResult[] }> {
   const dateStr = formatDateForApi(date);
   const url = `${CONFIG.apiBaseUrl}?date=${dateStr}`;
 
   const response = await fetch(url, {
-    headers: {
-      Accept: 'application/json',
-    },
-    next: { revalidate: 0 }, // No cache for cron
+    headers: { Accept: 'application/json' },
+    next: { revalidate: 0 },
   });
 
   if (!response.ok) {
     throw new Error(
-      `Failed to fetch stories: ${response.status} ${response.statusText}`
+      `Failed to fetch daily content: ${response.status} ${response.statusText}`
     );
   }
 
   const data = await response.json();
 
-  // Handle both array and { stories: [] } response formats
-  const rawStories: ApiStory[] = Array.isArray(data) ? data : data.stories;
+  // Handle new combined format { stories, gameResults } or old array format
+  let rawStories: ApiStory[];
+  let rawGameResults: ApiGameResult[] = [];
 
-  if (!rawStories || rawStories.length === 0) {
-    throw new Error(`No stories found for date: ${dateStr}`);
+  if (Array.isArray(data)) {
+    rawStories = data;
+  } else {
+    rawStories = data.stories || [];
+    rawGameResults = data.gameResults || [];
   }
 
-  return rawStories.map(mapApiStoryToStory);
+  if (rawStories.length === 0 && rawGameResults.length === 0) {
+    throw new Error(`No content found for date: ${dateStr}`);
+  }
+
+  const stories = rawStories.map(mapApiStoryToStory);
+  const gameResults: GameResult[] = rawGameResults.map((g) => ({
+    ...g,
+    team: mapTeam(g.team) as GameResult['team'],
+  }));
+
+  return { stories, gameResults };
+}
+
+// Keep backwards-compatible function
+export async function fetchDailyStories(date: Date): Promise<Story[]> {
+  const { stories } = await fetchDailyContent(date);
+  return stories;
 }
 
 // =============================================================================
@@ -253,7 +282,7 @@ export async function fetchDailyStories(date: Date): Promise<Story[]> {
 
 export type SendOptions = {
   date?: Date;
-  recipients?: string[];  // Optional - defaults to TEST_RECIPIENTS
+  recipients?: string[];
   variant?: ABVariant;
   showAppPromo?: boolean;
   tags?: string[];
@@ -264,20 +293,19 @@ export type SendOptions = {
 export async function sendChicagoDailyEmail(
   options: SendOptions = {}
 ): Promise<SendResult> {
-  // Use hard-coded test recipients if none provided
   const recipients = options.recipients || TEST_RECIPIENTS;
 
   const {
     date = getYesterday(),
     variant = AB_VARIANTS[0],
-    showAppPromo = false,
-    tags = ['chicago-daily'],
+    showAppPromo = true,
+    tags = ['chicago-daily', 'edge'],
     testMode = false,
   } = options;
 
   try {
-    // 1. Fetch stories
-    const stories = await fetchDailyStories(date);
+    // 1. Fetch stories + game results
+    const { stories, gameResults } = await fetchDailyContent(date);
 
     // 2. Sort by views and get hero
     const sortedStories = [...stories].sort((a, b) => b.views - a.views);
@@ -287,14 +315,32 @@ export async function sendChicagoDailyEmail(
     const formattedDate = formatDate(date);
     const dateLabel = getYesterdayLabel();
 
-    // Fixed subject format: "Chicago Sports News for Jan 22, 2026"
-    const subject = `Chicago Sports News for ${dateLabel}`;
-    const preheader = variant.preheaderPattern(heroStory, sortedStories.length);
+    // Build subject — include score summary if games were played
+    let subject: string;
+    if (gameResults.length > 0) {
+      const scoreSnippet = gameResults
+        .slice(0, 2)
+        .map(
+          (g) =>
+            `${g.team} ${g.result === 'W' ? 'W' : g.result === 'OTL' ? 'OTL' : 'L'} ${g.teamScore}-${g.opponentScore}`
+        )
+        .join(', ');
+      subject = `${scoreSnippet} + ${stories.length} Stories | Edge Daily`;
+    } else if (heroStory) {
+      subject = `Chicago Sports News for ${dateLabel} | Edge Daily`;
+    } else {
+      subject = `Chicago Sports Daily — ${dateLabel}`;
+    }
+
+    const preheader = heroStory
+      ? variant.preheaderPattern(heroStory, sortedStories.length)
+      : 'Your daily Chicago sports intelligence briefing';
 
     // 4. Build email props
     const emailProps: ChicagoDailyEmailProps = {
       date: formattedDate,
       stories: sortedStories,
+      gameResults,
       showAppPromo,
       unsubscribeUrl: CONFIG.defaultUnsubscribeUrl,
       managePrefsUrl: CONFIG.defaultManagePrefsUrl,
@@ -302,7 +348,7 @@ export async function sendChicagoDailyEmail(
       utmParams: {
         source: 'email',
         medium: 'newsletter',
-        campaign: `chicago_daily_${formatDateForApi(date)}`,
+        campaign: `edge_daily_${formatDateForApi(date)}`,
       },
     };
 
@@ -312,8 +358,8 @@ export async function sendChicagoDailyEmail(
       console.log('  Subject:', subject);
       console.log('  Preheader:', preheader);
       console.log('  Recipients:', recipients.length);
-      console.log('  Hero:', heroStory.title);
-      console.log('  Total stories:', sortedStories.length);
+      console.log('  Stories:', sortedStories.length);
+      console.log('  Game Results:', gameResults.length);
       return {
         success: true,
         id: 'test-mode-id',
@@ -324,14 +370,14 @@ export async function sendChicagoDailyEmail(
 
     // 6. Send via Resend
     const { data, error } = await resend.emails.send({
-      from: 'Sports Mockery <info@sportsmockery.com>',
+      from: CONFIG.fromEmail,
       to: recipients,
       replyTo: CONFIG.replyTo,
       subject,
       react: ChicagoDailyEmail(emailProps),
       tags: tags.map((name) => ({ name, value: 'true' })),
       headers: {
-        'X-Campaign-Id': `chicago-daily-${formatDateForApi(date)}`,
+        'X-Campaign-Id': `edge-daily-${formatDateForApi(date)}`,
         'X-Variant-Id': variant.id,
       },
     });
@@ -350,7 +396,8 @@ export async function sendChicagoDailyEmail(
       id: data?.id,
       subject,
       recipientCount: recipients.length,
-      variant: variant.id,
+      stories: sortedStories.length,
+      games: gameResults.length,
     });
 
     return {
@@ -388,11 +435,10 @@ export async function sendABTest(
   const {
     date = getYesterday(),
     recipients,
-    variants = AB_VARIANTS.slice(0, 2), // Default: control vs emoji
-    showAppPromo = false,
+    variants = AB_VARIANTS.slice(0, 2),
+    showAppPromo = true,
   } = options;
 
-  // Split recipients evenly across variants
   const chunkSize = Math.ceil(recipients.length / variants.length);
   const results: SendResult[] = [];
 
@@ -409,7 +455,7 @@ export async function sendABTest(
       recipients: variantRecipients,
       variant,
       showAppPromo,
-      tags: ['chicago-daily', `ab-test`, `variant-${variant.id}`],
+      tags: ['chicago-daily', 'edge', 'ab-test', `variant-${variant.id}`],
       metadata: {
         ab_test: 'true',
         variant_id: variant.id,

@@ -23,15 +23,30 @@ export type Story = {
   title: string;
   url: string;
   imageUrl: string;
-  team: 'Bears' | 'Bulls' | 'Cubs' | 'White Sox' | 'Other';
+  team: 'Bears' | 'Bulls' | 'Cubs' | 'White Sox' | 'Blackhawks' | 'Other';
   summary?: string;
   publishedAt: string;
   views: number;
 };
 
+export type GameResult = {
+  id: string;
+  team: 'Bears' | 'Bulls' | 'Cubs' | 'White Sox' | 'Blackhawks';
+  teamSlug: string;
+  opponent: string;
+  opponentFull: string;
+  teamScore: number;
+  opponentScore: number;
+  isHome: boolean;
+  result: 'W' | 'L' | 'OTL' | null;
+  gameDate: string;
+  scoresUrl: string;
+};
+
 export type ChicagoDailyEmailProps = {
-  date: string; // e.g., 'January 21, 2026'
-  stories: Story[]; // unsorted; component sorts by views
+  date: string;
+  stories: Story[];
+  gameResults?: GameResult[];
   showAppPromo?: boolean;
   unsubscribeUrl: string;
   managePrefsUrl: string;
@@ -44,23 +59,67 @@ export type ChicagoDailyEmailProps = {
 };
 
 // =============================================================================
-// Constants
+// Constants — Edge Brand Palette
 // =============================================================================
 
-const BRAND_RED = '#bc0000';
-const BRAND_RED_HOVER = '#a00000';
-const DARK_BG = '#111827';
-const LIGHT_BG = '#f9fafb';
-const TEXT_PRIMARY = '#111827';
-const TEXT_SECONDARY = '#6b7280';
-const TEXT_MUTED = '#9ca3af';
+const EDGE_BLACK = '#0B0F14';
+const EDGE_WHITE = '#FAFAFB';
+const EDGE_RED = '#BC0000';
+const EDGE_CYAN = '#00D4FF';
+const EDGE_GOLD = '#D6B05E';
 
-const TEAM_EMOJI: Record<Story['team'], string> = {
-  Bears: '🐻',
-  Bulls: '🐂',
-  Cubs: '🦁',
-  'White Sox': '⚾',
-  Other: '🏙️',
+const TEXT_PRIMARY = '#1A1A2E';
+const TEXT_SECONDARY = '#64748B';
+const TEXT_MUTED = '#94A3B8';
+const DIVIDER = '#E2E8F0';
+const CARD_BG = '#FFFFFF';
+const BODY_BG = '#F1F5F9';
+
+const BASE_URL = 'https://test.sportsmockery.com';
+
+const TEAM_COLORS: Record<string, string> = {
+  Bears: '#C83803',
+  Bulls: '#CE1141',
+  Cubs: '#0E3386',
+  'White Sox': '#27251F',
+  Blackhawks: '#00833E',
+  Other: EDGE_RED,
+};
+
+const TEAM_LOGOS: Record<string, string> = {
+  Bears: `${BASE_URL}/ar/bears-logo.png`,
+  Bulls: `${BASE_URL}/ar/bulls-logo.png`,
+  Cubs: `${BASE_URL}/ar/cubs-logo.png`,
+  'White Sox': `${BASE_URL}/ar/whitesox-logo.png`,
+  Blackhawks: `${BASE_URL}/ar/blackhawks-logo.png`,
+};
+
+// Channel branding — uses light-bg logos (black/dark text versions)
+const CHANNELS = {
+  untold: {
+    name: 'Untold Chicago Stories',
+    tagline: 'The stories Chicago forgot. Raw. Real. Untold.',
+    url: 'https://www.youtube.com/@untoldchicago',
+    logo: `${BASE_URL}/downloads/untold-logo.png`,
+    color: '#BC0000',
+    borderColor: '#BC0000',
+  },
+  pinwheels: {
+    name: 'Pinwheels & Ivy',
+    tagline: 'Your Cubs podcast. Every pitch. Every play.',
+    url: 'https://www.youtube.com/c/PinwheelsandIvyPodcast',
+    logo: `${BASE_URL}/downloads/pinwheels-ivy-logo.png`,
+    color: '#2D8B2D',
+    borderColor: '#2D8B2D',
+  },
+  nostrokes: {
+    name: 'No Strokes Golf Podcast',
+    tagline: 'Golf without the handicap. Pure entertainment.',
+    url: 'https://www.youtube.com/@nostrokes',
+    logo: `${BASE_URL}/downloads/nostrokes-logo.png`,
+    color: '#1B5E3B',
+    borderColor: '#1B5E3B',
+  },
 };
 
 const SOCIAL_LINKS = {
@@ -68,10 +127,11 @@ const SOCIAL_LINKS = {
   youtube: 'https://youtube.com/@sportsmockery',
   instagram: 'https://instagram.com/sportsmockery',
   facebook: 'https://facebook.com/sportsmockery',
+  tiktok: 'https://tiktok.com/@sportsmockery',
 };
 
 // =============================================================================
-// Utility Functions
+// Utilities
 // =============================================================================
 
 function addUtmParams(
@@ -79,11 +139,15 @@ function addUtmParams(
   utm?: ChicagoDailyEmailProps['utmParams']
 ): string {
   if (!utm) return url;
-  const urlObj = new URL(url);
-  if (utm.source) urlObj.searchParams.set('utm_source', utm.source);
-  if (utm.medium) urlObj.searchParams.set('utm_medium', utm.medium);
-  if (utm.campaign) urlObj.searchParams.set('utm_campaign', utm.campaign);
-  return urlObj.toString();
+  try {
+    const urlObj = new URL(url);
+    if (utm.source) urlObj.searchParams.set('utm_source', utm.source);
+    if (utm.medium) urlObj.searchParams.set('utm_medium', utm.medium);
+    if (utm.campaign) urlObj.searchParams.set('utm_campaign', utm.campaign);
+    return urlObj.toString();
+  } catch {
+    return url;
+  }
 }
 
 function truncate(text: string, maxLength: number): string {
@@ -91,18 +155,10 @@ function truncate(text: string, maxLength: number): string {
   return text.slice(0, maxLength - 1).trim() + '…';
 }
 
-function groupByTeam(stories: Story[]): Record<Story['team'], Story[]> {
-  const groups: Record<Story['team'], Story[]> = {
-    Bears: [],
-    Bulls: [],
-    Cubs: [],
-    'White Sox': [],
-    Other: [],
-  };
-  for (const story of stories) {
-    groups[story.team].push(story);
-  }
-  return groups;
+function hasImage(url?: string): boolean {
+  if (!url) return false;
+  if (url.includes('placeholder')) return false;
+  return url.startsWith('http');
 }
 
 // =============================================================================
@@ -112,7 +168,8 @@ function groupByTeam(stories: Story[]): Record<Story['team'], Story[]> {
 export function ChicagoDailyEmail({
   date,
   stories,
-  showAppPromo = false,
+  gameResults = [],
+  showAppPromo = true,
   unsubscribeUrl,
   managePrefsUrl,
   previewText,
@@ -122,228 +179,445 @@ export function ChicagoDailyEmail({
     campaign: 'chicago_daily',
   },
 }: ChicagoDailyEmailProps) {
-  // Sort stories by views descending
+  // All stories sorted by views, highest first
   const sortedStories = [...stories].sort((a, b) => b.views - a.views);
-  const heroStory = sortedStories[0];
+  const hotStory = sortedStories[0];
   const remainingStories = sortedStories.slice(1);
 
-  // Group remaining stories by team for optional section
-  const teamGroups = groupByTeam(remainingStories);
-  const teamsWithMultiple = (
-    Object.entries(teamGroups) as [Story['team'], Story[]][]
-  ).filter(([, s]) => s.length >= 2);
-  const showByTeam = teamsWithMultiple.length >= 2;
-
-  // Default preview text
   const preview =
     previewText ||
     (heroStory
-      ? truncate(heroStory.summary || heroStory.title, 85)
-      : 'Your daily Chicago sports briefing');
+      ? truncate(heroStory.summary || heroStory.title, 90)
+      : 'Your daily Chicago sports intelligence briefing');
 
   return (
     <Html>
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta httpEquiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name="color-scheme" content="light" />
+        <meta name="supported-color-schemes" content="light" />
       </Head>
       <Preview>{preview}</Preview>
-      <Body style={styles.body}>
-        <Container style={styles.container}>
-          {/* ─────────────────────────────────────────────────────────────── */}
-          {/* HEADER */}
-          {/* ─────────────────────────────────────────────────────────────── */}
-          <Section style={styles.header}>
+      <Body style={s.body}>
+        <Container style={s.wrapper}>
+          {/* ═══════════════════════════════════════════════════════════════ */}
+          {/* HEADER — Edge Branding                                        */}
+          {/* ═══════════════════════════════════════════════════════════════ */}
+          <Section style={s.header}>
             <Row>
-              <Column style={styles.headerLogoCol}>
+              <Column style={s.headerLogoCol}>
                 <Img
-                  src="https://datalab.sportsmockery.com/logo-light.png"
-                  alt="Sports Mockery"
+                  src={`${BASE_URL}/edge-logo-blue.png`}
+                  alt="Edge"
                   width={120}
-                  height={32}
-                  style={styles.logo}
+                  style={{ display: 'block' }}
                 />
               </Column>
-              <Column style={styles.headerTextCol}>
-                <Text style={styles.headerTitle}>Chicago Sports Daily</Text>
-                <Text style={styles.headerDate}>{date}</Text>
+              <Column style={s.headerRight}>
+                <Text style={s.headerDate}>{date}</Text>
+              </Column>
+            </Row>
+            <Row>
+              <Column>
+                <Text style={s.headerTagline}>
+                  Chicago Sports Intelligence
+                </Text>
               </Column>
             </Row>
           </Section>
 
-          {/* ─────────────────────────────────────────────────────────────── */}
-          {/* HERO STORY */}
-          {/* ─────────────────────────────────────────────────────────────── */}
-          {heroStory && (
-            <Section style={styles.heroSection}>
-              <Link
-                href={addUtmParams(heroStory.url, utmParams)}
-                style={styles.heroImageLink}
-              >
-                <Img
-                  src={heroStory.imageUrl}
-                  alt={heroStory.title}
-                  width={552}
-                  style={styles.heroImage}
-                />
-              </Link>
-              <Text style={styles.heroTeamTag}>
-                {TEAM_EMOJI[heroStory.team]} {heroStory.team.toUpperCase()}
-              </Text>
-              <Link
-                href={addUtmParams(heroStory.url, utmParams)}
-                style={styles.heroTitleLink}
-              >
-                <Text style={styles.heroTitle}>{heroStory.title}</Text>
-              </Link>
-              {heroStory.summary && (
-                <Text style={styles.heroSummary}>
-                  {truncate(heroStory.summary, 150)}
-                </Text>
-              )}
-              <Button
-                href={addUtmParams(heroStory.url, utmParams)}
-                style={styles.heroCta}
-              >
-                Read Full Story →
-              </Button>
-            </Section>
-          )}
+          {/* Cyan accent line */}
+          <Section style={s.cyanLine} />
 
-          {/* ─────────────────────────────────────────────────────────────── */}
-          {/* TOP STORIES */}
-          {/* ─────────────────────────────────────────────────────────────── */}
-          {remainingStories.length > 0 && (
-            <Section style={styles.topStoriesSection}>
-              <Text style={styles.sectionTitle}>MORE STORIES</Text>
-              {remainingStories.slice(0, 6).map((story) => (
-                <Row key={story.id} style={styles.storyRow}>
-                  <Column style={styles.storyThumbCol}>
-                    <Link href={addUtmParams(story.url, utmParams)}>
-                      <Img
-                        src={story.imageUrl}
-                        alt={story.title}
-                        width={80}
-                        height={80}
-                        style={styles.storyThumb}
-                      />
-                    </Link>
-                  </Column>
-                  <Column style={styles.storyTextCol}>
-                    <Text style={styles.storyTeam}>
-                      {TEAM_EMOJI[story.team]} {story.team}
-                    </Text>
-                    <Link
-                      href={addUtmParams(story.url, utmParams)}
-                      style={styles.storyLink}
-                    >
-                      {truncate(story.title, 70)}
-                    </Link>
-                  </Column>
-                </Row>
+          {/* ═══════════════════════════════════════════════════════════════ */}
+          {/* GAME SCORES — Yesterday's Results                             */}
+          {/* ═══════════════════════════════════════════════════════════════ */}
+          {gameResults.length > 0 && (
+            <Section style={s.scoresSection}>
+              <Text style={s.scoresSectionLabel}>YESTERDAY'S SCORES</Text>
+              {gameResults.map((game) => (
+                <Section key={game.id} style={s.scoreCard}>
+                  <Row>
+                    <Column style={s.scoreResultCol}>
+                      <Text
+                        style={{
+                          ...s.scoreResultBadge,
+                          backgroundColor:
+                            game.result === 'W'
+                              ? '#16A34A'
+                              : game.result === 'OTL'
+                                ? EDGE_GOLD
+                                : '#DC2626',
+                        }}
+                      >
+                        {game.result}
+                      </Text>
+                    </Column>
+                    <Column style={s.scoreTeamsCol}>
+                      <Text style={s.scoreTeamName}>
+                        {game.team}
+                      </Text>
+                      <Text style={s.scoreOpponent}>
+                        {game.isHome ? 'vs' : '@'} {game.opponentFull}
+                      </Text>
+                    </Column>
+                    <Column style={s.scoreNumbersCol}>
+                      <Text style={s.scoreFinal}>
+                        {game.teamScore} – {game.opponentScore}
+                      </Text>
+                    </Column>
+                    <Column style={s.scoreLinkCol}>
+                      <Link
+                        href={addUtmParams(game.scoresUrl, utmParams)}
+                        style={s.scoreViewLink}
+                      >
+                        Box Score →
+                      </Link>
+                    </Column>
+                  </Row>
+                </Section>
               ))}
             </Section>
           )}
 
-          {/* ─────────────────────────────────────────────────────────────── */}
-          {/* BY TEAM (optional) */}
-          {/* ─────────────────────────────────────────────────────────────── */}
-          {showByTeam && (
-            <Section style={styles.byTeamSection}>
-              <Text style={styles.sectionTitle}>BY TEAM</Text>
-              <Row>
-                {teamsWithMultiple.slice(0, 2).map(([team, teamStories]) => (
-                  <Column key={team} style={styles.teamCol}>
-                    <Text style={styles.teamHeader}>
-                      {TEAM_EMOJI[team]} {team.toUpperCase()}
-                    </Text>
-                    {teamStories.slice(0, 3).map((story) => (
-                      <Text key={story.id} style={styles.teamStoryItem}>
-                        •{' '}
-                        <Link
-                          href={addUtmParams(story.url, utmParams)}
-                          style={styles.teamStoryLink}
-                        >
-                          {truncate(story.title, 45)}
-                        </Link>
-                      </Text>
-                    ))}
-                  </Column>
-                ))}
-              </Row>
-            </Section>
-          )}
-
-          {/* ─────────────────────────────────────────────────────────────── */}
-          {/* APP PROMO (optional) */}
-          {/* ─────────────────────────────────────────────────────────────── */}
-          {showAppPromo && (
-            <Section style={styles.promoSection}>
-              <Row>
-                <Column>
-                  <Text style={styles.promoText}>
-                    📱 Get alerts first — Download the SM app
-                  </Text>
-                </Column>
-                <Column style={styles.promoButtonCol}>
-                  <Button
-                    href="https://sportsmockery.com/app"
-                    style={styles.promoButton}
-                  >
-                    Download
-                  </Button>
-                </Column>
-              </Row>
-            </Section>
-          )}
-
-          {/* ─────────────────────────────────────────────────────────────── */}
-          {/* FOOTER */}
-          {/* ─────────────────────────────────────────────────────────────── */}
-          <Section style={styles.footer}>
-            {/* Social Links */}
-            <Row style={styles.socialRow}>
-              <Column align="center">
-                <Link href={SOCIAL_LINKS.twitter} style={styles.socialLink}>
-                  Twitter
+          {/* ═══════════════════════════════════════════════════════════════ */}
+          {/* HOT STORY                                                     */}
+          {/* ═══════════════════════════════════════════════════════════════ */}
+          {hotStory && (
+            <Section style={s.heroSection}>
+              {hasImage(hotStory.imageUrl) && (
+                <Link
+                  href={addUtmParams(hotStory.url, utmParams)}
+                  style={{ textDecoration: 'none' }}
+                >
+                  <Img
+                    src={hotStory.imageUrl}
+                    alt={hotStory.title}
+                    width={600}
+                    style={s.heroImage}
+                  />
                 </Link>
-                <Text style={styles.socialDivider}>·</Text>
-                <Link href={SOCIAL_LINKS.youtube} style={styles.socialLink}>
+              )}
+              <Section style={s.heroContent}>
+                <Text style={s.hotBadgeRow}>
+                  <span style={s.hotBadge as any}>HOT STORY</span>
+                  {'  '}
+                  <span style={{ ...(s.heroTeamPillInline as any), backgroundColor: TEAM_COLORS[hotStory.team] || EDGE_RED }}>
+                    {hotStory.team.toUpperCase()}
+                  </span>
+                  {'  '}
+                  {hotStory.views > 0 && (
+                    <span style={s.hotViews as any}>
+                      {hotStory.views.toLocaleString()} views
+                    </span>
+                  )}
+                </Text>
+                <Link
+                  href={addUtmParams(hotStory.url, utmParams)}
+                  style={{ textDecoration: 'none' }}
+                >
+                  <Text style={s.heroTitle}>{hotStory.title}</Text>
+                </Link>
+                {hotStory.summary && (
+                  <Text style={s.heroSummary}>
+                    {truncate(hotStory.summary, 180)}
+                  </Text>
+                )}
+                <Button
+                  href={addUtmParams(hotStory.url, utmParams)}
+                  style={s.heroCta}
+                >
+                  Read Full Story →
+                </Button>
+              </Section>
+            </Section>
+          )}
+
+          {/* ═══════════════════════════════════════════════════════════════ */}
+          {/* ALL STORIES — sorted by views, top down                       */}
+          {/* ═══════════════════════════════════════════════════════════════ */}
+          {remainingStories.length > 0 && (
+            <Section style={s.storiesSection}>
+              <Text style={s.sectionLabel}>TODAY'S STORIES</Text>
+              {remainingStories.map((story, idx) => (
+                <Section key={story.id} style={{
+                  ...s.storyCard,
+                  ...(idx === remainingStories.length - 1 ? { borderBottom: 'none', marginBottom: 0, paddingBottom: 0 } : {}),
+                }}>
+                  <Row>
+                    {hasImage(story.imageUrl) && (
+                      <Column style={s.storyImageCol}>
+                        <Link href={addUtmParams(story.url, utmParams)}>
+                          <Img
+                            src={story.imageUrl}
+                            alt={story.title}
+                            width={120}
+                            height={90}
+                            style={s.storyImage}
+                          />
+                        </Link>
+                      </Column>
+                    )}
+                    <Column style={hasImage(story.imageUrl) ? s.storyTextCol : s.storyTextColFull}>
+                      <Text
+                        style={{
+                          ...s.storyTeamLabel,
+                          color: TEAM_COLORS[story.team] || EDGE_RED,
+                        }}
+                      >
+                        {story.team.toUpperCase()}
+                        {story.views > 0 && (
+                          <span style={{ color: TEXT_MUTED, fontWeight: 400, letterSpacing: '0' }}>
+                            {' '}· {story.views.toLocaleString()} views
+                          </span>
+                        )}
+                      </Text>
+                      <Link
+                        href={addUtmParams(story.url, utmParams)}
+                        style={{ textDecoration: 'none' }}
+                      >
+                        <Text style={s.storyTitle}>
+                          {truncate(story.title, 80)}
+                        </Text>
+                      </Link>
+                      {story.summary && (
+                        <Text style={s.storySummary}>
+                          {truncate(story.summary, 100)}
+                        </Text>
+                      )}
+                    </Column>
+                  </Row>
+                </Section>
+              ))}
+            </Section>
+          )}
+
+          {/* ═══════════════════════════════════════════════════════════════ */}
+          {/* SCOUT AI CTA                                                  */}
+          {/* ═══════════════════════════════════════════════════════════════ */}
+          <Section style={s.scoutSection}>
+            <Row>
+              <Column style={s.scoutIconCol}>
+                <Img
+                  src={`${BASE_URL}/downloads/scout-v2.png`}
+                  alt="Scout AI"
+                  width={48}
+                  height={48}
+                  style={{ display: 'block', borderRadius: '12px' }}
+                />
+              </Column>
+              <Column style={s.scoutTextCol}>
+                <Text style={s.scoutTitle}>Ask Scout AI</Text>
+                <Text style={s.scoutDesc}>
+                  Get instant AI-powered analysis on any Chicago sports question
+                </Text>
+              </Column>
+            </Row>
+            <Button
+              href={addUtmParams(`${BASE_URL}/ask-ai`, utmParams)}
+              style={s.scoutCta}
+            >
+              Try Scout AI →
+            </Button>
+          </Section>
+
+          {/* ═══════════════════════════════════════════════════════════════ */}
+          {/* APP PROMO                                                     */}
+          {/* ═══════════════════════════════════════════════════════════════ */}
+          {showAppPromo && (
+            <Section style={s.appSection}>
+              <Text style={s.appTitle}>Get the Edge App</Text>
+              <Text style={s.appDesc}>
+                Breaking news alerts, live scores, and Scout AI in your pocket.
+              </Text>
+              <Row>
+                <Column align="center" style={{ paddingRight: '6px' }}>
+                  <Link href="https://apps.apple.com/app/sportsmockery">
+                    <Img
+                      src={`${BASE_URL}/app-store-badge.svg`}
+                      alt="Download on App Store"
+                      width={120}
+                      height={40}
+                      style={{ display: 'block' }}
+                    />
+                  </Link>
+                </Column>
+                <Column align="center" style={{ paddingLeft: '6px' }}>
+                  <Link href="https://play.google.com/store/apps/details?id=com.sportsmockery">
+                    <Img
+                      src={`${BASE_URL}/google-play-badge.svg`}
+                      alt="Get on Google Play"
+                      width={135}
+                      height={40}
+                      style={{ display: 'block' }}
+                    />
+                  </Link>
+                </Column>
+              </Row>
+            </Section>
+          )}
+
+          {/* ═══════════════════════════════════════════════════════════════ */}
+          {/* YOUTUBE CHANNELS                                              */}
+          {/* ═══════════════════════════════════════════════════════════════ */}
+          <Section style={s.channelsSection}>
+            <Text style={s.channelsSectionTitle}>FROM OUR CHANNELS</Text>
+
+            {/* Untold Chicago */}
+            <Section style={{ ...s.channelCard, borderLeft: `4px solid ${CHANNELS.untold.borderColor}` }}>
+              <Row>
+                <Column style={s.channelLogoCol}>
+                  <Link href={CHANNELS.untold.url}>
+                    <Img
+                      src={CHANNELS.untold.logo}
+                      alt={CHANNELS.untold.name}
+                      width={100}
+                      style={s.channelLogo}
+                    />
+                  </Link>
+                </Column>
+                <Column style={s.channelInfoCol}>
+                  <Link href={CHANNELS.untold.url} style={{ textDecoration: 'none' }}>
+                    <Text style={s.channelName}>{CHANNELS.untold.name}</Text>
+                  </Link>
+                  <Text style={s.channelTagline}>{CHANNELS.untold.tagline}</Text>
+                </Column>
+                <Column style={s.channelBtnCol}>
+                  <Link href={CHANNELS.untold.url} style={{ ...s.channelWatchBtn, color: CHANNELS.untold.color }}>
+                    Watch →
+                  </Link>
+                </Column>
+              </Row>
+            </Section>
+
+            {/* Pinwheels & Ivy */}
+            <Section style={{ ...s.channelCard, borderLeft: `4px solid ${CHANNELS.pinwheels.borderColor}` }}>
+              <Row>
+                <Column style={s.channelLogoCol}>
+                  <Link href={CHANNELS.pinwheels.url}>
+                    <Img
+                      src={CHANNELS.pinwheels.logo}
+                      alt={CHANNELS.pinwheels.name}
+                      width={100}
+                      style={s.channelLogo}
+                    />
+                  </Link>
+                </Column>
+                <Column style={s.channelInfoCol}>
+                  <Link href={CHANNELS.pinwheels.url} style={{ textDecoration: 'none' }}>
+                    <Text style={s.channelName}>{CHANNELS.pinwheels.name}</Text>
+                  </Link>
+                  <Text style={s.channelTagline}>{CHANNELS.pinwheels.tagline}</Text>
+                </Column>
+                <Column style={s.channelBtnCol}>
+                  <Link href={CHANNELS.pinwheels.url} style={{ ...s.channelWatchBtn, color: CHANNELS.pinwheels.color }}>
+                    Watch →
+                  </Link>
+                </Column>
+              </Row>
+            </Section>
+
+            {/* No Strokes Golf */}
+            <Section style={{ ...s.channelCard, borderLeft: `4px solid ${CHANNELS.nostrokes.borderColor}` }}>
+              <Row>
+                <Column style={s.channelLogoCol}>
+                  <Link href={CHANNELS.nostrokes.url}>
+                    <Img
+                      src={CHANNELS.nostrokes.logo}
+                      alt={CHANNELS.nostrokes.name}
+                      width={100}
+                      style={s.channelLogo}
+                    />
+                  </Link>
+                </Column>
+                <Column style={s.channelInfoCol}>
+                  <Link href={CHANNELS.nostrokes.url} style={{ textDecoration: 'none' }}>
+                    <Text style={s.channelName}>{CHANNELS.nostrokes.name}</Text>
+                  </Link>
+                  <Text style={s.channelTagline}>{CHANNELS.nostrokes.tagline}</Text>
+                </Column>
+                <Column style={s.channelBtnCol}>
+                  <Link href={CHANNELS.nostrokes.url} style={{ ...s.channelWatchBtn, color: CHANNELS.nostrokes.color }}>
+                    Watch →
+                  </Link>
+                </Column>
+              </Row>
+            </Section>
+          </Section>
+
+          {/* ═══════════════════════════════════════════════════════════════ */}
+          {/* EDGE CTA                                                      */}
+          {/* ═══════════════════════════════════════════════════════════════ */}
+          <Section style={s.edgeCtaSection}>
+            <Text style={s.edgeCtaTitle}>Experience Edge</Text>
+            <Text style={s.edgeCtaDesc}>
+              Live scores, AI analysis, GM trade simulator, mock drafts, and more.
+            </Text>
+            <Button
+              href={addUtmParams(BASE_URL, utmParams)}
+              style={s.edgeCtaBtn}
+            >
+              Visit Edge →
+            </Button>
+          </Section>
+
+          {/* ═══════════════════════════════════════════════════════════════ */}
+          {/* FOOTER                                                        */}
+          {/* ═══════════════════════════════════════════════════════════════ */}
+          <Section style={s.footer}>
+            <Img
+              src={`${BASE_URL}/edge-logo-blue.png`}
+              alt="Edge"
+              width={90}
+              style={{ display: 'block', margin: '0 auto 16px' }}
+            />
+
+            {/* Social Links */}
+            <Row>
+              <Column align="center">
+                <Link href={SOCIAL_LINKS.twitter} style={s.socialLink}>
+                  𝕏
+                </Link>
+                <Text style={s.socialDot}>·</Text>
+                <Link href={SOCIAL_LINKS.youtube} style={s.socialLink}>
                   YouTube
                 </Link>
-                <Text style={styles.socialDivider}>·</Text>
-                <Link href={SOCIAL_LINKS.instagram} style={styles.socialLink}>
+                <Text style={s.socialDot}>·</Text>
+                <Link href={SOCIAL_LINKS.instagram} style={s.socialLink}>
                   Instagram
                 </Link>
-                <Text style={styles.socialDivider}>·</Text>
-                <Link href={SOCIAL_LINKS.facebook} style={styles.socialLink}>
+                <Text style={s.socialDot}>·</Text>
+                <Link href={SOCIAL_LINKS.facebook} style={s.socialLink}>
                   Facebook
+                </Link>
+                <Text style={s.socialDot}>·</Text>
+                <Link href={SOCIAL_LINKS.tiktok} style={s.socialLink}>
+                  TikTok
                 </Link>
               </Column>
             </Row>
 
-            <Hr style={styles.footerHr} />
+            <Hr style={s.footerDivider} />
 
-            {/* Preference Links */}
             <Row>
               <Column align="center">
-                <Link href={managePrefsUrl} style={styles.footerLink}>
+                <Link href={managePrefsUrl} style={s.footerLink}>
                   Manage Preferences
                 </Link>
-                <Text style={styles.footerDivider}>·</Text>
-                <Link href={unsubscribeUrl} style={styles.footerLink}>
+                <Text style={s.socialDot}>·</Text>
+                <Link href={unsubscribeUrl} style={s.footerLink}>
                   Unsubscribe
                 </Link>
               </Column>
             </Row>
 
-            {/* Copyright */}
-            <Text style={styles.copyright}>
-              © {new Date().getFullYear()} SportsMockery.com · Chicago, IL
+            <Text style={s.footerCopyright}>
+              © {new Date().getFullYear()} Edge by SportsMockery · Chicago, IL
             </Text>
-            <Text style={styles.address}>
-              You received this email because you subscribed to Chicago Sports
-              Daily.
+            <Text style={s.footerLegal}>
+              You received this email because you subscribed to the Chicago
+              Sports Daily newsletter.
             </Text>
           </Section>
         </Container>
@@ -353,245 +627,502 @@ export function ChicagoDailyEmail({
 }
 
 // =============================================================================
-// Styles (email-safe inline styles)
+// Styles — Apple-inspired, email-safe inline CSS
 // =============================================================================
 
-const styles: Record<string, React.CSSProperties> = {
+const s: Record<string, React.CSSProperties> = {
+  // Layout
   body: {
-    backgroundColor: '#FAFAFB',
+    backgroundColor: BODY_BG,
     fontFamily:
-      "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+      "'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
     margin: 0,
     padding: 0,
+    WebkitFontSmoothing: 'antialiased' as any,
   },
-  container: {
+  wrapper: {
     maxWidth: '600px',
     margin: '0 auto',
-    backgroundColor: '#FAFAFB',
+    backgroundColor: CARD_BG,
   },
 
-  // Header
+  // ── Header ──────────────────────────────────────────────────────────
   header: {
-    backgroundColor: BRAND_RED,
-    padding: '16px 24px',
+    backgroundColor: EDGE_BLACK,
+    padding: '28px 32px 12px',
   },
   headerLogoCol: {
-    width: '130px',
     verticalAlign: 'middle',
+    width: '50%',
   },
-  logo: {
-    display: 'block',
-  },
-  headerTextCol: {
+  headerRight: {
     verticalAlign: 'middle',
     textAlign: 'right' as const,
-  },
-  headerTitle: {
-    color: '#FAFAFB',
-    fontSize: '14px',
-    fontWeight: 600,
-    margin: 0,
-    lineHeight: '1.2',
+    width: '50%',
   },
   headerDate: {
-    color: 'rgba(255,255,255,0.8)',
-    fontSize: '12px',
+    color: TEXT_MUTED,
+    fontSize: '13px',
+    fontWeight: 500,
     margin: 0,
-    lineHeight: '1.2',
+    letterSpacing: '0.3px',
+  },
+  headerTagline: {
+    color: EDGE_CYAN,
+    fontSize: '11px',
+    fontWeight: 600,
+    letterSpacing: '2px',
+    textTransform: 'uppercase' as const,
+    margin: '8px 0 0',
+    paddingBottom: '16px',
   },
 
-  // Hero
-  heroSection: {
-    padding: '24px',
+  // Cyan accent
+  cyanLine: {
+    height: '3px',
+    backgroundColor: EDGE_CYAN,
+    margin: 0,
+    padding: 0,
+    lineHeight: '0',
+    fontSize: '0',
   },
-  heroImageLink: {
-    display: 'block',
+
+  // ── Game Scores ─────────────────────────────────────────────────────
+  scoresSection: {
+    padding: '24px 32px 8px',
+    backgroundColor: EDGE_BLACK,
+  },
+  scoresSectionLabel: {
+    color: EDGE_CYAN,
+    fontSize: '11px',
+    fontWeight: 700,
+    letterSpacing: '2px',
+    margin: '0 0 16px',
+  },
+  scoreCard: {
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: '10px',
+    padding: '14px 16px',
+    marginBottom: '10px',
+    border: '1px solid rgba(255,255,255,0.08)',
+  },
+  scoreResultCol: {
+    width: '44px',
+    verticalAlign: 'middle',
+  },
+  scoreResultBadge: {
+    display: 'inline-block',
+    color: '#FFFFFF',
+    fontSize: '12px',
+    fontWeight: 800,
+    letterSpacing: '0.5px',
+    padding: '4px 10px',
+    borderRadius: '6px',
+    margin: 0,
+    textAlign: 'center' as const,
+  },
+  scoreTeamsCol: {
+    verticalAlign: 'middle',
+    paddingLeft: '12px',
+  },
+  scoreTeamName: {
+    color: EDGE_WHITE,
+    fontSize: '15px',
+    fontWeight: 700,
+    margin: 0,
+    lineHeight: '1.3',
+  },
+  scoreOpponent: {
+    color: TEXT_MUTED,
+    fontSize: '13px',
+    fontWeight: 400,
+    margin: '2px 0 0',
+    lineHeight: '1.3',
+  },
+  scoreNumbersCol: {
+    verticalAlign: 'middle',
+    textAlign: 'right' as const,
+    width: '80px',
+  },
+  scoreFinal: {
+    color: EDGE_WHITE,
+    fontSize: '20px',
+    fontWeight: 700,
+    margin: 0,
+    letterSpacing: '1px',
+  },
+  scoreLinkCol: {
+    verticalAlign: 'middle',
+    textAlign: 'right' as const,
+    width: '90px',
+    paddingLeft: '8px',
+  },
+  scoreViewLink: {
+    color: EDGE_CYAN,
+    fontSize: '12px',
+    fontWeight: 600,
+    textDecoration: 'none',
+  },
+
+  // ── Hero Story ──────────────────────────────────────────────────────
+  heroSection: {
+    padding: '0',
+    backgroundColor: CARD_BG,
   },
   heroImage: {
     width: '100%',
-    maxWidth: '552px',
+    maxWidth: '600px',
     height: 'auto',
-    borderRadius: '12px',
     display: 'block',
   },
-  heroTeamTag: {
-    display: 'inline-block',
-    backgroundColor: LIGHT_BG,
-    color: TEXT_SECONDARY,
-    fontSize: '11px',
-    fontWeight: 600,
-    letterSpacing: '0.5px',
-    padding: '6px 12px',
-    borderRadius: '4px',
-    marginTop: '16px',
-    marginBottom: '8px',
+  heroContent: {
+    padding: '24px 32px 32px',
   },
-  heroTitleLink: {
-    textDecoration: 'none',
+  hotBadgeRow: {
+    margin: '0 0 16px',
+    lineHeight: '28px',
+  },
+  hotBadge: {
+    display: 'inline',
+    backgroundColor: '#DC2626',
+    color: '#FFFFFF',
+    fontSize: '10px',
+    fontWeight: 800,
+    letterSpacing: '1.5px',
+    padding: '5px 14px',
+    borderRadius: '100px',
+  },
+  heroTeamPillInline: {
+    display: 'inline',
+    color: '#FFFFFF',
+    fontSize: '10px',
+    fontWeight: 700,
+    letterSpacing: '1.5px',
+    padding: '5px 14px',
+    borderRadius: '100px',
+  },
+  hotViews: {
+    display: 'inline',
+    color: TEXT_MUTED,
+    fontSize: '12px',
+    fontWeight: 500,
+  },
+  heroTeamPill: {
+    display: 'inline-block',
+    color: '#FFFFFF',
+    fontSize: '10px',
+    fontWeight: 700,
+    letterSpacing: '1.5px',
+    padding: '5px 14px',
+    borderRadius: '100px',
+    margin: '0 0 14px',
   },
   heroTitle: {
     color: TEXT_PRIMARY,
-    fontSize: '24px',
+    fontSize: '26px',
     fontWeight: 700,
-    lineHeight: '1.3',
-    margin: '0 0 12px 0',
+    lineHeight: '1.25',
+    margin: '0 0 12px',
+    letterSpacing: '-0.3px',
   },
   heroSummary: {
     color: TEXT_SECONDARY,
     fontSize: '16px',
-    lineHeight: '1.5',
-    margin: '0 0 20px 0',
+    lineHeight: '1.6',
+    margin: '0 0 24px',
   },
   heroCta: {
-    backgroundColor: BRAND_RED,
-    color: '#FAFAFB',
-    fontSize: '16px',
+    backgroundColor: EDGE_RED,
+    color: '#FFFFFF',
+    fontSize: '15px',
     fontWeight: 600,
-    padding: '14px 28px',
-    borderRadius: '8px',
+    padding: '14px 32px',
+    borderRadius: '10px',
     textDecoration: 'none',
     display: 'inline-block',
+    letterSpacing: '0.2px',
   },
 
-  // Top Stories
-  topStoriesSection: {
-    backgroundColor: LIGHT_BG,
-    padding: '24px',
+  // ── Story Cards ─────────────────────────────────────────────────────
+  storiesSection: {
+    padding: '8px 32px 24px',
+    backgroundColor: CARD_BG,
   },
-  sectionTitle: {
+  sectionLabel: {
     color: TEXT_SECONDARY,
-    fontSize: '12px',
+    fontSize: '11px',
     fontWeight: 700,
-    letterSpacing: '1px',
-    marginTop: 0,
-    marginBottom: '16px',
+    letterSpacing: '2px',
+    textTransform: 'uppercase' as const,
+    margin: '0 0 20px',
+    paddingTop: '8px',
+    borderTop: `2px solid ${DIVIDER}`,
   },
-  storyRow: {
-    marginBottom: '16px',
+  storyCard: {
+    marginBottom: '20px',
+    paddingBottom: '20px',
+    borderBottom: `1px solid ${DIVIDER}`,
   },
-  storyThumbCol: {
-    width: '80px',
+  storyImageCol: {
+    width: '120px',
     verticalAlign: 'top',
   },
-  storyThumb: {
-    borderRadius: '8px',
+  storyImage: {
+    borderRadius: '10px',
     display: 'block',
     objectFit: 'cover' as const,
   },
   storyTextCol: {
     verticalAlign: 'top',
-    paddingLeft: '16px',
+    paddingLeft: '20px',
   },
-  storyTeam: {
-    color: TEXT_MUTED,
-    fontSize: '11px',
+  storyTextColFull: {
+    verticalAlign: 'top',
+  },
+  storyTeamLabel: {
+    fontSize: '10px',
+    fontWeight: 700,
+    letterSpacing: '1.5px',
+    margin: '0 0 6px',
+  },
+  storyTitle: {
+    color: TEXT_PRIMARY,
+    fontSize: '17px',
     fontWeight: 600,
-    margin: '0 0 4px 0',
+    lineHeight: '1.35',
+    margin: '0 0 6px',
   },
-  storyLink: {
+  storySummary: {
+    color: TEXT_SECONDARY,
+    fontSize: '14px',
+    lineHeight: '1.5',
+    margin: 0,
+  },
+
+  // ── More Stories ────────────────────────────────────────────────────
+  moreSection: {
+    padding: '8px 32px 24px',
+    backgroundColor: BODY_BG,
+  },
+  moreStoryRow: {
+    marginBottom: '12px',
+  },
+  moreDotCol: {
+    width: '16px',
+    verticalAlign: 'top',
+    paddingTop: '6px',
+  },
+  moreDot: {
+    width: '8px',
+    height: '8px',
+    borderRadius: '50%',
+    display: 'inline-block',
+    margin: 0,
+    fontSize: '0',
+    lineHeight: '0',
+  },
+  moreTextCol: {
+    verticalAlign: 'top',
+    paddingLeft: '10px',
+  },
+  moreLink: {
     color: TEXT_PRIMARY,
     fontSize: '15px',
     fontWeight: 600,
     lineHeight: '1.4',
     textDecoration: 'none',
+    display: 'block',
+  },
+  moreTeam: {
+    color: TEXT_MUTED,
+    fontSize: '12px',
+    margin: '2px 0 0',
   },
 
-  // By Team
-  byTeamSection: {
-    padding: '24px',
+  // ── Scout AI ────────────────────────────────────────────────────────
+  scoutSection: {
+    padding: '28px 32px',
+    backgroundColor: CARD_BG,
+    borderTop: `3px solid ${EDGE_CYAN}`,
   },
-  teamCol: {
-    width: '50%',
+  scoutIconCol: {
+    width: '60px',
     verticalAlign: 'top',
-    paddingRight: '12px',
   },
-  teamHeader: {
+  scoutTextCol: {
+    verticalAlign: 'top',
+    paddingLeft: '16px',
+  },
+  scoutTitle: {
     color: TEXT_PRIMARY,
-    fontSize: '13px',
+    fontSize: '18px',
     fontWeight: 700,
-    marginTop: 0,
-    marginBottom: '8px',
+    margin: '0 0 4px',
   },
-  teamStoryItem: {
+  scoutDesc: {
     color: TEXT_SECONDARY,
-    fontSize: '13px',
-    lineHeight: '1.6',
-    margin: '0 0 4px 0',
-  },
-  teamStoryLink: {
-    color: BRAND_RED,
-    textDecoration: 'none',
-  },
-
-  // Promo
-  promoSection: {
-    backgroundColor: DARK_BG,
-    padding: '16px 24px',
-  },
-  promoText: {
-    color: '#FAFAFB',
     fontSize: '14px',
-    fontWeight: 500,
+    lineHeight: '1.5',
     margin: 0,
-    lineHeight: '40px',
   },
-  promoButtonCol: {
-    textAlign: 'right' as const,
-  },
-  promoButton: {
-    backgroundColor: '#FAFAFB',
-    color: DARK_BG,
+  scoutCta: {
+    backgroundColor: EDGE_CYAN,
+    color: EDGE_BLACK,
     fontSize: '14px',
-    fontWeight: 600,
-    padding: '10px 20px',
-    borderRadius: '6px',
+    fontWeight: 700,
+    padding: '12px 28px',
+    borderRadius: '10px',
     textDecoration: 'none',
+    display: 'inline-block',
+    marginTop: '16px',
   },
 
-  // Footer
-  footer: {
-    backgroundColor: DARK_BG,
-    padding: '32px 24px',
+  // ── App Promo ───────────────────────────────────────────────────────
+  appSection: {
+    padding: '32px',
+    backgroundColor: BODY_BG,
     textAlign: 'center' as const,
   },
-  socialRow: {
-    marginBottom: '16px',
+  appTitle: {
+    color: TEXT_PRIMARY,
+    fontSize: '20px',
+    fontWeight: 700,
+    margin: '0 0 8px',
+  },
+  appDesc: {
+    color: TEXT_SECONDARY,
+    fontSize: '14px',
+    lineHeight: '1.5',
+    margin: '0 0 20px',
+  },
+
+  // ── YouTube Channels ───────────────────────────────────────────────
+  channelsSection: {
+    padding: '28px 32px',
+    backgroundColor: BODY_BG,
+  },
+  channelsSectionTitle: {
+    color: TEXT_SECONDARY,
+    fontSize: '11px',
+    fontWeight: 700,
+    letterSpacing: '2px',
+    margin: '0 0 20px',
+    textTransform: 'uppercase' as const,
+  },
+  channelCard: {
+    backgroundColor: CARD_BG,
+    borderRadius: '12px',
+    padding: '16px 20px',
+    marginBottom: '12px',
+    border: `1px solid ${DIVIDER}`,
+  },
+  channelLogoCol: {
+    width: '110px',
+    verticalAlign: 'middle',
+  },
+  channelLogo: {
+    display: 'block',
+    height: 'auto',
+  },
+  channelInfoCol: {
+    verticalAlign: 'middle',
+    paddingLeft: '16px',
+  },
+  channelName: {
+    color: TEXT_PRIMARY,
+    fontSize: '15px',
+    fontWeight: 700,
+    margin: '0 0 2px',
+    lineHeight: '1.3',
+  },
+  channelTagline: {
+    color: TEXT_SECONDARY,
+    fontSize: '12px',
+    margin: 0,
+    lineHeight: '1.4',
+  },
+  channelBtnCol: {
+    width: '80px',
+    verticalAlign: 'middle',
+    textAlign: 'right' as const,
+  },
+  channelWatchBtn: {
+    fontSize: '13px',
+    fontWeight: 700,
+    textDecoration: 'none',
+  },
+
+  // ── Edge CTA ────────────────────────────────────────────────────────
+  edgeCtaSection: {
+    padding: '36px 32px',
+    backgroundColor: EDGE_BLACK,
+    textAlign: 'center' as const,
+    borderTop: `1px solid rgba(255,255,255,0.08)`,
+  },
+  edgeCtaTitle: {
+    color: EDGE_WHITE,
+    fontSize: '22px',
+    fontWeight: 700,
+    margin: '0 0 8px',
+    letterSpacing: '-0.3px',
+  },
+  edgeCtaDesc: {
+    color: TEXT_MUTED,
+    fontSize: '14px',
+    lineHeight: '1.5',
+    margin: '0 0 24px',
+  },
+  edgeCtaBtn: {
+    backgroundColor: EDGE_RED,
+    color: '#FFFFFF',
+    fontSize: '15px',
+    fontWeight: 700,
+    padding: '14px 36px',
+    borderRadius: '10px',
+    textDecoration: 'none',
+    display: 'inline-block',
+  },
+
+  // ── Footer ──────────────────────────────────────────────────────────
+  footer: {
+    backgroundColor: EDGE_BLACK,
+    padding: '32px',
+    textAlign: 'center' as const,
+    borderTop: `1px solid rgba(255,255,255,0.06)`,
   },
   socialLink: {
     color: TEXT_MUTED,
     fontSize: '13px',
+    fontWeight: 500,
     textDecoration: 'none',
   },
-  socialDivider: {
-    color: TEXT_MUTED,
+  socialDot: {
+    color: 'rgba(255,255,255,0.2)',
     display: 'inline',
-    margin: '0 8px',
+    margin: '0 10px',
+    fontSize: '13px',
   },
-  footerHr: {
-    borderColor: '#374151',
+  footerDivider: {
+    borderColor: 'rgba(255,255,255,0.08)',
     borderWidth: '1px 0 0 0',
-    margin: '16px 0',
+    margin: '20px 0',
   },
   footerLink: {
     color: TEXT_MUTED,
     fontSize: '12px',
     textDecoration: 'underline',
   },
-  footerDivider: {
-    color: TEXT_MUTED,
-    display: 'inline',
-    margin: '0 8px',
-  },
-  copyright: {
-    color: TEXT_MUTED,
+  footerCopyright: {
+    color: 'rgba(255,255,255,0.3)',
     fontSize: '12px',
-    marginTop: '16px',
+    marginTop: '20px',
     marginBottom: '4px',
   },
-  address: {
-    color: '#6b7280',
+  footerLegal: {
+    color: 'rgba(255,255,255,0.2)',
     fontSize: '11px',
     margin: 0,
+    lineHeight: '1.5',
   },
 };
 
