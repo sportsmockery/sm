@@ -186,8 +186,8 @@ export function ChicagoDailyEmail({
 
   const preview =
     previewText ||
-    (heroStory
-      ? truncate(heroStory.summary || heroStory.title, 90)
+    (hotStory
+      ? truncate(hotStory.summary || hotStory.title, 90)
       : 'Your daily Chicago sports intelligence briefing');
 
   return (
@@ -431,30 +431,32 @@ export function ChicagoDailyEmail({
               <Text style={s.appDesc}>
                 Breaking news alerts, live scores, and Scout AI in your pocket.
               </Text>
-              <Row>
-                <Column align="center" style={{ paddingRight: '6px' }}>
-                  <Link href="https://apps.apple.com/app/sportsmockery">
-                    <Img
-                      src={`${BASE_URL}/app-store-badge.svg`}
-                      alt="Download on App Store"
-                      width={120}
-                      height={40}
-                      style={{ display: 'block' }}
-                    />
-                  </Link>
-                </Column>
-                <Column align="center" style={{ paddingLeft: '6px' }}>
-                  <Link href="https://play.google.com/store/apps/details?id=com.sportsmockery">
-                    <Img
-                      src={`${BASE_URL}/google-play-badge.svg`}
-                      alt="Get on Google Play"
-                      width={135}
-                      height={40}
-                      style={{ display: 'block' }}
-                    />
-                  </Link>
-                </Column>
-              </Row>
+              <table cellPadding={0} cellSpacing={0} style={{ margin: '0 auto' }}>
+                <tr>
+                  <td style={{ paddingRight: '4px' }}>
+                    <Link href="https://apps.apple.com/app/sportsmockery">
+                      <Img
+                        src={`${BASE_URL}/app-store-badge.svg`}
+                        alt="Download on App Store"
+                        width={120}
+                        height={40}
+                        style={{ display: 'block' }}
+                      />
+                    </Link>
+                  </td>
+                  <td style={{ paddingLeft: '4px' }}>
+                    <Link href="https://play.google.com/store/apps/details?id=com.sportsmockery">
+                      <Img
+                        src={`${BASE_URL}/google-play-badge.svg`}
+                        alt="Get on Google Play"
+                        width={135}
+                        height={40}
+                        style={{ display: 'block' }}
+                      />
+                    </Link>
+                  </td>
+                </tr>
+              </table>
             </Section>
           )}
 
