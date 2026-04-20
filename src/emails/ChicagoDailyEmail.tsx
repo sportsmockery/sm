@@ -28,9 +28,9 @@ const F = "-apple-system,BlinkMacSystemFont,'Helvetica Neue',Helvetica,Arial,san
 // Network logos: use white versions for Untold & P&I on dark bg,
 // No Strokes gets a mini card bg since it has white in the logo
 const NET = [
-  { name: 'Untold Chicago Stories', desc: 'Raw Chicago documentary series', logo: `${BASE}/downloads/untold-logo-white.png`, url: 'https://www.youtube.com/@untoldchicago', accent: '#BC0000' },
-  { name: 'Pinwheels & Ivy', desc: 'Your daily Cubs podcast', logo: `${BASE}/downloads/pinwheels-ivy-logo-white.png`, url: 'https://www.youtube.com/c/PinwheelsandIvyPodcast', accent: '#2D8B2D' },
-  { name: 'No Strokes Golf', desc: 'Golf without the handicap', logo: `${BASE}/downloads/nostrokes-logo.png`, url: 'https://www.youtube.com/@nostrokes', accent: '#1B5E3B', needsBg: true },
+  { name: 'Untold Chicago Stories', desc: 'Raw Chicago documentary series', logo: `${BASE}/downloads/untold-logo-white.png`, url: 'https://www.youtube.com/@untoldchicago', accent: '#BC0000', w: 48 },
+  { name: 'Pinwheels & Ivy', desc: 'Your daily Cubs podcast', logo: `${BASE}/downloads/pinwheels-ivy-logo-white.png`, url: 'https://www.youtube.com/c/PinwheelsandIvyPodcast', accent: '#2D8B2D', w: 80 },
+  { name: 'No Strokes Golf', desc: 'Golf without the handicap', logo: `${BASE}/downloads/nostrokes-logo.png`, url: 'https://www.youtube.com/@nostrokes', accent: '#1B5E3B', w: 80, needsBg: true },
 ];
 
 // ─── Responsive CSS ──────────────────────────────────────────────────────────
@@ -311,17 +311,14 @@ export function ChicagoDailyEmail(v: DailyEdgeEmailVariables) {
                     backgroundColor: CARD, borderRadius: '8px', border: `1px solid ${BORDER}`, padding: '12px 14px',
                   }}>
                     <tr>
-                      <td width="48" valign="middle" className="net-logo">
-                        <div style={{
-                          width: '40px', height: '40px', borderRadius: '8px',
-                          backgroundColor: ch.needsBg ? '#FFFFFF' : 'transparent',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          overflow: 'hidden',
-                        }}>
-                          <Img src={ch.logo} alt={ch.name} width={ch.needsBg ? 36 : 40}
-                            style={{ display: 'block', height: 'auto', borderRadius: ch.needsBg ? '4px' : '0' }}
-                          />
-                        </div>
+                      <td width="90" valign="middle" className="net-logo">
+                        {ch.needsBg ? (
+                          <div style={{ backgroundColor: '#FFFFFF', borderRadius: '6px', padding: '4px 6px', display: 'inline-block' }}>
+                            <Img src={ch.logo} alt={ch.name} width={ch.w} style={{ display: 'block', height: 'auto' }} />
+                          </div>
+                        ) : (
+                          <Img src={ch.logo} alt={ch.name} width={ch.w} style={{ display: 'block', height: 'auto' }} />
+                        )}
                       </td>
                       <td valign="middle" style={{ paddingLeft: '12px' }}>
                         <div style={{ color: W90, fontSize: '13px', fontWeight: 600, fontFamily: F, lineHeight: '1.3' }}>{ch.name}</div>

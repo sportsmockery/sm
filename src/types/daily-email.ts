@@ -22,6 +22,7 @@ export interface EmailStory {
   published_at: string; // ISO 8601
   minutes_read: number; // 3–7
   relative_time: string; // "5 hours ago"
+  views: number;        // raw view count
 }
 
 export interface NetworkItem {

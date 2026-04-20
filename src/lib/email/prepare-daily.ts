@@ -103,6 +103,7 @@ function toEmailStory(raw: RawStory): EmailStory {
     published_at: raw.publishedAt,
     minutes_read: estimateReadTime(raw.summary, raw.title),
     relative_time: relativeTime(raw.publishedAt),
+    views: raw.views || 0,
   };
 }
 
