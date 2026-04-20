@@ -23,11 +23,13 @@ export const IS_BUILD_TIME =
   (process.env.NODE_ENV === 'production' && !process.env.VERCEL_URL && !process.env.VERCEL_ENV)
 
 /** Default timeout in ms — keep well under Vercel's 60s page gen limit */
-const DEFAULT_TIMEOUT_MS = 10_000
-const BUILD_TIMEOUT_MS = 8_000
+const DEFAULT_TIMEOUT_MS = 15_000
+// Build timeout must be short: pages make 5+ queries, each cascading on failure.
+// At 5s per query, even 10 sequential fallbacks = 50s (under 60s page gen limit).
+const BUILD_TIMEOUT_MS = 5_000
 
 interface BuildSafeFetchOptions {
-  /** Timeout in ms (defaults to 12s at runtime, 8s at build) */
+  /** Timeout in ms (defaults to 15s at runtime, 5s at build) */
   timeout?: number
   /** Label for logging on timeout/error */
   label?: string
@@ -46,7 +48,9 @@ export async function buildSafeFetch<T>(
   options: BuildSafeFetchOptions = {}
 ): Promise<T> {
   const defaultTimeout = IS_BUILD_TIME ? BUILD_TIMEOUT_MS : DEFAULT_TIMEOUT_MS
-  const timeout = options.timeout ?? defaultTimeout
+  // At build time, cap timeout to BUILD_TIMEOUT_MS even if caller specifies higher
+  const requestedTimeout = options.timeout ?? defaultTimeout
+  const timeout = IS_BUILD_TIME ? Math.min(requestedTimeout, BUILD_TIMEOUT_MS) : requestedTimeout
   const label = options.label ?? 'data fetch'
   const maxRetries = options.retries ?? (IS_BUILD_TIME ? 0 : 1)
 

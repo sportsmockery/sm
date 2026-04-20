@@ -7,14 +7,40 @@ import { createClient } from '@supabase/supabase-js'
 const DATALAB_URL = process.env.DATALAB_SUPABASE_URL!
 const DATALAB_ANON_KEY = process.env.DATALAB_SUPABASE_ANON_KEY!
 
-// 10-second global fetch timeout to prevent build/runtime hangs
-const DATALAB_FETCH_TIMEOUT_MS = 10_000
+// Global fetch timeout: 5s at build (fail fast, many pages to generate),
+// 15s at runtime (generous for DataLab under load)
+function getTimeoutMs(): number {
+  const isBuild = process.env.NEXT_PHASE === 'phase-production-build' ||
+    (process.env.NODE_ENV === 'production' && !process.env.VERCEL_URL && !process.env.VERCEL_ENV)
+  return isBuild ? 5_000 : 15_000
+}
 
-const globalFetchWithTimeout: typeof fetch = (input, init) => {
-  return fetch(input, {
-    ...init,
-    signal: init?.signal ?? AbortSignal.timeout(DATALAB_FETCH_TIMEOUT_MS),
-  })
+const globalFetchWithTimeout: typeof fetch = async (input, init) => {
+  try {
+    const response = await fetch(input, {
+      ...init,
+      signal: init?.signal ?? AbortSignal.timeout(getTimeoutMs()),
+    })
+    // Cloudflare 522 (origin unreachable) returns HTML — convert to a proper error
+    // so the Supabase client doesn't crash trying to parse HTML as JSON
+    if (response.status >= 500) {
+      const contentType = response.headers.get('content-type') || ''
+      if (!contentType.includes('application/json')) {
+        return new Response(
+          JSON.stringify({ message: `DataLab returned ${response.status}`, hint: 'origin unreachable' }),
+          { status: response.status, headers: { 'content-type': 'application/json' } }
+        )
+      }
+    }
+    return response
+  } catch {
+    // Return a synthetic error response instead of throwing —
+    // prevents unhandled rejections from crashing build workers
+    return new Response(
+      JSON.stringify({ message: 'DataLab unreachable', hint: 'fetch failed' }),
+      { status: 503, headers: { 'content-type': 'application/json' } }
+    )
+  }
 }
 
 // Public client for read-only operations (used by all team data layers)
