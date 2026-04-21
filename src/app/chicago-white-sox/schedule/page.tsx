@@ -7,8 +7,8 @@ import { getWhiteSoxSchedule, getWhiteSoxRecord, type WhiteSoxGame } from '@/lib
 const WHITE_SOX_LOGO = 'https://a.espncdn.com/i/teamlogos/mlb/500/chw.png'
 
 export const metadata: Metadata = {
-  title: 'Chicago White Sox Schedule 2025 | Game Dates & Results | SportsMockery',
-  description: 'Complete Chicago White Sox 2025 schedule with game dates, times, opponents, scores, and results. View upcoming games and past results.',
+  title: 'Chicago White Sox Schedule 2026 | Game Dates & Results | SportsMockery',
+  description: 'Complete Chicago White Sox 2026 schedule with game dates, times, opponents, scores, and results. View upcoming games and past results.',
 }
 
 export const dynamic = 'force-dynamic'
@@ -27,13 +27,18 @@ export default async function WhiteSoxSchedulePage() {
     losses: soxRecord.losses,
   }
 
-  // For out-of-season teams: order all games by most recent first
-  const sortedSchedule = [...schedule].sort((a, b) =>
-    new Date(b.date).getTime() - new Date(a.date).getTime()
-  )
+  // Sort schedule: upcoming games first (ascending by date), then completed (descending by date)
+  // This ensures "Up Next" picks the soonest game, not the last of season
+  const upcomingGames = schedule
+    .filter(g => g.status !== 'final' && (g as any).gameType !== 'spring-training')
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+  const completedGames = schedule
+    .filter(g => g.status === 'final')
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  const sortedSchedule = [...upcomingGames, ...completedGames]
 
-  // Find next scheduled game
-  const nextScheduledGame = schedule.find(g => g.status === 'scheduled')
+  // Next scheduled game is the first upcoming game
+  const nextScheduledGame = upcomingGames[0]
 
   return (
     <TeamHubLayout

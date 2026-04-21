@@ -7,8 +7,8 @@ import { getCubsSchedule, getCubsSeparatedRecord, type CubsGame } from '@/lib/cu
 const CUBS_LOGO = 'https://a.espncdn.com/i/teamlogos/mlb/500/chc.png'
 
 export const metadata: Metadata = {
-  title: 'Chicago Cubs Schedule 2025 | Game Dates & Results | SportsMockery',
-  description: 'Complete Chicago Cubs 2025 schedule with game dates, times, opponents, scores, and results. View upcoming games and past results.',
+  title: 'Chicago Cubs Schedule 2026 | Game Dates & Results | SportsMockery',
+  description: 'Complete Chicago Cubs 2026 schedule with game dates, times, opponents, scores, and results. View upcoming games and past results.',
 }
 
 export const dynamic = 'force-dynamic'
@@ -32,10 +32,15 @@ export default async function CubsSchedulePage() {
     divisionRank: separatedRecord.divisionRank || undefined,
   }
 
-  // For out-of-season teams: order all games by most recent first
-  const sortedSchedule = [...schedule].sort((a, b) =>
-    new Date(b.date).getTime() - new Date(a.date).getTime()
-  )
+  // Sort schedule: upcoming games first (ascending by date), then completed (descending by date)
+  // This ensures "Up Next" picks the soonest game, not the last of season
+  const upcomingGames = schedule
+    .filter(g => g.status !== 'final' && g.gameType !== 'spring-training')
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+  const completedGames = schedule
+    .filter(g => g.status === 'final')
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  const sortedSchedule = [...upcomingGames, ...completedGames]
 
   // Count games by type
   const springTrainingGames = schedule.filter(g => g.gameType === 'spring-training')
@@ -44,8 +49,8 @@ export default async function CubsSchedulePage() {
   const hasSpringTraining = springTrainingGames.length > 0
   const hasPostseason = postseasonGames.length > 0
 
-  // Find next scheduled game
-  const nextScheduledGame = schedule.find(g => g.status === 'scheduled')
+  // Next scheduled game is the first upcoming (non-spring-training) game
+  const nextScheduledGame = upcomingGames[0]
 
   return (
     <TeamHubLayout

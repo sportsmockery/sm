@@ -54,10 +54,14 @@ export default async function BearsSchedulePage() {
     fetchNextGame('bears'),
   ])
 
-  // For out-of-season teams: order all games by most recent first
-  const sortedSchedule = [...schedule].sort((a, b) =>
-    new Date(b.date).getTime() - new Date(a.date).getTime()
-  )
+  // Sort: upcoming ascending (soonest first), then completed descending (newest first)
+  const upcomingGames = schedule
+    .filter(g => g.status !== 'final')
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+  const completedGames = schedule
+    .filter(g => g.status === 'final')
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  const sortedSchedule = [...upcomingGames, ...completedGames]
 
   // Separate games by type for display purposes
   const preseasonGames = schedule.filter(g => g.gameType === 'preseason')
@@ -78,8 +82,8 @@ export default async function BearsSchedulePage() {
     divisionRank: separatedRecord.divisionRank || undefined,
   }
 
-  // Find next scheduled game (any type)
-  const nextScheduledGame = schedule.find(g => g.status === 'scheduled')
+  // Find next scheduled game (soonest upcoming, any type)
+  const nextScheduledGame = upcomingGames[0]
 
   // Map schedule data to SportsEvent schema format
   const sportsEvents: SportsEventGame[] = schedule.map(g => ({

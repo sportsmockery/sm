@@ -329,6 +329,29 @@ function SeasonSnapshotCard({
     return `${record.wins}-${record.losses}`
   }
 
+  // Compute season label based on league
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = now.getMonth() + 1 // 1-12
+  const getSeasonLabel = () => {
+    if (team.league === 'NFL') {
+      // NFL: Sep-Feb. If before Sep, current season is prev year.
+      const startYr = month < 9 ? year - 1 : year
+      return `${startYr} Season`
+    }
+    if (team.league === 'NBA' || team.league === 'NHL') {
+      // NBA/NHL: Oct-Jun. Show as YYYY-YY.
+      const startYr = month < 10 ? year - 1 : year
+      return `${startYr}-${String(startYr + 1).slice(2)} Season`
+    }
+    if (team.league === 'MLB') {
+      // MLB: Mar-Oct. Single year.
+      return `${year} Season`
+    }
+    return `${year} Season`
+  }
+  const seasonLabel = getSeasonLabel()
+
   return (
     <div
       className="glass-card glass-card-static"
@@ -355,7 +378,7 @@ function SeasonSnapshotCard({
             >
               Season Snapshot
             </h3>
-            <p className="text-xs text-white/70">2025 Season</p>
+            <p className="text-xs text-white/70">{seasonLabel}</p>
           </div>
         </div>
       </div>
