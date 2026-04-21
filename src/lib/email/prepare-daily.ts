@@ -325,7 +325,7 @@ export function prepareDailyEmailVariables(
     scout_title: 'Ask Scout anything about Chicago sports',
     scout_description: generateScoutDescription(allStories),
     scout_examples: generateScoutExamples(allStories),
-    scout_url: `${BASE}/ask-ai`,
+    scout_url: `${BASE}/scout-ai`,
 
     // Network
     network_items: NETWORK,

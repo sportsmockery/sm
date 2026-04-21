@@ -26,7 +26,7 @@ const B    = 'https://test.sportsmockery.com';
 const F    = "-apple-system,BlinkMacSystemFont,'Helvetica Neue',Helvetica,Arial,sans-serif";
 
 const NET = [
-  { n: 'Untold Chicago Stories', d: 'Raw documentaries from across the city', l: `${B}/downloads/untold-logo-white.png`, u: 'https://www.youtube.com/@untoldchicago', w: 48, bg: false },
+  { n: 'Untold Chicago Stories', d: 'Raw documentaries from across the city', l: `${B}/downloads/untold-logo-white.png`, u: 'https://www.youtube.com/@untoldchicago', w: 64, bg: false },
   { n: 'Pinwheels & Ivy', d: 'Your daily Cubs podcast', l: `${B}/downloads/pinwheels-ivy-logo-white.png`, u: 'https://www.youtube.com/c/PinwheelsandIvyPodcast', w: 80, bg: false },
   { n: 'No Strokes Golf', d: 'Golf without the handicap', l: `${B}/downloads/nostrokes-logo.png`, u: 'https://www.youtube.com/@nostrokes', w: 80, bg: false },
 ];
@@ -117,9 +117,19 @@ export function ChicagoDailyEmail(v: DailyEdgeEmailVariables) {
 <div style={{ height: '1px', background: `linear-gradient(90deg,${CYAN},${CYAN}33)` }} />
 
 {/* ─── INTRO ─────────────────────────────────────────────────────────────── */}
-<table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ padding: '12px 36px 8px' }} className="px">
+<table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ padding: '14px 36px 12px' }} className="px">
   <tr><td>
-    <div style={{ ...body13, maxWidth: '520px' }}>{v.intro_blurb}</div>
+    <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{
+      backgroundColor: CARD, borderRadius: '8px', border: `1px solid ${BD}`, padding: '12px 16px',
+    }}>
+      <tr>
+        <td width="3" style={{ backgroundColor: CYAN, borderRadius: '2px' }}></td>
+        <td style={{ paddingLeft: '12px' }}>
+          <div style={{ ...label10, color: CYAN, marginBottom: '4px' }}>Today's Briefing</div>
+          <div style={{ fontSize: '14px', lineHeight: '1.45', color: W90, fontFamily: F }}>{v.intro_blurb}</div>
+        </td>
+      </tr>
+    </table>
   </td></tr>
 </table>
 
@@ -128,15 +138,15 @@ export function ChicagoDailyEmail(v: DailyEdgeEmailVariables) {
 <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ padding: '0 36px 14px' }} className="px">
   <tr><td>
     <div style={{ ...label10, color: W30, marginBottom: '5px' }}>Scores</div>
-    <Link href={games[0].url} style={{ textDecoration: 'none', display: 'block' }}>
-      <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{
-        backgroundColor: CARD, borderRadius: '10px', border: `1px solid ${BD}`,
-      }}>
-        {games.map((g, i) => (
-          <tr key={i}><td style={{
-            padding: '8px 14px',
-            ...(i < games.length - 1 ? { borderBottom: `1px solid ${BD}` } : {}),
-          }}>
+    <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{
+      backgroundColor: CARD, borderRadius: '10px', border: `1px solid ${BD}`,
+    }}>
+      {games.map((g, i) => (
+        <tr key={i}><td style={{
+          padding: 0,
+          ...(i < games.length - 1 ? { borderBottom: `1px solid ${BD}` } : {}),
+        }}>
+          <Link href={g.url} style={{ textDecoration: 'none', display: 'block', padding: '8px 14px' }}>
             <table role="presentation" width="100%" cellPadding={0} cellSpacing={0}>
               <tr>
                 <td style={{ color: g.winner === 'home' ? W : W50, fontSize: '13px', fontWeight: g.winner === 'home' ? 700 : 400, fontFamily: F, paddingBottom: '1px', lineHeight: '1.3' }}>
@@ -155,11 +165,11 @@ export function ChicagoDailyEmail(v: DailyEdgeEmailVariables) {
                 </td>
               </tr>
             </table>
-          </td></tr>
-        ))}
-      </table>
-    </Link>
-    <div style={{ ...meta11, color: W08, marginTop: '4px' }}>Yesterday's final scores</div>
+          </Link>
+        </td></tr>
+      ))}
+    </table>
+    <div style={{ ...meta11, color: W30, marginTop: '4px' }}>Yesterday's final scores</div>
   </td></tr>
 </table>
 )}
@@ -168,6 +178,11 @@ export function ChicagoDailyEmail(v: DailyEdgeEmailVariables) {
 {hero && (
 <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ padding: '2px 36px 28px' }} className="px">
   <tr><td>
+    <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{
+      backgroundColor: CARD, borderRadius: '10px', border: `1px solid ${CYAN}44`, padding: '16px',
+      boxShadow: `0 0 24px ${CYAN}18, 0 0 48px ${CYAN}0A`,
+    }}>
+      <tr><td>
 
     {/* Label row */}
     <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ marginBottom: '6px' }}>
@@ -180,7 +195,7 @@ export function ChicagoDailyEmail(v: DailyEdgeEmailVariables) {
     {/* Image */}
     {ok(hero.image_url) && (
       <Link href={hero.url} style={{ display: 'block', marginBottom: '12px' }}>
-        <Img src={hero.image_url} alt="" width={548}
+        <Img src={hero.image_url} alt="" width={516}
           style={{ width: '100%', display: 'block', borderRadius: '8px', maxHeight: '230px', objectFit: 'cover' as const }} />
       </Link>
     )}
@@ -211,21 +226,16 @@ export function ChicagoDailyEmail(v: DailyEdgeEmailVariables) {
       </td>
     </tr></table>
 
+      </td></tr>
+    </table>
   </td></tr>
 </table>
 )}
-
-{/* divider */}
-<div style={{ height: '1px', backgroundColor: BD, margin: '0 36px' }} />
 
 {/* ─── 4. MORE FROM LAST NIGHT ───────────────────────────────────────────── */}
 {stories.length > 0 && (
 <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ padding: '20px 36px 6px' }} className="px">
 
-  <tr><td style={{ paddingBottom: '12px' }}>
-    <div style={{ ...heading16, margin: '0 0 1px' }}>More from last night</div>
-    <div style={{ ...meta11, color: W30 }}>{v.stories_count} new stories from the {v.stories_window_label}</div>
-  </td></tr>
 
   {stories.map((s, i) => (
     <tr key={i}><td style={{ padding: '11px 0', borderTop: `1px solid ${BD}` }}>
@@ -271,7 +281,7 @@ export function ChicagoDailyEmail(v: DailyEdgeEmailVariables) {
 <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{ padding: '20px 36px' }} className="px">
   <tr><td>
     <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} style={{
-      backgroundColor: CARD, borderRadius: '10px', border: `1px solid ${BD}`, padding: '16px 16px',
+      backgroundColor: CARD, borderRadius: '10px', border: `1px solid ${CYAN}44`, padding: '16px 16px',
     }}>
       <tr>
         <td width="56" valign="middle">
@@ -279,16 +289,11 @@ export function ChicagoDailyEmail(v: DailyEdgeEmailVariables) {
         </td>
         <td valign="middle" style={{ paddingLeft: '14px' }}>
           <div style={{ ...heading16, fontSize: '15px', marginBottom: '2px' }}>{v.scout_title}</div>
-          <div style={{ ...body13, marginBottom: '7px' }}>{v.scout_description}</div>
-          {v.scout_examples.map((q, i) => (
-            <div key={i} style={{ ...body13, marginBottom: '0px', paddingLeft: '12px', position: 'relative' as const }}>
-              <span style={{ position: 'absolute' as const, left: 0, color: CYAN }}>›</span>{q}
-            </div>
-          ))}
-          <div style={{ marginTop: '10px' }}>
+          <div style={{ ...body13, marginBottom: '10px' }}>{v.scout_description}</div>
+          <div>
             <table role="presentation" cellPadding={0} cellSpacing={0}><tr>
-              <td style={{ backgroundColor: '#1C1C26', borderRadius: '999px', padding: '7px 14px' }}>
-                <Link href={v.scout_url} style={{ color: W, fontSize: '12px', fontWeight: 600, textDecoration: 'none', fontFamily: F }}>
+              <td style={{ backgroundColor: '#BC0000', borderRadius: '999px', padding: '9px 20px', lineHeight: '1' }}>
+                <Link href={v.scout_url} style={{ color: W, fontSize: '12px', fontWeight: 600, textDecoration: 'none', fontFamily: F, whiteSpace: 'nowrap' as const }}>
                   Try Scout now →
                 </Link>
               </td>
@@ -418,11 +423,11 @@ export function ChicagoDailyEmail(v: DailyEdgeEmailVariables) {
       ))}
     </div>
     <div style={{ marginBottom: '14px' }}>
-      <Link href={v.preferences_url} style={{ color: W15, fontSize: '11px', textDecoration: 'underline', fontFamily: F }}>Manage preferences</Link>
-      <span style={{ color: W08, margin: '0 8px', fontSize: '10px' }}>·</span>
-      <Link href={v.unsubscribe_url} style={{ color: W15, fontSize: '11px', textDecoration: 'underline', fontFamily: F }}>Unsubscribe</Link>
+      <Link href={v.preferences_url} style={{ color: W50, fontSize: '11px', textDecoration: 'underline', fontFamily: F }}>Manage preferences</Link>
+      <span style={{ color: W30, margin: '0 8px', fontSize: '10px' }}>·</span>
+      <Link href={v.unsubscribe_url} style={{ color: W50, fontSize: '11px', textDecoration: 'underline', fontFamily: F }}>Unsubscribe</Link>
     </div>
-    <div style={{ color: W08, fontSize: '10px', fontFamily: F, lineHeight: '1.5' }}>
+    <div style={{ color: W30, fontSize: '10px', fontFamily: F, lineHeight: '1.5' }}>
       © {new Date().getFullYear()} Edge by SportsMockery · Chicago, IL<br />
       You received this because you subscribed to Chicago Sports Daily.
     </div>
