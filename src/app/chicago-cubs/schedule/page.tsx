@@ -300,3 +300,4 @@ function GameRow({ game }: { game: CubsGame }) {
     </div>
   )
 }
+
