@@ -34,8 +34,14 @@ export default async function CubsSchedulePage() {
 
   // Sort schedule: upcoming games first (ascending by date), then completed (descending by date)
   // This ensures "Up Next" picks the soonest game, not the last of season
+  const today = new Date().toISOString().split('T')[0]
   const upcomingGames = schedule
-    .filter(g => g.status !== 'final' && g.gameType !== 'spring-training')
+    .filter(g =>
+      g.status !== 'final' &&
+      g.gameType !== 'spring-training' &&
+      (g as any).result !== 'PPD' &&
+      g.date >= today  // exclude past dates (e.g. postponed rows never filled in)
+    )
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
   const completedGames = schedule
     .filter(g => g.status === 'final')

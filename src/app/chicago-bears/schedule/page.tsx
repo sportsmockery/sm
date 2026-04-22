@@ -55,8 +55,13 @@ export default async function BearsSchedulePage() {
   ])
 
   // Sort: upcoming ascending (soonest first), then completed descending (newest first)
+  const today = new Date().toISOString().split('T')[0]
   const upcomingGames = schedule
-    .filter(g => g.status !== 'final')
+    .filter(g =>
+      g.status !== 'final' &&
+      (g as any).result !== 'PPD' &&
+      g.date >= today  // exclude past dates
+    )
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
   const completedGames = schedule
     .filter(g => g.status === 'final')
