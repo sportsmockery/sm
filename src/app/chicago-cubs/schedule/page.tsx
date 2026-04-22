@@ -44,7 +44,7 @@ export default async function CubsSchedulePage() {
     )
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
   const completedGames = schedule
-    .filter(g => g.status === 'final')
+    .filter(g => g.status === 'final' && g.gameType !== 'spring-training')
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
   const sortedSchedule = [...upcomingGames, ...completedGames]
 
@@ -138,10 +138,10 @@ export default async function CubsSchedulePage() {
             }}
           >
             <h2 style={{ fontWeight: 700, color: 'var(--sm-text)' }}>
-              Chicago Cubs 2025 Schedule
+              Chicago Cubs {new Date().getFullYear()} Schedule
             </h2>
             <span style={{ fontSize: '14px', color: 'var(--sm-text-muted)' }}>
-              {hasSpringTraining ? `${springTrainingGames.length} ST + ` : ''}{regularGames.length} regular{hasPostseason ? ` + ${postseasonGames.length} playoff` : ''} games
+              {regularGames.length} regular{hasPostseason ? ` + ${postseasonGames.length} playoff` : ''} games
             </span>
           </div>
           <div>

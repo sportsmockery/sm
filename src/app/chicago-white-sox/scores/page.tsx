@@ -47,7 +47,7 @@ export default async function WhiteSoxScoresPage() {
         <div className="glass-card glass-card-sm glass-card-static"  >
           <div className="flex flex-wrap gap-6 justify-center text-center">
             <div>
-              <div className="text-xs uppercase tracking-wider mb-1" style={{ color: 'var(--sm-text-muted)' }}>2025 Season</div>
+              <div className="text-xs uppercase tracking-wider mb-1" style={{ color: 'var(--sm-text-muted)' }}>{new Date().getFullYear()} Season</div>
               <div className="text-xl font-bold" style={{ color: 'var(--sm-text)' }}>
                 {soxRecord.wins}-{soxRecord.losses}
               </div>

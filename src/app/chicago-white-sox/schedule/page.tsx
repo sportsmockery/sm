@@ -39,7 +39,7 @@ export default async function WhiteSoxSchedulePage() {
     )
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
   const completedGames = schedule
-    .filter(g => g.status === 'final')
+    .filter(g => g.status === 'final' && (g as any).gameType !== 'spring-training')
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
   const sortedSchedule = [...upcomingGames, ...completedGames]
 
@@ -95,7 +95,7 @@ export default async function WhiteSoxSchedulePage() {
         <div className="glass-card glass-card-sm glass-card-static" style={{ marginBottom: '24px' }}>
           <div className="flex flex-wrap gap-6 justify-center text-center">
             <div>
-              <div style={{ fontSize: '11px', color: 'var(--sm-text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>2025 Season</div>
+              <div style={{ fontSize: '11px', color: 'var(--sm-text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>{new Date().getFullYear()} Season</div>
               <div style={{ fontSize: '22px', fontWeight: 800, color: 'var(--sm-text)' }}>
                 {soxRecord.wins}-{soxRecord.losses}
               </div>
@@ -115,10 +115,10 @@ export default async function WhiteSoxSchedulePage() {
             }}
           >
             <h2 style={{ fontWeight: 700, color: 'var(--sm-text)' }}>
-              White Sox 2025 Schedule
+              White Sox {new Date().getFullYear()} Schedule
             </h2>
             <span style={{ fontSize: '14px', color: 'var(--sm-text-muted)' }}>
-              {schedule.length} games
+              {completedGames.length + upcomingGames.length} games
             </span>
           </div>
           <div>
