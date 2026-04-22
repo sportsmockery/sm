@@ -747,7 +747,7 @@ async function getLeaderboards(season: number): Promise<BullsLeaderboard> {
   }
 
   // Parallelize players and game stats fetch
-  const [players, { data: gameStats }] = await Promise.all([
+  const [players, { data: initialGameStats }] = await Promise.all([
     getBullsPlayers(),
     datalabAdmin
       .from('bulls_player_game_stats')
@@ -766,6 +766,7 @@ async function getLeaderboards(season: number): Promise<BullsLeaderboard> {
   const playersMap = new Map(players.map(p => [p.playerId, p]))
 
   // Fallback to previous season if no stats
+  let gameStats = initialGameStats
   if (!gameStats || gameStats.length === 0) {
     const { data: prevStats } = await datalabAdmin
       .from('bulls_player_game_stats')
