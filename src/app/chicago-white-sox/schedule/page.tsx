@@ -103,30 +103,59 @@ export default async function WhiteSoxSchedulePage() {
           </div>
         </div>
 
-        {/* All Games */}
-        <div className="glass-card glass-card-static" style={{ overflow: 'hidden', padding: 0 }}>
-          <div
-            style={{
-              padding: '16px 20px',
-              borderBottom: '1px solid var(--sm-border)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-            }}
-          >
-            <h2 style={{ fontWeight: 700, color: 'var(--sm-text)' }}>
-              White Sox {new Date().getFullYear()} Schedule
-            </h2>
-            <span style={{ fontSize: '14px', color: 'var(--sm-text-muted)' }}>
-              {completedGames.length + upcomingGames.length} games
-            </span>
+        {/* Upcoming Games */}
+        {upcomingGames.length > 0 && (
+          <div className="glass-card glass-card-static" style={{ overflow: 'hidden', padding: 0, marginBottom: '24px' }}>
+            <div
+              style={{
+                padding: '16px 20px',
+                borderBottom: '1px solid var(--sm-border)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
+              <h2 style={{ fontWeight: 700, color: 'var(--sm-text)' }}>
+                Upcoming Games
+              </h2>
+              <span style={{ fontSize: '14px', color: 'var(--sm-text-muted)' }}>
+                {upcomingGames.length} remaining
+              </span>
+            </div>
+            <div>
+              {upcomingGames.map((game) => (
+                <GameRow key={game.gameId} game={game} />
+              ))}
+            </div>
           </div>
-          <div>
-            {sortedSchedule.map((game) => (
-              <GameRow key={game.gameId} game={game} />
-            ))}
+        )}
+
+        {/* Recent Results */}
+        {completedGames.length > 0 && (
+          <div className="glass-card glass-card-static" style={{ overflow: 'hidden', padding: 0 }}>
+            <div
+              style={{
+                padding: '16px 20px',
+                borderBottom: '1px solid var(--sm-border)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
+              <h2 style={{ fontWeight: 700, color: 'var(--sm-text)' }}>
+                Recent Results
+              </h2>
+              <span style={{ fontSize: '14px', color: 'var(--sm-text-muted)' }}>
+                {completedGames.length} played
+              </span>
+            </div>
+            <div>
+              {completedGames.map((game) => (
+                <GameRow key={game.gameId} game={game} />
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </TeamHubLayout>
   )
