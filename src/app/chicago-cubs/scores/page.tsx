@@ -6,7 +6,7 @@ import { getCubsRecentScores, getCubsSeparatedRecord } from '@/lib/cubsData'
 import BoxScoreClient from './BoxScoreClient'
 
 export const metadata: Metadata = {
-  title: 'Chicago Cubs Scores 2025 | Box Scores & Results | SportsMockery',
+  title: 'Chicago Cubs Scores 2026 | Box Scores & Results | SportsMockery',
   description: 'Chicago Cubs box scores with detailed player stats. View batting, pitching, and more for every game.',
 }
 

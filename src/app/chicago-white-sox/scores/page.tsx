@@ -6,7 +6,7 @@ import { getWhiteSoxRecentScores, getWhiteSoxRecord } from '@/lib/whitesoxData'
 import BoxScoreClient from './BoxScoreClient'
 
 export const metadata: Metadata = {
-  title: 'Chicago White Sox Scores 2025 | Box Scores & Results | SportsMockery',
+  title: 'Chicago White Sox Scores 2026 | Box Scores & Results | SportsMockery',
   description: 'Chicago White Sox box scores with detailed player stats. View batting, pitching, and more for every game.',
 }
 
