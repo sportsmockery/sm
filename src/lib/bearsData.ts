@@ -968,7 +968,8 @@ async function getLeaderboards(season: number, gameType: GameType = 'regular'): 
       .from('bears_player_game_stats')
       .select('*')
       .eq('season', season)
-      .eq('is_opponent', false),
+      .eq('is_opponent', false)
+      .limit(5000),
   ])
   const players = transformPlayers((allPlayersRaw as any[]) || [])
   // Bears now uses ESPN ID: bp.espn_id = bpgs.player_id
@@ -990,6 +991,7 @@ async function getLeaderboards(season: number, gameType: GameType = 'regular'): 
       .select('*')
       .eq('season', season - 1)
       .eq('is_opponent', false)
+      .limit(5000)
     gameStats = (prevStats || []).filter((g: any) => {
       const gt = (g.game_type || '').toLowerCase()
       return gt === 'regular' || gt === '' || !g.game_type

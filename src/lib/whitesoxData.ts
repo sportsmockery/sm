@@ -800,7 +800,8 @@ async function getLeaderboards(season: number): Promise<WhiteSoxLeaderboard> {
         save
       `)
       .eq('season', season)
-      .eq('is_opponent', false),
+      .eq('is_opponent', false)
+      .limit(5000),
   ])
 
   const players = transformPlayers((allPlayersRaw as any[]) || [])
@@ -836,6 +837,7 @@ async function getLeaderboards(season: number): Promise<WhiteSoxLeaderboard> {
       `)
       .eq('season', season - 1)
       .eq('is_opponent', false)
+      .limit(5000)
     gameStats = prevStats
   }
 

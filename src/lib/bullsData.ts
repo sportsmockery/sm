@@ -764,7 +764,8 @@ async function getLeaderboards(season: number): Promise<BullsLeaderboard> {
         blocks
       `)
       .eq('season', season)
-      .eq('is_opponent', false),
+      .eq('is_opponent', false)
+      .limit(5000),
   ])
   const players = transformPlayers((allPlayersRaw as any[]) || [])
   // Use playerId (ESPN ID) as key since stats tables use ESPN IDs
@@ -785,6 +786,7 @@ async function getLeaderboards(season: number): Promise<BullsLeaderboard> {
       `)
       .eq('season', season - 1)
       .eq('is_opponent', false)
+      .limit(5000)
     gameStats = prevStats
   }
 
@@ -820,10 +822,11 @@ async function getLeaderboards(season: number): Promise<BullsLeaderboard> {
   const aggregatedStats = Array.from(playerTotals.values())
 
   // Determine minimum games qualifier. NBA rate-stat leaders traditionally require
-  // 58 games in a full 82-game season (~70%). We scale that to actual games played
-  // so the filter works mid-season too. Fallback: 10 games minimum.
+  // 58 games in a full 82-game season (~70%). Mid-season we scale to 50% of max
+  // games played so the filter still excludes small-sample outliers but doesn't
+  // exclude legitimate late-season acquisitions or injury-returners. Min 15.
   const maxGames = aggregatedStats.reduce((m, s) => Math.max(m, s.games), 0)
-  const minGames = Math.max(10, Math.floor(maxGames * 0.4))
+  const minGames = Math.max(15, Math.floor(maxGames * 0.5))
 
   // Qualified pool (for rate-based leaderboards: PPG, RPG, APG, SPG, BPG)
   const qualified = aggregatedStats.filter(s =>

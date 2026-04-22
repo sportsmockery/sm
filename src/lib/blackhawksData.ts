@@ -749,7 +749,8 @@ async function getLeaderboards(season: number): Promise<BlackhawksLeaderboard> {
         shots_against
       `)
       .eq('season', season)
-      .eq('is_opponent', false),
+      .eq('is_opponent', false)
+      .limit(5000),
   ])
   const players = transformPlayers((allPlayersRaw as any[]) || [])
   const playersMap = new Map(players.map((p: any) => [p.playerId, p]))
@@ -770,6 +771,7 @@ async function getLeaderboards(season: number): Promise<BlackhawksLeaderboard> {
       `)
       .eq('season', season - 1)
       .eq('is_opponent', false)
+      .limit(5000)
     gameStats = prevStats
   }
 
