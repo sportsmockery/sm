@@ -77,13 +77,13 @@ export default function LiveGamePage({ sport, gameId }: LiveGamePageProps) {
 
   return (
     <div style={{ minHeight: '100vh', background: '#0B0F14' }}>
-      {/* Score Header (always shown) */}
-      <ScoreHeader game={game} />
-
-      {/* Game Info bar inside header */}
-      <div className="sticky top-[130px] sm:top-[140px] z-40" style={{ background: 'linear-gradient(to right, #111827, #1f2937, #111827)', borderBottom: '2px solid #00D4FF', backdropFilter: 'blur(12px)' }}>
-        <div className="max-w-[1200px] mx-auto px-4">
-          <GameInfo game={game} />
+      {/* Score Header + Game Info bar — sticky as one unit */}
+      <div className="sticky top-0 z-50">
+        <ScoreHeader game={game} />
+        <div style={{ background: 'linear-gradient(to right, #111827, #1f2937, #111827)', borderBottom: '2px solid #00D4FF' }}>
+          <div className="max-w-[1200px] mx-auto px-4">
+            <GameInfo game={game} />
+          </div>
         </div>
       </div>
 

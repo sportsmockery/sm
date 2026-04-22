@@ -74,7 +74,7 @@ export default function ScoreHeader({ game }: ScoreHeaderProps) {
           animation: scoreFlash 2s ease-out;
         }
       `}</style>
-      <div className="sticky top-0 z-50 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white shadow-lg">
+      <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white shadow-lg">
         <div className="max-w-[1200px] mx-auto px-4">
           {/* Score display */}
           <div className="py-4 flex items-center justify-between">
