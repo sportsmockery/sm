@@ -727,16 +727,22 @@ async function getTeamStats(season: number): Promise<WhiteSoxTeamStats> {
 
   const wins = seasonRecord?.wins || 0
   const losses = seasonRecord?.losses || 0
-  const gamesPlayed = (gamesData?.length || 0) || (wins + losses)
-  const runsScored = gamesData?.reduce((sum: number, g: any) => sum + (g.whitesox_score || 0), 0) || 0
-  const runsAllowed = gamesData?.reduce((sum: number, g: any) => sum + (g.opponent_score || 0), 0) || 0
+  // Win% must be wins / (wins + losses), NOT wins / total games in games_master.
+  // games_master includes spring_training + regular games combined, which inflates
+  // the denominator and under-reports Win%.
+  const recordGames = wins + losses
+  // teamData (filtered by game_type) is the authoritative runs source.
+  const runsScored = teamData?.runs_scored
+    ?? (gamesData?.reduce((sum: number, g: any) => sum + (g.whitesox_score || 0), 0) || 0)
+  const runsAllowed = teamData?.runs_allowed
+    ?? (gamesData?.reduce((sum: number, g: any) => sum + (g.opponent_score || 0), 0) || 0)
 
   return {
     season,
     record: `${wins}-${losses}`,
     wins,
     losses,
-    pct: gamesPlayed > 0 ? Math.round((wins / gamesPlayed) * 1000) / 1000 : 0,
+    pct: recordGames > 0 ? Math.round((wins / recordGames) * 1000) / 1000 : 0,
     runsScored,
     runsAllowed,
     runDiff: runsScored - runsAllowed,

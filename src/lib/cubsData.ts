@@ -738,16 +738,24 @@ async function getTeamStats(season: number): Promise<CubsTeamStats> {
 
   const wins = seasonRecord?.wins || 0
   const losses = seasonRecord?.losses || 0
-  const gamesPlayed = gamesData?.length || 0
-  const runsScored = gamesData?.reduce((sum: number, g: any) => sum + (g.cubs_score || 0), 0) || 0
-  const runsAllowed = gamesData?.reduce((sum: number, g: any) => sum + (g.opponent_score || 0), 0) || 0
+  // Win% must be wins / (wins + losses), NOT wins / total games in games_master.
+  // games_master includes spring_training + regular games combined, which inflates
+  // the denominator and under-reports Win%.
+  const recordGames = wins + losses
+  // Filter gamesData to the current phase for accurate runs totals.
+  // teamData (already filtered by game_type) provides the authoritative runs count
+  // when available; fall back to games_master sum otherwise.
+  const runsScored = teamData?.runs_scored
+    ?? (gamesData?.reduce((sum: number, g: any) => sum + (g.cubs_score || 0), 0) || 0)
+  const runsAllowed = teamData?.runs_allowed
+    ?? (gamesData?.reduce((sum: number, g: any) => sum + (g.opponent_score || 0), 0) || 0)
 
   return {
     season,
     record: `${wins}-${losses}`,
     wins,
     losses,
-    pct: gamesPlayed > 0 ? Math.round((wins / gamesPlayed) * 1000) / 1000 : 0,
+    pct: recordGames > 0 ? Math.round((wins / recordGames) * 1000) / 1000 : 0,
     runsScored,
     runsAllowed,
     runDiff: runsScored - runsAllowed,
