@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import NewsletterForm from './NewsletterForm'
+import styles from './newsletter.module.css'
 
 export const metadata: Metadata = {
   title: 'Edge Daily Newsletter | Sports Mockery',
@@ -61,7 +62,7 @@ export default function NewsletterPage() {
       </section>
 
       {/* What You Get */}
-      <section style={{ position: 'relative', maxWidth: '720px', margin: '0 auto', padding: '0 24px 80px' }}>
+      <section style={{ position: 'relative', maxWidth: '900px', margin: '0 auto', padding: '0 24px 48px' }}>
         <h2 style={{
           fontSize: '24px',
           fontWeight: 800,
@@ -70,59 +71,89 @@ export default function NewsletterPage() {
           textAlign: 'center',
           marginBottom: '32px',
         }}>
-          What&apos;s Inside
+          What&apos;s Inside Every Edition
         </h2>
 
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '16px',
-        }}>
+        <div className={styles.featureGrid}>
           {[
             {
-              icon: '📊',
-              title: 'Live Scoreboard',
-              desc: 'Every Chicago team result from the night before — scores, records, and highlights.',
+              title: 'Scoreboard',
+              desc: 'Bears, Bulls, Cubs, Sox, Hawks — every final score, record, and result from the night before.',
             },
             {
-              icon: '📰',
               title: 'Top Stories',
-              desc: 'The biggest Chicago sports stories, curated and ranked by what matters most.',
+              desc: 'The biggest Chicago sports stories curated and ranked by readership. Headlines that actually matter.',
             },
             {
-              icon: '🤖',
-              title: 'Scout AI Insights',
-              desc: 'AI-powered questions and angles you won\'t find anywhere else.',
+              title: 'Scout AI',
+              desc: 'AI-generated questions and angles tailored to the day\'s news — insights you won\'t find anywhere else.',
             },
             {
-              icon: '🎥',
-              title: 'Latest Videos',
-              desc: 'New episodes from our YouTube channels — podcasts, analysis, and more.',
+              title: 'Video',
+              desc: 'Latest episodes from Untold Chicago Stories, Pinwheels & Ivy, and No Strokes — direct links, no searching.',
             },
           ].map((item) => (
             <div
               key={item.title}
               className="glass-card glass-card-static"
-              style={{ padding: '24px', textAlign: 'center' }}
+              style={{ padding: '20px', textAlign: 'center' }}
             >
-              <div style={{ fontSize: '28px', marginBottom: '12px' }}>{item.icon}</div>
-              <h3 style={{ fontSize: '16px', fontWeight: 700, color: 'var(--sm-text)', marginBottom: '8px' }}>
+              <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--sm-text)', marginBottom: '8px' }}>
                 {item.title}
               </h3>
-              <p style={{ fontSize: '14px', lineHeight: 1.6, color: 'var(--sm-text-muted)', margin: 0 }}>
+              <p style={{ fontSize: '13px', lineHeight: 1.6, color: 'var(--sm-text-muted)', margin: 0 }}>
                 {item.desc}
               </p>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Why Subscribe */}
+      <section style={{ position: 'relative', maxWidth: '600px', margin: '0 auto', padding: '0 24px 80px' }}>
+        <div className="glass-card glass-card-static" style={{ padding: '32px' }}>
+          <h2 style={{
+            fontSize: '22px',
+            fontWeight: 800,
+            letterSpacing: '-0.5px',
+            color: 'var(--sm-text)',
+            marginBottom: '20px',
+            textAlign: 'center',
+          }}>
+            Why 6 AM with Edge?
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {[
+              { label: 'All five teams, one email', detail: 'Stop checking five different apps. Bears, Bulls, Cubs, White Sox, and Blackhawks — consolidated into a single morning read.' },
+              { label: 'Written for Chicago fans', detail: 'Not a national wire recap. Every story, score, and insight is filtered through a Chicago lens by people who actually watch the games.' },
+              { label: 'AI-powered angles', detail: 'Scout AI surfaces questions and storylines the mainstream coverage misses — like having a sports analyst in your inbox.' },
+              { label: 'Under 5 minutes', detail: 'Designed to scan fast. Get fully caught up on your commute, over coffee, or before the group chat starts buzzing.' },
+            ].map((item) => (
+              <div key={item.label} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                <div style={{
+                  width: '6px',
+                  minWidth: '6px',
+                  height: '6px',
+                  borderRadius: '50%',
+                  backgroundColor: '#00D4FF',
+                  marginTop: '8px',
+                }} />
+                <div>
+                  <span style={{ fontSize: '15px', fontWeight: 600, color: 'var(--sm-text)' }}>{item.label}</span>
+                  <span style={{ fontSize: '14px', color: 'var(--sm-text-muted)' }}> — {item.detail}</span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         <p style={{
           textAlign: 'center',
           fontSize: '14px',
           color: 'var(--sm-text-dim)',
-          marginTop: '32px',
+          marginTop: '24px',
         }}>
-          Delivered 6 AM CT, every day. Unsubscribe anytime.
+          Delivered 6 AM CT, every day. Free forever. Unsubscribe anytime.
         </p>
       </section>
     </div>

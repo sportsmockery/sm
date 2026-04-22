@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import { createClient } from '@supabase/supabase-js'
 import ApplyForm from './ApplyForm'
 
 export const metadata: Metadata = {
@@ -12,30 +13,26 @@ export const metadata: Metadata = {
   },
 }
 
-const OPEN_ROLES = [
-  {
-    title: 'Sports Writer',
-    type: 'Full-time / Freelance',
-    desc: 'Cover Chicago sports with original reporting, analysis, and editorial takes. Beat coverage for one or more Chicago teams.',
-  },
-  {
-    title: 'Video Producer',
-    type: 'Full-time / Part-time',
-    desc: 'Create and edit video content for our YouTube channels — podcasts, analysis segments, and short-form social clips.',
-  },
-  {
-    title: 'Data Analyst',
-    type: 'Full-time',
-    desc: 'Build and maintain sports analytics models, stat visualizations, and data-driven content for SM Edge.',
-  },
-  {
-    title: 'Social Media Manager',
-    type: 'Full-time',
-    desc: 'Grow our social presence across platforms with engaging, on-brand content that drives traffic and conversation.',
-  },
-]
+export const revalidate = 60 // revalidate every 60s
 
-export default function ApplyPage() {
+async function getOpenJobs() {
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  )
+
+  const { data } = await supabase
+    .from('sm_open_jobs')
+    .select('title, type, description')
+    .eq('active', true)
+    .order('sort_order', { ascending: true })
+
+  return data || []
+}
+
+export default async function ApplyPage() {
+  const jobs = await getOpenJobs()
+
   return (
     <div className="sm-hero-bg" style={{ minHeight: '100vh' }}>
       <div className="sm-grid-overlay" />
@@ -79,50 +76,52 @@ export default function ApplyPage() {
       </section>
 
       {/* Open Roles */}
-      <section style={{ position: 'relative', maxWidth: '720px', margin: '0 auto', padding: '0 24px 48px' }}>
-        <h2 style={{
-          fontSize: '24px',
-          fontWeight: 800,
-          letterSpacing: '-0.5px',
-          color: 'var(--sm-text)',
-          marginBottom: '24px',
-        }}>
-          Open Roles
-        </h2>
+      {jobs.length > 0 && (
+        <section style={{ position: 'relative', maxWidth: '720px', margin: '0 auto', padding: '0 24px 48px' }}>
+          <h2 style={{
+            fontSize: '24px',
+            fontWeight: 800,
+            letterSpacing: '-0.5px',
+            color: 'var(--sm-text)',
+            marginBottom: '24px',
+          }}>
+            Open Roles
+          </h2>
 
-        <div style={{ display: 'grid', gap: '16px', marginBottom: '16px' }}>
-          {OPEN_ROLES.map((role) => (
-            <div
-              key={role.title}
-              className="glass-card glass-card-static"
-              style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '8px' }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
-                <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--sm-text)', margin: 0 }}>
-                  {role.title}
-                </h3>
-                <span style={{
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  color: '#00D4FF',
-                  padding: '4px 12px',
-                  borderRadius: '999px',
-                  background: 'rgba(0, 212, 255, 0.1)',
-                }}>
-                  {role.type}
-                </span>
+          <div style={{ display: 'grid', gap: '16px', marginBottom: '16px' }}>
+            {jobs.map((role) => (
+              <div
+                key={role.title}
+                className="glass-card glass-card-static"
+                style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '8px' }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                  <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--sm-text)', margin: 0 }}>
+                    {role.title}
+                  </h3>
+                  <span style={{
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    color: '#00D4FF',
+                    padding: '4px 12px',
+                    borderRadius: '999px',
+                    background: 'rgba(0, 212, 255, 0.1)',
+                  }}>
+                    {role.type}
+                  </span>
+                </div>
+                <p style={{ fontSize: '15px', lineHeight: 1.6, color: 'var(--sm-text-muted)', margin: 0 }}>
+                  {role.description}
+                </p>
               </div>
-              <p style={{ fontSize: '15px', lineHeight: 1.6, color: 'var(--sm-text-muted)', margin: 0 }}>
-                {role.desc}
-              </p>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        <p style={{ fontSize: '14px', color: 'var(--sm-text-dim)' }}>
-          Don&apos;t see your role? Apply anyway — we&apos;re always looking for talented people.
-        </p>
-      </section>
+          <p style={{ fontSize: '14px', color: 'var(--sm-text-dim)' }}>
+            Don&apos;t see your role? Apply anyway — we&apos;re always looking for talented people.
+          </p>
+        </section>
+      )}
 
       {/* Application Form */}
       <section style={{ position: 'relative', maxWidth: '600px', margin: '0 auto', padding: '0 24px 80px' }}>
@@ -136,7 +135,7 @@ export default function ApplyPage() {
           Apply Now
         </h2>
 
-        <ApplyForm roles={OPEN_ROLES.map((r) => r.title)} />
+        <ApplyForm roles={jobs.map((r) => r.title)} />
       </section>
     </div>
   )

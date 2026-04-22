@@ -1,8 +1,15 @@
 'use client'
 
-import { useState, FormEvent } from 'react'
+import { useState, useRef, FormEvent } from 'react'
 
 type Status = 'idle' | 'loading' | 'success' | 'error'
+
+const ALLOWED_TYPES = [
+  'application/pdf',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+]
+const ALLOWED_EXTENSIONS = ['.pdf', '.docx']
+const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10 MB
 
 export default function ApplyForm({ roles }: { roles: string[] }) {
   const [form, setForm] = useState({
@@ -14,11 +21,40 @@ export default function ApplyForm({ roles }: { roles: string[] }) {
     portfolio: '',
     coverLetter: '',
   })
+  const [resume, setResume] = useState<File | null>(null)
+  const [fileError, setFileError] = useState('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [status, setStatus] = useState<Status>('idle')
   const [errorMsg, setErrorMsg] = useState('')
 
   function update(field: string, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }))
+  }
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setFileError('')
+    const file = e.target.files?.[0]
+    if (!file) {
+      setResume(null)
+      return
+    }
+
+    const ext = '.' + file.name.split('.').pop()?.toLowerCase()
+    if (!ALLOWED_TYPES.includes(file.type) && !ALLOWED_EXTENSIONS.includes(ext)) {
+      setFileError('Please upload a PDF or DOCX file. Other formats are not accepted.')
+      setResume(null)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+      return
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
+      setFileError('File must be under 10 MB.')
+      setResume(null)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+      return
+    }
+
+    setResume(file)
   }
 
   async function handleSubmit(e: FormEvent) {
@@ -27,10 +63,15 @@ export default function ApplyForm({ roles }: { roles: string[] }) {
     setErrorMsg('')
 
     try {
+      const formData = new FormData()
+      Object.entries(form).forEach(([key, value]) => {
+        if (value) formData.append(key, value)
+      })
+      if (resume) formData.append('resume', resume)
+
       const res = await fetch('/api/apply', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: formData,
       })
 
       const data = await res.json()
@@ -174,6 +215,74 @@ export default function ApplyForm({ roles }: { roles: string[] }) {
             value={form.portfolio}
             onChange={(e) => update('portfolio', e.target.value)}
           />
+        </div>
+
+        {/* Resume Upload */}
+        <div>
+          <label htmlFor="resume" style={labelStyle}>Resume</label>
+          <div
+            style={{
+              position: 'relative',
+              border: '1px dashed var(--sm-border)',
+              borderRadius: '10px',
+              padding: '20px',
+              textAlign: 'center',
+              cursor: 'pointer',
+              transition: 'border-color 0.2s',
+            }}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <input
+              type="file"
+              id="resume"
+              ref={fileInputRef}
+              accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              onChange={handleFileChange}
+              style={{ display: 'none' }}
+            />
+            {resume ? (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                <svg width="20" height="20" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#00D4FF">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                </svg>
+                <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--sm-text)' }}>{resume.name}</span>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setResume(null)
+                    if (fileInputRef.current) fileInputRef.current.value = ''
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: '2px',
+                    color: 'var(--sm-text-muted)',
+                  }}
+                >
+                  <svg width="16" height="16" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            ) : (
+              <>
+                <svg width="24" height="24" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="var(--sm-text-muted)" style={{ margin: '0 auto 8px' }}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                </svg>
+                <p style={{ fontSize: '14px', color: 'var(--sm-text-muted)', margin: '0 0 4px' }}>
+                  Click to upload your resume
+                </p>
+                <p style={{ fontSize: '13px', color: 'var(--sm-text-dim)', margin: 0 }}>
+                  PDF or DOCX only, 10 MB max
+                </p>
+              </>
+            )}
+          </div>
+          {fileError && (
+            <p style={{ fontSize: '13px', color: '#BC0000', margin: '8px 0 0' }}>{fileError}</p>
+          )}
         </div>
 
         {/* Cover Letter */}
