@@ -75,9 +75,24 @@ export default async function ApplyPage() {
         </p>
       </section>
 
+      {/* Application Form */}
+      <section style={{ position: 'relative', maxWidth: '600px', margin: '0 auto', padding: '0 24px 48px' }}>
+        <h2 style={{
+          fontSize: '24px',
+          fontWeight: 800,
+          letterSpacing: '-0.5px',
+          color: 'var(--sm-text)',
+          marginBottom: '24px',
+        }}>
+          Apply Now
+        </h2>
+
+        <ApplyForm roles={jobs.map((r) => r.title)} />
+      </section>
+
       {/* Open Roles */}
       {jobs.length > 0 && (
-        <section style={{ position: 'relative', maxWidth: '720px', margin: '0 auto', padding: '0 24px 48px' }}>
+        <section style={{ position: 'relative', maxWidth: '720px', margin: '0 auto', padding: '0 24px 80px' }}>
           <h2 style={{
             fontSize: '24px',
             fontWeight: 800,
@@ -122,21 +137,6 @@ export default async function ApplyPage() {
           </p>
         </section>
       )}
-
-      {/* Application Form */}
-      <section style={{ position: 'relative', maxWidth: '600px', margin: '0 auto', padding: '0 24px 80px' }}>
-        <h2 style={{
-          fontSize: '24px',
-          fontWeight: 800,
-          letterSpacing: '-0.5px',
-          color: 'var(--sm-text)',
-          marginBottom: '24px',
-        }}>
-          Apply Now
-        </h2>
-
-        <ApplyForm roles={jobs.map((r) => r.title)} />
-      </section>
     </div>
   )
 }
