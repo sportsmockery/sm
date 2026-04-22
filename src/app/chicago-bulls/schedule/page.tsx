@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description: 'Complete Chicago Bulls 2025-26 schedule with game dates, times, opponents, scores, and results. View upcoming games and past results.',
 }
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 300
 
 export default async function BullsSchedulePage() {
   const team = CHICAGO_TEAMS.bulls

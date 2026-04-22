@@ -830,8 +830,10 @@ export async function getBearsStats(
 
   return buildSafeFetch(
     async () => {
-      const teamStats = await getTeamStats(targetSeason, gameType)
-      const leaderboards = await getLeaderboards(targetSeason, gameType)
+      const [teamStats, leaderboards] = await Promise.all([
+        getTeamStats(targetSeason, gameType),
+        getLeaderboards(targetSeason, gameType),
+      ])
       return { team: teamStats, leaderboards, gameType }
     },
     {
@@ -870,30 +872,24 @@ async function getTeamStatsFromDatalab(season: number, gameType: GameType = 'reg
     return getDefaultTeamStats(season)
   }
 
-  // Get team season stats filtered by game_type
-  const { data: teamData } = await datalabAdmin
-    .from('bears_team_season_stats')
-    .select('*')
-    .eq('season', season)
-    .eq('game_type', gameType)
-    .single()
-
-  // Get season record for accurate W-L
-  const { data: recordData } = await datalabAdmin
-    .from('bears_season_record')
-    .select('*')
-    .single()
-
-  // Calculate points against from completed games, filtered by game_type
-  const gameTypeFilter = gameType === 'postseason'
-    ? 'game_type.eq.postseason,game_type.eq.post,game_type.eq.playoff'
-    : 'game_type.eq.regular,game_type.is.null'
-
-  const { data: gamesData } = await datalabAdmin
-    .from('bears_games_master')
-    .select('bears_score, opponent_score, game_type')
-    .eq('season', season)
-    .or('bears_score.gt.0,opponent_score.gt.0')
+  // Parallelize all three queries
+  const [{ data: teamData }, { data: recordData }, { data: gamesData }] = await Promise.all([
+    datalabAdmin
+      .from('bears_team_season_stats')
+      .select('*')
+      .eq('season', season)
+      .eq('game_type', gameType)
+      .single(),
+    datalabAdmin
+      .from('bears_season_record')
+      .select('*')
+      .single(),
+    datalabAdmin
+      .from('bears_games_master')
+      .select('bears_score, opponent_score, game_type')
+      .eq('season', season)
+      .or('bears_score.gt.0,opponent_score.gt.0'),
+  ])
 
   // Filter games by type in JS (more reliable than complex OR filters)
   const filteredGames = (gamesData || []).filter((g: any) => {
@@ -956,19 +952,17 @@ async function getLeaderboards(season: number, gameType: GameType = 'regular'): 
     return { passing: [], rushing: [], receiving: [], defense: [], sacks: [], interceptions: [] }
   }
 
-  const players = await getBearsPlayers()
+  // Parallelize players and game stats fetch
+  const [players, { data: allGameStats }] = await Promise.all([
+    getBearsPlayers(),
+    datalabAdmin
+      .from('bears_player_game_stats')
+      .select('*')
+      .eq('season', season)
+      .eq('is_opponent', false),
+  ])
   // Bears now uses ESPN ID: bp.espn_id = bpgs.player_id
   const playersMap = new Map(players.map(p => [p.playerId, p]))
-
-  // Get all game stats for season and aggregate by player
-  // Use select('*') to avoid column name mismatches between short/long formats
-  // Fetch all stats for the season, then filter game_type in JS
-  // (game_type values are inconsistent: null, empty, 'regular', 'postseason', 'post', 'playoff')
-  let { data: allGameStats } = await datalabAdmin
-    .from('bears_player_game_stats')
-    .select('*')
-    .eq('season', season)
-    .eq('is_opponent', false)
 
   // Filter by game type in JS for reliability
   let gameStats = (allGameStats || []).filter((g: any) => {

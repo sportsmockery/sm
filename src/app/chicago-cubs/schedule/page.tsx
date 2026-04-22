@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description: 'Complete Chicago Cubs 2026 schedule with game dates, times, opponents, scores, and results. View upcoming games and past results.',
 }
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 300
 
 export default async function CubsSchedulePage() {
   const team = CHICAGO_TEAMS.cubs

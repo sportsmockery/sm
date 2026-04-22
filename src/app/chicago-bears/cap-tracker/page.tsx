@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 }
 
 // Revalidate every hour per user request
-export const dynamic = 'force-dynamic'
+export const revalidate = 300
 
 function formatMoney(n: number | null | undefined): string {
   if (n == null) return '--'

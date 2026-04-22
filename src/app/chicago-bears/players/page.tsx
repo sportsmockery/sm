@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description: 'Complete list of Chicago Bears players with photos, positions, stats, and player profiles.',
 }
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 300
 
 export default async function BearsPlayersPage() {
   const team = CHICAGO_TEAMS.bears

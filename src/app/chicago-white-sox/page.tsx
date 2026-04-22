@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 }
 
 // Revalidate every hour
-export const dynamic = 'force-dynamic'
+export const revalidate = 300
 
 // Fetch White Sox posts from database
 async function getWhiteSoxPosts(limit: number = 12) {

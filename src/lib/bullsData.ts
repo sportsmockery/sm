@@ -659,8 +659,10 @@ export async function getBullsStats(season?: number): Promise<BullsStats> {
 
   return buildSafeFetch(
     async () => {
-      const teamStats = await getTeamStats(targetSeason)
-      const leaderboards = await getLeaderboards(targetSeason)
+      const [teamStats, leaderboards] = await Promise.all([
+        getTeamStats(targetSeason),
+        getLeaderboards(targetSeason),
+      ])
       return { team: teamStats, leaderboards }
     },
     {
@@ -744,24 +746,24 @@ async function getLeaderboards(season: number): Promise<BullsLeaderboard> {
     return { scoring: [], rebounding: [], assists: [], defense: [], steals: [], blocks: [] }
   }
 
-  const players = await getBullsPlayers()
+  // Parallelize players and game stats fetch
+  const [players, { data: gameStats }] = await Promise.all([
+    getBullsPlayers(),
+    datalabAdmin
+      .from('bulls_player_game_stats')
+      .select(`
+        player_id,
+        points,
+        total_rebounds,
+        assists,
+        steals,
+        blocks
+      `)
+      .eq('season', season)
+      .eq('is_opponent', false),
+  ])
   // Use playerId (ESPN ID) as key since stats tables use ESPN IDs
   const playersMap = new Map(players.map(p => [p.playerId, p]))
-
-  // Get all game stats for season and aggregate by player
-  // Note: Column is 'total_rebounds' in the database, not 'rebounds'
-  let { data: gameStats } = await datalabAdmin
-    .from('bulls_player_game_stats')
-    .select(`
-      player_id,
-      points,
-      total_rebounds,
-      assists,
-      steals,
-      blocks
-    `)
-    .eq('season', season)
-    .eq('is_opponent', false)
 
   // Fallback to previous season if no stats
   if (!gameStats || gameStats.length === 0) {

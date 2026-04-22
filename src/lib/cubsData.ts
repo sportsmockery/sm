@@ -686,8 +686,10 @@ export async function getCubsStats(season?: number): Promise<CubsStats> {
 
   return buildSafeFetch(
     async () => {
-      const teamStats = await getTeamStats(targetSeason)
-      const leaderboards = await getLeaderboards(targetSeason)
+      const [teamStats, leaderboards] = await Promise.all([
+        getTeamStats(targetSeason),
+        getLeaderboards(targetSeason),
+      ])
       return { team: teamStats, leaderboards }
     },
     {
@@ -774,13 +776,34 @@ async function getLeaderboards(season: number): Promise<CubsLeaderboard> {
     return { batting: [], homeRuns: [], obp: [], rbiLeaders: [], atBats: [], pitching: [], saves: [] }
   }
 
-  const players = await getCubsPlayers()
+  // Parallelize all three queries
+  const [players, { data: rawPlayers }, { data: gameStats }] = await Promise.all([
+    getCubsPlayers(),
+    datalabAdmin
+      .from('cubs_players')
+      .select('espn_id, player_id')
+      .eq('is_active', true),
+    datalabAdmin
+      .from('cubs_player_game_stats')
+      .select(`
+        player_id,
+        at_bats,
+        hits,
+        home_runs,
+        rbi,
+        walks,
+        innings_pitched,
+        earned_runs,
+        strikeouts_pitched,
+        win,
+        loss,
+        save
+      `)
+      .eq('season', season)
+      .eq('is_opponent', false),
+  ])
 
   // Build MLB player_id → player map (stats table uses MLB IDs, not ESPN IDs)
-  const { data: rawPlayers } = await datalabAdmin
-    .from('cubs_players')
-    .select('espn_id, player_id')
-    .eq('is_active', true)
   const espnToPlayer = new Map(players.map(p => [p.playerId, p]))
   const playersMap = new Map<string, typeof players[0]>()
   for (const rp of rawPlayers || []) {
@@ -789,26 +812,6 @@ async function getLeaderboards(season: number): Promise<CubsLeaderboard> {
       playersMap.set(String(rp.player_id), player)
     }
   }
-
-  // Get all game stats for season and aggregate by player
-  let { data: gameStats } = await datalabAdmin
-    .from('cubs_player_game_stats')
-    .select(`
-      player_id,
-      at_bats,
-      hits,
-      home_runs,
-      rbi,
-      walks,
-      innings_pitched,
-      earned_runs,
-      strikeouts_pitched,
-      win,
-      loss,
-      save
-    `)
-    .eq('season', season)
-    .eq('is_opponent', false)
 
   // Fallback to previous season if no stats (off-season)
   if (!gameStats || gameStats.length === 0) {

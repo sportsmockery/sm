@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: 'Complete list of Chicago White Sox players with photos, positions, stats, and player profiles.',
 }
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 300
 
 type PositionGroup = 'pitchers' | 'catchers' | 'infielders' | 'outfielders'
 

@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   },
 }
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 300
 
 async function getCubsPosts(limit: number = 20) {
   try {

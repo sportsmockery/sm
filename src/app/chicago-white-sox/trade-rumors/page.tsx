@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   },
 }
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 300
 
 async function getWhiteSoxPosts(limit: number = 20) {
   try {

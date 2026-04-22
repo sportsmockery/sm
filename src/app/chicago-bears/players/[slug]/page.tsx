@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: PlayerPageProps): Promise<Met
   }
 }
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 300
 
 export default async function PlayerProfilePage({ params }: PlayerPageProps) {
   const { slug } = await params

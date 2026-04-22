@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   },
 }
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 300
 
 // Helper to calculate progressive record
 function calculateProgressiveRecord(games: BearsGame[]): (BearsGame & { progressiveRecord: string })[] {

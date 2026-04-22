@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   },
 }
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 300
 
 // Fetch Bulls posts from database
 async function getBullsPosts(limit: number = 20) {

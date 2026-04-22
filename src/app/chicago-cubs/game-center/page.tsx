@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   },
 }
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 300
 
 export default async function CubsGameCenterPage() {
   const team = CHICAGO_TEAMS.cubs

@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 }
 
 // Revalidate every hour
-export const dynamic = 'force-dynamic'
+export const revalidate = 300
 
 const TEAM_COLOR = 'var(--sm-red)'
 

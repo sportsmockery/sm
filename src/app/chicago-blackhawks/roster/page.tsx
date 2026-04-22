@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: 'Complete 2025-26 Chicago Blackhawks roster with player profiles, positions, measurements, and stats.',
 }
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 300
 
 const TEAM_COLOR = 'var(--sm-red)'
 

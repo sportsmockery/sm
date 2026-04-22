@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   },
 }
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 300
 
 export default async function BearsStatsPage() {
   // 2025-26 NFL season is stored as season = 2025

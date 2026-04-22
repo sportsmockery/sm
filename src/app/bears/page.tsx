@@ -16,7 +16,7 @@ import {
   AskBearsAI,
 } from '@/components/bears'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 300
 
 export const metadata: Metadata = {
   title: 'Chicago Bears Hub | News, Stats & Analysis',
