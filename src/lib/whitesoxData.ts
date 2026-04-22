@@ -694,27 +694,29 @@ async function getTeamStats(season: number): Promise<WhiteSoxTeamStats> {
     return getDefaultTeamStats(season)
   }
 
+  // CRITICAL: Both whitesox_team_season_stats and whitesox_seasons can have multiple rows per season
+  // (regular + spring_training). Must filter by game_type to avoid .single() failure.
+  const mlbPhase = getMLBSeasonPhase()
+  const gameTypeFilter =
+    mlbPhase === 'spring-training' ? 'spring_training'
+    : mlbPhase === 'postseason' ? 'postseason'
+    : 'regular'
+
   // Get team season stats
-  const { data: teamData } = await datalabAdmin
+  let teamStatsQuery = datalabAdmin
     .from('whitesox_team_season_stats')
     .select('*')
     .eq('season', season)
-    .single()
+    .eq('game_type', gameTypeFilter)
+  const { data: teamData } = await teamStatsQuery.maybeSingle()
 
-  // CRITICAL: Get authoritative record from whitesox_seasons table (recommended by Datalab)
-  // This avoids issues with calculating record from games_master
-  // Filter by game_type to avoid .single() failure when both spring_training and regular rows exist
-  const mlbPhase = getMLBSeasonPhase()
+  // Get authoritative record from whitesox_seasons table (recommended by Datalab)
   let seasonsQuery = datalabAdmin
     .from('whitesox_seasons')
     .select('wins, losses')
     .eq('season', season)
-  if (mlbPhase === 'regular') {
-    seasonsQuery = seasonsQuery.eq('game_type', 'regular')
-  } else if (mlbPhase === 'spring-training') {
-    seasonsQuery = seasonsQuery.eq('game_type', 'spring_training')
-  }
-  const { data: seasonRecord } = await seasonsQuery.single()
+    .eq('game_type', gameTypeFilter)
+  const { data: seasonRecord } = await seasonsQuery.maybeSingle()
 
   // Get completed games for runs calculation
   const { data: gamesData } = await datalabAdmin
