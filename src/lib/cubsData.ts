@@ -778,13 +778,16 @@ async function getLeaderboards(season: number): Promise<CubsLeaderboard> {
     return { batting: [], homeRuns: [], obp: [], rbiLeaders: [], atBats: [], pitching: [], saves: [] }
   }
 
-  // Parallelize all three queries
-  const [players, { data: rawPlayers }, { data: initialGameStats }] = await Promise.all([
-    getCubsPlayers(),
+  // Parallelize all three queries.
+  // Fetch ALL players (not just is_active) so historical-season leaderboards still
+  // show players who appeared that year but have since been traded/released.
+  const [{ data: allPlayersRaw }, { data: rawPlayers }, { data: initialGameStats }] = await Promise.all([
     datalabAdmin
       .from('cubs_players')
-      .select('espn_id, player_id')
-      .eq('is_active', true),
+      .select('*'),
+    datalabAdmin
+      .from('cubs_players')
+      .select('espn_id, player_id'),
     datalabAdmin
       .from('cubs_player_game_stats')
       .select(`
@@ -804,6 +807,8 @@ async function getLeaderboards(season: number): Promise<CubsLeaderboard> {
       .eq('season', season)
       .eq('is_opponent', false),
   ])
+
+  const players = transformPlayers((allPlayersRaw as any[]) || [])
 
   // Build MLB player_id → player map (stats table uses MLB IDs, not ESPN IDs)
   const espnToPlayer = new Map(players.map(p => [p.playerId, p]))

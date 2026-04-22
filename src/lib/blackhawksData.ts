@@ -245,8 +245,10 @@ function transformPlayers(data: any[]): BlackhawksPlayer[] {
     const yearsExp = p.years_pro ?? p.years_exp ?? p.experience
 
     return {
-      // Stats table uses ESPN IDs in player_id column (confirmed by DB inspection)
-      playerId: String(p.espn_id || p.player_id || p.id),
+      // Stats table (blackhawks_player_game_stats) uses NHL IDs in its player_id column.
+      // Prefer nhl_id (matches stats), fall back to player_id (which is also nhl_id after
+      // dedup migration), then espn_id, then id. This ensures playersMap joins correctly.
+      playerId: String(p.nhl_id || p.player_id || p.espn_id || p.id),
       internalId: p.id,
       slug: p.slug || generateSlug(p.name || p.full_name),
       fullName: p.name || p.full_name,
@@ -728,9 +730,13 @@ async function getLeaderboards(season: number): Promise<BlackhawksLeaderboard> {
     return { goals: [], assists: [], points: [], goaltending: [] }
   }
 
-  // Parallelize players and game stats fetch
-  const [players, { data: initialGameStats }] = await Promise.all([
-    getBlackhawksPlayers(),
+  // Parallelize players and game stats fetch.
+  // Include ALL players (not just is_active) so historical-season leaderboards still
+  // show players who appeared that year but have since left the roster.
+  const [{ data: allPlayersRaw }, { data: initialGameStats }] = await Promise.all([
+    datalabAdmin
+      .from('blackhawks_players')
+      .select('*'),
     datalabAdmin
       .from('blackhawks_player_game_stats')
       .select(`
@@ -745,8 +751,8 @@ async function getLeaderboards(season: number): Promise<BlackhawksLeaderboard> {
       .eq('season', season)
       .eq('is_opponent', false),
   ])
-  // Use playerId (ESPN ID) as key since stats tables use ESPN IDs
-  const playersMap = new Map(players.map(p => [p.playerId, p]))
+  const players = transformPlayers((allPlayersRaw as any[]) || [])
+  const playersMap = new Map(players.map((p: any) => [p.playerId, p]))
 
   // Fallback to previous season if no stats
   let gameStats = initialGameStats
@@ -843,8 +849,14 @@ async function getLeaderboards(season: number): Promise<BlackhawksLeaderboard> {
       tertiaryLabel: 'A',
     }))
 
+  // Goaltending: require minimum appearances to avoid small-sample SV% outliers.
+  // NHL qualifying goalies need ~25 games in a full 82-game season.
+  // Scale to max games played so this works mid-season too.
+  const maxGoalieGames = aggregatedStats.reduce((m, s) => Math.max(m, s.saves > 0 ? s.games : 0), 0)
+  const minGoalieGames = Math.max(3, Math.floor(maxGoalieGames * 0.25))
+
   const goaltending = aggregatedStats
-    .filter(s => s.saves > 0 && playersMap.has(String(s.player_id)))
+    .filter(s => s.saves > 0 && s.games >= minGoalieGames && playersMap.has(String(s.player_id)))
     .sort((a, b) => {
       const aSvPct = a.shotsAgainst > 0 ? a.saves / a.shotsAgainst : 0
       const bSvPct = b.shotsAgainst > 0 ? b.saves / b.shotsAgainst : 0

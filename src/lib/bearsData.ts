@@ -952,15 +952,25 @@ async function getLeaderboards(season: number, gameType: GameType = 'regular'): 
     return { passing: [], rushing: [], receiving: [], defense: [], sacks: [], interceptions: [] }
   }
 
-  // Parallelize players and game stats fetch
-  const [players, { data: allGameStats }] = await Promise.all([
-    getBearsPlayers(),
+  // Parallelize players and game stats fetch.
+  // IMPORTANT: For a historical stats page (e.g., 2025 season), we must include
+  // players who appeared that season even if they are no longer active on the roster.
+  // Fetch ALL players (active + inactive) and rely on the game_stats join to filter.
+  const [{ data: allPlayersRaw }, { data: allGameStats }] = await Promise.all([
+    datalabAdmin
+      .from('bears_players')
+      .select(`
+        id, player_id, espn_id, name, first_name, last_name,
+        position, position_group, jersey_number, height_inches, weight_lbs,
+        age, college, years_exp, status, is_active, headshot_url
+      `),
     datalabAdmin
       .from('bears_player_game_stats')
       .select('*')
       .eq('season', season)
       .eq('is_opponent', false),
   ])
+  const players = transformPlayers((allPlayersRaw as any[]) || [])
   // Bears now uses ESPN ID: bp.espn_id = bpgs.player_id
   const playersMap = new Map(players.map(p => [p.playerId, p]))
 

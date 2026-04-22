@@ -746,9 +746,13 @@ async function getLeaderboards(season: number): Promise<BullsLeaderboard> {
     return { scoring: [], rebounding: [], assists: [], defense: [], steals: [], blocks: [] }
   }
 
-  // Parallelize players and game stats fetch
-  const [players, { data: initialGameStats }] = await Promise.all([
-    getBullsPlayers(),
+  // Parallelize players and game stats fetch.
+  // Include ALL players (not just is_current_bulls) so historical-season leaderboards
+  // still show players who appeared that year but have since been traded/released.
+  const [{ data: allPlayersRaw }, { data: initialGameStats }] = await Promise.all([
+    datalabAdmin
+      .from('bulls_players')
+      .select('*'),
     datalabAdmin
       .from('bulls_player_game_stats')
       .select(`
@@ -762,6 +766,7 @@ async function getLeaderboards(season: number): Promise<BullsLeaderboard> {
       .eq('season', season)
       .eq('is_opponent', false),
   ])
+  const players = transformPlayers((allPlayersRaw as any[]) || [])
   // Use playerId (ESPN ID) as key since stats tables use ESPN IDs
   const playersMap = new Map(players.map(p => [p.playerId, p]))
 
@@ -814,8 +819,19 @@ async function getLeaderboards(season: number): Promise<BullsLeaderboard> {
 
   const aggregatedStats = Array.from(playerTotals.values())
 
-  const scoring = aggregatedStats
-    .filter(s => s.points > 0 && playersMap.has(String(s.player_id)))
+  // Determine minimum games qualifier. NBA rate-stat leaders traditionally require
+  // 58 games in a full 82-game season (~70%). We scale that to actual games played
+  // so the filter works mid-season too. Fallback: 10 games minimum.
+  const maxGames = aggregatedStats.reduce((m, s) => Math.max(m, s.games), 0)
+  const minGames = Math.max(10, Math.floor(maxGames * 0.4))
+
+  // Qualified pool (for rate-based leaderboards: PPG, RPG, APG, SPG, BPG)
+  const qualified = aggregatedStats.filter(s =>
+    s.games >= minGames && playersMap.has(String(s.player_id))
+  )
+
+  const scoring = qualified
+    .filter(s => s.points > 0)
     .sort((a, b) => (b.points / b.games) - (a.points / a.games))
     .slice(0, 5)
     .map(s => ({
@@ -828,8 +844,8 @@ async function getLeaderboards(season: number): Promise<BullsLeaderboard> {
       tertiaryLabel: 'GP',
     }))
 
-  const rebounding = aggregatedStats
-    .filter(s => s.rebounds > 0 && playersMap.has(String(s.player_id)))
+  const rebounding = qualified
+    .filter(s => s.rebounds > 0)
     .sort((a, b) => (b.rebounds / b.games) - (a.rebounds / a.games))
     .slice(0, 5)
     .map(s => ({
@@ -842,8 +858,8 @@ async function getLeaderboards(season: number): Promise<BullsLeaderboard> {
       tertiaryLabel: 'GP',
     }))
 
-  const assists = aggregatedStats
-    .filter(s => s.assists > 0 && playersMap.has(String(s.player_id)))
+  const assists = qualified
+    .filter(s => s.assists > 0)
     .sort((a, b) => (b.assists / b.games) - (a.assists / a.games))
     .slice(0, 5)
     .map(s => ({
@@ -856,8 +872,8 @@ async function getLeaderboards(season: number): Promise<BullsLeaderboard> {
       tertiaryLabel: 'GP',
     }))
 
-  const defense = aggregatedStats
-    .filter(s => (s.steals + s.blocks) > 0 && playersMap.has(String(s.player_id)))
+  const defense = qualified
+    .filter(s => (s.steals + s.blocks) > 0)
     .sort((a, b) => ((b.steals + b.blocks) / b.games) - ((a.steals + a.blocks) / a.games))
     .slice(0, 5)
     .map(s => ({
@@ -870,8 +886,8 @@ async function getLeaderboards(season: number): Promise<BullsLeaderboard> {
       tertiaryLabel: 'GP',
     }))
 
-  const steals = aggregatedStats
-    .filter(s => s.steals > 0 && playersMap.has(String(s.player_id)))
+  const steals = qualified
+    .filter(s => s.steals > 0)
     .sort((a, b) => (b.steals / b.games) - (a.steals / a.games))
     .slice(0, 5)
     .map(s => ({
@@ -884,8 +900,8 @@ async function getLeaderboards(season: number): Promise<BullsLeaderboard> {
       tertiaryLabel: 'GP',
     }))
 
-  const blocks = aggregatedStats
-    .filter(s => s.blocks > 0 && playersMap.has(String(s.player_id)))
+  const blocks = qualified
+    .filter(s => s.blocks > 0)
     .sort((a, b) => (b.blocks / b.games) - (a.blocks / a.games))
     .slice(0, 5)
     .map(s => ({
