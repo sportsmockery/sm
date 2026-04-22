@@ -219,7 +219,7 @@ export function ChicagoDailyEmail(v: DailyEdgeEmailVariables) {
 
     {/* CTA */}
     <table role="presentation" cellPadding={0} cellSpacing={0} className="mob-full"><tr>
-      <td style={{ backgroundColor: RED, borderRadius: '999px', padding: '11px 24px', lineHeight: '1' }}>
+      <td style={{ backgroundColor: '#BC0000', borderRadius: '999px', padding: '11px 24px', lineHeight: '1' }}>
         <Link href={hero.url} style={{ color: W, fontSize: '13px', fontWeight: 600, textDecoration: 'none', fontFamily: F, whiteSpace: 'nowrap' as const }}>
           {ctaCopy}
         </Link>
@@ -242,7 +242,7 @@ export function ChicagoDailyEmail(v: DailyEdgeEmailVariables) {
       <table role="presentation" width="100%" cellPadding={0} cellSpacing={0} className="stack">
         <tr>
           {ok(s.image_url) && (
-            <td width="28%" valign="top" style={{ paddingRight: '12px' }} className="si">
+            <td width="28%" valign="middle" style={{ paddingRight: '12px' }} className="si">
               <Link href={s.url}>
                 <Img src={s.image_url} alt="" width="100%"
                   style={{ display: 'block', borderRadius: '6px', maxHeight: '78px', objectFit: 'cover' as const }} />
@@ -265,8 +265,8 @@ export function ChicagoDailyEmail(v: DailyEdgeEmailVariables) {
   {/* Browse all */}
   <tr><td style={{ paddingTop: '14px', paddingBottom: '4px' }}>
     <table role="presentation" cellPadding={0} cellSpacing={0}><tr>
-      <td style={{ padding: '7px 14px', borderRadius: '999px', border: `1px solid ${W15}` }}>
-        <Link href={v.all_stories_url} style={{ color: W50, fontSize: '12px', fontWeight: 500, textDecoration: 'none', fontFamily: F }}>
+      <td style={{ backgroundColor: '#BC0000', borderRadius: '999px', padding: '9px 20px', lineHeight: '1' }}>
+        <Link href={v.all_stories_url} style={{ color: W, fontSize: '12px', fontWeight: 600, textDecoration: 'none', fontFamily: F, whiteSpace: 'nowrap' as const }}>
           Browse all stories →
         </Link>
       </td>
@@ -411,14 +411,12 @@ export function ChicagoDailyEmail(v: DailyEdgeEmailVariables) {
     <div style={{ marginBottom: '16px', lineHeight: '22px' }}>
       {[
         { l: '𝕏', h: 'https://twitter.com/sportsmockery' },
-        { l: 'YouTube', h: 'https://youtube.com/@sportsmockery' },
-        { l: 'Instagram', h: 'https://instagram.com/sportsmockery' },
         { l: 'Facebook', h: 'https://facebook.com/sportsmockery' },
-        { l: 'TikTok', h: 'https://tiktok.com/@sportsmockery' },
+        { l: 'TikTok', h: 'https://www.tiktok.com/@sportsmockerychi' },
       ].map((s, i) => (
         <span key={s.l}>
-          {i > 0 && <span style={{ color: W08, margin: '0 7px', fontSize: '10px' }}>·</span>}
-          <Link href={s.h} style={{ color: W30, fontSize: '11px', fontWeight: 500, textDecoration: 'none', fontFamily: F }}>{s.l}</Link>
+          {i > 0 && <span style={{ color: W30, margin: '0 7px', fontSize: '10px' }}>·</span>}
+          <Link href={s.h} style={{ color: W50, fontSize: '11px', fontWeight: 500, textDecoration: 'none', fontFamily: F }}>{s.l}</Link>
         </span>
       ))}
     </div>

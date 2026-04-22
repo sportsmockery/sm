@@ -346,8 +346,8 @@ export function prepareDailyEmailVariables(
       'Breaking news alerts for your favorite teams',
       'Personalized feed — only the teams you follow',
     ],
-    ios_url: 'https://apps.apple.com/app/sportsmockery',
-    android_url: 'https://play.google.com/store/apps/details?id=com.sportsmockery',
+    ios_url: 'https://apps.apple.com/us/app/sports-mockery/id680797716',
+    android_url: 'https://play.google.com/store/apps/details?id=com.mobiloud.android.sportsmockery&hl=en',
 
     // Footer
     unsubscribe_url: 'https://sportsmockery.com/unsubscribe',
