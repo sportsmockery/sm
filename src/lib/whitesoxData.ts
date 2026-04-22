@@ -766,7 +766,7 @@ async function getLeaderboards(season: number): Promise<WhiteSoxLeaderboard> {
   }
 
   // Parallelize all three queries
-  const [players, { data: rawPlayers }, { data: gameStats }] = await Promise.all([
+  const [players, { data: rawPlayers }, { data: initialGameStats }] = await Promise.all([
     getWhiteSoxPlayers(),
     datalabAdmin
       .from('whitesox_players')
@@ -803,6 +803,7 @@ async function getLeaderboards(season: number): Promise<WhiteSoxLeaderboard> {
   }
 
   // Fallback to previous season if no stats (off-season)
+  let gameStats = initialGameStats
   if (!gameStats || gameStats.length === 0) {
     const { data: prevStats } = await datalabAdmin
       .from('whitesox_player_game_stats')
