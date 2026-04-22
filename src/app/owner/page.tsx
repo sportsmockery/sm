@@ -1,7 +1,7 @@
 import { datalabAdmin } from '@/lib/supabase-datalab'
 import OwnershipHub from './OwnershipHub'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 300
 
 const DATALAB_URL = 'https://datalab.sportsmockery.com'
 
