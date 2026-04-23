@@ -59,19 +59,22 @@ export async function GET(
     }
 
     // Both Chicago team and opponent stats use blackhawks_game_id
+    // Stats are keyed on game_id (the NHL API's game ID), NOT on blackhawks_game_id
+    // (which is often null). Use game_id from the games_master row.
+    const nhlGameId = gameData.game_id
     const [hawksResult, oppResult] = await Promise.all([
       datalabAdmin
         .from('blackhawks_player_game_stats')
         .select(`player_id, goals, assists, points, plus_minus, penalty_minutes, shots_on_goal, hits, blocked_shots, time_on_ice,
           saves, goals_against, shots_against, is_opponent`)
-        .eq('blackhawks_game_id', gameData.id)
+        .eq('game_id', nhlGameId)
         .eq('is_opponent', false),
       datalabAdmin
         .from('blackhawks_player_game_stats')
         .select(`player_id, goals, assists, points, plus_minus, penalty_minutes, shots_on_goal, hits, blocked_shots, time_on_ice,
           saves, goals_against, shots_against, is_opponent,
           opponent_player_name, opponent_player_position, opponent_player_headshot_url`)
-        .eq('blackhawks_game_id', gameData.id)
+        .eq('game_id', nhlGameId)
         .eq('is_opponent', true),
     ])
 
