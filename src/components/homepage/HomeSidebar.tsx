@@ -149,8 +149,8 @@ export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarP
   }
 
   return (
-    <header className="sticky top-0 flex h-screen w-[275px] flex-col justify-between px-2 py-3">
-      <div className="flex flex-col gap-1 pt-4">
+    <header className="sticky top-0 flex h-screen w-[275px] flex-col justify-between px-2 py-3" style={{ overflow: 'hidden' }}>
+      <div className="flex flex-col gap-1 pt-4" style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
         {/* Team Navigation */}
         <nav className="flex flex-col gap-1">
           {/* For You - All Teams */}
@@ -239,8 +239,8 @@ export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarP
           })}
         </nav>
 
-        {/* Top 5 Articles — shown for all teams, filtered by team when selected */}
-        {topArticles.length > 0 && (
+        {/* Top 5 Articles — only shown on "For You" (all teams), hidden when a specific team is selected */}
+        {topArticles.length > 0 && (!selectedTeam || selectedTeam === 'all') && (
           <div style={{ marginTop: 8, borderTop: '1px solid var(--hp-border)', paddingTop: 8 }}>
             <div style={{ padding: '4px 16px', fontSize: 14, fontWeight: 700, letterSpacing: '-0.01em' }}>
               <span style={{ color: '#00D4FF' }}>EDGE</span> <span style={{ color: '#BC0000' }}>&#x2736;</span> <span style={{ color: '#00D4FF' }}>Top Stories</span>
@@ -309,7 +309,7 @@ export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarP
           </div>
         )}
 
-        {/* SM Edge Features — left sidebar only when a team is selected */}
+        {/* SM Edge Features — shown when a team is selected (replaces Top Stories) */}
         {selectedTeam && selectedTeam !== 'all' && (
           <div style={{ marginTop: 8, borderTop: '1px solid var(--hp-border)', paddingTop: 8 }}>
             <div style={{ padding: '4px 16px', fontSize: 14, fontWeight: 700, letterSpacing: '-0.01em' }}>
@@ -338,9 +338,13 @@ export default function HomeSidebar({ selectedTeam, onSelectTeam }: HomeSidebarP
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg" style={{ background: 'var(--hp-muted)', color: '#00D4FF', border: '1px solid #00D4FF' }}>
                   <item.icon className="h-5 w-5" />
                 </div>
-                <div style={{ flex: 1 }}>
-                  <span>{item.label}</span>
-                  {/* No descriptions on left sidebar when team selected — keep descriptions on right (TrendsSidebar) */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 14, fontWeight: 500 }}>{item.label}</div>
+                  {item.desc && (
+                    <div style={{ fontSize: 11, color: 'var(--hp-muted-foreground)', lineHeight: 1.3, marginTop: 2, whiteSpace: 'normal' }}>
+                      {item.desc}
+                    </div>
+                  )}
                 </div>
                 {(item.label === 'Fan Chat' || item.label === 'Game Center') && (
                   <span
