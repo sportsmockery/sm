@@ -1,8 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { checkRateLimitRedis, getClientIp } from '@/lib/rate-limit'
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit: 5 subscribe attempts per minute per IP
+    const rl = await checkRateLimitRedis({
+      prefix: 'newsletter-sub',
+      key: getClientIp(request),
+      maxRequests: 5,
+      windowSeconds: 60,
+    })
+    if (!rl.success) {
+      return NextResponse.json(
+        { error: 'Too many subscribe attempts. Please try again later.' },
+        { status: 429 }
+      )
+    }
+
     const { email } = await request.json()
 
     if (!email || typeof email !== 'string' || !email.includes('@')) {

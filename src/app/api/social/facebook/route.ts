@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { requireAdmin } from '@/lib/admin-auth'
 
 /**
  * POST /api/social/facebook
@@ -7,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server'
  * The `message` field contains the caption text (no URL).
  * The `link` field contains the article URL which Facebook uses to build a card
  * with the featured image, headline, and description from OG tags.
+ * Requires admin authentication.
  *
  * Required env vars:
  * - FB_PAGE_ID: The Facebook Page ID
@@ -14,6 +16,12 @@ import { NextRequest, NextResponse } from 'next/server'
  */
 export async function POST(request: NextRequest) {
   try {
+    // Require admin auth — posting to social media is a privileged action
+    const { error: authError, status } = await requireAdmin(request)
+    if (authError) {
+      return NextResponse.json({ error: authError }, { status: status || 401 })
+    }
+
     const { url, caption } = await request.json()
 
     if (!url || !caption) {

@@ -3,30 +3,11 @@
 
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/db'
+import { checkRateLimitRedis } from '@/lib/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
 const VALID_EVENTS = new Set(['open', 'summary_viewed', 'close'])
-
-// In-memory rate limiter: 10 events/min per anon_id
-const rateLimitStore = new Map<string, { count: number; lastReset: number }>()
-const RATE_LIMIT = 10
-const RATE_WINDOW_MS = 60_000
-
-function isRateLimited(anonId: string): boolean {
-  const now = Date.now()
-  const entry = rateLimitStore.get(anonId)
-
-  if (!entry || now - entry.lastReset > RATE_WINDOW_MS) {
-    rateLimitStore.set(anonId, { count: 1, lastReset: now })
-    return false
-  }
-
-  if (entry.count >= RATE_LIMIT) return true
-
-  entry.count++
-  return false
-}
 
 export async function POST(request: Request) {
   try {
@@ -41,7 +22,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid event type' }, { status: 400 })
     }
 
-    if (isRateLimited(anon_id)) {
+    // Rate limit: 10 events per minute per anon_id (persistent via Redis)
+    const rl = await checkRateLimitRedis({
+      prefix: 'scout-track',
+      key: anon_id,
+      maxRequests: 10,
+      windowSeconds: 60,
+    })
+    if (!rl.success) {
       return NextResponse.json({ error: 'Rate limited' }, { status: 429 })
     }
 

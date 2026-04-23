@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
 import { randomUUID } from 'crypto'
 import Anthropic from '@anthropic-ai/sdk'
 import { getPostIQSystemPrompt, getTeamKnowledge, VOICE_GUIDELINES, HEADLINE_GUIDELINES, SOCIAL_STRATEGY, JOURNALISM_STANDARDS } from '@/lib/postiq-knowledge'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { requireAdmin } from '@/lib/admin-auth'
 
 const anthropic = new Anthropic()
 const DATALAB_API = 'https://datalab.sportsmockery.com'
@@ -197,11 +196,10 @@ async function tryDataLabPostIQ(body: AIRequest, userId?: string): Promise<Respo
   }
 
   if (!process.env.POSTIQ_INTERNAL_KEY) {
-    console.log('[PostIQ] No internal key configured, using local fallback. Available env vars:', Object.keys(process.env).filter(k => k.includes('POSTIQ')).join(', ') || 'none')
+    // SEC-2026-002 fix: do not log env var names
+    console.log('[PostIQ] No internal key configured, using local fallback')
     return null
   }
-
-  console.log('[PostIQ] Internal key found, attempting DataLab call for action:', body.action)
 
   try {
     const response = await fetch(`${DATALAB_API}/api/v2/postiq/suggest`, {
@@ -246,38 +244,15 @@ async function tryDataLabPostIQ(body: AIRequest, userId?: string): Promise<Respo
  */
 export async function POST(request: NextRequest) {
   try {
+    // Require admin authentication — SEC-2026-001 fix
+    const auth = await requireAdmin(request)
+    if (auth.error) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status })
+    }
+    const userId = auth.user!.id
+
     const body: AIRequest = await request.json()
     const { action, content, title, category, team, postId } = body
-
-    // Get user session for logging
-    let userId: string | undefined
-    try {
-      const cookieStore = await cookies()
-      const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-          cookies: {
-            getAll() {
-              return cookieStore.getAll()
-            },
-            setAll(cookiesToSet) {
-              cookiesToSet.forEach(({ name, value, options }) => {
-                try {
-                  cookieStore.set(name, value, options)
-                } catch {
-                  // Ignore
-                }
-              })
-            },
-          },
-        }
-      )
-      const { data: { session } } = await supabase.auth.getSession()
-      userId = session?.user?.id
-    } catch {
-      // Continue without user ID
-    }
 
     // Try DataLab first
     const datalabResponse = await tryDataLabPostIQ(body, userId)

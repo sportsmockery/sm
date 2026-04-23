@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { TwitterApi, ApiResponseError } from 'twitter-api-v2'
+import { requireAdmin } from '@/lib/admin-auth'
 
 /**
  * POST /api/social/x
@@ -7,6 +8,7 @@ import { TwitterApi, ApiResponseError } from 'twitter-api-v2'
  * Posts to X (Twitter) using the X API v2 with OAuth 1.0a User Context.
  * The tweet text includes the caption followed by the URL.
  * X will render a link card using the OG/Twitter tags from the article page.
+ * Requires admin authentication.
  *
  * Required env vars:
  * - X_API_KEY: Consumer API Key
@@ -16,6 +18,12 @@ import { TwitterApi, ApiResponseError } from 'twitter-api-v2'
  */
 export async function POST(request: NextRequest) {
   try {
+    // Require admin auth — posting to social media is a privileged action
+    const { error: authError, status } = await requireAdmin(request)
+    if (authError) {
+      return NextResponse.json({ error: authError }, { status: status || 401 })
+    }
+
     const { url, caption } = (await request.json()) as {
       url?: string
       caption?: string

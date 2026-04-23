@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { TwitterApi } from 'twitter-api-v2';
 import { createClient } from '@supabase/supabase-js';
+import { requireAdmin } from '@/lib/admin-auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,6 +23,12 @@ function getTwitterClient() {
 
 export async function POST(request: NextRequest) {
   try {
+    // Require admin auth — posting to social media is a privileged action
+    const { error: authError, status } = await requireAdmin(request);
+    if (authError) {
+      return NextResponse.json({ error: authError }, { status: status || 401 });
+    }
+
     const { predictionId, caption, mediaUrl } = await request.json();
 
     const supabase = getSupabaseClient();

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { checkRateLimitRedis, getClientIp } from '@/lib/rate-limit'
 
 /**
  * Ask AI API Route
@@ -188,6 +189,21 @@ function transformChartData(dataLabChart: {
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit: 20 queries per minute per IP
+    const clientIp = getClientIp(request)
+    const rl = await checkRateLimitRedis({
+      prefix: 'ask-ai',
+      key: clientIp,
+      maxRequests: 20,
+      windowSeconds: 60,
+    })
+    if (!rl.success) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded. Please wait a moment before asking another question.' },
+        { status: 429 }
+      )
+    }
+
     const body = await request.json()
     const { query, sessionId } = body
 

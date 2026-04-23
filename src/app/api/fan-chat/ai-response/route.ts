@@ -8,9 +8,7 @@ import {
   shouldAIRespond,
   type TriggerReason
 } from '@/lib/ai-personalities'
-
-// Rate limiting storage (in production, use Redis or similar)
-const rateLimitStore: Map<string, { count: number; lastReset: number; lastMessage: number }> = new Map()
+import { checkRateLimitRedis, getClientIp } from '@/lib/rate-limit'
 
 interface ChatMessage {
   id: string
@@ -47,31 +45,33 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check rate limits
-    const rateLimitKey = `${personality.id}`
-    const now = Date.now()
-    const rateLimit = rateLimitStore.get(rateLimitKey) || { count: 0, lastReset: now, lastMessage: 0 }
+    // Rate limiting — persistent via Upstash Redis, keyed per personality + client IP
+    const clientIp = getClientIp(request)
 
-    // Reset hourly count if needed
-    if (now - rateLimit.lastReset > 60 * 60 * 1000) {
-      rateLimit.count = 0
-      rateLimit.lastReset = now
-    }
-
-    // Check if we've exceeded hourly limit
-    if (rateLimit.count >= AI_RATE_LIMITS.maxMessagesPerHour) {
+    // Hourly limit per personality per IP
+    const hourlyCheck = await checkRateLimitRedis({
+      prefix: 'fan-chat-ai-hour',
+      key: `${personality.id}:${clientIp}`,
+      maxRequests: AI_RATE_LIMITS.maxMessagesPerHour,
+      windowSeconds: 3600,
+    })
+    if (!hourlyCheck.success) {
       return NextResponse.json(
         { error: 'Rate limit exceeded', shouldRespond: false },
         { status: 429 }
       )
     }
 
-    // Check minimum time between messages
-    const timeSinceLastMessage = now - rateLimit.lastMessage
-    const minDelay = AI_RATE_LIMITS.minSecondsBetweenMessages * 1000
-    if (timeSinceLastMessage < minDelay) {
+    // Minimum delay between messages (burst protection)
+    const burstCheck = await checkRateLimitRedis({
+      prefix: 'fan-chat-ai-burst',
+      key: `${personality.id}:${clientIp}`,
+      maxRequests: 1,
+      windowSeconds: AI_RATE_LIMITS.minSecondsBetweenMessages,
+    })
+    if (!burstCheck.success) {
       return NextResponse.json(
-        { error: 'Too soon since last message', shouldRespond: false, retryAfter: minDelay - timeSinceLastMessage },
+        { error: 'Too soon since last message', shouldRespond: false, retryAfter: burstCheck.reset },
         { status: 429 }
       )
     }
@@ -217,12 +217,7 @@ RESPONSE FORMAT:
       .replace(/\s{2,}/g, ' ') // Collapse multiple spaces left behind
       .trim()
 
-    // Update rate limiting
-    rateLimit.count++
-    rateLimit.lastMessage = now
-    rateLimitStore.set(rateLimitKey, rateLimit)
-
-    // Return the AI response
+    // Return the AI response (rate limiting is already tracked by Redis/memory on check)
     return NextResponse.json({
       shouldRespond: true,
       message: {

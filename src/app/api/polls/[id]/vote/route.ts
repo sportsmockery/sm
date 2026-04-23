@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase-server'
 import type { VoteInput, Poll, PollResults, PollOptionResult } from '@/types/polls'
 import { getRandomMicrocopy } from '@/types/polls'
 import crypto from 'crypto'
+import { checkRateLimitRedis, getClientIp } from '@/lib/rate-limit'
 
 /**
  * POST /api/polls/[id]/vote
@@ -13,6 +14,20 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Rate limit: 10 votes per minute per IP to prevent poll manipulation
+    const rl = await checkRateLimitRedis({
+      prefix: 'poll-vote',
+      key: getClientIp(request),
+      maxRequests: 10,
+      windowSeconds: 60,
+    })
+    if (!rl.success) {
+      return NextResponse.json(
+        { error: 'Too many votes. Please wait a moment.' },
+        { status: 429 }
+      )
+    }
+
     const { id } = await params
     const body: VoteInput = await request.json()
     const { option_ids, user_id, anonymous_id } = body

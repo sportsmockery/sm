@@ -1,8 +1,15 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { requireAdmin } from '@/lib/admin-auth'
 import { datalabAdmin } from '@/lib/supabase-datalab'
 import { getBullsSchedule, getBullsRecord } from '@/lib/bullsData'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Debug routes require admin authentication
+  const { error: authError, status } = await requireAdmin(request)
+  if (authError) {
+    return NextResponse.json({ error: authError }, { status: status || 401 })
+  }
+
   const results: Record<string, any> = {
     timestamp: new Date().toISOString(),
     datalabConfigured: !!datalabAdmin,
