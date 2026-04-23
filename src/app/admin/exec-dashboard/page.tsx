@@ -97,6 +97,22 @@ function evergreenPct(name: string) {
   return 15 + Math.abs(h % 55)
 }
 
+// Freestar metrics type (mirrors pub.network dashboard)
+type FreestarMetrics = {
+  revenue: number | null
+  impressions: number | null
+  netCpm: number | null
+  viewability: number | null
+  fillRate: number | null
+  pageRpm: number | null
+  prevRevenue: number | null
+  prevImpressions: number | null
+  prevNetCpm: number | null
+  prevViewability: number | null
+  prevFillRate: number | null
+  prevPageRpm: number | null
+}
+
 // Read Freestar ad report data from localStorage (shared with embedded Freestar app)
 // The embedded app at /admin/freestar/ stores reports under key "sm_ad_reports"
 // (defined as Pr.adReports in public/admin/freestar/assets/index-DGTApot3.js)
@@ -711,6 +727,7 @@ export default function ExecDashboard() {
   const [expandedHistoryMonth, setExpandedHistoryMonth] = useState<string | null>(null)
   // Freestar P&L state
   const [freestarRevenue, setFreestarRevenue] = useState<number | null>(null)
+  const [freestarMetrics, setFreestarMetrics] = useState<FreestarMetrics | null>(null)
   const [freestarLoading, setFreestarLoading] = useState(false)
   const [revenueSource, setRevenueSource] = useState<'local' | 'api' | 'estimate'>('estimate')
   const [freehandExpenses, setFreehandExpenses] = useState<Array<{ id: string; desc: string; amount: number; date: string }>>([])
@@ -770,33 +787,54 @@ export default function ExecDashboard() {
     return { startStr: start.toISOString().slice(0, 10), endStr: end.toISOString().slice(0, 10) }
   }, [range, customStart, customEnd])
 
-  // Fetch Freestar revenue: prefer localStorage (matches embedded dashboard), fallback to API
+  // Fetch Freestar revenue + metrics: prefer localStorage for revenue, API for full metrics
   useEffect(() => {
     if (tab !== 'Freestar') return
     const { startStr, endStr } = freestarDateRange
 
-    // First, try reading from localStorage (same source as embedded Freestar dashboard)
+    // First, try reading revenue from localStorage (same source as embedded Freestar dashboard)
     const localRevenue = getFreestarLocalRevenue(startStr, endStr)
     if (localRevenue !== null) {
       setFreestarRevenue(Math.round(localRevenue))
       setRevenueSource('local')
-      setFreestarLoading(false)
-      return
     }
 
-    // Fall back to API if no local data
-    const fetchFreestarRevenue = async () => {
+    // Always try the API for the full metrics set (impressions, CPM, viewability, etc.)
+    const fetchFreestarMetrics = async () => {
       setFreestarLoading(true)
       try {
         const res = await fetch(`/api/freestar-revenue?start=${startStr}&end=${endStr}`)
         if (res.ok) {
           const json = await res.json()
-          setFreestarRevenue(json.revenue ?? null)
-          setRevenueSource('api')
+          // Store full metrics object
+          setFreestarMetrics({
+            revenue: json.revenue ?? null,
+            impressions: json.impressions ?? null,
+            netCpm: json.netCpm ?? null,
+            viewability: json.viewability ?? null,
+            fillRate: json.fillRate ?? null,
+            pageRpm: json.pageRpm ?? null,
+            prevRevenue: json.prevRevenue ?? null,
+            prevImpressions: json.prevImpressions ?? null,
+            prevNetCpm: json.prevNetCpm ?? null,
+            prevViewability: json.prevViewability ?? null,
+            prevFillRate: json.prevFillRate ?? null,
+            prevPageRpm: json.prevPageRpm ?? null,
+          })
+          // If no localStorage revenue, use API revenue
+          if (localRevenue === null) {
+            if (json.revenue !== null) {
+              setFreestarRevenue(json.revenue)
+              setRevenueSource('api')
+            } else if (data?.overview) {
+              setFreestarRevenue(Math.round(data.overview.periodViews * 0.00186))
+              setRevenueSource('estimate')
+            }
+          }
         }
       } catch {
         // Fallback: estimate from dashboard data
-        if (data?.overview) {
+        if (localRevenue === null && data?.overview) {
           setFreestarRevenue(Math.round(data.overview.periodViews * 0.00186))
           setRevenueSource('estimate')
         }
@@ -804,7 +842,7 @@ export default function ExecDashboard() {
         setFreestarLoading(false)
       }
     }
-    fetchFreestarRevenue()
+    fetchFreestarMetrics()
   }, [tab, range, customStart, customEnd, data, freestarDateRange])
 
   // Listen for localStorage changes from the embedded Freestar iframe
@@ -1787,7 +1825,79 @@ export default function ExecDashboard() {
             const profit = revenue - totalExpenses
             const margin = revenue > 0 ? ((profit / revenue) * 100).toFixed(1) : '0.0'
 
+            // PoP delta helper
+            const popDelta = (curr: number | null | undefined, prev: number | null | undefined): { pct: string; up: boolean } | null => {
+              if (curr == null || prev == null || prev === 0) return curr != null && prev === 0 && curr > 0 ? { pct: '+100%', up: true } : null
+              const d = ((curr - prev) / prev) * 100
+              return { pct: (d >= 0 ? '+' : '') + d.toFixed(2) + '%', up: d >= 0 }
+            }
+
+            // Format value helpers for the metric cards
+            const fmtCurrency = (v: number | null | undefined) => v != null ? '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '\u2014'
+            const fmtInt = (v: number | null | undefined) => v != null ? v.toLocaleString('en-US') : '\u2014'
+            const fmtPct = (v: number | null | undefined) => v != null ? v.toFixed(2) + '%' : '\u2014'
+
+            // Build the 6-metric card definitions mirroring pub.network
+            const metricCards: Array<{ label: string; value: string; prev: number | null | undefined; curr: number | null | undefined }> = [
+              { label: 'Net Revenue', value: fmtCurrency(freestarMetrics?.revenue ?? (revenueSource !== 'estimate' ? revenue : null)), curr: freestarMetrics?.revenue ?? (revenueSource !== 'estimate' ? revenue : null), prev: freestarMetrics?.prevRevenue },
+              { label: 'Impressions', value: fmtInt(freestarMetrics?.impressions), curr: freestarMetrics?.impressions, prev: freestarMetrics?.prevImpressions },
+              { label: 'Net CPM', value: fmtCurrency(freestarMetrics?.netCpm), curr: freestarMetrics?.netCpm, prev: freestarMetrics?.prevNetCpm },
+              { label: 'Viewability', value: fmtPct(freestarMetrics?.viewability), curr: freestarMetrics?.viewability, prev: freestarMetrics?.prevViewability },
+              { label: 'Fill Rate', value: fmtPct(freestarMetrics?.fillRate), curr: freestarMetrics?.fillRate, prev: freestarMetrics?.prevFillRate },
+              { label: 'Page RPM', value: fmtCurrency(freestarMetrics?.pageRpm), curr: freestarMetrics?.pageRpm, prev: freestarMetrics?.prevPageRpm },
+            ]
+
             return <>
+              {/* ── SOURCE INDICATOR BANNER ── */}
+              <div className="rounded-lg px-4 py-2.5 flex items-center gap-2 text-sm font-semibold" style={{
+                background: revenueSource === 'api' ? 'rgba(16,185,129,0.08)' : revenueSource === 'local' ? 'rgba(59,130,246,0.08)' : 'rgba(245,158,11,0.08)',
+                border: `1px solid ${revenueSource === 'api' ? 'rgba(16,185,129,0.25)' : revenueSource === 'local' ? 'rgba(59,130,246,0.25)' : 'rgba(245,158,11,0.25)'}`,
+                color: revenueSource === 'api' ? '#10b981' : revenueSource === 'local' ? '#3b82f6' : '#f59e0b',
+              }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  {revenueSource === 'api' ? <path d="M22 11.08V12a10 10 0 11-5.93-9.14" /> : revenueSource === 'local' ? <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /> : <path d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />}
+                  {revenueSource === 'api' && <path d="M22 4L12 14.01l-3-3" />}
+                  {revenueSource === 'local' && <><path d="M14 2v6h6" /><path d="M16 13H8m8 4H8m2-8H8" /></>}
+                </svg>
+                {revenueSource === 'api' ? 'Live from Freestar API' : revenueSource === 'local' ? 'From uploaded CSV reports' : 'Estimated from views'}
+                {freestarLoading && <span className="ml-2 text-xs opacity-70">(refreshing...)</span>}
+              </div>
+
+              {/* ── FREESTAR METRICS GRID (mirrors pub.network dashboard) ── */}
+              <div className="rounded-xl border" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
+                <div className="px-5 py-3 border-b flex items-center justify-between" style={{ borderColor: 'var(--sm-border)' }}>
+                  <div className="flex items-center gap-2">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: '#00D4FF' }}>
+                      <path d="M18 20V10M12 20V4M6 20v-6" />
+                    </svg>
+                    <h3 className="text-sm font-bold uppercase tracking-wider" style={{ color: 'var(--sm-text)' }}>Freestar Metrics</h3>
+                  </div>
+                  <span className="text-xs" style={{ color: 'var(--sm-text-dim)' }}>
+                    {freestarLoading ? 'Fetching...' : `${range.replace('-', ' ').replace(/\b\w/g, c => c.toUpperCase())} vs. prior period`}
+                  </span>
+                </div>
+                <div className="p-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                    {metricCards.map(mc => {
+                      const delta = popDelta(mc.curr, mc.prev)
+                      return (
+                        <div key={mc.label} className="rounded-lg border px-4 py-3" style={{ background: 'var(--sm-surface)', borderColor: 'var(--sm-border)' }}>
+                          <p className="text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--sm-text-dim)' }}>{mc.label}</p>
+                          <p className="text-xl font-extrabold tabular-nums" style={{ color: 'var(--sm-text)' }}>{mc.value}</p>
+                          {delta ? (
+                            <p className="text-xs font-bold mt-1 tabular-nums" style={{ color: delta.up ? '#10b981' : '#bc0000' }}>
+                              {delta.pct} PoP
+                            </p>
+                          ) : (
+                            <p className="text-xs mt-1" style={{ color: 'var(--sm-text-dim)' }}>&mdash;</p>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+
               {/* ── P&L SUMMARY ── */}
               <div className="rounded-xl border" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
                 <div className="px-5 py-3 border-b flex items-center justify-between" style={{ borderColor: 'var(--sm-border)' }}>
