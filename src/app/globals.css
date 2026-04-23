@@ -4331,7 +4331,7 @@ main, .page-content, [role="main"] {
 
 /* ===== 2030 ARTICLE BODY OVERRIDES ===== */
 .article-body-2030 {
-  max-width: 820px;
+  max-width: 775px;
   margin: 0;
   font-family: var(--sm-font-body);
 }
@@ -4418,12 +4418,11 @@ main, .page-content, [role="main"] {
   .article-body-2030 blockquote { padding: 20px 24px; font-size: 17px; margin: 28px 0; }
 }
 
-/* Article body wrapper — moderate padding on large screens */
-/* NOTE: 15% side padding removed — it collapsed the 3-column layout (TOC + article + sidebar) */
+/* Article body wrapper — wider desktop margins (15% each side) */
 @media (min-width: 1280px) {
   .article-body-wrapper {
-    padding-left: 32px !important;
-    padding-right: 32px !important;
+    padding-left: 15% !important;
+    padding-right: 15% !important;
   }
 }
 

@@ -435,8 +435,8 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
             </aside>
           )}
 
-          {/* Main article column — centered when no TOC, flex when TOC present */}
-          <div style={{ flex: hasEnoughHeadings ? 1 : undefined, minWidth: 0, maxWidth: 820, width: '100%', margin: hasEnoughHeadings ? undefined : '0 auto', borderColor: 'var(--sm-border)' }}>
+          {/* Main article column */}
+          <div style={{ width: '100%', maxWidth: 775, borderColor: 'var(--sm-border)' }}>
 
             <article className="article-body-2030" suppressHydrationWarning>
               {blockDocument ? (
