@@ -257,6 +257,15 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
   const postContent = post.content || ''
   const blockDocument = isBlockContent(postContent) ? parseDocument(postContent) : null
 
+  // Server-side heading count to decide if TOC sidebar should render
+  const storedTocItems = post.toc as Array<{ id: string; text: string; level: number }> | null
+  const hasEnoughHeadings = (() => {
+    if (storedTocItems && storedTocItems.length >= 3) return true
+    // Quick regex count of h2/h3 tags in content
+    const headingMatches = postContent.match(/<h[23][^>]*>/gi)
+    return (headingMatches?.length || 0) >= 3
+  })()
+
   // Sanitize WordPress content: strip inline scripts, block comments, shortcodes.
   // This MUST run before auto-linking or any other content processing.
   // WordPress tweet embeds include <script> tags that execute during SSR and
@@ -413,16 +422,18 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
       {/* 2030 Article Body Area */}
       <div style={{ backgroundColor: 'var(--sm-dark)' }}>
         <div className="article-body-wrapper" style={{ maxWidth: 1460, margin: '0 auto', padding: '16px 24px 48px', display: 'flex', gap: 24 }}>
-          {/* Left TOC Sidebar (Desktop only) — skinny rail */}
-          <aside className="hidden xl:block" style={{ width: 200, minWidth: 200, flexShrink: 0 }}>
-            <div style={{ position: 'sticky', top: 96 }}>
-              <ArticleTableOfContents
-                contentHtml={cleanContent}
-                variant="glass"
-                storedToc={post.toc as Array<{ id: string; text: string; level: number }> | null}
-              />
-            </div>
-          </aside>
+          {/* Left TOC Sidebar (Desktop only) — skinny rail, only when article has 3+ headings */}
+          {hasEnoughHeadings && (
+            <aside className="hidden xl:block" style={{ width: 200, minWidth: 200, flexShrink: 0 }}>
+              <div style={{ position: 'sticky', top: 96 }}>
+                <ArticleTableOfContents
+                  contentHtml={cleanContent}
+                  variant="glass"
+                  storedToc={storedTocItems}
+                />
+              </div>
+            </aside>
+          )}
 
           {/* Main article column — flex to fill space between TOC and sidebar */}
           <div style={{ flex: 1, minWidth: 0, maxWidth: 820, borderColor: 'var(--sm-border)' }}>
