@@ -45,15 +45,26 @@ export async function GET(
     let playersMap: Record<string, { name: string; position: string; headshot_url: string | null }> = {}
 
     if (cubsPlayerIds.length > 0) {
+      // cubs_player_game_stats.player_id uses MLB IDs (e.g., '621020' for Dansby Swanson),
+      // NOT ESPN IDs. Match on both player_id AND mlb_id columns to be resilient to
+      // whichever key the stat row was written with (historically ESPN-sync used espn_id).
       const { data: playersData } = await datalabAdmin
         .from('cubs_players')
-        .select('espn_id, name, position, headshot_url')
-        .in('espn_id', cubsPlayerIds)
+        .select('espn_id, mlb_id, player_id, name, position, headshot_url')
+        .or(
+          `player_id.in.(${cubsPlayerIds.join(',')}),` +
+          `mlb_id.in.(${cubsPlayerIds.join(',')}),` +
+          `espn_id.in.(${cubsPlayerIds.join(',')})`
+        )
 
       if (playersData) {
-        playersMap = Object.fromEntries(
-          playersData.map(p => [p.espn_id, { name: p.name, position: p.position, headshot_url: p.headshot_url }])
-        )
+        for (const p of playersData as any[]) {
+          const info = { name: p.name, position: p.position, headshot_url: p.headshot_url }
+          // Index under every ID column so the lookup below always hits.
+          if (p.player_id) playersMap[String(p.player_id)] = info
+          if (p.mlb_id) playersMap[String(p.mlb_id)] = info
+          if (p.espn_id) playersMap[String(p.espn_id)] = info
+        }
       }
     }
 

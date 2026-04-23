@@ -80,16 +80,24 @@ export async function GET(
     let playersMap: Record<string, { name: string; position: string; headshot_url: string | null }> = {}
 
     if (hawksPlayerIds.length > 0) {
-      // Stats player_id = ESPN ID, match via espn_id column on players table
+      // blackhawks_player_game_stats.player_id uses NHL IDs (8-digit), but legacy
+      // rows may use ESPN IDs. Match on all ID columns to be resilient.
       const { data: playersData } = await datalabAdmin
         .from('blackhawks_players')
-        .select('espn_id, name, position, headshot_url')
-        .in('espn_id', hawksPlayerIds)
+        .select('espn_id, nhl_id, player_id, name, position, headshot_url')
+        .or(
+          `player_id.in.(${hawksPlayerIds.join(',')}),` +
+          `nhl_id.in.(${hawksPlayerIds.join(',')}),` +
+          `espn_id.in.(${hawksPlayerIds.join(',')})`
+        )
 
       if (playersData) {
-        playersMap = Object.fromEntries(
-          playersData.map(p => [String(p.espn_id), { name: p.name, position: p.position, headshot_url: p.headshot_url }])
-        )
+        for (const p of playersData as any[]) {
+          const info = { name: p.name, position: p.position, headshot_url: p.headshot_url }
+          if (p.player_id) playersMap[String(p.player_id)] = info
+          if (p.nhl_id) playersMap[String(p.nhl_id)] = info
+          if (p.espn_id) playersMap[String(p.espn_id)] = info
+        }
       }
     }
 

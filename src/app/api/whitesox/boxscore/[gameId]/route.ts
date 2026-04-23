@@ -43,15 +43,24 @@ export async function GET(
     let playersMap: Record<string, { name: string; position: string; headshot_url: string | null }> = {}
 
     if (soxPlayerIds.length > 0) {
+      // whitesox_player_game_stats.player_id uses MLB IDs, NOT ESPN IDs.
+      // Match on all three ID columns so the lookup is resilient to historical data.
       const { data: playersData } = await datalabAdmin
         .from('whitesox_players')
-        .select('espn_id, name, position, headshot_url')
-        .in('espn_id', soxPlayerIds)
+        .select('espn_id, mlb_id, player_id, name, position, headshot_url')
+        .or(
+          `player_id.in.(${soxPlayerIds.join(',')}),` +
+          `mlb_id.in.(${soxPlayerIds.join(',')}),` +
+          `espn_id.in.(${soxPlayerIds.join(',')})`
+        )
 
       if (playersData) {
-        playersMap = Object.fromEntries(
-          playersData.map(p => [p.espn_id, { name: p.name, position: p.position, headshot_url: p.headshot_url }])
-        )
+        for (const p of playersData as any[]) {
+          const info = { name: p.name, position: p.position, headshot_url: p.headshot_url }
+          if (p.player_id) playersMap[String(p.player_id)] = info
+          if (p.mlb_id) playersMap[String(p.mlb_id)] = info
+          if (p.espn_id) playersMap[String(p.espn_id)] = info
+        }
       }
     }
 

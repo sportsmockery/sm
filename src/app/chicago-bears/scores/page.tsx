@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import { getBearsSchedule, getPlayoffRoundName, getBearsSeparatedRecord, type BearsGame } from '@/lib/bearsData'
+import { datalabAdmin } from '@/lib/supabase-datalab'
 import BoxScoreClient from './BoxScoreClient'
 import { TeamHubLayout } from '@/components/team'
 import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
@@ -53,8 +54,29 @@ export default async function BearsScoresPage() {
   // Get latest game ID for initial box score (most recent first)
   const allGamesSorted = completedGames
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-  const latestGame = allGamesSorted[0]
-  const initialGameId = latestGame?.gameId || null
+  // Pick the most recent game that has player stats synced. Bears stats use
+  // bears_game_id (FK to bears_games_master.id), not game_id.
+  let initialGameId: string | null = allGamesSorted[0]?.gameId || null
+  if (datalabAdmin && allGamesSorted.length > 0) {
+    try {
+      const ids = allGamesSorted
+        .map(g => Number(g.gameId))
+        .filter(n => !isNaN(n))
+      const { data: statRows } = await datalabAdmin
+        .from('bears_player_game_stats')
+        .select('bears_game_id')
+        .in('bears_game_id', ids)
+        .eq('is_opponent', false)
+        .limit(5000)
+      const gameIdsWithStats = new Set((statRows || []).map((r: any) => String(r.bears_game_id)))
+      for (const g of allGamesSorted) {
+        if (gameIdsWithStats.has(String(g.gameId))) {
+          initialGameId = g.gameId
+          break
+        }
+      }
+    } catch {}
+  }
 
   // Transform games for client component - most recent first
   const games = allGamesSorted.map(game => ({

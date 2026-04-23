@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { TeamHubLayout } from '@/components/team'
 import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
 import { getBlackhawksRecentScores, getBlackhawksRecord } from '@/lib/blackhawksData'
+import { datalabAdmin } from '@/lib/supabase-datalab'
 import BoxScoreClient from './BoxScoreClient'
 
 export const metadata: Metadata = {
@@ -27,8 +28,33 @@ export default async function BlackhawksScoresPage() {
     otl: hawksRecord.otLosses,
   }
 
-  const latestGame = scores[0]
-  const initialGameId = latestGame?.gameId || null
+  // Pick the most recent game with player stats already synced.
+  let initialGameId: string | null = scores[0]?.gameId || null
+  if (datalabAdmin && scores.length > 0) {
+    try {
+      const { data: gameRows } = await datalabAdmin
+        .from('blackhawks_games_master')
+        .select('id, game_id')
+        .in('id', scores.map(s => Number(s.gameId)).filter(n => !isNaN(n)))
+      if (gameRows && gameRows.length > 0) {
+        const { data: statRows } = await datalabAdmin
+          .from('blackhawks_player_game_stats')
+          .select('game_id')
+          .in('game_id', gameRows.map((g: any) => g.game_id).filter(Boolean))
+          .eq('is_opponent', false)
+          .limit(5000)
+        const gameIdsWithStats = new Set((statRows || []).map((r: any) => r.game_id))
+        const idToGameId = new Map(gameRows.map((g: any) => [g.id, g.game_id]))
+        for (const s of scores) {
+          const gameId = idToGameId.get(Number(s.gameId))
+          if (gameId && gameIdsWithStats.has(gameId)) {
+            initialGameId = s.gameId
+            break
+          }
+        }
+      }
+    } catch {}
+  }
 
   const games = scores.map(game => ({
     gameId: game.gameId,
