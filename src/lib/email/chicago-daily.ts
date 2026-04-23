@@ -3,6 +3,7 @@ import {
   ChicagoDailyEmail,
   ChicagoDailyEmailProps,
   Story,
+  EdgeInsight,
 } from '@/emails/ChicagoDailyEmail';
 
 // =============================================================================
@@ -218,6 +219,33 @@ function mapApiStoryToStory(apiStory: ApiStory): Story {
   };
 }
 
+/**
+ * Fetch EDGE insights from DataLab for the daily email.
+ * Graceful degradation — returns empty array on failure.
+ */
+async function fetchEdgeInsights(stories: Story[]): Promise<EdgeInsight[]> {
+  try {
+    const res = await fetch('https://datalab.sportsmockery.com/api/edge-insights/daily-briefing', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        stories: stories.map(s => ({
+          title: s.title,
+          summary: s.summary,
+          team: s.team,
+          views: s.views,
+        })),
+      }),
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.insights || [];
+  } catch {
+    console.error('[EDGE Insights] Failed to fetch — sending email without insights');
+    return [];
+  }
+}
+
 export async function fetchDailyStories(date: Date): Promise<Story[]> {
   const dateStr = formatDateForApi(date);
   const url = `${CONFIG.apiBaseUrl}?date=${dateStr}`;
@@ -283,6 +311,9 @@ export async function sendChicagoDailyEmail(
     const sortedStories = [...stories].sort((a, b) => b.views - a.views);
     const heroStory = sortedStories[0];
 
+    // 2b. Fetch EDGE insights (non-blocking — empty array on failure)
+    const edgeInsights = await fetchEdgeInsights(sortedStories);
+
     // 3. Build subject and preheader
     const formattedDate = formatDate(date);
     const dateLabel = getYesterdayLabel();
@@ -295,6 +326,7 @@ export async function sendChicagoDailyEmail(
     const emailProps: ChicagoDailyEmailProps = {
       date: formattedDate,
       stories: sortedStories,
+      edgeInsights: edgeInsights.length > 0 ? edgeInsights : undefined,
       showAppPromo,
       unsubscribeUrl: CONFIG.defaultUnsubscribeUrl,
       managePrefsUrl: CONFIG.defaultManagePrefsUrl,

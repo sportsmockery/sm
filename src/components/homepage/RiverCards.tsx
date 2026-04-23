@@ -930,7 +930,23 @@ interface ScoutSummaryCardProps extends BaseCardProps {
   commentsCount?: number
 }
 
-export function ScoutSummaryCard({ summary, bullets, topic, team, teamColor, timestamp, slug, categorySlug, stats, commentsCount }: ScoutSummaryCardProps) {
+// Non-Chicago keywords to filter out of Key Insights
+const NON_CHICAGO_KEYWORDS = /\b(heat|lakers|celtics|warriors|knicks|nets|76ers|sixers|clippers|bucks|cavaliers|cavs|raptors|pistons|pacers|magic|hawks|hornets|wizards|pelicans|grizzlies|timberwolves|thunder|trail blazers|blazers|jazz|kings|spurs|suns|mavericks|mavs|rockets|nuggets|cowboys|patriots|eagles|giants|commanders|49ers|seahawks|rams(?! \d)|cardinals|falcons|panthers|saints|buccaneers|bucs|steelers|ravens|bengals|browns|titans|texans|colts|jaguars|dolphins|jets|bills|chargers|raiders|broncos|chiefs|yankees|mets|red sox|dodgers|braves|astros|padres|phillies|rangers|orioles|twins|guardians|royals|mariners|angels|rays|marlins|rockies|nationals|reds|brewers|diamondbacks|pirates|tigers|athletics|bluejays|blue jays|canadiens|maple leafs|bruins|rangers|penguins|flyers|capitals|hurricanes|lightning|panthers|red wings|senators|sabres|islanders|devils|blue jackets|predators|stars|wild|jets|flames|oilers|canucks|kraken|avalanche|golden knights|ducks|sharks|kings)\b/i
+
+function cleanBullets(rawBullets: string[]): string[] {
+  return rawBullets.filter(b => {
+    // Remove bullets that contain URLs
+    if (/https?:\/\//.test(b)) return false
+    // Remove bullets about non-Chicago teams
+    if (NON_CHICAGO_KEYWORDS.test(b)) return false
+    // Remove very short or empty bullets
+    if (b.trim().length < 10) return false
+    return true
+  })
+}
+
+export function ScoutSummaryCard({ summary, bullets: rawBullets, topic, team, teamColor, timestamp, slug, categorySlug, stats, commentsCount }: ScoutSummaryCardProps) {
+  const bullets = cleanBullets(rawBullets || [])
   const teamHex = teamColor
   const router = useRouter()
   const audio = useAudioPlayer()

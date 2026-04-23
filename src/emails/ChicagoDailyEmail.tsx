@@ -29,9 +29,15 @@ export type Story = {
   views: number;
 };
 
+export type EdgeInsight = {
+  text: string;
+  team?: string;
+};
+
 export type ChicagoDailyEmailProps = {
   date: string; // e.g., 'January 21, 2026'
   stories: Story[]; // unsorted; component sorts by views
+  edgeInsights?: EdgeInsight[]; // 3-5 cross-story insights from DataLab
   showAppPromo?: boolean;
   unsubscribeUrl: string;
   managePrefsUrl: string;
@@ -112,6 +118,7 @@ function groupByTeam(stories: Story[]): Record<Story['team'], Story[]> {
 export function ChicagoDailyEmail({
   date,
   stories,
+  edgeInsights,
   showAppPromo = false,
   unsubscribeUrl,
   managePrefsUrl,
@@ -170,6 +177,21 @@ export function ChicagoDailyEmail({
               </Column>
             </Row>
           </Section>
+
+          {/* ─────────────────────────────────────────────────────────────── */}
+          {/* EDGE INSIGHTS */}
+          {/* ─────────────────────────────────────────────────────────────── */}
+          {edgeInsights && edgeInsights.length > 0 && (
+            <Section style={styles.edgeInsightsSection}>
+              <Text style={styles.edgeInsightsLabel}>⚡ EDGE INSIGHTS</Text>
+              {edgeInsights.map((insight, i) => (
+                <Text key={i} style={styles.edgeInsightItem}>
+                  <span style={{ color: BRAND_RED, fontWeight: 700 }}>•</span>{' '}
+                  {insight.text}
+                </Text>
+              ))}
+            </Section>
+          )}
 
           {/* ─────────────────────────────────────────────────────────────── */}
           {/* HERO STORY */}
@@ -398,6 +420,26 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '12px',
     margin: 0,
     lineHeight: '1.2',
+  },
+
+  // Edge Insights
+  edgeInsightsSection: {
+    backgroundColor: DARK_BG,
+    padding: '20px 24px',
+    borderBottom: `3px solid ${BRAND_RED}`,
+  },
+  edgeInsightsLabel: {
+    color: '#ffffff',
+    fontSize: '13px',
+    fontWeight: 700,
+    letterSpacing: '1.5px',
+    margin: '0 0 12px 0',
+  },
+  edgeInsightItem: {
+    color: 'rgba(255,255,255,0.9)',
+    fontSize: '14px',
+    lineHeight: '1.6',
+    margin: '0 0 8px 0',
   },
 
   // Hero
