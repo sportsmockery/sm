@@ -32,10 +32,10 @@ export async function GET(
       return NextResponse.json({ error: 'Datalab not configured' }, { status: 500 })
     }
 
-    // Get game info - include external_id for stats join
+    // Get game info - include external_id and game_id for stats join resilience
     const { data: gameData, error: gameError } = await datalabAdmin
       .from('blackhawks_games_master')
-      .select(`id, external_id, game_date, season, opponent, opponent_full_name,
+      .select(`id, external_id, game_id, game_date, season, opponent, opponent_full_name,
         is_blackhawks_home, arena, blackhawks_score, opponent_score,
         blackhawks_win, is_overtime`)
       .eq('id', gameId)
@@ -59,9 +59,10 @@ export async function GET(
     }
 
     // Both Chicago team and opponent stats use blackhawks_game_id
-    // Stats are keyed on game_id (the NHL API's game ID), NOT on blackhawks_game_id
-    // (which is often null). Use game_id from the games_master row.
-    const nhlGameId = gameData.game_id
+    // Stats are keyed on game_id (the NHL/ESPN game ID string), NOT on blackhawks_game_id
+    // (which is often null on newer rows). Prefer game_id column, fall back to external_id
+    // (same value, older rows may have only one or the other populated).
+    const nhlGameId = (gameData as any).game_id || (gameData as any).external_id
     const [hawksResult, oppResult] = await Promise.all([
       datalabAdmin
         .from('blackhawks_player_game_stats')
