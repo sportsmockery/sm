@@ -19,6 +19,7 @@ import { SegmentErrorBoundary } from '@/components/article/SegmentErrorBoundary'
 import ArticleSidebar from '@/components/article/ArticleSidebar'
 import { ArticleTableOfContents, MoreFromTeam } from '@/components/article'
 import ScoutRecapCard from '@/components/article/ScoutRecapCard'
+import ScoutInsightBox from '@/components/article/ScoutInsightBox'
 import { categorySlugToTeam } from '@/lib/types'
 import { stripDuplicateFeaturedImage, calculateReadTime, getContextLabel, sanitizeWordPressContent } from '@/lib/content-utils'
 import { buildAutoLinkContextForPost, applyAutoLinksToHtml } from '@/lib/autolink'
@@ -429,7 +430,15 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
             <article className="article-body-2030" suppressHydrationWarning>
               {blockDocument ? (
                 /* Block-based article content */
-                <ArticleBlockContent document={blockDocument} />
+                <>
+                  <ArticleBlockContent document={blockDocument} />
+                  <ScoutInsightBox
+                    postId={post.id}
+                    postTitle={post.title}
+                    content={post.content || ''}
+                    team={categorySlugToTeam(categoryData?.slug)?.replace('-', '') || undefined}
+                  />
+                </>
               ) : (
                 <>
                   {/* Mobile TOC - shown at top on smaller screens */}
@@ -442,16 +451,12 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
                   <ArticleContentWithEmbeds
                     content={stripDuplicateFeaturedImage(autoLinkedContent, post.featured_image)}
                     inlineSlot={
-                      <div style={{ margin: '24px 0' }}>
-                        <ScoutRecapCard
-                          postId={post.id}
-                          slug={slug}
-                          title={post.title}
-                          content={post.content}
-                          excerpt={post.excerpt}
-                          team={categorySlugToTeam(categoryData?.slug)?.replace('-', '') || undefined}
-                        />
-                      </div>
+                      <ScoutInsightBox
+                        postId={post.id}
+                        postTitle={post.title}
+                        content={post.content || ''}
+                        team={categorySlugToTeam(categoryData?.slug)?.replace('-', '') || undefined}
+                      />
                     }
                   />
                 </>
