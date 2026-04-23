@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { chicago_team, draft_year } = body
+    const { chicago_team, draft_year, num_rounds } = body
 
     if (!chicago_team || !CHICAGO_TEAMS[chicago_team]) {
       return NextResponse.json({ error: 'Invalid Chicago team' }, { status: 400 })
@@ -88,10 +88,13 @@ export async function POST(request: NextRequest) {
       year = fallbackYear
     }
 
-    // Limit MLB drafts to 7 rounds
-    if (teamInfo.sport === 'mlb') {
-      draftOrder = draftOrder.filter((p: any) => p.round <= 7)
-    }
+    // Determine max rounds per sport
+    const MAX_ROUNDS: Record<string, number> = { nfl: 7, nba: 2, nhl: 7, mlb: 7 }
+    const sportMax = MAX_ROUNDS[teamInfo.sport] || 7
+
+    // Apply round limit: use num_rounds from request if provided, otherwise sport max
+    const roundLimit = num_rounds ? Math.min(Math.max(1, num_rounds), sportMax) : sportMax
+    draftOrder = draftOrder.filter((p: any) => p.round <= roundLimit)
 
     // 1. Create mock draft session using RPC
     // Bypass eligibility check since frontend already validates via /api/gm/draft/teams endpoint

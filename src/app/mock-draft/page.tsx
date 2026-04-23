@@ -129,6 +129,8 @@ export default function MockDraftPage() {
   const [eligibility, setEligibility] = useState<Record<string, TeamEligibility>>({})
   const [eligibilityLoading, setEligibilityLoading] = useState(true)
   const [gmScore, setGmScore] = useState(0)
+  const [pendingTeam, setPendingTeam] = useState<string | null>(null)
+  const [selectedRounds, setSelectedRounds] = useState<number | null>(null)
 
   // Mock model state (feature-flagged)
   const [mockGradeData, setMockGradeData] = useState<MockGradeResponse | null>(null)
@@ -250,6 +252,26 @@ export default function MockDraftPage() {
     setProspectsLoading(false)
   }, [])
 
+  // Max rounds per sport
+  const MAX_ROUNDS: Record<string, number> = { nfl: 7, nba: 2, nhl: 7, mlb: 7 }
+
+  // Select a team — show round config instead of immediately starting
+  function selectTeamForDraft(teamKey: string) {
+    setError(null)
+    const team = CHICAGO_TEAMS.find(t => t.key === teamKey)
+    if (!team) return
+
+    const teamElig = eligibility[teamKey]
+    if (teamElig && !teamElig.eligible) {
+      setError(teamElig.reason || `Mock Draft is not available for ${team.name}`)
+      return
+    }
+
+    setPendingTeam(teamKey)
+    const maxRounds = MAX_ROUNDS[team.sport] || 7
+    setSelectedRounds(maxRounds) // Default to full draft
+  }
+
   // Start a new draft
   async function startDraft(teamKey: string) {
     setError(null)
@@ -267,7 +289,7 @@ export default function MockDraftPage() {
       const res = await fetch('/api/gm/draft/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chicago_team: teamKey }),
+        body: JSON.stringify({ chicago_team: teamKey, num_rounds: selectedRounds }),
       })
 
       const data = await res.json()
@@ -289,6 +311,7 @@ export default function MockDraftPage() {
       }
 
       setSelectedTeam(teamKey)
+      setPendingTeam(null)
       fetchProspects(team.sport, data.draft?.draft_year)
 
       // If user's first pick is not #1, auto-advance to fill in earlier picks
@@ -596,6 +619,8 @@ export default function MockDraftPage() {
   // Reset to team selection
   function resetDraft() {
     setSelectedTeam(null)
+    setPendingTeam(null)
+    setSelectedRounds(null)
     setActiveDraft(null)
     setProspects([])
     setGradeResult(null)
@@ -758,7 +783,7 @@ export default function MockDraftPage() {
         )}
 
         {/* Team Selection */}
-        {!selectedTeam && (
+        {!selectedTeam && !pendingTeam && (
           <div className="grid md:grid-cols-2 gap-4 sm:gap-6" style={{ alignItems: 'start' }}>
             {/* Team picker */}
             <div className={cardBg}>
@@ -793,7 +818,7 @@ export default function MockDraftPage() {
                     return (
                       <button
                         key={team.key}
-                        onClick={() => isEligible && startDraft(team.key)}
+                        onClick={() => isEligible && selectTeamForDraft(team.key)}
                         disabled={!isEligible}
                         style={{
                           display: 'flex', alignItems: 'center', gap: 10,
@@ -908,6 +933,94 @@ export default function MockDraftPage() {
             </div>
           </div>
         )}
+
+        {/* Round Selection — shown after picking a team, before draft starts */}
+        {!selectedTeam && pendingTeam && (() => {
+          const pendingConfig = CHICAGO_TEAMS.find(t => t.key === pendingTeam)
+          const pendingElig = eligibility[pendingTeam]
+          const maxRounds = MAX_ROUNDS[pendingConfig?.sport || 'nfl'] || 7
+          const roundOptions = Array.from({ length: maxRounds }, (_, i) => i + 1)
+
+          return (
+            <div style={{ maxWidth: 520, margin: '0 auto' }}>
+              <div className={cardBg} style={{ textAlign: 'center' }}>
+                {/* Team header */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginBottom: 20 }}>
+                  {pendingConfig && (
+                    <Image src={pendingElig?.logo_url || pendingConfig.logo} alt={pendingConfig.name} width={48} height={48} style={{ objectFit: 'contain' }} />
+                  )}
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ fontWeight: 700, fontSize: '1.125rem', color: 'var(--sm-text)' }}>
+                      {pendingConfig?.name}
+                    </div>
+                    <div style={{ fontSize: 13, color: 'var(--sm-text-muted)' }}>
+                      {pendingConfig?.sport.toUpperCase()} Draft {pendingElig?.draft_year || 2026}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Round selector */}
+                <div style={{ marginBottom: 24 }}>
+                  <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--sm-text)', marginBottom: 10 }}>
+                    Number of Rounds
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
+                    {roundOptions.map(r => {
+                      const isSelected = selectedRounds === r
+                      return (
+                        <button
+                          key={r}
+                          onClick={() => setSelectedRounds(r)}
+                          style={{
+                            width: 44, height: 44, borderRadius: 10,
+                            border: `2px solid ${isSelected ? (pendingConfig?.color || '#bc0000') : 'var(--sm-border)'}`,
+                            backgroundColor: isSelected ? (pendingConfig?.color || '#bc0000') : 'var(--sm-card)',
+                            color: isSelected ? '#fff' : 'var(--sm-text)',
+                            fontWeight: 700, fontSize: 16,
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease',
+                          }}
+                        >
+                          {r}
+                        </button>
+                      )
+                    })}
+                  </div>
+                  <div style={{ fontSize: 12, color: 'var(--sm-text-muted)', marginTop: 8 }}>
+                    {selectedRounds === maxRounds ? 'Full draft' : `Rounds 1–${selectedRounds}`}
+                  </div>
+                </div>
+
+                {/* Action buttons */}
+                <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+                  <button
+                    onClick={() => { setPendingTeam(null); setSelectedRounds(null) }}
+                    style={{
+                      padding: '10px 20px', borderRadius: 8,
+                      border: '1px solid var(--sm-border)',
+                      backgroundColor: 'transparent',
+                      color: 'var(--sm-text-muted)',
+                      fontWeight: 600, fontSize: 14, cursor: 'pointer',
+                    }}
+                  >
+                    Back
+                  </button>
+                  <button
+                    onClick={() => startDraft(pendingTeam)}
+                    style={{
+                      padding: '10px 28px', borderRadius: 8, border: 'none',
+                      backgroundColor: pendingConfig?.color || '#bc0000',
+                      color: '#fff',
+                      fontWeight: 700, fontSize: 14, cursor: 'pointer',
+                    }}
+                  >
+                    Start Draft
+                  </button>
+                </div>
+              </div>
+            </div>
+          )
+        })()}
 
         {/* Auto-advancing overlay */}
         {autoAdvancing && (
