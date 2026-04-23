@@ -422,18 +422,16 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
       {/* 2030 Article Body Area */}
       <div style={{ backgroundColor: 'var(--sm-dark)' }}>
         <div className="article-body-wrapper" style={{ maxWidth: 1460, margin: '0 auto', padding: '16px 24px 48px', display: 'flex', gap: 24 }}>
-          {/* Left TOC Sidebar (Desktop only) — skinny rail, only when article has 3+ headings */}
-          {hasEnoughHeadings && (
-            <aside className="hidden xl:block" style={{ width: 200, minWidth: 200, flexShrink: 0 }}>
-              <div style={{ position: 'sticky', top: 96 }}>
-                <ArticleTableOfContents
-                  contentHtml={cleanContent}
-                  variant="glass"
-                  storedToc={storedTocItems}
-                />
-              </div>
-            </aside>
-          )}
+          {/* Left TOC Sidebar (Desktop only) — aside always renders to maintain spacing */}
+          <aside className="hidden xl:block" style={{ width: 260, flexShrink: 0 }}>
+            <div style={{ position: 'sticky', top: 96 }}>
+              <ArticleTableOfContents
+                contentHtml={cleanContent}
+                variant="glass"
+                storedToc={storedTocItems}
+              />
+            </div>
+          </aside>
 
           {/* Main article column */}
           <div style={{ width: '100%', maxWidth: 775, borderColor: 'var(--sm-border)' }}>
