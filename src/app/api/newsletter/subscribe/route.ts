@@ -30,6 +30,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Also add to email_subscribers (chicago_daily list) for the 6 AM cron
+    const { error: cronListErr } = await supabaseAdmin
+      .from('email_subscribers')
+      .insert({
+        email: normalizedEmail,
+        list: 'chicago_daily',
+        subscribed: true,
+        source: 'newsletter_widget',
+      })
+
+    if (cronListErr && !cronListErr.message?.includes('duplicate')) {
+      console.error('[newsletter] email_subscribers error:', cronListErr.message)
+    }
+
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('[newsletter] Unhandled error:', error)

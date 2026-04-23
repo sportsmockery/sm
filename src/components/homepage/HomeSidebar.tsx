@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { ArrowRightLeft, ClipboardPen, MessageSquare, BarChart3, Video, Volume2, Tv, MoreVertical, Sun, Moon } from "lucide-react"
+import { ArrowRightLeft, ClipboardPen, MessageSquare, BarChart3, Video, Volume2, Tv, MoreVertical, Sun, Moon, Mail } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
 import { useTheme } from "@/contexts/ThemeContext"
 import { supabase } from "@/lib/supabase"
@@ -41,6 +41,7 @@ const edgeTools: { icon: React.ComponentType<{ className?: string }>; label: str
   { icon: Video, label: 'Vision Theater', desc: 'All videos, no digging. Just press play.', href: '/vision-theater' },
   { icon: Volume2, label: 'Hands-Free Audio', desc: 'Sit back, choose a voice, and press play.', href: '/audio' },
   { icon: ReportCardIcon, label: 'GM Report Cards', desc: 'Transparent, data-backed grades on every Chicago ownership group.', href: '/owner' },
+  { icon: Mail, label: 'Subscribe', desc: 'Chicago sports intelligence in your inbox every morning at 6 AM.', href: '/newsletter' },
 ]
 
 function getTimeAgo(dateStr: string): string {

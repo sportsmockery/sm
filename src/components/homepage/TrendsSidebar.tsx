@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowRightLeft, ClipboardPen, MessageSquare, BarChart3, Video, Volume2, Tv, MoreHorizontal, LogIn } from "lucide-react"
+import { ArrowRightLeft, ClipboardPen, MessageSquare, BarChart3, Video, Volume2, Tv, MoreHorizontal, LogIn, Mail } from "lucide-react"
 import FeedTeamSidebar from "@/components/homepage/FeedTeamSidebar"
 import { useAuth } from "@/contexts/AuthContext"
 
@@ -23,6 +23,7 @@ const EDGE_TOOLS: { icon: React.ComponentType<{ className?: string }>; label: st
   { icon: Video, label: 'Vision Theater', desc: 'All videos, no digging. Just press play.', href: '/vision-theater' },
   { icon: Volume2, label: 'Hands-Free Audio', desc: 'Sit back, choose a voice, and press play.', href: '/audio' },
   { icon: ReportCardIcon, label: 'GM Report Cards', desc: 'Transparent, data-backed grades on every Chicago ownership group.', href: '/owner' },
+  { icon: Mail, label: 'Subscribe', desc: 'Chicago sports intelligence in your inbox every morning at 6 AM.', href: '/newsletter' },
 ]
 
 interface TrendsSidebarProps {
