@@ -5,11 +5,18 @@ import { processIconShortcodes } from '@/lib/shortcodes'
 
 // Window.twttr type is declared in TwitterEmbed.tsx
 
+interface InlineSlot {
+  afterParagraph: number
+  node: React.ReactNode
+}
+
 interface ArticleContentWithEmbedsProps {
   content: string
   className?: string
   /** React node to inject after the 3rd paragraph */
   inlineSlot?: React.ReactNode
+  /** Multiple inline slots at specific paragraph positions */
+  inlineSlots?: InlineSlot[]
 }
 
 // Script loading state
@@ -110,6 +117,46 @@ function splitAfterParagraph(html: string, n: number): [string, string] {
 }
 
 /**
+ * Split HTML at multiple paragraph positions.
+ * Returns alternating [htmlSegment, slotNode, htmlSegment, slotNode, ...] segments.
+ */
+function splitAtMultiplePositions(
+  html: string,
+  slots: InlineSlot[]
+): Array<{ type: 'html'; content: string } | { type: 'slot'; node: React.ReactNode }> {
+  if (!slots.length) return [{ type: 'html', content: html }]
+
+  // Sort slots by paragraph position
+  const sorted = [...slots].sort((a, b) => a.afterParagraph - b.afterParagraph)
+
+  const segments: Array<{ type: 'html'; content: string } | { type: 'slot'; node: React.ReactNode }> = []
+  let remaining = html
+  let consumed = 0
+
+  for (const slot of sorted) {
+    const targetPara = slot.afterParagraph - consumed
+    if (targetPara <= 0) {
+      // Already past this position, insert slot here
+      segments.push({ type: 'slot', node: slot.node })
+      continue
+    }
+
+    const [before, after] = splitAfterParagraph(remaining, targetPara)
+    if (before) segments.push({ type: 'html', content: before })
+    segments.push({ type: 'slot', node: slot.node })
+    remaining = after
+    // Count how many paragraphs we consumed
+    consumed = slot.afterParagraph
+  }
+
+  if (remaining) {
+    segments.push({ type: 'html', content: remaining })
+  }
+
+  return segments
+}
+
+/**
  * Renders WordPress article HTML CLIENT-ONLY to prevent React hydration
  * mismatches (removeChild errors). WordPress HTML contains structures
  * that browsers normalize differently than the server renderer, causing
@@ -119,6 +166,7 @@ export default function ArticleContentWithEmbeds({
   content,
   className = '',
   inlineSlot,
+  inlineSlots,
 }: ArticleContentWithEmbedsProps) {
   const contentRef = useRef<HTMLDivElement>(null)
   const [mounted, setMounted] = useState(false)
@@ -166,14 +214,24 @@ export default function ArticleContentWithEmbeds({
   }
 
   // Client render: actual content
+
+  // Build combined slots array from both inlineSlot (legacy) and inlineSlots
+  const allSlots: InlineSlot[] = [...(inlineSlots || [])]
   if (inlineSlot) {
-    const [before, after] = splitAfterParagraph(processedContent, 3)
+    allSlots.push({ afterParagraph: 3, node: inlineSlot })
+  }
+
+  if (allSlots.length > 0) {
+    const segments = splitAtMultiplePositions(processedContent, allSlots)
     return (
       <div ref={contentRef} className={`article-body ${className}`} suppressHydrationWarning>
-        <div dangerouslySetInnerHTML={{ __html: before }} suppressHydrationWarning />
-        {after ? inlineSlot : null}
-        {after && <div dangerouslySetInnerHTML={{ __html: after }} suppressHydrationWarning />}
-        {!after && inlineSlot}
+        {segments.map((seg, i) =>
+          seg.type === 'html' ? (
+            <div key={i} dangerouslySetInnerHTML={{ __html: seg.content }} suppressHydrationWarning />
+          ) : (
+            <div key={i}>{seg.node}</div>
+          )
+        )}
       </div>
     )
   }

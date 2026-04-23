@@ -20,6 +20,8 @@ import ArticleSidebar from '@/components/article/ArticleSidebar'
 import { ArticleTableOfContents, MoreFromTeam } from '@/components/article'
 import ScoutRecapCard from '@/components/article/ScoutRecapCard'
 import ScoutInsightBox from '@/components/article/ScoutInsightBox'
+import ArticleContentWithInsights from '@/components/article/ArticleContentWithInsights'
+import { EdgeInsightsPanel } from '@/components/edge/ArticleEdgeInsights'
 import { categorySlugToTeam } from '@/lib/types'
 import { stripDuplicateFeaturedImage, calculateReadTime, getContextLabel, sanitizeWordPressContent } from '@/lib/content-utils'
 import { buildAutoLinkContextForPost, applyAutoLinksToHtml } from '@/lib/autolink'
@@ -449,6 +451,7 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
                     content={post.content || ''}
                     team={categorySlugToTeam(categoryData?.slug)?.replace('-', '') || undefined}
                   />
+                  <EdgeInsightsPanel articleId={post.id} />
                 </>
               ) : (
                 <>
@@ -458,17 +461,13 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
                     className="xl:hidden"
                   />
 
-                  {/* Auto-linked content with duplicate featured image stripped */}
-                  <ArticleContentWithEmbeds
+                  {/* Article content with inline Scout Insight + EDGE Insight strips */}
+                  <ArticleContentWithInsights
                     content={stripDuplicateFeaturedImage(autoLinkedContent, post.featured_image)}
-                    inlineSlot={
-                      <ScoutInsightBox
-                        postId={post.id}
-                        postTitle={post.title}
-                        content={post.content || ''}
-                        team={categorySlugToTeam(categoryData?.slug)?.replace('-', '') || undefined}
-                      />
-                    }
+                    postId={post.id}
+                    postTitle={post.title}
+                    postContent={post.content || ''}
+                    team={categorySlugToTeam(categoryData?.slug)?.replace('-', '') || undefined}
                   />
                 </>
               )}
