@@ -20,6 +20,25 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    // Idempotency check — skip if this event was already processed
+    const { data: existing } = await supabaseAdmin
+      .from('stripe_webhook_events')
+      .select('id')
+      .eq('event_id', event.id)
+      .maybeSingle()
+
+    if (existing) {
+      console.log(`[Stripe Webhook] Skipping duplicate event: ${event.id} (${event.type})`)
+      return NextResponse.json({ received: true, duplicate: true })
+    }
+
+    // Record this event before processing (idempotency key)
+    await supabaseAdmin.from('stripe_webhook_events').insert({
+      event_id: event.id,
+      event_type: event.type,
+      processed_at: new Date().toISOString(),
+    })
+
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session

@@ -128,12 +128,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // 5. Allow Freestar dashboard (static SPA at /admin/freestar)
-  if (pathname === '/admin/freestar' || pathname === '/admin/freestar/') {
-    return NextResponse.next()
-  }
-
   // 7. Admin route protection — require authentication
+  // Note: /admin/freestar was previously exempted but now requires auth like all admin pages
   if (pathname.startsWith('/admin')) {
     const { supabase, response } = createSupabaseMiddlewareClient(request)
     const { data: { user } } = await supabase.auth.getUser()

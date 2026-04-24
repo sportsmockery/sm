@@ -83,17 +83,30 @@ export async function requireAdmin(request?: NextRequest): Promise<
 
 /**
  * Verify cron secret for cron job endpoints.
+ * Accepts either:
+ *   1. Authorization: Bearer <CRON_SECRET> (Vercel cron + manual calls)
+ *   2. Valid Vercel cron signature header (defense-in-depth)
  * Returns true if authorized, false otherwise.
  */
 export function verifyCronSecret(request: NextRequest): boolean {
-  const authHeader = request.headers.get('authorization')
   const cronSecret = process.env.CRON_SECRET
 
   if (!cronSecret) {
-    // CRON_SECRET must be set in production
     console.error('[Cron Auth] CRON_SECRET environment variable is not set')
     return false
   }
 
-  return authHeader === `Bearer ${cronSecret}`
+  // Check Authorization header (primary — Vercel sends this automatically)
+  const authHeader = request.headers.get('authorization')
+  if (authHeader === `Bearer ${cronSecret}`) {
+    return true
+  }
+
+  // Also accept x-vercel-cron-secret if configured (Vercel-native validation)
+  const vercelCronHeader = request.headers.get('x-vercel-cron-secret')
+  if (vercelCronHeader && vercelCronHeader === cronSecret) {
+    return true
+  }
+
+  return false
 }
