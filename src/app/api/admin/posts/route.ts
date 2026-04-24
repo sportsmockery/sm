@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { requireAdmin } from '@/lib/admin-auth'
+import { auditLog, getAuditContext } from '@/lib/audit-log'
 
 /**
  * GET /api/admin/posts
@@ -176,6 +177,16 @@ export async function POST(request: NextRequest) {
       }))
       await supabaseAdmin.from('sm_post_tags').insert(tagRows)
     }
+
+    // Audit log
+    auditLog({
+      userId: auth.user!.id,
+      action: postData.status === 'published' ? 'post_published' : 'post_created',
+      resourceType: 'post',
+      resourceId: post.id,
+      details: { title: body.title, slug: body.slug, status: postData.status },
+      ...getAuditContext(request),
+    })
 
     return NextResponse.json(post, { status: 201 })
   } catch (error) {

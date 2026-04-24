@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { processIconShortcodes } from '@/lib/shortcodes'
+import { sanitizeHtml } from '@/lib/sanitize-html'
 
 // Window.twttr type is declared in TwitterEmbed.tsx
 
@@ -227,7 +228,7 @@ export default function ArticleContentWithEmbeds({
       <div ref={contentRef} className={`article-body ${className}`} suppressHydrationWarning>
         {segments.map((seg, i) =>
           seg.type === 'html' ? (
-            <div key={i} dangerouslySetInnerHTML={{ __html: seg.content }} suppressHydrationWarning />
+            <div key={i} dangerouslySetInnerHTML={{ __html: sanitizeHtml(seg.content) }} suppressHydrationWarning />
           ) : (
             <div key={i}>{seg.node}</div>
           )
@@ -240,7 +241,7 @@ export default function ArticleContentWithEmbeds({
     <div
       ref={contentRef}
       className={`article-body ${className}`}
-      dangerouslySetInnerHTML={{ __html: processedContent }}
+      dangerouslySetInnerHTML={{ __html: sanitizeHtml(processedContent) }}
       suppressHydrationWarning
     />
   )

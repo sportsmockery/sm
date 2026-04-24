@@ -4,6 +4,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { getPostIQSystemPrompt, getTeamKnowledge, VOICE_GUIDELINES, HEADLINE_GUIDELINES, SOCIAL_STRATEGY, JOURNALISM_STANDARDS } from '@/lib/postiq-knowledge'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { requireAdmin } from '@/lib/admin-auth'
+import { auditLog, getAuditContext } from '@/lib/audit-log'
 
 const anthropic = new Anthropic()
 const DATALAB_API = 'https://datalab.sportsmockery.com'
@@ -253,6 +254,16 @@ export async function POST(request: NextRequest) {
 
     const body: AIRequest = await request.json()
     const { action, content, title, category, team, postId } = body
+
+    // Audit log AI usage
+    auditLog({
+      userId,
+      action: `postiq_${action}`,
+      resourceType: 'ai',
+      resourceId: postId || null,
+      details: { action, team, category },
+      ...getAuditContext(request),
+    })
 
     // Try DataLab first
     const datalabResponse = await tryDataLabPostIQ(body, userId)

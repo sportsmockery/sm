@@ -9,6 +9,7 @@ import {
   type TriggerReason
 } from '@/lib/ai-personalities'
 import { checkRateLimitRedis, getClientIp } from '@/lib/rate-limit'
+import { sanitizeChatMessage } from '@/lib/sanitize-prompt'
 
 interface ChatMessage {
   id: string
@@ -113,10 +114,10 @@ export async function POST(request: NextRequest) {
     // Use the validated trigger reason, or fall back to provided reason
     const effectiveTriggerReason = triggerCheck.reason || triggerReason
 
-    // Build conversation context for AI
+    // Build conversation context for AI — sanitize each message
     const conversationContext = messages
       .slice(-20) // Last 20 messages
-      .map(m => `${m.user}: ${m.content}`)
+      .map(m => `${m.user}: ${sanitizeChatMessage(m.content)}`)
       .join('\n')
 
     // Build the prompt based on trigger reason

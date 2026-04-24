@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { auditLog, getAuditContext } from '@/lib/audit-log'
+import { validateMediaUpload } from '@/lib/validate-upload'
 
 export async function GET(request: NextRequest) {
   try {
@@ -82,15 +84,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
     }
 
-    // Validate file type
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'application/pdf']
-    if (!allowedTypes.includes(file.type)) {
-      return NextResponse.json({ error: 'File type not allowed' }, { status: 400 })
-    }
-
-    // Validate file size (10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      return NextResponse.json({ error: 'File too large (max 10MB)' }, { status: 400 })
+    // Validate file type, extension, size, and magic bytes
+    const validation = await validateMediaUpload(file)
+    if (!validation.valid) {
+      return NextResponse.json({ error: validation.error }, { status: 400 })
     }
 
     // Generate unique filename
@@ -139,6 +136,16 @@ export async function POST(request: NextRequest) {
       console.error('Database insert error:', dbError)
       throw dbError
     }
+
+    // Audit log
+    auditLog({
+      userId: user.id,
+      action: 'media_uploaded',
+      resourceType: 'media',
+      resourceId: data.id,
+      details: { filename: file.name, type: file.type, size: file.size },
+      ...getAuditContext(request),
+    })
 
     return NextResponse.json(data)
   } catch (error) {

@@ -1,3 +1,5 @@
+import { sanitizeHtml } from '@/lib/sanitize-html'
+
 interface ArticleContentProps {
   content: string
   className?: string
@@ -65,7 +67,7 @@ export default function ArticleContent({
         '--tw-prose-th-borders': 'var(--sm-border)',
         '--tw-prose-td-borders': 'var(--sm-border)',
       } as React.CSSProperties}
-      dangerouslySetInnerHTML={{ __html: content }}
+      dangerouslySetInnerHTML={{ __html: sanitizeHtml(content) }}
     />
   )
 }

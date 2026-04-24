@@ -4,6 +4,7 @@ import { useMemo } from 'react'
 import { splitContentByShortcodes, ContentSegment } from '@/lib/shortcodes'
 import ChartEmbed from '@/components/charts/ChartEmbed'
 import PollEmbed from '@/components/polls/PollEmbed'
+import { sanitizeHtml } from '@/lib/sanitize-html'
 
 interface ShortcodeContentProps {
   html: string
@@ -25,7 +26,7 @@ export default function ShortcodeContent({ html, className = '' }: ShortcodeCont
             return (
               <div
                 key={index}
-                dangerouslySetInnerHTML={{ __html: segment.content }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(segment.content) }}
               />
             )
           case 'chart':

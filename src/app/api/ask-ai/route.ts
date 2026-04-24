@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimitRedis, getClientIp } from '@/lib/rate-limit'
+import { sanitizeQuery } from '@/lib/sanitize-prompt'
 
 /**
  * Ask AI API Route
@@ -205,14 +206,14 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { query, sessionId } = body
+    const { query: rawQuery, sessionId } = body
 
-    if (!query || typeof query !== 'string' || query.trim().length < 3) {
-      return NextResponse.json(
-        { error: 'Query is required and must be at least 3 characters' },
-        { status: 400 }
-      )
+    // Sanitize and validate query
+    const sanitized = sanitizeQuery(rawQuery)
+    if (!sanitized.safe) {
+      return NextResponse.json({ error: sanitized.reason }, { status: 400 })
     }
+    const query = sanitized.query
 
     console.log('Ask AI request:', query.slice(0, 100), sessionId ? `[session: ${sessionId}]` : '[new session]')
 

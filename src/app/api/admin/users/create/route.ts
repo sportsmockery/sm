@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { requireAdmin } from '@/lib/admin-auth'
+import { auditLog, getAuditContext } from '@/lib/audit-log'
 
 // Create admin client with service role key
 function getSupabaseAdmin() {
@@ -71,6 +72,16 @@ export async function POST(request: NextRequest) {
       // Don't fail the request, just log it
       console.warn('User created in Auth but failed to add to sm_users:', dbError.message)
     }
+
+    // Audit log
+    auditLog({
+      userId: auth.user!.id,
+      action: 'user_created',
+      resourceType: 'user',
+      resourceId: authData.user.id,
+      details: { email, role },
+      ...getAuditContext(request),
+    })
 
     return NextResponse.json({
       success: true,
