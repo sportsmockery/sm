@@ -1,6 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { Resend } from 'resend'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { checkRateLimitRedis, getClientIp } from '@/lib/rate-limit'
+
+const resend = new Resend(process.env.RESEND_API_KEY)
+const AUDIENCE_NAME = 'Edge Daily Newsletter'
+
+/** Get or create the Resend audience for the daily newsletter. */
+async function getOrCreateAudience(): Promise<string | null> {
+  try {
+    const { data: audiences, error: listErr } = await resend.audiences.list()
+    if (listErr) throw listErr
+
+    const existing = audiences?.data?.find(
+      (a: { name: string }) => a.name === AUDIENCE_NAME
+    )
+    if (existing) return existing.id
+
+    const { data: created, error: createErr } = await resend.audiences.create({
+      name: AUDIENCE_NAME,
+    })
+    if (createErr) throw createErr
+    return created!.id
+  } catch (err) {
+    console.error('[newsletter] Failed to get/create Resend audience:', err)
+    return null
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,7 +55,7 @@ export async function POST(request: NextRequest) {
 
     const normalizedEmail = email.trim().toLowerCase()
 
-    // Upsert into sm_newsletter_subscribers to avoid duplicates
+    // 1. Upsert into sm_newsletter_subscribers
     const { error } = await supabaseAdmin
       .from('sm_newsletter_subscribers')
       .upsert(
@@ -45,7 +71,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Also add to email_subscribers (chicago_daily list) for the 6 AM cron
+    // 2. Add to email_subscribers (chicago_daily list) for the 6 AM cron
     const { error: cronListErr } = await supabaseAdmin
       .from('email_subscribers')
       .insert({
@@ -57,6 +83,18 @@ export async function POST(request: NextRequest) {
 
     if (cronListErr && !cronListErr.message?.includes('duplicate')) {
       console.error('[newsletter] email_subscribers error:', cronListErr.message)
+    }
+
+    // 3. Sync to Resend audience (best-effort — don't fail if Resend is down)
+    const audienceId = await getOrCreateAudience()
+    if (audienceId) {
+      const { error: contactErr } = await resend.contacts.create({
+        email: normalizedEmail,
+        audienceId,
+      })
+      if (contactErr && !contactErr.message?.includes('already exists')) {
+        console.error('[newsletter] Resend contact create error:', contactErr.message)
+      }
     }
 
     return NextResponse.json({ success: true })
