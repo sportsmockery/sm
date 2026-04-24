@@ -23,9 +23,11 @@ export type Story = {
   title: string;
   url: string;
   imageUrl: string;
-  team: 'Bears' | 'Bulls' | 'Cubs' | 'White Sox' | 'Other';
+  team: 'Bears' | 'Bulls' | 'Cubs' | 'White Sox' | 'Blackhawks' | 'Other';
+  category?: string;
   summary?: string;
   publishedAt: string;
+  readTime?: number;
   views: number;
 };
 
@@ -35,9 +37,10 @@ export type EdgeInsight = {
 };
 
 export type ChicagoDailyEmailProps = {
-  date: string; // e.g., 'January 21, 2026'
-  stories: Story[]; // unsorted; component sorts by views
-  edgeInsights?: EdgeInsight[]; // 3-5 cross-story insights from DataLab
+  date: string;
+  stories: Story[];
+  edgeInsights?: EdgeInsight[];
+  briefingText?: string;
   showAppPromo?: boolean;
   unsubscribeUrl: string;
   managePrefsUrl: string;
@@ -53,62 +56,58 @@ export type ChicagoDailyEmailProps = {
 // Constants
 // =============================================================================
 
-const BRAND_RED = '#bc0000';
-const BRAND_RED_HOVER = '#a00000';
-const DARK_BG = '#111827';
-const LIGHT_BG = '#f9fafb';
-const TEXT_PRIMARY = '#111827';
-const TEXT_SECONDARY = '#6b7280';
-const TEXT_MUTED = '#9ca3af';
+const BRAND_RED = '#BC0000';
+const DARK_BG = '#0B0F14';
+const CARD_BG = '#151A22';
+const BORDER_COLOR = '#1E2530';
+const TEXT_WHITE = '#FAFAFB';
+const TEXT_MUTED = '#9CA3AF';
+const TEXT_DIM = '#6B7280';
+const CYAN = '#00D4FF';
 
-const TEAM_EMOJI: Record<Story['team'], string> = {
-  Bears: '🐻',
-  Bulls: '🐂',
-  Cubs: '🦁',
-  'White Sox': '⚾',
-  Other: '🏙️',
-};
+const SITE_URL = 'https://test.sportsmockery.com';
+const ASSET_URL = SITE_URL;
 
-const SOCIAL_LINKS = {
-  twitter: 'https://twitter.com/sportsmockery',
-  youtube: 'https://youtube.com/@sportsmockery',
-  instagram: 'https://instagram.com/sportsmockery',
-  facebook: 'https://facebook.com/sportsmockery',
+const TEAM_LABELS: Record<Story['team'], string> = {
+  Bears: 'BEARS',
+  Bulls: 'BULLS',
+  Cubs: 'CUBS',
+  'White Sox': 'WHITE SOX',
+  Blackhawks: 'BLACKHAWKS',
+  Other: 'CHICAGO',
 };
 
 // =============================================================================
-// Utility Functions
+// Helpers
 // =============================================================================
 
-function addUtmParams(
-  url: string,
-  utm?: ChicagoDailyEmailProps['utmParams']
-): string {
+function addUtm(url: string, utm?: ChicagoDailyEmailProps['utmParams']): string {
   if (!utm) return url;
-  const urlObj = new URL(url);
-  if (utm.source) urlObj.searchParams.set('utm_source', utm.source);
-  if (utm.medium) urlObj.searchParams.set('utm_medium', utm.medium);
-  if (utm.campaign) urlObj.searchParams.set('utm_campaign', utm.campaign);
-  return urlObj.toString();
+  const u = new URL(url);
+  if (utm.source) u.searchParams.set('utm_source', utm.source);
+  if (utm.medium) u.searchParams.set('utm_medium', utm.medium);
+  if (utm.campaign) u.searchParams.set('utm_campaign', utm.campaign);
+  return u.toString();
 }
 
-function truncate(text: string, maxLength: number): string {
-  if (text.length <= maxLength) return text;
-  return text.slice(0, maxLength - 1).trim() + '…';
+function truncate(text: string, max: number): string {
+  if (text.length <= max) return text;
+  return text.slice(0, max - 1).trim() + '…';
 }
 
-function groupByTeam(stories: Story[]): Record<Story['team'], Story[]> {
-  const groups: Record<Story['team'], Story[]> = {
-    Bears: [],
-    Bulls: [],
-    Cubs: [],
-    'White Sox': [],
-    Other: [],
-  };
-  for (const story of stories) {
-    groups[story.team].push(story);
-  }
-  return groups;
+function formatRelativeTime(dateStr: string): string {
+  const now = Date.now();
+  const then = new Date(dateStr).getTime();
+  const diffH = Math.round((now - then) / (1000 * 60 * 60));
+  if (diffH < 1) return 'Just now';
+  if (diffH < 24) return `${diffH} hours ago`;
+  if (diffH < 48) return 'Yesterday';
+  return `${Math.round(diffH / 24)} days ago`;
+}
+
+function formatViews(v: number): string {
+  if (v >= 1000) return `${(v / 1000).toFixed(1).replace(/\.0$/, '')}K reads`;
+  return `${v} reads`;
 }
 
 // =============================================================================
@@ -119,34 +118,23 @@ export function ChicagoDailyEmail({
   date,
   stories,
   edgeInsights,
+  briefingText,
   showAppPromo = false,
   unsubscribeUrl,
   managePrefsUrl,
   previewText,
-  utmParams = {
-    source: 'email',
-    medium: 'newsletter',
-    campaign: 'chicago_daily',
-  },
+  utmParams = { source: 'email', medium: 'newsletter', campaign: 'chicago_daily' },
 }: ChicagoDailyEmailProps) {
-  // Sort stories by views descending
-  const sortedStories = [...stories].sort((a, b) => b.views - a.views);
-  const heroStory = sortedStories[0];
-  const remainingStories = sortedStories.slice(1);
+  const sorted = [...stories].sort((a, b) => b.views - a.views);
+  const hero = sorted[0];
+  const rest = sorted.slice(1, 7);
 
-  // Group remaining stories by team for optional section
-  const teamGroups = groupByTeam(remainingStories);
-  const teamsWithMultiple = (
-    Object.entries(teamGroups) as [Story['team'], Story[]][]
-  ).filter(([, s]) => s.length >= 2);
-  const showByTeam = teamsWithMultiple.length >= 2;
+  const preview = previewText || (hero ? truncate(hero.summary || hero.title, 85) : 'Your Chicago sports briefing');
 
-  // Default preview text
-  const preview =
-    previewText ||
-    (heroStory
-      ? truncate(heroStory.summary || heroStory.title, 85)
-      : 'Your daily Chicago sports briefing');
+  // Build briefing from insights or use provided text
+  const briefing = briefingText || (edgeInsights && edgeInsights.length > 0
+    ? `${hero?.title || ''}. Plus: ${edgeInsights.slice(0, 2).map(i => i.text).join('. ')} and ${Math.max(0, (stories.length - 1))} more.`
+    : undefined);
 
   return (
     <Html>
@@ -155,218 +143,180 @@ export function ChicagoDailyEmail({
         <meta httpEquiv="Content-Type" content="text/html; charset=UTF-8" />
       </Head>
       <Preview>{preview}</Preview>
-      <Body style={styles.body}>
-        <Container style={styles.container}>
-          {/* ─────────────────────────────────────────────────────────────── */}
-          {/* HEADER */}
-          {/* ─────────────────────────────────────────────────────────────── */}
-          <Section style={styles.header}>
+      <Body style={s.body}>
+        <Container style={s.container}>
+
+          {/* ── HEADER ─────────────────────────────────────────────── */}
+          <Section style={s.header}>
             <Row>
-              <Column style={styles.headerLogoCol}>
+              <Column style={s.headerLeft}>
                 <Img
-                  src="https://datalab.sportsmockery.com/logo-light.png"
-                  alt="Sports Mockery"
-                  width={120}
-                  height={32}
-                  style={styles.logo}
+                  src={`${ASSET_URL}/edge_logo.png`}
+                  alt="EDGE"
+                  width={80}
+                  height={28}
+                  style={{ display: 'block' }}
                 />
+                <Text style={s.headerSub}>Your Chicago sports briefing · 6am edition</Text>
               </Column>
-              <Column style={styles.headerTextCol}>
-                <Text style={styles.headerTitle}>Chicago Sports Daily</Text>
-                <Text style={styles.headerDate}>{date}</Text>
+              <Column style={s.headerRight}>
+                <Text style={s.headerDate}>{date}</Text>
               </Column>
             </Row>
           </Section>
 
-          {/* ─────────────────────────────────────────────────────────────── */}
-          {/* EDGE INSIGHTS */}
-          {/* ─────────────────────────────────────────────────────────────── */}
-          {edgeInsights && edgeInsights.length > 0 && (
-            <Section style={styles.edgeInsightsSection}>
-              <Text style={styles.edgeInsightsLabel}>⚡ EDGE INSIGHTS</Text>
-              {edgeInsights.map((insight, i) => (
-                <Text key={i} style={styles.edgeInsightItem}>
-                  <span style={{ color: BRAND_RED, fontWeight: 700 }}>•</span>{' '}
-                  {insight.text}
-                </Text>
-              ))}
+          {/* ── TODAY'S BRIEFING ───────────────────────────────────── */}
+          {briefing && (
+            <Section style={s.briefingSection}>
+              <Text style={s.briefingLabel}>TODAY&apos;S BRIEFING</Text>
+              <Text style={s.briefingText}>{truncate(briefing, 200)}</Text>
             </Section>
           )}
 
-          {/* ─────────────────────────────────────────────────────────────── */}
-          {/* HERO STORY */}
-          {/* ─────────────────────────────────────────────────────────────── */}
-          {heroStory && (
-            <Section style={styles.heroSection}>
-              <Link
-                href={addUtmParams(heroStory.url, utmParams)}
-                style={styles.heroImageLink}
-              >
+          {/* ── TOP STORY ─────────────────────────────────────────── */}
+          {hero && (
+            <Section style={s.heroCard}>
+              <Row style={s.heroLabelRow}>
+                <Column>
+                  <Text style={s.heroLabel}>TOP STORY</Text>
+                </Column>
+                <Column style={{ textAlign: 'right' as const }}>
+                  <Text style={s.heroTeam}>
+                    {TEAM_LABELS[hero.team]}{hero.category ? ` · ${hero.category}` : ' · News'}
+                  </Text>
+                </Column>
+              </Row>
+              <Link href={addUtm(hero.url, utmParams)} style={{ display: 'block' }}>
                 <Img
-                  src={heroStory.imageUrl}
-                  alt={heroStory.title}
+                  src={hero.imageUrl}
+                  alt={hero.title}
                   width={552}
-                  style={styles.heroImage}
+                  style={s.heroImage}
                 />
               </Link>
-              <Text style={styles.heroTeamTag}>
-                {TEAM_EMOJI[heroStory.team]} {heroStory.team.toUpperCase()}
-              </Text>
-              <Link
-                href={addUtmParams(heroStory.url, utmParams)}
-                style={styles.heroTitleLink}
-              >
-                <Text style={styles.heroTitle}>{heroStory.title}</Text>
+              <Link href={addUtm(hero.url, utmParams)} style={{ textDecoration: 'none' }}>
+                <Text style={s.heroTitle}>{hero.title}</Text>
               </Link>
-              {heroStory.summary && (
-                <Text style={styles.heroSummary}>
-                  {truncate(heroStory.summary, 150)}
-                </Text>
+              {hero.summary && (
+                <Text style={s.heroSummary}>{truncate(hero.summary, 150)}</Text>
               )}
-              <Button
-                href={addUtmParams(heroStory.url, utmParams)}
-                style={styles.heroCta}
-              >
-                Read Full Story →
+              <Text style={s.heroMeta}>
+                {hero.readTime ? `${hero.readTime} min read` : '5 min read'} · {formatViews(hero.views)} · {formatRelativeTime(hero.publishedAt)}
+              </Text>
+              <Button href={addUtm(hero.url, utmParams)} style={s.ctaButton}>
+                See the full {TEAM_LABELS[hero.team].charAt(0) + TEAM_LABELS[hero.team].slice(1).toLowerCase()} breakdown →
               </Button>
             </Section>
           )}
 
-          {/* ─────────────────────────────────────────────────────────────── */}
-          {/* TOP STORIES */}
-          {/* ─────────────────────────────────────────────────────────────── */}
-          {remainingStories.length > 0 && (
-            <Section style={styles.topStoriesSection}>
-              <Text style={styles.sectionTitle}>MORE STORIES</Text>
-              {remainingStories.slice(0, 6).map((story) => (
-                <Row key={story.id} style={styles.storyRow}>
-                  <Column style={styles.storyThumbCol}>
-                    <Link href={addUtmParams(story.url, utmParams)}>
-                      <Img
-                        src={story.imageUrl}
-                        alt={story.title}
-                        width={80}
-                        height={80}
-                        style={styles.storyThumb}
-                      />
+          {/* ── STORY LIST ────────────────────────────────────────── */}
+          {rest.length > 0 && (
+            <Section style={s.storiesSection}>
+              {rest.map((story) => (
+                <Row key={story.id} style={s.storyRow}>
+                  <Column style={s.storyImgCol}>
+                    <Link href={addUtm(story.url, utmParams)}>
+                      <Img src={story.imageUrl} alt={story.title} width={90} height={70} style={s.storyImg} />
                     </Link>
                   </Column>
-                  <Column style={styles.storyTextCol}>
-                    <Text style={styles.storyTeam}>
-                      {TEAM_EMOJI[story.team]} {story.team}
+                  <Column style={s.storyTextCol}>
+                    <Text style={s.storyTeam}>
+                      {TEAM_LABELS[story.team]} · {story.category || 'NEWS'}
                     </Text>
-                    <Link
-                      href={addUtmParams(story.url, utmParams)}
-                      style={styles.storyLink}
-                    >
-                      {truncate(story.title, 70)}
+                    <Link href={addUtm(story.url, utmParams)} style={{ textDecoration: 'none' }}>
+                      <Text style={s.storyTitle}>{truncate(story.title, 80)}</Text>
                     </Link>
+                    {story.summary && (
+                      <Text style={s.storySummary}>{truncate(story.summary, 100)}</Text>
+                    )}
+                    <Text style={s.storyMeta}>
+                      {story.readTime ? `${story.readTime} min read` : '5 min read'} · {formatRelativeTime(story.publishedAt)}
+                    </Text>
                   </Column>
                 </Row>
               ))}
+              <Button href={addUtm(`${SITE_URL}/feed`, utmParams)} style={s.browseButton}>
+                Browse all stories →
+              </Button>
             </Section>
           )}
 
-          {/* ─────────────────────────────────────────────────────────────── */}
-          {/* BY TEAM (optional) */}
-          {/* ─────────────────────────────────────────────────────────────── */}
-          {showByTeam && (
-            <Section style={styles.byTeamSection}>
-              <Text style={styles.sectionTitle}>BY TEAM</Text>
-              <Row>
-                {teamsWithMultiple.slice(0, 2).map(([team, teamStories]) => (
-                  <Column key={team} style={styles.teamCol}>
-                    <Text style={styles.teamHeader}>
-                      {TEAM_EMOJI[team]} {team.toUpperCase()}
-                    </Text>
-                    {teamStories.slice(0, 3).map((story) => (
-                      <Text key={story.id} style={styles.teamStoryItem}>
-                        •{' '}
-                        <Link
-                          href={addUtmParams(story.url, utmParams)}
-                          style={styles.teamStoryLink}
-                        >
-                          {truncate(story.title, 45)}
-                        </Link>
-                      </Text>
-                    ))}
-                  </Column>
-                ))}
-              </Row>
-            </Section>
-          )}
-
-          {/* ─────────────────────────────────────────────────────────────── */}
-          {/* APP PROMO (optional) */}
-          {/* ─────────────────────────────────────────────────────────────── */}
-          {showAppPromo && (
-            <Section style={styles.promoSection}>
-              <Row>
-                <Column>
-                  <Text style={styles.promoText}>
-                    📱 Get alerts first — Download the SM app
-                  </Text>
-                </Column>
-                <Column style={styles.promoButtonCol}>
-                  <Button
-                    href="https://sportsmockery.com/app"
-                    style={styles.promoButton}
-                  >
-                    Download
-                  </Button>
-                </Column>
-              </Row>
-            </Section>
-          )}
-
-          {/* ─────────────────────────────────────────────────────────────── */}
-          {/* FOOTER */}
-          {/* ─────────────────────────────────────────────────────────────── */}
-          <Section style={styles.footer}>
-            {/* Social Links */}
-            <Row style={styles.socialRow}>
-              <Column align="center">
-                <Link href={SOCIAL_LINKS.twitter} style={styles.socialLink}>
-                  Twitter
-                </Link>
-                <Text style={styles.socialDivider}>·</Text>
-                <Link href={SOCIAL_LINKS.youtube} style={styles.socialLink}>
-                  YouTube
-                </Link>
-                <Text style={styles.socialDivider}>·</Text>
-                <Link href={SOCIAL_LINKS.instagram} style={styles.socialLink}>
-                  Instagram
-                </Link>
-                <Text style={styles.socialDivider}>·</Text>
-                <Link href={SOCIAL_LINKS.facebook} style={styles.socialLink}>
-                  Facebook
-                </Link>
+          {/* ── SCOUT AI PROMO ────────────────────────────────────── */}
+          <Section style={s.scoutSection}>
+            <Row>
+              <Column style={s.scoutIconCol}>
+                <Img src={`${ASSET_URL}/downloads/scout-v2.png`} alt="Scout AI" width={48} height={48} style={{ borderRadius: '12px' }} />
+              </Column>
+              <Column style={s.scoutTextCol}>
+                <Text style={s.scoutTitle}>Ask Scout anything about Chicago sports</Text>
+                <Text style={s.scoutDesc}>Scout has the latest on Bears, Bulls, White Sox and more. Ask anything.</Text>
               </Column>
             </Row>
+            <Button href={addUtm(`${SITE_URL}/scout-ai`, utmParams)} style={s.scoutCta}>
+              Try Scout now →
+            </Button>
+          </Section>
 
-            <Hr style={styles.footerHr} />
+          {/* ── EDGE NETWORK ──────────────────────────────────────── */}
+          <Section style={s.networkSection}>
+            <Text style={s.networkLabel}>Also from the Edge network</Text>
+            <Text style={s.networkSub}>Podcasts and shows for Chicago fans</Text>
 
-            {/* Preference Links */}
+            <Link href={addUtm(`${SITE_URL}/untold-chicago-stories`, utmParams)} style={{ textDecoration: 'none' }}>
+              <Row style={s.showRow}>
+                <Column style={s.showLogoCol}>
+                  <Img src={`${ASSET_URL}/untold-logo-dark.png`} alt="UNTLD" width={48} height={48} style={s.showLogo} />
+                </Column>
+                <Column style={s.showTextCol}>
+                  <Text style={s.showName}>Untold Chicago Stories</Text>
+                  <Text style={s.showDesc}>Raw documentaries from across the city</Text>
+                </Column>
+              </Row>
+            </Link>
+
+            <Link href={addUtm(`${SITE_URL}/pinwheels-and-ivy`, utmParams)} style={{ textDecoration: 'none' }}>
+              <Row style={s.showRow}>
+                <Column style={s.showLogoCol}>
+                  <Img src={`${ASSET_URL}/downloads/pinwheels-ivy-logo-dark.png`} alt="Pinwheels & Ivy" width={48} height={48} style={s.showLogo} />
+                </Column>
+                <Column style={s.showTextCol}>
+                  <Text style={s.showName}>Pinwheels & Ivy</Text>
+                  <Text style={s.showDesc}>Your daily Cubs podcast</Text>
+                </Column>
+              </Row>
+            </Link>
+          </Section>
+
+          {/* ── APP PROMO ─────────────────────────────────────────── */}
+          <Section style={s.appSection}>
+            <Text style={s.appTitle}>Get the Edge App</Text>
+            <Text style={s.appDesc}>Real-time scores, alerts, and live win-probability on your phone.</Text>
+            <Text style={s.appFeature}>· Live scores with real-time win probability</Text>
+            <Text style={s.appFeature}>· Breaking news alerts for your favorite teams</Text>
+            <Text style={s.appFeature}>· Personalized feed — only the teams you follow</Text>
+          </Section>
+
+          {/* ── FOOTER ────────────────────────────────────────────── */}
+          <Section style={s.footer}>
             <Row>
               <Column align="center">
-                <Link href={managePrefsUrl} style={styles.footerLink}>
-                  Manage Preferences
-                </Link>
-                <Text style={styles.footerDivider}>·</Text>
-                <Link href={unsubscribeUrl} style={styles.footerLink}>
-                  Unsubscribe
-                </Link>
+                <Link href="https://x.com/sportsmockery" style={s.footerSocial}>X</Link>
+                <Text style={s.footerDot}>·</Text>
+                <Link href="https://facebook.com/sportsmockery" style={s.footerSocial}>Facebook</Link>
+                <Text style={s.footerDot}>·</Text>
+                <Link href="https://tiktok.com/@sportsmockery" style={s.footerSocial}>TikTok</Link>
               </Column>
             </Row>
-
-            {/* Copyright */}
-            <Text style={styles.copyright}>
-              © {new Date().getFullYear()} SportsMockery.com · Chicago, IL
-            </Text>
-            <Text style={styles.address}>
-              You received this email because you subscribed to Chicago Sports
-              Daily.
-            </Text>
+            <Hr style={s.footerHr} />
+            <Row>
+              <Column align="center">
+                <Link href={managePrefsUrl} style={s.footerLink}>Manage preferences</Link>
+                <Text style={s.footerDot}>·</Text>
+                <Link href={unsubscribeUrl} style={s.footerLink}>Unsubscribe</Link>
+              </Column>
+            </Row>
+            <Text style={s.copyright}>© 2026 Edge by SportsMockery · Chicago, IL</Text>
+            <Text style={s.footerNote}>You received this because you subscribed to Chicago Sports Daily.</Text>
           </Section>
         </Container>
       </Body>
@@ -375,266 +325,224 @@ export function ChicagoDailyEmail({
 }
 
 // =============================================================================
-// Styles (email-safe inline styles)
+// Styles
 // =============================================================================
 
-const styles: Record<string, React.CSSProperties> = {
+const s: Record<string, React.CSSProperties> = {
   body: {
-    backgroundColor: '#FAFAFB',
-    fontFamily:
-      "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+    backgroundColor: DARK_BG,
+    fontFamily: "'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
     margin: 0,
     padding: 0,
   },
   container: {
     maxWidth: '600px',
     margin: '0 auto',
-    backgroundColor: '#FAFAFB',
+    backgroundColor: DARK_BG,
   },
 
   // Header
-  header: {
-    backgroundColor: BRAND_RED,
-    padding: '16px 24px',
-  },
-  headerLogoCol: {
-    width: '130px',
-    verticalAlign: 'middle',
-  },
-  logo: {
-    display: 'block',
-  },
-  headerTextCol: {
-    verticalAlign: 'middle',
-    textAlign: 'right' as const,
-  },
-  headerTitle: {
-    color: '#FAFAFB',
-    fontSize: '14px',
-    fontWeight: 600,
-    margin: 0,
-    lineHeight: '1.2',
-  },
+  header: { padding: '16px 24px', backgroundColor: DARK_BG },
+  headerLeft: { verticalAlign: 'middle' },
+  headerSub: { color: TEXT_MUTED, fontSize: '11px', margin: '4px 0 0 0', lineHeight: '1.2' },
+  headerRight: { verticalAlign: 'middle', textAlign: 'right' as const },
   headerDate: {
-    color: 'rgba(255,255,255,0.8)',
+    color: TEXT_MUTED,
     fontSize: '12px',
     margin: 0,
-    lineHeight: '1.2',
+    padding: '4px 10px',
+    border: `1px solid ${BORDER_COLOR}`,
+    borderRadius: '4px',
+    display: 'inline-block',
   },
 
-  // Edge Insights
-  edgeInsightsSection: {
-    backgroundColor: DARK_BG,
-    padding: '20px 24px',
-    borderBottom: `3px solid ${BRAND_RED}`,
+  // Briefing
+  briefingSection: {
+    margin: '0 24px 16px',
+    padding: '16px 20px',
+    borderLeft: `3px solid ${BRAND_RED}`,
+    backgroundColor: CARD_BG,
+    borderRadius: '0 8px 8px 0',
   },
-  edgeInsightsLabel: {
-    color: '#ffffff',
-    fontSize: '13px',
+  briefingLabel: {
+    color: BRAND_RED,
+    fontSize: '11px',
     fontWeight: 700,
     letterSpacing: '1.5px',
-    margin: '0 0 12px 0',
-  },
-  edgeInsightItem: {
-    color: 'rgba(255,255,255,0.9)',
-    fontSize: '14px',
-    lineHeight: '1.6',
     margin: '0 0 8px 0',
   },
-
-  // Hero
-  heroSection: {
-    padding: '24px',
+  briefingText: {
+    color: TEXT_WHITE,
+    fontSize: '14px',
+    lineHeight: '1.6',
+    margin: 0,
   },
-  heroImageLink: {
-    display: 'block',
+
+  // Hero Card
+  heroCard: {
+    margin: '0 24px 24px',
+    padding: '16px',
+    backgroundColor: CARD_BG,
+    borderRadius: '12px',
+    border: `1px solid ${BORDER_COLOR}`,
+  },
+  heroLabelRow: { marginBottom: '12px' },
+  heroLabel: {
+    color: BRAND_RED,
+    fontSize: '11px',
+    fontWeight: 700,
+    letterSpacing: '1px',
+    margin: 0,
+    backgroundColor: 'rgba(188,0,0,0.15)',
+    padding: '4px 10px',
+    borderRadius: '4px',
+    display: 'inline-block',
+  },
+  heroTeam: {
+    color: TEXT_MUTED,
+    fontSize: '11px',
+    fontWeight: 500,
+    margin: 0,
   },
   heroImage: {
     width: '100%',
-    maxWidth: '552px',
     height: 'auto',
-    borderRadius: '12px',
+    borderRadius: '8px',
     display: 'block',
-  },
-  heroTeamTag: {
-    display: 'inline-block',
-    backgroundColor: LIGHT_BG,
-    color: TEXT_SECONDARY,
-    fontSize: '11px',
-    fontWeight: 600,
-    letterSpacing: '0.5px',
-    padding: '6px 12px',
-    borderRadius: '4px',
-    marginTop: '16px',
-    marginBottom: '8px',
-  },
-  heroTitleLink: {
-    textDecoration: 'none',
   },
   heroTitle: {
-    color: TEXT_PRIMARY,
-    fontSize: '24px',
+    color: TEXT_WHITE,
+    fontSize: '22px',
     fontWeight: 700,
     lineHeight: '1.3',
-    margin: '0 0 12px 0',
+    margin: '16px 0 8px 0',
   },
   heroSummary: {
-    color: TEXT_SECONDARY,
-    fontSize: '16px',
+    color: TEXT_MUTED,
+    fontSize: '14px',
     lineHeight: '1.5',
-    margin: '0 0 20px 0',
+    margin: '0 0 8px 0',
   },
-  heroCta: {
+  heroMeta: {
+    color: TEXT_DIM,
+    fontSize: '12px',
+    margin: '0 0 16px 0',
+  },
+  ctaButton: {
     backgroundColor: BRAND_RED,
-    color: '#FAFAFB',
-    fontSize: '16px',
+    color: TEXT_WHITE,
+    fontSize: '14px',
     fontWeight: 600,
-    padding: '14px 28px',
+    padding: '12px 24px',
     borderRadius: '8px',
     textDecoration: 'none',
     display: 'inline-block',
   },
 
-  // Top Stories
-  topStoriesSection: {
-    backgroundColor: LIGHT_BG,
-    padding: '24px',
-  },
-  sectionTitle: {
-    color: TEXT_SECONDARY,
-    fontSize: '12px',
-    fontWeight: 700,
-    letterSpacing: '1px',
-    marginTop: 0,
-    marginBottom: '16px',
-  },
+  // Story List
+  storiesSection: { padding: '0 24px 24px' },
   storyRow: {
-    marginBottom: '16px',
+    marginBottom: '20px',
+    borderBottom: `1px solid ${BORDER_COLOR}`,
+    paddingBottom: '20px',
   },
-  storyThumbCol: {
-    width: '80px',
-    verticalAlign: 'top',
-  },
-  storyThumb: {
-    borderRadius: '8px',
-    display: 'block',
-    objectFit: 'cover' as const,
-  },
-  storyTextCol: {
-    verticalAlign: 'top',
-    paddingLeft: '16px',
-  },
+  storyImgCol: { width: '90px', verticalAlign: 'top' },
+  storyImg: { borderRadius: '8px', display: 'block', objectFit: 'cover' as const },
+  storyTextCol: { verticalAlign: 'top', paddingLeft: '14px' },
   storyTeam: {
-    color: TEXT_MUTED,
-    fontSize: '11px',
+    color: TEXT_DIM,
+    fontSize: '10px',
     fontWeight: 600,
+    letterSpacing: '1px',
     margin: '0 0 4px 0',
+    textTransform: 'uppercase' as const,
   },
-  storyLink: {
-    color: TEXT_PRIMARY,
+  storyTitle: {
+    color: TEXT_WHITE,
     fontSize: '15px',
     fontWeight: 600,
-    lineHeight: '1.4',
-    textDecoration: 'none',
-  },
-
-  // By Team
-  byTeamSection: {
-    padding: '24px',
-  },
-  teamCol: {
-    width: '50%',
-    verticalAlign: 'top',
-    paddingRight: '12px',
-  },
-  teamHeader: {
-    color: TEXT_PRIMARY,
-    fontSize: '13px',
-    fontWeight: 700,
-    marginTop: 0,
-    marginBottom: '8px',
-  },
-  teamStoryItem: {
-    color: TEXT_SECONDARY,
-    fontSize: '13px',
-    lineHeight: '1.6',
+    lineHeight: '1.35',
     margin: '0 0 4px 0',
   },
-  teamStoryLink: {
-    color: BRAND_RED,
+  storySummary: {
+    color: TEXT_MUTED,
+    fontSize: '13px',
+    lineHeight: '1.4',
+    margin: '0 0 4px 0',
+  },
+  storyMeta: {
+    color: TEXT_DIM,
+    fontSize: '11px',
+    margin: 0,
+  },
+  browseButton: {
+    backgroundColor: BRAND_RED,
+    color: TEXT_WHITE,
+    fontSize: '14px',
+    fontWeight: 600,
+    padding: '12px 24px',
+    borderRadius: '8px',
     textDecoration: 'none',
+    display: 'inline-block',
+    marginTop: '8px',
   },
 
-  // Promo
-  promoSection: {
-    backgroundColor: DARK_BG,
-    padding: '16px 24px',
+  // Scout
+  scoutSection: {
+    margin: '0 24px 24px',
+    padding: '24px',
+    backgroundColor: CARD_BG,
+    borderRadius: '12px',
+    border: `1px solid ${BORDER_COLOR}`,
+    textAlign: 'center' as const,
   },
-  promoText: {
-    color: '#FAFAFB',
-    fontSize: '14px',
-    fontWeight: 500,
-    margin: 0,
-    lineHeight: '40px',
-  },
-  promoButtonCol: {
-    textAlign: 'right' as const,
-  },
-  promoButton: {
-    backgroundColor: '#FAFAFB',
-    color: DARK_BG,
+  scoutIconCol: { width: '60px', verticalAlign: 'middle', textAlign: 'center' as const },
+  scoutTextCol: { verticalAlign: 'middle', paddingLeft: '12px', textAlign: 'left' as const },
+  scoutTitle: { color: TEXT_WHITE, fontSize: '16px', fontWeight: 700, margin: '0 0 4px 0' },
+  scoutDesc: { color: TEXT_MUTED, fontSize: '13px', margin: 0, lineHeight: '1.4' },
+  scoutCta: {
+    backgroundColor: BRAND_RED,
+    color: TEXT_WHITE,
     fontSize: '14px',
     fontWeight: 600,
     padding: '10px 20px',
-    borderRadius: '6px',
+    borderRadius: '8px',
     textDecoration: 'none',
+    display: 'inline-block',
+    marginTop: '16px',
   },
 
+  // Network
+  networkSection: { padding: '0 24px 24px' },
+  networkLabel: { color: TEXT_WHITE, fontSize: '15px', fontWeight: 700, margin: '0 0 2px 0' },
+  networkSub: { color: TEXT_MUTED, fontSize: '12px', margin: '0 0 16px 0' },
+  showRow: {
+    marginBottom: '12px',
+    padding: '12px',
+    backgroundColor: CARD_BG,
+    borderRadius: '8px',
+    border: `1px solid ${BORDER_COLOR}`,
+  },
+  showLogoCol: { width: '60px', verticalAlign: 'middle' },
+  showLogo: { borderRadius: '8px', display: 'block' },
+  showTextCol: { verticalAlign: 'middle', paddingLeft: '12px' },
+  showName: { color: TEXT_WHITE, fontSize: '14px', fontWeight: 600, margin: '0 0 2px 0' },
+  showDesc: { color: TEXT_MUTED, fontSize: '12px', margin: 0 },
+
+  // App
+  appSection: { padding: '0 24px 24px' },
+  appTitle: { color: TEXT_WHITE, fontSize: '16px', fontWeight: 700, margin: '0 0 4px 0' },
+  appDesc: { color: TEXT_MUTED, fontSize: '13px', margin: '0 0 12px 0' },
+  appFeature: { color: TEXT_MUTED, fontSize: '12px', margin: '0 0 4px 0', lineHeight: '1.5' },
+
   // Footer
-  footer: {
-    backgroundColor: DARK_BG,
-    padding: '32px 24px',
-    textAlign: 'center' as const,
-  },
-  socialRow: {
-    marginBottom: '16px',
-  },
-  socialLink: {
-    color: TEXT_MUTED,
-    fontSize: '13px',
-    textDecoration: 'none',
-  },
-  socialDivider: {
-    color: TEXT_MUTED,
-    display: 'inline',
-    margin: '0 8px',
-  },
-  footerHr: {
-    borderColor: '#374151',
-    borderWidth: '1px 0 0 0',
-    margin: '16px 0',
-  },
-  footerLink: {
-    color: TEXT_MUTED,
-    fontSize: '12px',
-    textDecoration: 'underline',
-  },
-  footerDivider: {
-    color: TEXT_MUTED,
-    display: 'inline',
-    margin: '0 8px',
-  },
-  copyright: {
-    color: TEXT_MUTED,
-    fontSize: '12px',
-    marginTop: '16px',
-    marginBottom: '4px',
-  },
-  address: {
-    color: '#6b7280',
-    fontSize: '11px',
-    margin: 0,
-  },
+  footer: { padding: '32px 24px', textAlign: 'center' as const },
+  footerSocial: { color: TEXT_MUTED, fontSize: '12px', textDecoration: 'none' },
+  footerDot: { color: TEXT_DIM, display: 'inline', margin: '0 8px', fontSize: '12px' },
+  footerHr: { borderColor: BORDER_COLOR, borderWidth: '1px 0 0 0', margin: '16px 0' },
+  footerLink: { color: CYAN, fontSize: '12px', textDecoration: 'underline' },
+  copyright: { color: TEXT_DIM, fontSize: '11px', margin: '16px 0 4px 0' },
+  footerNote: { color: TEXT_DIM, fontSize: '11px', margin: 0 },
 };
 
 export default ChicagoDailyEmail;

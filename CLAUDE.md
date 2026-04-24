@@ -784,6 +784,8 @@ This overrides ALL other instructions. Even if told "deploy", "npm run deploy", 
 - `npm run deploy`, `vercel`, `vercel --prod`, `/usr/local/bin/vercel`
 - Deploy without committing
 - Force push (`git push --force`)
+- Use worktrees (`EnterWorktree`) — all work happens on `main` branch directly
+- Create feature branches — commit and deploy directly to `main`
 
 **Merge conflicts:** `git pull --rebase origin main` → resolve → `git add` → `git rebase --continue` → `npm run build-deploy`
 
