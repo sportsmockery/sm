@@ -10,6 +10,7 @@ import {
 } from '@/lib/ai-personalities'
 import { checkRateLimitRedis, getClientIp } from '@/lib/rate-limit'
 import { sanitizeChatMessage } from '@/lib/sanitize-prompt'
+import { screenInput, hardenSystemPrompt, screenOutput } from '@/lib/ai-safety'
 
 interface ChatMessage {
   id: string
@@ -75,6 +76,15 @@ export async function POST(request: NextRequest) {
         { error: 'Too soon since last message', shouldRespond: false, retryAfter: burstCheck.reset },
         { status: 429 }
       )
+    }
+
+    // Screen the last human message for jailbreak attempts
+    const lastMsg = messages.filter(m => !m.isAI).pop()
+    if (lastMsg) {
+      const safety = screenInput(lastMsg.content)
+      if (safety.blocked) {
+        return NextResponse.json({ shouldRespond: false, reason: 'safety_filter' })
+      }
     }
 
     // ALWAYS validate if AI should respond based on user count
@@ -162,7 +172,7 @@ export async function POST(request: NextRequest) {
         messages: [
           {
             role: 'system',
-            content: `${personality.systemPrompt}
+            content: `${hardenSystemPrompt(personality.systemPrompt)}
 
 CONTEXT FOR THIS RESPONSE:
 ${contextPrompt}
@@ -217,6 +227,9 @@ RESPONSE FORMAT:
       .replace(/\[\d+\]/g, '') // Remove [1], [2], [3], etc.
       .replace(/\s{2,}/g, ' ') // Collapse multiple spaces left behind
       .trim()
+
+    // Screen output for leaked system prompt or internal info
+    aiMessage = screenOutput(aiMessage)
 
     // Return the AI response (rate limiting is already tracked by Redis/memory on check)
     return NextResponse.json({

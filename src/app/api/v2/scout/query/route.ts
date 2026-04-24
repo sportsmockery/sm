@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { screenInput, screenOutput } from '@/lib/ai-safety'
+import { sanitizeQuery } from '@/lib/sanitize-prompt'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,6 +16,24 @@ const DATALAB_API = 'https://datalab.sportsmockery.com'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
+
+    // Sanitize query input
+    if (body.query) {
+      const sanitized = sanitizeQuery(body.query)
+      if (!sanitized.safe) {
+        return NextResponse.json({ error: sanitized.reason }, { status: 400 })
+      }
+      body.query = sanitized.query
+
+      // Screen for jailbreak attempts
+      const safety = screenInput(body.query)
+      if (safety.blocked) {
+        return NextResponse.json({
+          response: safety.reason,
+          source: 'safety',
+        })
+      }
+    }
 
     // Get user session
     const cookieStore = await cookies()
@@ -56,6 +76,8 @@ export async function POST(request: NextRequest) {
 
     // Pass through the response (including 503 with fallback_to_legacy)
     const data = await response.json()
+    // Screen output for leaked system info
+    if (data.response) data.response = screenOutput(data.response)
     return NextResponse.json(data, { status: response.status })
   } catch (error) {
     console.error('[v2/scout/query] Error:', error)

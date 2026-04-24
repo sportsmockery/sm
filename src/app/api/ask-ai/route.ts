@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimitRedis, getClientIp } from '@/lib/rate-limit'
 import { sanitizeQuery } from '@/lib/sanitize-prompt'
+import { screenInput, screenOutput } from '@/lib/ai-safety'
 
 /**
  * Ask AI API Route
@@ -215,6 +216,21 @@ export async function POST(request: NextRequest) {
     }
     const query = sanitized.query
 
+    // Screen for jailbreak/prompt injection attempts
+    const safety = screenInput(query)
+    if (safety.blocked) {
+      return NextResponse.json({
+        response: safety.reason,
+        source: 'safety',
+        showSuggestions: true,
+        suggestions: [
+          "What's the Bears' record this season?",
+          "Who leads the Bulls in scoring?",
+          "Cubs playoff chances this year?"
+        ]
+      })
+    }
+
     console.log('Ask AI request:', query.slice(0, 100), sessionId ? `[session: ${sessionId}]` : '[new session]')
 
     // Build seasonContext for Data Lab
@@ -276,9 +292,9 @@ export async function POST(request: NextRequest) {
     // Transform chart data to the format expected by the frontend component
     const transformedChartData = data.chartData ? transformChartData(data.chartData) : null
 
-    // Return the Data Lab response
+    // Screen AI output for leaked system info, then return
     return NextResponse.json({
-      response: data.response,
+      response: screenOutput(data.response),
       rowCount: data.rowCount,
       source: data.source,
       team: data.team,

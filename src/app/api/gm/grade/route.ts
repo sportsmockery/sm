@@ -4,6 +4,7 @@ import { getGMAuthUser } from '@/lib/gm-auth'
 import { datalabAdmin } from '@/lib/supabase-datalab'
 import { randomBytes } from 'crypto'
 import { computeTradeHash } from '@/lib/gm-trade-hash'
+import { SYSTEM_PROMPT_DEFENSE } from '@/lib/ai-safety'
 
 export const dynamic = 'force-dynamic'
 
@@ -840,7 +841,8 @@ IMPORTANT: Always include historical_context with 2-3 similar real trades from h
 
 Reasoning should: name specific players, mention team phase (rebuild/contend), note cap/salary if relevant, reference comparable real trades when possible, and always frame from Chicago's perspective. Be a seasoned GM, not a robot.
 
-Do not wrap in markdown code blocks. Just raw JSON.`
+Do not wrap in markdown code blocks. Just raw JSON.
+${SYSTEM_PROMPT_DEFENSE}`
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now()
