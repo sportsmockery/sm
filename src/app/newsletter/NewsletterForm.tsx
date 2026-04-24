@@ -1,15 +1,24 @@
 'use client'
 
-import { useState, FormEvent } from 'react'
+import { useState, FormEvent, useRef, useEffect } from 'react'
+import styles from './newsletter.module.css'
 
 type Status = 'idle' | 'loading' | 'success' | 'error'
 
-export default function NewsletterForm() {
+export default function NewsletterForm({ variant = 'full' }: { variant?: 'full' | 'compact' }) {
   const [email, setEmail] = useState('')
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [status, setStatus] = useState<Status>('idle')
   const [errorMsg, setErrorMsg] = useState('')
+  const [showName, setShowName] = useState(false)
+  const successRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (status === 'success' && successRef.current) {
+      successRef.current.focus()
+    }
+  }, [status])
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -38,87 +47,76 @@ export default function NewsletterForm() {
     }
   }
 
+  /* ── Success state ── */
   if (status === 'success') {
     return (
-      <div
-        className="glass-card glass-card-static"
-        style={{ padding: '48px 32px', textAlign: 'center' }}
-      >
-        <div style={{ fontSize: '48px', marginBottom: '16px' }}>✓</div>
-        <h2 style={{ fontSize: '24px', fontWeight: 800, color: 'var(--sm-text)', marginBottom: '12px' }}>
-          You&apos;re In
-        </h2>
-        <p style={{ fontSize: '16px', color: 'var(--sm-text-muted)', margin: 0, lineHeight: 1.6 }}>
+      <div ref={successRef} tabIndex={-1} className={styles.successCard}>
+        <div className={styles.successCheck}>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        </div>
+        <h2 className={styles.successTitle}>You&apos;re in.</h2>
+        <p className={styles.successDesc}>
           Welcome to the Edge Daily. Your first briefing arrives tomorrow at 6 AM CT.
         </p>
       </div>
     )
   }
 
-  return (
-    <div className="glass-card glass-card-static" style={{ padding: '36px 32px' }}>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-          <div>
-            <label
-              htmlFor="firstName"
-              style={{ display: 'block', fontWeight: 600, fontSize: '14px', color: 'var(--sm-text)', marginBottom: '8px' }}
-            >
-              First Name
-            </label>
-            <input
-              type="text"
-              id="firstName"
-              className="sm-input"
-              placeholder="First"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="lastName"
-              style={{ display: 'block', fontWeight: 600, fontSize: '14px', color: 'var(--sm-text)', marginBottom: '8px' }}
-            >
-              Last Name
-            </label>
-            <input
-              type="text"
-              id="lastName"
-              className="sm-input"
-              placeholder="Last"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-            />
-          </div>
-        </div>
-
-        <div>
-          <label
-            htmlFor="email"
-            style={{ display: 'block', fontWeight: 600, fontSize: '14px', color: 'var(--sm-text)', marginBottom: '8px' }}
-          >
-            Email <span style={{ color: '#BC0000' }}>*</span>
-          </label>
+  /* ── Compact variant (bottom CTA) ── */
+  if (variant === 'compact') {
+    return (
+      <form onSubmit={handleSubmit} className={styles.compactForm}>
+        <div className={styles.compactRow}>
           <input
             type="email"
-            id="email"
             required
-            className="sm-input"
-            placeholder="you@example.com"
+            className={`sm-input ${styles.compactInput}`}
+            placeholder="Enter your email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            aria-label="Email address"
           />
+          <button
+            type="submit"
+            disabled={status === 'loading'}
+            className={styles.compactBtn}
+            style={{
+              backgroundColor: '#BC0000',
+              color: '#FAFAFB',
+              opacity: status === 'loading' ? 0.7 : 1,
+              cursor: status === 'loading' ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {status === 'loading' ? 'Joining...' : 'Get the Edge'}
+          </button>
         </div>
-
         {status === 'error' && (
-          <p style={{ fontSize: '14px', color: '#BC0000', margin: 0 }}>{errorMsg}</p>
+          <p className={styles.errorText}>{errorMsg}</p>
         )}
+      </form>
+    )
+  }
 
+  /* ── Full variant (hero) ── */
+  return (
+    <form onSubmit={handleSubmit} className={styles.fullForm}>
+      {/* Email — primary field, always visible */}
+      <div className={styles.emailRow}>
+        <input
+          type="email"
+          required
+          className={`sm-input ${styles.emailInput}`}
+          placeholder="Enter your email address"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          aria-label="Email address"
+        />
         <button
           type="submit"
           disabled={status === 'loading'}
-          className="btn-primary btn-full"
+          className={styles.submitBtn}
           style={{
             backgroundColor: '#BC0000',
             color: '#FAFAFB',
@@ -126,13 +124,53 @@ export default function NewsletterForm() {
             cursor: status === 'loading' ? 'not-allowed' : 'pointer',
           }}
         >
-          {status === 'loading' ? 'Subscribing...' : 'Subscribe to Edge Daily'}
+          {status === 'loading' ? (
+            <span className={styles.loadingDots}>
+              <span /><span /><span />
+            </span>
+          ) : (
+            'Subscribe Free'
+          )}
         </button>
+      </div>
 
-        <p style={{ fontSize: '13px', color: 'var(--sm-text-dim)', margin: 0, textAlign: 'center' }}>
-          Free forever. No spam. Unsubscribe anytime.
-        </p>
-      </form>
-    </div>
+      {/* Optional name fields — progressive disclosure */}
+      {!showName ? (
+        <button
+          type="button"
+          onClick={() => setShowName(true)}
+          className={styles.addNameBtn}
+        >
+          + Add your name <span className={styles.optionalTag}>(optional)</span>
+        </button>
+      ) : (
+        <div className={styles.nameRow}>
+          <input
+            type="text"
+            className={`sm-input ${styles.nameInput}`}
+            placeholder="First name"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            aria-label="First name"
+          />
+          <input
+            type="text"
+            className={`sm-input ${styles.nameInput}`}
+            placeholder="Last name"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            aria-label="Last name"
+          />
+        </div>
+      )}
+
+      {status === 'error' && (
+        <p className={styles.errorText}>{errorMsg}</p>
+      )}
+
+      <p className={styles.finePrint}>
+        Free forever. No spam. Unsubscribe anytime.
+      </p>
+    </form>
   )
 }
