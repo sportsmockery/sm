@@ -16,16 +16,35 @@ interface ScoutRecapCardProps {
 
 const CACHE_TTL = 60 * 60 * 1000 // 1 hour
 
-/** Parse AI response into 3 bullet points. Handles bullet markers, numbered lists, or plain sentences. */
+/** Parse AI response into exactly 3 bullet points. Handles bullet markers, numbered lists, or plain paragraph. */
 function parseBullets(text: string): string {
   if (!text) return ''
-  // Split on bullet/number markers or newlines
+
+  // First try: split on bullet/number markers or newlines
   const lines = text
     .split(/\n/)
     .map(l => l.replace(/^[\s]*[-•*]\s*/, '').replace(/^\d+[.)]\s*/, '').trim())
     .filter(l => l.length > 0)
-  // Take first 3 meaningful lines
-  return lines.slice(0, 3).join('\n')
+
+  if (lines.length >= 3) return lines.slice(0, 3).join('\n')
+
+  // Fallback: split a single paragraph into sentences and take 3
+  const sentences = text
+    .replace(/([.!?])\s+/g, '$1\n')
+    .split('\n')
+    .map(s => s.trim())
+    .filter(s => s.length > 10)
+
+  if (sentences.length >= 3) return sentences.slice(0, 3).join('\n')
+
+  // Last resort: split long text into ~3 roughly equal chunks by sentence boundaries
+  const allSentences = text.match(/[^.!?]+[.!?]+/g) || [text]
+  const chunkSize = Math.ceil(allSentences.length / 3)
+  const chunks: string[] = []
+  for (let i = 0; i < allSentences.length && chunks.length < 3; i += chunkSize) {
+    chunks.push(allSentences.slice(i, i + chunkSize).join(' ').trim())
+  }
+  return chunks.join('\n')
 }
 
 export default function ScoutRecapCard({ postId, slug, title, content, excerpt, team }: ScoutRecapCardProps) {
