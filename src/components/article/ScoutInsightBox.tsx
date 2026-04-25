@@ -57,7 +57,7 @@ export default function ScoutInsightBox({ postId, postTitle, content, team }: Sc
 
     const controller = new AbortController()
 
-    fetch('https://datalab.sportsmockery.com/api/scout/insight', {
+    fetch('/api/scout/insight', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

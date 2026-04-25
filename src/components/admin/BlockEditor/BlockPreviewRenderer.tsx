@@ -207,22 +207,7 @@ function RenderBlock({ block }: { block: ContentBlock }) {
 
     /* ─── Analysis (cyan) ─── */
     case 'scout-insight':
-      if (block.data.autoGenerate !== false && !block.data.insight) {
-        return (
-          <InsightBlock>
-            <div className="flex items-center gap-3 py-2">
-              <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(0,212,255,0.15)' }}>
-                <span style={{ color: '#00D4FF', fontSize: 14 }}>&#10024;</span>
-              </div>
-              <div>
-                <span className="text-xs font-bold uppercase tracking-widest block" style={{ color: '#00D4FF' }}>Scout AI Insight</span>
-                <span className="text-[11px] text-slate-500">Will be auto-generated when published</span>
-              </div>
-            </div>
-          </InsightBlock>
-        );
-      }
-      if (!block.data.insight) return <EmptyState label="Scout Insight — add analysis text" accent={BRAND.cyan} />;
+      if (!block.data.insight) return null;
       return (
         <InsightBlock>
           <ScoutInsight insight={block.data.insight} confidence={block.data.confidence} />
