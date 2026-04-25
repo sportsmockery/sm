@@ -153,7 +153,7 @@ export function useEdgeInsights(articleId: string | number): EdgeInsight[] {
 
     const controller = new AbortController()
 
-    fetch(`https://datalab.sportsmockery.com/api/edge-insights?article_id=${articleId}`, {
+    fetch(`/api/edge-insights?article_id=${articleId}`, {
       signal: controller.signal,
     })
       .then(r => r.ok ? r.json() : null)

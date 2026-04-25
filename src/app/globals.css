@@ -4331,7 +4331,7 @@ main, .page-content, [role="main"] {
 
 /* ===== 2030 ARTICLE BODY OVERRIDES ===== */
 .article-body-2030 {
-  max-width: 775px;
+  max-width: 900px;
   margin: 0;
   font-family: var(--sm-font-body);
 }
@@ -4396,6 +4396,14 @@ main, .page-content, [role="main"] {
   margin: 24px 0;
   float: none !important;
 }
+.article-glass-card-sm {
+  background: var(--sm-card);
+  border: 1px solid var(--sm-border);
+  border-left: 3px solid #00D4FF;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+}
 .article-body-2030 .article-glass-card-sm img {
   width: auto;
   margin: 0;
@@ -4418,11 +4426,18 @@ main, .page-content, [role="main"] {
   .article-body-2030 blockquote { padding: 20px 24px; font-size: 17px; margin: 28px 0; }
 }
 
-/* Article body wrapper — wider desktop margins (15% each side) */
+/* Article body wrapper — responsive padding */
+.article-body-wrapper {
+  padding: 16px 16px 48px;
+}
+@media (min-width: 768px) {
+  .article-body-wrapper {
+    padding: 16px 24px 48px;
+  }
+}
 @media (min-width: 1280px) {
   .article-body-wrapper {
-    padding-left: 15% !important;
-    padding-right: 15% !important;
+    padding: 16px 40px 48px;
   }
 }
 
