@@ -532,8 +532,8 @@
   text-align: center;
   padding: 56px 40px;
   border-radius: 20px;
-  background: var(--sm-card, rgba(255, 255, 255, 0.03));
-  border: 1px solid rgba(0, 212, 255, 0.12);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   position: relative;
   overflow: hidden;
 }
@@ -542,7 +542,8 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at 50% 0%, rgba(0, 212, 255, 0.06) 0%, transparent 60%);
+  border-radius: 20px;
+  background: radial-gradient(ellipse at 50% 0%, rgba(0, 212, 255, 0.08) 0%, transparent 60%);
   pointer-events: none;
 }
 
@@ -550,14 +551,14 @@
   font-size: clamp(1.5rem, 3vw, 2rem);
   font-weight: 800;
   letter-spacing: -0.8px;
-  color: var(--sm-text);
+  color: #FAFAFB;
   margin: 0 0 8px;
   position: relative;
 }
 
 .ctaSubline {
   font-size: 18px;
-  color: var(--sm-text-muted);
+  color: rgba(250, 250, 251, 0.7);
   margin: 0 0 32px;
   position: relative;
 }
@@ -568,7 +569,7 @@
 
 .ctaFine {
   font-size: 13px;
-  color: var(--sm-text-dim);
+  color: rgba(250, 250, 251, 0.5);
   margin: 16px 0 0;
   position: relative;
 }

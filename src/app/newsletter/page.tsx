@@ -4,13 +4,27 @@ import styles from './newsletter.module.css'
 import Image from 'next/image'
 
 export const metadata: Metadata = {
-  title: 'Edge Daily Newsletter | Sports Mockery',
-  description: 'Get the Edge Daily — Chicago sports intelligence delivered to your inbox every morning. Scores, stories, Scout AI insights, and more.',
+  title: 'Edge Daily Newsletter | Chicago sports intelligence in your inbox every morning.',
+  description: 'Edge Daily Newsletter | Chicago sports intelligence in your inbox every morning.',
   alternates: { canonical: 'https://sportsmockery.com/newsletter' },
   openGraph: {
-    title: 'Edge Daily Newsletter | Sports Mockery',
-    description: 'Chicago sports intelligence delivered to your inbox every morning.',
+    title: 'Edge Daily Newsletter',
+    description: 'Chicago sports intelligence in your inbox every morning.',
     type: 'website',
+    images: [
+      {
+        url: 'https://test.sportsmockery.com/edge-email-preview.png',
+        width: 1200,
+        height: 630,
+        alt: 'Edge Daily Newsletter — Chicago sports intelligence in your inbox every morning',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Edge Daily Newsletter',
+    description: 'Chicago sports intelligence in your inbox every morning.',
+    images: ['https://test.sportsmockery.com/edge-email-preview.png'],
   },
 }
 

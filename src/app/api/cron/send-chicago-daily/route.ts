@@ -47,8 +47,31 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Fetch subscribers from Supabase
+    // Dedup: skip if we already sent for this date (prevents double-sends)
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+    const targetDateStr = targetDate.toISOString().split('T')[0];
+    const forceResend = searchParams.get('force') === 'true';
+
+    if (!forceResend) {
+      const { data: existing } = await supabase
+        .from('email_send_log')
+        .select('id')
+        .eq('campaign', 'chicago_daily')
+        .eq('date', targetDateStr)
+        .eq('success', true)
+        .limit(1);
+
+      if (existing && existing.length > 0) {
+        console.log(`[Cron] Chicago Daily already sent for ${targetDateStr}, skipping`);
+        return NextResponse.json({
+          message: `Already sent for ${targetDateStr}`,
+          skipped: true,
+          sent: 0,
+        });
+      }
+    }
+
+    // Fetch subscribers from Supabase
 
     const { data: subscribers, error: subError } = await supabase
       .from('email_subscribers')
