@@ -16,6 +16,18 @@ interface ScoutRecapCardProps {
 
 const CACHE_TTL = 60 * 60 * 1000 // 1 hour
 
+/** Parse AI response into 3 bullet points. Handles bullet markers, numbered lists, or plain sentences. */
+function parseBullets(text: string): string {
+  if (!text) return ''
+  // Split on bullet/number markers or newlines
+  const lines = text
+    .split(/\n/)
+    .map(l => l.replace(/^[\s]*[-•*]\s*/, '').replace(/^\d+[.)]\s*/, '').trim())
+    .filter(l => l.length > 0)
+  // Take first 3 meaningful lines
+  return lines.slice(0, 3).join('\n')
+}
+
 export default function ScoutRecapCard({ postId, slug, title, content, excerpt, team }: ScoutRecapCardProps) {
   const [recap, setRecap] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -69,7 +81,10 @@ export default function ScoutRecapCard({ postId, slug, title, content, excerpt, 
         }
 
         const data = await res.json()
-        const text = data.summary || data.response || data.answer || ''
+        const raw = data.summary || data.response || data.answer || ''
+
+        // Extract up to 3 bullet points from the response
+        const text = parseBullets(raw)
 
         if (text) {
           setRecap(text)
@@ -120,16 +135,21 @@ export default function ScoutRecapCard({ postId, slug, title, content, excerpt, 
         </span>
       </div>
 
-      {/* Body */}
+      {/* Body — 3 bullet points */}
       {loading ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div style={{ height: 14, borderRadius: 8, background: 'var(--sm-surface)', width: '100%', animation: 'pulse 1.5s infinite' }} />
+          <div style={{ height: 14, borderRadius: 8, background: 'var(--sm-surface)', width: '85%', animation: 'pulse 1.5s infinite' }} />
           <div style={{ height: 14, borderRadius: 8, background: 'var(--sm-surface)', width: '70%', animation: 'pulse 1.5s infinite' }} />
         </div>
       ) : (
-        <p style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--sm-text-muted)', margin: 0 }}>
-          {recap}
-        </p>
+        <ul style={{ margin: 0, paddingLeft: 18, listStyleType: 'disc' }}>
+          {recap?.split('\n').map((point, i) => (
+            <li key={i} style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--sm-text-muted)', marginBottom: i < 2 ? 4 : 0 }}>
+              {point}
+            </li>
+          ))}
+        </ul>
       )}
 
       {/* Ask Scout more */}

@@ -15,6 +15,8 @@ export async function POST(req: NextRequest) {
       content,
       excerpt,
       team,
+      format: 'bullets',
+      maxBullets: 3,
     }
     if (username) {
       payload.username = username
