@@ -25,19 +25,39 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'regular_season_record is required' }, { status: 400 })
     }
 
-    // Update the bears_season_record table
+    // bears_season_record is a Postgres VIEW (cannot be updated directly).
+    // Write to the underlying bears_seasons table instead. Parse the
+    // "11-6" / "11-6-1" formatted strings into wins/losses/ties.
+    const parts = String(regular_season_record).split('-').map((s: string) => parseInt(s, 10))
+    if (parts.some(Number.isNaN) || parts.length < 2 || parts.length > 3) {
+      return NextResponse.json({ error: 'regular_season_record must be "W-L" or "W-L-T"' }, { status: 400 })
+    }
+    const [wins, losses, ties = 0] = parts
+    const gamesPlayed = wins + losses + ties
+    const winPct = gamesPlayed > 0 ? Number(((wins + 0.5 * ties) / gamesPlayed).toFixed(3)) : 0
+
+    const updateRow: Record<string, unknown> = {
+      wins,
+      losses,
+      ties,
+      games_played: gamesPlayed,
+      win_pct: winPct,
+      updated_at: new Date().toISOString(),
+    }
+    if (postseason_record) updateRow.playoff_result = `Postseason (${postseason_record})`
+
+    // Update the row for the current NFL season (not row id=1 — that was a bug).
+    const now = new Date()
+    const currentNflSeason = now.getUTCMonth() + 1 >= 9 ? now.getUTCFullYear() : now.getUTCFullYear() - 1
+
     const { data, error } = await datalabAdmin
-      .from('bears_season_record')
-      .update({
-        regular_season_record,
-        postseason_record: postseason_record || '0-0',
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', 1) // Assuming single row for current season
+      .from('bears_seasons')
+      .update(updateRow)
+      .eq('season', currentNflSeason)
       .select()
 
     if (error) {
-      console.error('Failed to update bears_season_record:', error)
+      console.error('Failed to update bears_seasons:', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
