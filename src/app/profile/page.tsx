@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useAuth } from '@/contexts/AuthContext'
+import { useTheme } from '@/contexts/ThemeContext'
 import AchievementBadge from '@/components/AchievementBadge'
 import { FavoriteTeamsSelector } from '@/components/personalization'
 import { TeamSlug } from '@/lib/types'
@@ -48,6 +49,7 @@ const readingHistory = [
 
 export default function ProfilePage() {
   const { user, loading, isAuthenticated, refreshUser } = useAuth()
+  const { theme, setTheme } = useTheme()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [isEditingName, setIsEditingName] = useState(false)
@@ -57,7 +59,7 @@ export default function ProfilePage() {
   const [isSavingAvatar, setIsSavingAvatar] = useState(false)
 
   const [settings, setSettings] = useState({
-    darkMode: true, reducedMotion: false, compactMode: false,
+    reducedMotion: false, compactMode: false,
     showProfile: true, showActivity: false, allowAnalytics: true,
     favoriteTeams: ['bears'] as TeamSlug[],
   })
@@ -352,7 +354,7 @@ export default function ProfilePage() {
 
             <CollapsibleSection title="Account" description="Manage your account settings" iconBgColor="#71717a" isExpanded={expandedSections.account} onToggle={() => toggleSection('account')}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <ToggleSetting label="Dark Mode" description="Use dark theme throughout the site" enabled={settings.darkMode} onChange={() => handleToggle('darkMode')} />
+                <ToggleSetting label="Dark Mode" description="Use dark theme throughout the site" enabled={theme === 'dark'} onChange={() => setTheme(theme === 'dark' ? 'light' : 'dark')} />
                 <ToggleSetting label="Reduced Motion" description="Minimize animations for accessibility" enabled={settings.reducedMotion} onChange={() => handleToggle('reducedMotion')} />
                 <ToggleSetting label="Compact Mode" description="Denser layout with smaller elements" enabled={settings.compactMode} onChange={() => handleToggle('compactMode')} />
                 <div style={{ height: '1px', background: 'var(--sm-border)', margin: '4px 0' }} />
