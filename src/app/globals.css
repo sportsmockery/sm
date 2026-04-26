@@ -1048,7 +1048,7 @@ main {
 
 /* ========== ARTICLE STYLES ========== */
 .article-body {
-  max-width: 750px;
+  max-width: 100%;
   font-family: var(--font-body);
   font-size: 16px;
   line-height: 1.7;

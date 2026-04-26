@@ -16,6 +16,16 @@ interface ScoutRecapCardProps {
 
 const CACHE_TTL = 60 * 60 * 1000 // 1 hour
 
+/** Strip URLs (markdown links keep their label, bare URLs removed) */
+function stripUrls(s: string): string {
+  // Convert markdown links [text](url) to just text
+  let out = s.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+  // Remove bare URLs
+  out = out.replace(/https?:\/\/[^\s),]+/g, '')
+  // Clean up leftover artifacts (double spaces, trailing punctuation oddities)
+  return out.replace(/\s{2,}/g, ' ').trim()
+}
+
 /** Parse AI response into exactly 3 bullet points. Handles bullet markers, numbered lists, or plain paragraph. */
 function parseBullets(text: string): string {
   if (!text) return ''
@@ -24,6 +34,7 @@ function parseBullets(text: string): string {
   const lines = text
     .split(/\n/)
     .map(l => l.replace(/^[\s]*[-•*]\s*/, '').replace(/^\d+[.)]\s*/, '').trim())
+    .map(l => stripUrls(l))
     .filter(l => l.length > 0)
 
   if (lines.length >= 3) return lines.slice(0, 3).join('\n')
@@ -32,7 +43,7 @@ function parseBullets(text: string): string {
   const sentences = text
     .replace(/([.!?])\s+/g, '$1\n')
     .split('\n')
-    .map(s => s.trim())
+    .map(s => stripUrls(s.trim()))
     .filter(s => s.length > 10)
 
   if (sentences.length >= 3) return sentences.slice(0, 3).join('\n')
@@ -42,7 +53,7 @@ function parseBullets(text: string): string {
   const chunkSize = Math.ceil(allSentences.length / 3)
   const chunks: string[] = []
   for (let i = 0; i < allSentences.length && chunks.length < 3; i += chunkSize) {
-    chunks.push(allSentences.slice(i, i + chunkSize).join(' ').trim())
+    chunks.push(stripUrls(allSentences.slice(i, i + chunkSize).join(' ').trim()))
   }
   return chunks.join('\n')
 }
