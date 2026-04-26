@@ -440,17 +440,16 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
           {/* Main article column */}
           <div style={{ width: '100%', maxWidth: 900, flex: 1, minWidth: 0, borderColor: 'var(--sm-border)' }}>
 
-            {/* Scout Recap — AI article summary */}
-            <ScoutRecapCard
-              postId={post.id}
-              slug={slug}
-              title={post.title}
-              content={post.content}
-              excerpt={post.excerpt}
-              team={categorySlugToTeam(categoryData?.slug)?.replace('-', '') || undefined}
-            />
-
             <article className="article-body-2030" suppressHydrationWarning>
+              {/* Scout Recap — AI article summary */}
+              <ScoutRecapCard
+                postId={post.id}
+                slug={slug}
+                title={post.title}
+                content={post.content}
+                excerpt={post.excerpt}
+                team={categorySlugToTeam(categoryData?.slug)?.replace('-', '') || undefined}
+              />
               {blockDocument ? (
                 /* Block-based article content */
                 <>
