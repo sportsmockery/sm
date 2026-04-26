@@ -886,6 +886,21 @@ export default function TestingDashboard() {
             Import
           </button>
           <input ref={fileRef} type="file" accept=".json" onChange={importResults} style={{ display: 'none' }} />
+          <button onClick={async () => {
+            try {
+              const res = await fetch('/api/testing/results')
+              const data = await res.json()
+              if (data.results) {
+                setResults(prev => ({ ...prev, ...data.results }))
+                setTester(data.tester || 'Claude (automated)')
+              }
+            } catch { alert('Failed to load automated results') }
+          }} style={{
+            background: 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.3)', borderRadius: 8,
+            padding: '6px 14px', color: '#00D4FF', fontSize: 13, cursor: 'pointer',
+          }}>
+            Load Automated Results
+          </button>
           <button onClick={resetAll} style={{
             background: 'rgba(255,59,92,0.08)', border: '1px solid rgba(255,59,92,0.2)', borderRadius: 8,
             padding: '6px 14px', color: '#FF3B5C', fontSize: 13, cursor: 'pointer',
