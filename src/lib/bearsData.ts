@@ -1163,13 +1163,17 @@ export async function getBearsSeparatedRecord(season?: number): Promise<BearsSep
   const postLosses = postGames.filter(g => g.result === 'L').length
 
   // VALIDATION: Expected from ESPN - Bears 2025: Regular 11-6 (1st NFC North), Post 1-1
-  // Get division rank from Datalab if available
+  // Get division rank from Datalab if available.
+  // NOTE: division_rank lives on bears_seasons (not bears_season_record, which is
+  // a different summary table without that column). Filtering by current season
+  // avoids a `.single()` failure when historical seasons are present.
   let divisionRank: string | null = null
   if (datalabAdmin) {
     const { data } = await datalabAdmin
-      .from('bears_season_record')
+      .from('bears_seasons')
       .select('division_rank')
-      .single()
+      .eq('season', 2025)
+      .maybeSingle()
     divisionRank = data?.division_rank || '1st NFC North' // Fallback to expected value
   }
 

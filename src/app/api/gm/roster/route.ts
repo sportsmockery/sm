@@ -139,7 +139,7 @@ async function fetchSeasonStats(team: string, sport: string): Promise<Map<string
       const { data: stats } = await datalabAdmin
         .from(statsTable)
         .select('player_id, passing_yards, passing_touchdowns, passing_interceptions, rushing_yards, rushing_touchdowns, rushing_carries, receiving_yards, receiving_touchdowns, receiving_receptions, defensive_total_tackles, defensive_sacks')
-        .eq('season', season).eq('is_opponent', false)
+        .eq('season', season).eq('is_opponent', false).limit(10000)
       if (stats) {
         const agg = new Map<string, any>()
         for (const s of stats) {
@@ -157,7 +157,7 @@ async function fetchSeasonStats(team: string, sport: string): Promise<Map<string
       const { data: stats } = await datalabAdmin
         .from(statsTable)
         .select('player_id, points, total_rebounds, assists, steals, blocks, field_goal_pct, three_point_pct')
-        .eq('season', season).eq('is_opponent', false)
+        .eq('season', season).eq('is_opponent', false).limit(10000)
       if (stats) {
         const agg = new Map<string, any>()
         for (const s of stats) {
@@ -176,7 +176,7 @@ async function fetchSeasonStats(team: string, sport: string): Promise<Map<string
       const { data: stats } = await datalabAdmin
         .from(statsTable)
         .select('player_id, goals, assists, points, plus_minus, shots_on_goal')
-        .eq('season', season).eq('is_opponent', false)
+        .eq('season', season).eq('is_opponent', false).limit(10000)
       if (stats) {
         const agg = new Map<string, any>()
         for (const s of stats) {
@@ -194,6 +194,7 @@ async function fetchSeasonStats(team: string, sport: string): Promise<Map<string
         .select('player_id, at_bats, hits, home_runs, rbi, runs, stolen_bases, walks, strikeouts, innings_pitched, earned_runs, strikeouts_pitched, win, loss, save')
         .eq('season', season)
         .eq('is_opponent', false)
+        .limit(10000)
       if (stats) {
         const agg = new Map<string, any>()
         for (const s of stats) {

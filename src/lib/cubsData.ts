@@ -1075,23 +1075,25 @@ export async function getCubsSeparatedRecord(season?: number): Promise<CubsSepar
       let divisionRank: string | null = null
 
       if (datalabAdmin) {
-        // Filter by game_type for regular season to avoid .single() failure
+        // Filter by game_type for regular season to avoid .single() failure.
+        // Note: cubs_seasons does NOT have a division_rank column — don't select it.
         const mlbPhase = getMLBSeasonPhase()
         let query = datalabAdmin
           .from('cubs_seasons')
-          .select('wins, losses, division_rank')
+          .select('wins, losses')
           .eq('season', targetSeason)
         if (mlbPhase === 'regular') {
           query = query.eq('game_type', 'regular')
         } else if (mlbPhase === 'spring-training') {
           query = query.eq('game_type', 'spring_training')
         }
-        const { data: seasonRecord } = await query.single()
+        const { data: seasonRecord } = await query.maybeSingle()
 
         if (seasonRecord) {
           regWins = seasonRecord.wins || 0
           regLosses = seasonRecord.losses || 0
-          divisionRank = seasonRecord.division_rank || null
+          // divisionRank not available on cubs_seasons — leave as null and let
+          // the page fall back to schedule-based calculation below.
         }
       }
 

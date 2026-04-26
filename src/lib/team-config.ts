@@ -118,12 +118,15 @@ export function getTeamKey(slug: string): string | null {
 }
 
 // DataLab table configuration for each team
-const DATALAB_CONFIG: Record<string, { gamesTable: string; scoreCol: string; oppScoreCol: string; isHomeCol: string }> = {
-  bears: { gamesTable: 'bears_games_master', scoreCol: 'bears_score', oppScoreCol: 'opponent_score', isHomeCol: 'is_bears_home' },
-  bulls: { gamesTable: 'bulls_games_master', scoreCol: 'bulls_score', oppScoreCol: 'opponent_score', isHomeCol: 'is_bulls_home' },
-  blackhawks: { gamesTable: 'blackhawks_games_master', scoreCol: 'blackhawks_score', oppScoreCol: 'opponent_score', isHomeCol: 'is_blackhawks_home' },
-  cubs: { gamesTable: 'cubs_games_master', scoreCol: 'cubs_score', oppScoreCol: 'opponent_score', isHomeCol: 'is_cubs_home' },
-  whitesox: { gamesTable: 'whitesox_games_master', scoreCol: 'whitesox_score', oppScoreCol: 'opponent_score', isHomeCol: 'is_whitesox_home' },
+const DATALAB_CONFIG: Record<string, { gamesTable: string; scoreCol: string; oppScoreCol: string; isHomeCol: string; hasIsPlayoff: boolean }> = {
+  // hasIsPlayoff: only bears_games_master actually has the is_playoff column.
+  // The other 4 use game_type='postseason' (or 'playoff'). Querying the missing
+  // column on those tables generates Postgres 42703 errors and pollutes logs.
+  bears: { gamesTable: 'bears_games_master', scoreCol: 'bears_score', oppScoreCol: 'opponent_score', isHomeCol: 'is_bears_home', hasIsPlayoff: true },
+  bulls: { gamesTable: 'bulls_games_master', scoreCol: 'bulls_score', oppScoreCol: 'opponent_score', isHomeCol: 'is_bulls_home', hasIsPlayoff: false },
+  blackhawks: { gamesTable: 'blackhawks_games_master', scoreCol: 'blackhawks_score', oppScoreCol: 'opponent_score', isHomeCol: 'is_blackhawks_home', hasIsPlayoff: false },
+  cubs: { gamesTable: 'cubs_games_master', scoreCol: 'cubs_score', oppScoreCol: 'opponent_score', isHomeCol: 'is_cubs_home', hasIsPlayoff: false },
+  whitesox: { gamesTable: 'whitesox_games_master', scoreCol: 'whitesox_score', oppScoreCol: 'opponent_score', isHomeCol: 'is_whitesox_home', hasIsPlayoff: false },
 }
 
 /**
@@ -228,11 +231,16 @@ export async function fetchTeamRecord(teamKey: string): Promise<TeamRecord | nul
       } else {
         const gamesConfig = DATALAB_CONFIG[teamKey]
         if (gamesConfig) {
+          // Only include is_playoff in the OR clause when the table actually has
+          // that column. Otherwise PostgREST returns 42703 and the query fails.
+          const orFilter = gamesConfig.hasIsPlayoff
+            ? 'game_type.eq.postseason,game_type.eq.playoff,is_playoff.eq.true'
+            : 'game_type.eq.postseason,game_type.eq.playoff'
           const { data: games } = await datalabClient
             .from(gamesConfig.gamesTable)
             .select('*')
             .eq('season', currentSeason)
-            .or('game_type.eq.postseason,game_type.eq.playoff,is_playoff.eq.true')
+            .or(orFilter)
             .gt(gamesConfig.scoreCol, 0)
 
           if (games && games.length > 0) {
