@@ -6,16 +6,16 @@ import DepthChartClient from './DepthChartClient'
 import { HubUpdatesFeed } from '@/components/hub'
 
 export const metadata: Metadata = {
-  title: 'Chicago White Sox Depth Chart 2025 | Sports Mockery',
+  title: 'Chicago White Sox Depth Chart 2026 | Sports Mockery',
   description:
     'Interactive roster, starters/backups by position.',
   openGraph: {
-    title: 'Chicago White Sox Depth Chart 2025',
+    title: 'Chicago White Sox Depth Chart 2026',
     description: 'Interactive roster, starters/backups by position.',
     type: 'website',
   },
   twitter: {
-    title: 'Chicago White Sox Depth Chart 2025',
+    title: 'Chicago White Sox Depth Chart 2026',
     description: 'Interactive roster, starters/backups by position.',
   },
 }

@@ -145,7 +145,7 @@ export default async function BearsTradeRumorsPage() {
         <RumorTicker teamSlug="chicago-bears" />
 
         {/* Hub Updates Feed */}
-        <HubUpdatesFeed hubSlug="trade-rumors" title="Live Updates" emptyState="No trade updates yet. Check back soon." />
+        <HubUpdatesFeed hubSlug="trade-rumors" teamSlug="chicago-bears" title="Live Updates" emptyState="No trade updates yet. Check back soon." />
 
         {/* Rumors Feed */}
         <section>

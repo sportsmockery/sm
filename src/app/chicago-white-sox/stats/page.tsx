@@ -6,8 +6,8 @@ import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
 import { getWhiteSoxStats, getWhiteSoxRecord, type WhiteSoxStats, type LeaderboardEntry, type WhiteSoxPlayer } from '@/lib/whitesoxData'
 
 export const metadata: Metadata = {
-  title: 'Chicago White Sox Stats 2025 | Team & Player Statistics | SportsMockery',
-  description: 'Chicago White Sox 2025 team and player statistics. View batting averages, home runs, RBIs, and pitching stats.',
+  title: 'Chicago White Sox Stats 2026 | Team & Player Statistics | SportsMockery',
+  description: 'Chicago White Sox 2026 team and player statistics. View batting averages, home runs, RBIs, and pitching stats.',
 }
 
 export const revalidate = 300
@@ -101,6 +101,30 @@ export default async function WhiteSoxStatsPage() {
               }
               entries={stats.leaderboards.homeRuns}
               emptyText="No home run stats available"
+            />
+
+            {/* OBP Leaders */}
+            <LeaderboardCard
+              title="On-Base Percentage"
+              icon={
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              }
+              entries={stats.leaderboards.obp}
+              emptyText="No OBP stats available"
+            />
+
+            {/* RBI Leaders */}
+            <LeaderboardCard
+              title="RBI Leaders"
+              icon={
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              }
+              entries={stats.leaderboards.rbiLeaders}
+              emptyText="No RBI stats available"
             />
           </div>
         </section>
@@ -366,7 +390,7 @@ function LeaderboardRow({ entry, rank, isLast }: { entry: LeaderboardEntry; rank
         <div>
           <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--sm-text)' }}>
             {typeof entry.primaryStat === 'number'
-              ? (entry.primaryLabel === 'AVG' || entry.primaryLabel === 'ERA'
+              ? (entry.primaryLabel === 'AVG' || entry.primaryLabel === 'ERA' || entry.primaryLabel === 'OBP'
                   ? entry.primaryStat.toFixed(3)
                   : entry.primaryStat)
               : entry.primaryStat}

@@ -63,7 +63,7 @@ export default async function BullsDepthChartPage() {
   return (
     <TeamHubLayout team={team} record={record} nextGame={nextGame} activeTab="depth-chart">
       <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-        <HubUpdatesFeed hubSlug="depth-chart" title="Depth Chart Updates" emptyState="No roster updates yet." />
+        <HubUpdatesFeed hubSlug="depth-chart" teamSlug="chicago-bulls" title="Depth Chart Updates" emptyState="No roster updates yet." />
       </div>
       <DepthChartClient
         positionGroups={positionGroups}

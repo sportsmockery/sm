@@ -6,7 +6,7 @@ import { TeamHubLayout } from '@/components/team'
 import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
 
 export const metadata: Metadata = {
-  title: 'Chicago White Sox Players 2025 | Full Roster | SportsMockery',
+  title: 'Chicago White Sox Players 2026 | Full Roster | SportsMockery',
   description: 'Complete list of Chicago White Sox players with photos, positions, stats, and player profiles.',
 }
 

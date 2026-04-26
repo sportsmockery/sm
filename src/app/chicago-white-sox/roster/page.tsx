@@ -6,8 +6,8 @@ import { CHICAGO_TEAMS, fetchNextGame } from '@/lib/team-config'
 import { getWhiteSoxRosterGrouped, getWhiteSoxRecord, POSITION_GROUP_NAMES, type WhiteSoxPlayer, type PositionGroup } from '@/lib/whitesoxData'
 
 export const metadata: Metadata = {
-  title: 'Chicago White Sox Roster 2025 | SportsMockery',
-  description: 'Complete 2025 Chicago White Sox roster with player profiles, positions, measurements, and stats.',
+  title: 'Chicago White Sox Roster 2026 | SportsMockery',
+  description: 'Complete 2026 Chicago White Sox roster with player profiles, positions, measurements, and stats.',
 }
 
 export const revalidate = 300
