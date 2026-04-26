@@ -4,12 +4,12 @@ import { getBearsFilmRoomVideos } from '@/lib/getBearsFilmRoomVideos';
 import { BearsFilmRoomClient } from './BearsFilmRoomClient';
 
 export const metadata: Metadata = {
-  title: 'Bears Film Room — Video Analysis',
-  description: 'Watch in-depth Chicago Bears video analysis, film breakdowns, and podcast episodes. Expert analysis of Bears plays, draft prospects, and game strategy.',
+  title: 'Untold Chicago Stories — Video Series',
+  description: 'Untold Chicago is a long-form podcast and video series giving former Chicago athletes the space to tell their story the way it was actually lived.',
   alternates: { canonical: '/bears-film-room' },
   openGraph: {
-    title: 'Bears Film Room | Sports Mockery',
-    description: 'In-depth Chicago Bears video analysis, film breakdowns, and podcast episodes.',
+    title: 'Untold Chicago Stories | Sports Mockery',
+    description: 'Long-form podcast giving former Chicago athletes the space to tell their story the way it was actually lived.',
     images: [{ url: '/og-image.png', width: 1200, height: 630 }],
   },
 };

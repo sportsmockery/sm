@@ -43,7 +43,6 @@ const publicPaths = [
   '/bears-film-room',       // Show pages
   '/pinwheels-and-ivy',
   '/southside-behavior',
-  '/untold-chicago-stories',
   '/subscription',
   '/api/public',
   '/api/bears',  // Bears data API (ticker, schedule, roster, etc.)

@@ -281,7 +281,7 @@ export function ChicagoDailyEmail({
             </Text>
 
             {/* Untold Chicago Stories */}
-            <Link href={utm(`${SITE}/untold-chicago-stories`, u)} style={{ textDecoration: 'none' }}>
+            <Link href={utm(`${SITE}/bears-film-room`, u)} style={{ textDecoration: 'none' }}>
               <Row style={{ marginBottom: '10px', padding: '12px', backgroundColor: CARD_BG, borderRadius: '8px', border: `1px solid ${BORDER}` }}>
                 <Column style={{ width: '56px', verticalAlign: 'middle' }}>
                   <Img src={`${SITE}/downloads/untold-logo-dark.png`} alt="UNTLD" width={44} height={44} style={{ borderRadius: '8px', display: 'block' }} />

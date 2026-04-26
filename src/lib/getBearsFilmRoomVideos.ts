@@ -2,7 +2,7 @@
 import 'server-only';
 import { ShowVideo } from './youtubeTypes';
 
-const BFR_HANDLE = '@bearsfilmroom';
+const BFR_HANDLE = '@untoldchicago';
 const MAX_RESULTS = 20; // Fetch more to filter out shorts
 const DISPLAY_COUNT = 5; // 1 latest + 4 previous
 
@@ -56,7 +56,7 @@ export async function getBearsFilmRoomVideos(): Promise<{
     channelsJson.items?.[0]?.contentDetails?.relatedPlaylists?.uploads;
 
   if (!uploadsPlaylistId) {
-    console.error('No uploads playlist ID found for Bears Film Room');
+    console.error('No uploads playlist ID found for Untold Chicago Stories');
     return { latestVideo: null, previousVideos: [] };
   }
 

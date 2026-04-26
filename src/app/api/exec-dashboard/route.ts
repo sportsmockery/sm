@@ -16,7 +16,7 @@ const YT = [
 ]
 const XA = [
   { username: 'sportsmockery', label: 'SportsMockery' },
-  { username: 'bfr_pod', label: 'Bears Film Room Pod' },
+  { username: 'untoldchicago', label: 'Untold Chicago Stories' },
   { username: 'PinwheelsIvyPod', label: 'Pinwheels & Ivy Pod' },
   { username: 'SSBehavior', label: 'SS Behavior' },
   { username: 'dabearsblog', label: 'DaBearsBlog' },
