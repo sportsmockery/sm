@@ -22,7 +22,7 @@ const SPORT_ROSTER_TABLE: Record<string, string> = {
 }
 
 const SEASON_VALUES: Record<string, number> = {
-  bears: 2025, bulls: 2026, blackhawks: 2026, cubs: 2025, whitesox: 2025,
+  bears: 2025, bulls: 2026, blackhawks: 2026, cubs: 2026, whitesox: 2026,
 }
 
 const STATS_TABLES: Record<string, string> = {
@@ -193,6 +193,7 @@ async function fetchSeasonStats(team: string, sport: string): Promise<Map<string
         .from(statsTable)
         .select('player_id, at_bats, hits, home_runs, rbi, runs, stolen_bases, walks, strikeouts, innings_pitched, earned_runs, strikeouts_pitched, win, loss, save')
         .eq('season', season)
+        .eq('is_opponent', false)
       if (stats) {
         const agg = new Map<string, any>()
         for (const s of stats) {

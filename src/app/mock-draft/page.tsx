@@ -179,7 +179,7 @@ export default function MockDraftPage() {
   const fetchEligibility = useCallback(async () => {
     setEligibilityLoading(true)
     try {
-      const res = await fetch('https://datalab.sportsmockery.com/api/gm/draft/teams')
+      const res = await fetch('/api/gm/draft/eligibility')
       const eligMap: Record<string, TeamEligibility> = {}
 
       if (res.ok) {
@@ -1257,7 +1257,7 @@ export default function MockDraftPage() {
                               {pick.selected_prospect!.name}
                             </div>
                             <div style={{ fontSize: '12px', color: subText }}>
-                              {pick.selected_prospect!.position} • {pick.selected_prospect!.school}
+                              {pick.selected_prospect!.position}
                             </div>
                           </div>
                           {pickFeedback[pick.pick_number] && (

@@ -685,7 +685,7 @@ Your grades must show natural variance like a real analyst panel. NEVER output t
 ### NFL (Bears)
 - Position value: QB > Edge > LT > CB > WR > IDL > LB > RB (RBs are nearly worthless in trade value)
 - Trading a 1st for an RB = grade 15-30. Trading franchise QB = grade 0-10.
-- Bears are CONTENDING (12-7 in 2025) with championship window OPEN. Caleb Williams is UNTOUCHABLE (grade 0 if sent).
+- Bears are CONTENDING (11-6 in 2025) with championship window OPEN. Caleb Williams is UNTOUCHABLE (grade 0 if sent).
 - 2026 moves: Joe Thuney (4th), Jonah Jackson (6th) - OL upgraded. TOP NEED: EDGE pass rush.
 - DJ Moore is a TRADE CANDIDATE ($28M cap hit, only 682 yards in 2025).
 - Division trades (Packers/Vikings/Lions) cost a 5-10 point penalty.
@@ -695,7 +695,7 @@ Your grades must show natural variance like a real analyst panel. NEVER output t
 - Position value: Two-way wing > Lead creator > Stretch big > 3&D > Traditional center
 - Salary matching is MANDATORY for over-the-cap teams (125% + $100K rule).
 - Rookie-scale deals are the most valuable contracts. Supermax = hardest to trade.
-- Bulls are in FULL REBUILD after 7+ trades at Feb 2026 deadline. Traded Vucevic, Coby White, Dosunmu, Lonzo Ball.
+- Bulls completed a FULL REBUILD at the Feb 2026 deadline with 7+ trades. Traded Vucevic, Coby White, Dosunmu, Lonzo Ball.
 - New young core: Jaden Ivey, Anfernee Simons, Rob Dillingham, Isaac Okoro, Collin Sexton.
 - Have 7 1st-round picks over 6 drafts + 14+ 2nd-rounders. Grade as REBUILD team: young players + picks = GOOD, expensive vets = BAD.
 - Can't trade consecutive future 1sts (Stepien Rule). No-trade clauses exist.
@@ -705,8 +705,8 @@ Your grades must show natural variance like a real analyst panel. NEVER output t
 - Position value: #1 Center > Top-pair D > Elite winger > Starting goalie > depth
 - Retained salary (up to 50%) is a major trade mechanic. **Blackhawks may have 0 retention slots available** (Jones, Rantanen, McCabe deals used them). If trade requires retention and no slots: grade 0 with explanation.
 - Blackhawks are REBUILDING around Connor Bedard. Bedard is UNTOUCHABLE (grade 0 if sent).
-- Likely SELLERS at March 6 deadline. Pending UFAs to trade: Connor Murphy, Ilya Mikheyev, Jason Dickinson, Matt Grzelcyk, Nick Foligno.
-- 2026 dual deadline: Feb 4 freeze + March 6 deadline. NTC/NMC checking required.
+- Completed selling at March 6 deadline. Now in offseason rebuild mode. Veterans who weren't traded may still be trade candidates.
+- NTC/NMC checking required.
 - Selling veterans for picks/prospects = good. Acquiring expensive vets = bad.
 - Rental trades at deadline are common — UFAs have less value than controlled players.
 
@@ -724,8 +724,8 @@ Your grades must show natural variance like a real analyst panel. NEVER output t
 - Years of team control dramatically affect value — 3 years of control >> rental.
 - Service time impact on value: pre-arb years = most valuable. Option years must be factored.
 - Qualifying offer opportunity cost: QO-attached free agents require draft pick compensation.
-- Cubs (92-70) are CONTENDING — aggressive buyer. TOP NEEDS: SP (rotation depth), RP. Trading top prospects for proven talent = acceptable.
-- White Sox (60-102) are in HISTORIC REBUILD — selling everything. Luis Robert Jr. is #1 trade chip ($20M option 2027). Any return of future assets is acceptable.
+- Cubs are CONTENDING after 92-70 in 2025 — aggressive buyer. TOP NEEDS: SP (rotation depth), RP. Trading top prospects for proven talent = acceptable.
+- White Sox are in HISTORIC REBUILD after 60-102 in 2025 — selling everything. Luis Robert Jr. is #1 trade chip ($20M option 2027). Any return of future assets is acceptable.
 - **Salary Retention**: Sending team can retain 0-50% of a player's salary. Factor this into contract value — a $30M player with 50% retained is effectively a $15M acquisition. Retention makes expensive players more tradeable and increases realistic value.
 - **Cash Considerations**: CBA limits direct cash to $100,000 max. Minor value in modern trades, typically a sweetener.
 - When retention is included, note the NET salary impact for Chicago in cap_analysis.

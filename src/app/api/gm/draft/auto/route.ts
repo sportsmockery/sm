@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
 
     if (mockError) {
       log(`get_mock_draft RPC error: ${JSON.stringify(mockError)}`)
-      return NextResponse.json({ error: 'Mock draft not found', debug: debugLog }, { status: 404 })
+      return NextResponse.json({ error: 'Mock draft not found' }, { status: 404 })
     }
 
     // RPC can return array or single object depending on function definition
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
 
     if (!mockDraft) {
       log(`Mock draft not found for id: ${mock_id}, data was: ${JSON.stringify(mockDraftData)}`)
-      return NextResponse.json({ error: 'Mock draft not found', debug: debugLog }, { status: 404 })
+      return NextResponse.json({ error: 'Mock draft not found' }, { status: 404 })
     }
 
     log(`Mock draft found: sport=${mockDraft.sport}, year=${mockDraft.draft_year}, current_pick=${mockDraft.current_pick}`)
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     // Verify ownership
     if (mockDraft.user_id !== user.id) {
       log(`Ownership mismatch: stored=${mockDraft.user_id}, current=${user.id}`)
-      return NextResponse.json({ error: 'Unauthorized', debug: debugLog }, { status: 403 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
     const allPicks = mockDraft.picks || []
@@ -104,7 +104,6 @@ export async function POST(request: NextRequest) {
           picks,
           user_picks: userPickNumbers,
         },
-        debug: debugLog,
       })
     }
 
@@ -139,7 +138,6 @@ export async function POST(request: NextRequest) {
       log(`Prospects fetch error: ${JSON.stringify(prospectError)}`)
       return NextResponse.json({
         error: `Failed to fetch prospects: ${prospectError.message}`,
-        debug: debugLog
       }, { status: 500 })
     }
 
@@ -149,7 +147,6 @@ export async function POST(request: NextRequest) {
       log(`No prospects found for ${league} ${mockDraft.draft_year}`)
       return NextResponse.json({
         error: `No prospects available for ${league} ${mockDraft.draft_year}. Database may not have prospect data.`,
-        debug: debugLog
       }, { status: 400 })
     }
 
@@ -283,7 +280,6 @@ export async function POST(request: NextRequest) {
       // Return what we have
       return NextResponse.json({
         error: 'Draft advanced but failed to fetch updated state',
-        debug: debugLog,
       }, { status: 500 })
     }
 
@@ -362,7 +358,6 @@ export async function POST(request: NextRequest) {
         user_picks: userPickNumbers,
       },
       picksAdvanced,
-      debug: debugLog,
     })
 
   } catch (error) {
@@ -374,13 +369,12 @@ export async function POST(request: NextRequest) {
         error_type: 'api',
         error_message: String(error),
         route: '/api/gm/draft/auto',
-        metadata: { debug: debugLog },
+        metadata: {},
       })
     } catch {}
     return NextResponse.json({
       error: 'Failed to auto-advance draft',
       message: String(error),
-      debug: debugLog
     }, { status: 500 })
   }
 }
