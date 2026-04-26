@@ -891,8 +891,12 @@ export default function TestingDashboard() {
               const res = await fetch('/api/testing/results')
               const data = await res.json()
               if (data.results) {
-                setResults(prev => ({ ...prev, ...data.results }))
+                const merged = { ...data.results }
+                const complete = Object.values(merged).filter((v: any) => v.status === 'complete').length
+                const problem = Object.values(merged).filter((v: any) => v.status === 'problem').length
+                setResults(merged)
                 setTester(data.tester || 'Claude (automated)')
+                alert(`Loaded ${Object.keys(merged).length} results: ${complete} passed, ${problem} failed, ${Object.keys(merged).length - complete - problem} untested`)
               }
             } catch { alert('Failed to load automated results') }
           }} style={{
