@@ -61,7 +61,7 @@ export function ArticleMeta() {
 
 /** ArticleBody — constrains content to readable article width */
 export function ArticleBody({ children }: { children: React.ReactNode }) {
-  return <div className="max-w-[720px] mx-auto">{children}</div>;
+  return <div>{children}</div>;
 }
 
 /* ─── Intelligence Primitives (cyan) ─── */
