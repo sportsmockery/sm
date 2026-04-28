@@ -34,8 +34,41 @@ export async function GET() {
     ])
 
     const scoreRows = (scoresRes.data ?? []) as Array<Record<string, unknown>>
-    if (scoreRows.length === 0) {
+    const transparencyAssetsRawForGate = (assetsRes.data ?? []) as Array<Record<string, unknown>>
+
+    // Full mock only when *both* article scores and transparency assets are empty.
+    // If transparency is seeded but articles aren't scored yet (post-migration,
+    // pre-worker-run state), serve mock articles + real transparency so the
+    // Transparency Assets panel reflects DB reality.
+    if (scoreRows.length === 0 && transparencyAssetsRawForGate.length === 0) {
       return NextResponse.json({ ...buildMockPayload(), source: 'mock' })
+    }
+    if (scoreRows.length === 0) {
+      const base = buildMockPayload()
+      const realTransparency = mapTransparencyAssets(transparencyAssetsRawForGate)
+      const realEvals = mapTransparencyEvaluations((assetEvalsRes.data ?? []) as Array<Record<string, unknown>>)
+      const aboutAsset = realTransparency.find((a) => a.assetType === 'about_page')
+      const authorPages = realTransparency.filter((a) => a.assetType === 'author_page')
+      const siteAssets  = realTransparency.filter((a) => a.ownerScope === 'site')
+      const siteTransparencyScore = siteAssets.length === 0
+        ? 0
+        : round1(((siteAssets.reduce((s, a) => s + a.total, 0) / siteAssets.length) / 100) * 15)
+      return NextResponse.json({
+        ...base,
+        transparencyAssets: realTransparency,
+        transparencyEvaluations: realEvals,
+        siteTrust: {
+          siteTransparencyScore,
+          aboutScore: aboutAsset?.total ?? 0,
+          avgAuthorPageScore: authorPages.length === 0 ? 0 : Math.round(authorPages.reduce((s, a) => s + a.total, 0) / authorPages.length),
+          assetsScored: realTransparency.length,
+        },
+        operations: {
+          ...base.operations,
+          transparencyAssetsUnderReview: realTransparency.filter((a) => a.findingsCount > 0).length,
+        },
+        source: 'mock-articles+db-transparency',
+      })
     }
 
     const articles: ArticleAnalysisRow[] = scoreRows.map((r) => ({
@@ -167,37 +200,9 @@ export async function GET() {
     }
     const googleScore = Math.round(articles.reduce((s, a) => s + a.total, 0) / articles.length)
 
-    // ── Transparency assets payload ───────────────────────────────────────
-    const transparencyAssets: TransparencyAsset[] = (transparencyAssetsRaw ?? []).map((a) => ({
-      id: String(a.id),
-      assetType: a.asset_type as TransparencyAsset['assetType'],
-      url: String(a.url),
-      label: String(a.label),
-      ownerScope: a.owner_scope as TransparencyAsset['ownerScope'],
-      ownerId: (a.owner_id as string | null) ?? null,
-      contentHash: String(a.content_hash ?? ''),
-      lastCrawledAt: (a.last_crawled_at as string | null) ?? null,
-      lastEvaluatedAt: (a.last_evaluated_at as string | null) ?? null,
-      status: a.status as TransparencyAsset['status'],
-      total: Number(a.total ?? 0),
-      findingsCount: Number(a.findings_count ?? 0),
-      recommendationCount: Number(a.recommendation_count ?? 0),
-      rulesetVersion: String(a.ruleset_version),
-    }))
-    const transparencyEvaluations: TransparencyAssetEvaluation[] = ((assetEvalsRes.data ?? []) as Array<Record<string, unknown>>).map((e) => ({
-      id: String(e.id),
-      assetId: String(e.asset_id),
-      ruleId: String(e.rule_id),
-      ruleFamily: 'transparency_assets',
-      sourceType: e.source_type as TransparencyAssetEvaluation['sourceType'],
-      status: e.status as TransparencyAssetEvaluation['status'],
-      confidence: Number(e.confidence ?? 0),
-      impactedField: (e.impacted_field as string | null) ?? null,
-      explanation: String(e.explanation),
-      remediation: (e.remediation as string | null) ?? null,
-      rulesetVersion: String(e.ruleset_version),
-      evaluatedAt: String(e.evaluated_at),
-    }))
+    // ── Transparency assets payload (uses shared mappers) ────────────────
+    const transparencyAssets: TransparencyAsset[] = mapTransparencyAssets(transparencyAssetsRaw ?? [])
+    const transparencyEvaluations: TransparencyAssetEvaluation[] = mapTransparencyEvaluations((assetEvalsRes.data ?? []) as Array<Record<string, unknown>>)
     const aboutAsset = transparencyAssets.find((a) => a.assetType === 'about_page')
     const authorPages = transparencyAssets.filter((a) => a.assetType === 'author_page')
     const siteAssets  = transparencyAssets.filter((a) => a.ownerScope === 'site')
@@ -257,3 +262,39 @@ function bucketize(scores: number[]): Array<{ bucket: string; count: number }> {
 }
 
 function round1(n: number): number { return Math.round(n * 10) / 10 }
+
+function mapTransparencyAssets(rows: Array<Record<string, unknown>>): TransparencyAsset[] {
+  return rows.map((a) => ({
+    id: String(a.id),
+    assetType: a.asset_type as TransparencyAsset['assetType'],
+    url: String(a.url),
+    label: String(a.label),
+    ownerScope: a.owner_scope as TransparencyAsset['ownerScope'],
+    ownerId: (a.owner_id as string | null) ?? null,
+    contentHash: String(a.content_hash ?? ''),
+    lastCrawledAt: (a.last_crawled_at as string | null) ?? null,
+    lastEvaluatedAt: (a.last_evaluated_at as string | null) ?? null,
+    status: a.status as TransparencyAsset['status'],
+    total: Number(a.total ?? 0),
+    findingsCount: Number(a.findings_count ?? 0),
+    recommendationCount: Number(a.recommendation_count ?? 0),
+    rulesetVersion: String(a.ruleset_version),
+  }))
+}
+
+function mapTransparencyEvaluations(rows: Array<Record<string, unknown>>): TransparencyAssetEvaluation[] {
+  return rows.map((e) => ({
+    id: String(e.id),
+    assetId: String(e.asset_id),
+    ruleId: String(e.rule_id),
+    ruleFamily: 'transparency_assets',
+    sourceType: e.source_type as TransparencyAssetEvaluation['sourceType'],
+    status: e.status as TransparencyAssetEvaluation['status'],
+    confidence: Number(e.confidence ?? 0),
+    impactedField: (e.impacted_field as string | null) ?? null,
+    explanation: String(e.explanation),
+    remediation: (e.remediation as string | null) ?? null,
+    rulesetVersion: String(e.ruleset_version),
+    evaluatedAt: String(e.evaluated_at),
+  }))
+}
