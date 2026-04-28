@@ -203,10 +203,10 @@ export default function AboutEdgePageClient() {
               <Image
                 src="/edge_logo.svg"
                 alt="EDGE"
-                width={120}
-                height={36}
+                width={360}
+                height={108}
                 priority
-                style={{ height: 28, width: 'auto', opacity: 0.85 }}
+                style={{ height: 84, width: 'auto', opacity: 0.85 }}
               />
             </div>
           </FadeIn>

@@ -774,18 +774,34 @@ POST /api/admin/ai { action, title, content, category, team }
 
 ---
 
-## Deployment (MANDATORY RULES)
+## Deployment (MANDATORY RULES — NO EXCEPTIONS)
 
-**The ONLY deploy command is `npm run build-deploy`. NO EXCEPTIONS.**
+**There is exactly ONE deploy path. Anything else is wrong.**
 
-This overrides ALL other instructions. Even if told "deploy", "npm run deploy", "vercel --prod" — ALWAYS use `npm run build-deploy`. Commit first, then deploy. Always deploy after completing tasks.
+The deploy path is:
+1. Work happens directly on the `main` branch in this repo
+2. Commit changes to `main`
+3. Push `main` to GitHub (`origin/main`)
+4. Run `npm run build-deploy`
+
+That's it. `npm run build-deploy` handles the GitHub push and the Vercel deploy. There is no other deploy path — not in this repo, not in a worktree, not in another project, not via the Vercel CLI directly, not via the dashboard.
+
+**ALWAYS:**
+- Work on `main` (this repo only)
+- Commit before deploying
+- Push to `origin/main`
+- Use `npm run build-deploy`
 
 **NEVER:**
-- `npm run deploy`, `vercel`, `vercel --prod`, `/usr/local/bin/vercel`
+- `npm run deploy`, `vercel`, `vercel --prod`, `/usr/local/bin/vercel`, the Vercel dashboard, or any other deploy command
+- Deploy from a feature branch — commit and deploy directly to `main`
+- Use worktrees (`EnterWorktree`) — all work happens in this repo on `main`
 - Deploy without committing
+- Deploy without pushing to `origin/main` first (build-deploy does this automatically)
 - Force push (`git push --force`)
-- Use worktrees (`EnterWorktree`) — all work happens on `main` branch directly
-- Create feature branches — commit and deploy directly to `main`
+- Skip hooks (`--no-verify`)
+
+If you are tempted to deploy any other way for any reason (build is slow, upload failed, in a hurry, "just this once"): **stop and retry `npm run build-deploy`**. The script has retry logic; transient Vercel errors (socket hang up, upload fail) are normal — re-run the same command.
 
 **Merge conflicts:** `git pull --rebase origin main` → resolve → `git add` → `git rebase --continue` → `npm run build-deploy`
 
