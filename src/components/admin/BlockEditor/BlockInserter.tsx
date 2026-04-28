@@ -1,137 +1,67 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
-import {
-  Plus, X, Type, Heading, ImageIcon, Play, Minus,
-  Sparkles, Vote, BarChart, Users, ArrowRightLeft,
-  Thermometer, List, Swords, Flame, Bell,
-  Quote, Share2,
-} from 'lucide-react';
-import { BLOCK_CATEGORIES, type BlockType } from './types';
+import React from 'react';
+import { Plus } from 'lucide-react';
+import type { BlockType } from './types';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const ICON_MAP: Record<string, any> = {
-  Type, Heading, Image: ImageIcon, Play, Minus,
-  Sparkles, Vote, BarChart, Users, ArrowRightLeft,
-  Thermometer, List, Swords, Flame, Bell,
-  Quote, Share2,
-};
-
+// Backwards-compatible export: existing call sites pass `onInsert(type)`.
+// In the new flow, the BlockEditor opens a modal picker on request, so this
+// component only needs to be a presentational "+ Add Block" trigger.
+//
+// To preserve the prop shape, we accept `onInsert` (no-op fallback) and an
+// optional `onRequestPicker` — the editor wires the latter to open its modal.
 interface BlockInserterProps {
-  onInsert: (type: BlockType) => void;
+  onInsert?: (type: BlockType) => void; // legacy, retained for compat
+  onRequestPicker?: () => void;
+  variant?: 'inline' | 'standalone';
 }
 
-export function BlockInserter({ onInsert }: BlockInserterProps) {
-  const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState('');
-  const menuRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (open && inputRef.current) inputRef.current.focus();
-  }, [open]);
-
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    if (open) document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [open]);
-
-  const filteredCategories = BLOCK_CATEGORIES.map((cat) => ({
-    ...cat,
-    blocks: cat.blocks.filter(
-      (b) =>
-        b.label.toLowerCase().includes(search.toLowerCase()) ||
-        b.description.toLowerCase().includes(search.toLowerCase())
-    ),
-  })).filter((cat) => cat.blocks.length > 0);
-
-  return (
-    <div className="relative flex justify-center my-2" ref={menuRef}>
+export function BlockInserter({ onRequestPicker, variant = 'inline' }: BlockInserterProps) {
+  if (variant === 'standalone') {
+    return (
       <button
         type="button"
-        onClick={() => { setOpen(!open); setSearch(''); }}
-        className="flex items-center justify-center w-8 h-8 rounded-full transition-all"
+        onClick={onRequestPicker}
+        className="group flex w-full items-center justify-center gap-2 rounded-xl py-4 transition-all"
         style={{
-          backgroundColor: open ? '#00D4FF' : 'rgba(0,0,0,0.05)',
-          color: open ? '#ffffff' : '#6b7280',
-          border: '1px solid rgba(0,0,0,0.1)',
+          backgroundColor: 'rgba(0,212,255,0.06)',
+          border: '1px dashed rgba(0,212,255,0.35)',
+          color: '#00D4FF',
         }}
-        aria-label="Add block"
       >
-        {open ? <X size={14} /> : <Plus size={14} />}
+        <Plus size={14} />
+        <span className="text-[12px] font-semibold uppercase tracking-[0.18em]">
+          Add Block
+        </span>
       </button>
+    );
+  }
 
-      {open && (
-        <div
-          className="absolute top-10 z-50 w-[320px] max-h-[420px] overflow-y-auto rounded-xl shadow-2xl"
-          style={{
-            backgroundColor: '#ffffff',
-            border: '1px solid rgba(0,0,0,0.12)',
-          }}
-        >
-          {/* Search */}
-          <div className="p-3 border-b" style={{ borderColor: 'rgba(0,0,0,0.08)' }}>
-            <input
-              ref={inputRef}
-              type="text"
-              placeholder="Search blocks..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-transparent text-sm outline-none"
-              style={{ color: '#0B0F14' }}
-            />
-          </div>
-
-          {/* Categories */}
-          {filteredCategories.map((cat) => {
-            const catAccent = cat.label === 'Fan Interaction' ? '#BC0000' : '#00D4FF';
-            const catAccentBg = cat.label === 'Fan Interaction' ? 'rgba(188,0,0,0.1)' : 'rgba(0,212,255,0.1)';
-            return (
-              <div key={cat.label}>
-                <div className="px-3 pt-3 pb-1">
-                  <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#9ca3af' }}>
-                    {cat.label}
-                  </span>
-                </div>
-                {cat.blocks.map((block) => {
-                  const Icon = ICON_MAP[block.icon] || Type;
-                  const isRedBlock = ['sentiment-meter', 'hot-take', 'update', 'debate'].includes(block.type);
-                  const accent = isRedBlock ? '#BC0000' : catAccent;
-                  const accentBg = isRedBlock ? 'rgba(188,0,0,0.1)' : catAccentBg;
-                  return (
-                    <button
-                      key={block.type}
-                      type="button"
-                      onClick={() => { onInsert(block.type); setOpen(false); }}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-black/5"
-                    >
-                      <div
-                        className="flex items-center justify-center w-8 h-8 rounded-lg shrink-0"
-                        style={{ backgroundColor: accentBg }}
-                      >
-                        {React.createElement(Icon, { size: 14, color: accent })}
-                      </div>
-                      <div>
-                        <div className="text-sm font-medium" style={{ color: '#0B0F14' }}>{block.label}</div>
-                        <div className="text-[11px]" style={{ color: '#6b7280' }}>{block.description}</div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            );
-          })}
-
-          {filteredCategories.length === 0 && (
-            <div className="p-6 text-center text-sm" style={{ color: '#6b7280' }}>No blocks found</div>
-          )}
-        </div>
-      )}
+  return (
+    <div className="group/inserter relative flex justify-center py-1.5">
+      <button
+        type="button"
+        onClick={onRequestPicker}
+        className="flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-medium uppercase tracking-[0.16em] opacity-0 transition-all duration-150 group-hover/inserter:opacity-100 hover:scale-[1.03] focus:opacity-100"
+        style={{
+          backgroundColor: 'rgba(0,212,255,0.1)',
+          color: '#00D4FF',
+          border: '1px solid rgba(0,212,255,0.3)',
+        }}
+        aria-label="Add block here"
+      >
+        <Plus size={11} />
+        Add Block
+      </button>
+      {/* Faint divider line on hover */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute left-0 right-0 top-1/2 h-px -translate-y-1/2 opacity-0 transition-opacity duration-150 group-hover/inserter:opacity-100"
+        style={{
+          background:
+            'linear-gradient(90deg, transparent, rgba(0,212,255,0.25), transparent)',
+        }}
+      />
     </div>
   );
 }
