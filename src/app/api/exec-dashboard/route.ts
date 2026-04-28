@@ -7,6 +7,7 @@ const WP_SMED = 'https://www.sportsmockery.com/wp-json/smed/v1'
 const SEMRUSH_API = 'https://api.semrush.com'
 const MAX_PAGES = 10
 const PER_PAGE = 100
+const VIEW_TRACKING_START = '2026-03' // SMED view tracking started this month
 
 // ── Social configs ────────────────────────────────────────────────────────────
 const YT = [
@@ -146,7 +147,7 @@ async function fetchEditorial(startDate: Date, prevStart: Date, now: Date, days:
     fetch(`${WP_SMED}/views/overview?start=${startStr}&end=${nowStr}`, { next: { revalidate: 900 } }).then(r => r.ok ? r.json() : null).catch(() => null),
     fetch(`${WP_SMED}/views/overview?start=${prevStr}&end=${startStr}`, { next: { revalidate: 900 } }).then(r => r.ok ? r.json() : null).catch(() => null),
     fetch(`${WP_SMED}/views/authors?months=12`, { next: { revalidate: 900 } }).then(r => r.ok ? r.json() : []).catch(() => []),
-    fetch(`${WP_SMED}/views/posts?start=${startStr}&end=${nowStr}&limit=50`, { next: { revalidate: 900 } }).then(r => r.ok ? r.json() : []).catch(() => []),
+    fetch(`${WP_SMED}/views/posts?start=${startStr}&end=${nowStr}&limit=1000`, { next: { revalidate: 900 } }).then(r => r.ok ? r.json() : []).catch(() => []),
   ])
 
   const period = periodResult.posts
@@ -277,7 +278,10 @@ async function fetchEditorial(startDate: Date, prevStart: Date, now: Date, days:
     const m = row.month
     if (m) monthlyViewsMap.set(m, (monthlyViewsMap.get(m) || 0) + parseInt(row.total_views || '0'))
   }
-  const monthlyTrend = monthCounts.map(m => ({ ...m, views: monthlyViewsMap.get(m.month) || 0 }))
+  const monthlyTrend = monthCounts.map(m => ({
+    ...m,
+    views: m.month < VIEW_TRACKING_START ? null : (monthlyViewsMap.get(m.month) || 0),
+  }))
 
   // ── Writer trends (from period data only) ──
   const top5Ids = writers.slice(0, 5).map(w => w.id)

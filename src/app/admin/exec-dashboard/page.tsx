@@ -30,7 +30,7 @@ interface Data {
   topicBreakdown: Array<{ topic: string; count: number }>
   recentPosts: any[]; topContent: any[]
   publishingTrend: Array<{ date: string; count: number; views: number }>
-  monthlyTrend: Array<{ month: string; count: number; views: number }>
+  monthlyTrend: Array<{ month: string; count: number; views: number | null }>
   dayOfWeek: Array<{ name: string; count: number }>
   hourDistribution: Array<{ hour: number; count: number }>
   readTimeDistribution: Array<{ range: string; count: number }>
@@ -1115,9 +1115,9 @@ export default function ExecDashboard() {
 
             {/* Monthly Trend */}
             {(() => {
-              const monthsWithViews = data.monthlyTrend.filter(m => m.views > 0)
+              const monthsWithViews = data.monthlyTrend.filter(m => m.views !== null && m.views > 0)
               const showFiltered = monthsWithViews.length > 0 && monthsWithViews.length < 4
-              const trendData = showFiltered ? monthsWithViews : data.monthlyTrend.filter(m => m.count > 0 || m.views > 0)
+              const trendData = showFiltered ? monthsWithViews : data.monthlyTrend.filter(m => m.count > 0 || (m.views !== null && m.views > 0))
               if (trendData.length === 0) return null
               return (
                 <Section title="Monthly Trend" badge={<span className="text-xs tabular-nums" style={{ color: 'var(--sm-text-dim)' }}>last 12 months</span>}>
