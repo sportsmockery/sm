@@ -1437,6 +1437,7 @@ export default function AdvancedPostEditor({
               }}
               placeholder="Article title..."
               tabIndex={1}
+              autoFocus={!isEditing}
               className="mb-2 w-full border-0 bg-transparent p-0 text-3xl font-bold text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-0"
             />
 
@@ -1491,13 +1492,18 @@ export default function AdvancedPostEditor({
               </div>
             )}
 
-            {/* Content Editor - Block Editor only */}
+            {/* Content Editor — block-only on admin. The internal
+                `editorMode` flag (declared earlier in this component) gates
+                this surface so a future migration of /studio to the block
+                editor can flip the flag without restructuring. */}
             <div className="mb-6">
-              <BlockEditor
-                initialBlocks={blockDoc?.blocks}
-                initialTemplate={blockDoc?.template}
-                onChange={(doc) => setBlockDoc(doc)}
-              />
+              {editorMode === 'blocks' && (
+                <BlockEditor
+                  initialBlocks={blockDoc?.blocks}
+                  initialTemplate={blockDoc?.template}
+                  onChange={(doc) => setBlockDoc(doc)}
+                />
+              )}
             </div>
 
             {/* SEO Section - Below Content */}

@@ -19,36 +19,81 @@ interface BlockPickerModalProps {
 
 function PreviewParagraph() {
   return (
-    <div className="flex flex-col gap-1.5 px-1">
-      <div className="h-1.5 w-[92%] rounded-full bg-white/55" />
-      <div className="h-1.5 w-[78%] rounded-full bg-white/45" />
-      <div className="h-1.5 w-[60%] rounded-full bg-white/35" />
+    <div
+      className="px-1 text-[7.5px] leading-[1.55] text-white/75"
+      style={{
+        fontFamily:
+          'var(--font-space-grotesk), ui-sans-serif, system-ui, -apple-system, sans-serif',
+      }}
+    >
+      Caleb Williams sliced through the Lions secondary on consecutive
+      drives, finishing 24-of-31 for 312 yards and three scores. Eberflus
+      called it the cleanest pocket play of the season.
     </div>
   );
 }
 
 function PreviewHeading() {
   return (
-    <div className="flex flex-col gap-1.5 px-1">
-      <div className="h-2.5 w-[68%] rounded-full bg-white/85" />
-      <div className="h-1 w-[40%] rounded-full bg-white/30" />
+    <div className="flex flex-col gap-1 px-1">
+      <span
+        className="text-[14px] font-bold leading-[1.05] tracking-[-0.02em] text-white"
+        style={{
+          fontFamily:
+            'var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif',
+        }}
+      >
+        The Bears Just Changed Everything
+      </span>
+      <span className="text-[7.5px] uppercase tracking-[0.18em] text-white/35">
+        Section heading
+      </span>
     </div>
   );
 }
 
 function PreviewImage() {
   return (
-    <div className="flex flex-col gap-1.5 px-1">
+    <div className="px-1">
       <div
-        className="flex h-12 w-full items-center justify-center rounded-md"
+        className="relative h-14 w-full overflow-hidden rounded-md"
         style={{
-          background: 'linear-gradient(135deg, rgba(0,212,255,0.15), rgba(255,255,255,0.06))',
+          backgroundImage:
+            'radial-gradient(circle at 22% 30%, #2a4d6e 0%, transparent 55%),' +
+            'radial-gradient(circle at 78% 65%, #5b1a1a 0%, transparent 60%),' +
+            'radial-gradient(circle at 50% 90%, #6c5a2a 0%, transparent 65%),' +
+            'linear-gradient(135deg, #1f2a36 0%, #14202c 100%)',
+          filter: 'saturate(1.05)',
           border: '1px solid rgba(255,255,255,0.08)',
         }}
       >
-        <ImageIcon size={18} className="text-white/60" />
+        {/* Soft sun-flare to suggest a real photo */}
+        <div
+          aria-hidden
+          className="absolute"
+          style={{
+            top: '8%',
+            left: '18%',
+            width: '40%',
+            height: '40%',
+            borderRadius: '9999px',
+            background:
+              'radial-gradient(circle, rgba(255,255,255,0.35), rgba(255,255,255,0) 70%)',
+            filter: 'blur(4px)',
+          }}
+        />
+        <div
+          aria-hidden
+          className="absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(180deg, rgba(0,0,0,0) 60%, rgba(0,0,0,0.4) 100%)',
+          }}
+        />
+        <div className="absolute bottom-1 left-1.5 right-1.5 truncate text-[7px] text-white/85">
+          Soldier Field, Sunday afternoon
+        </div>
       </div>
-      <div className="h-1 w-[55%] rounded-full bg-white/25" />
     </div>
   );
 }
@@ -56,18 +101,41 @@ function PreviewImage() {
 function PreviewVideo() {
   return (
     <div
-      className="relative flex h-16 w-full items-center justify-center rounded-md"
+      className="relative h-16 w-full overflow-hidden rounded-md"
       style={{
         background:
-          'linear-gradient(135deg, rgba(11,15,20,0.9), rgba(0,0,0,0.6))',
+          'radial-gradient(circle at 30% 35%, #1a2c3d 0%, transparent 55%),' +
+          'linear-gradient(135deg, #0b0f14 0%, #050709 100%)',
         border: '1px solid rgba(255,255,255,0.08)',
       }}
     >
+      {/* Subtle scan-line glow */}
       <div
-        className="flex h-7 w-7 items-center justify-center rounded-full"
-        style={{ backgroundColor: 'rgba(255,255,255,0.95)' }}
+        aria-hidden
+        className="absolute inset-x-0 top-0 h-1/2"
+        style={{
+          background:
+            'linear-gradient(180deg, rgba(0,212,255,0.07) 0%, transparent 100%)',
+        }}
+      />
+      {/* Play button overlay */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div
+          className="flex h-8 w-8 items-center justify-center rounded-full"
+          style={{
+            backgroundColor: 'rgba(255,255,255,0.95)',
+            boxShadow: '0 4px 14px rgba(0,0,0,0.45)',
+          }}
+        >
+          <Play size={12} className="ml-0.5 text-black" fill="black" />
+        </div>
+      </div>
+      {/* Timecode chip */}
+      <div
+        className="absolute bottom-1 right-1 rounded px-1 text-[7.5px] font-medium tabular-nums text-white/90"
+        style={{ backgroundColor: 'rgba(0,0,0,0.55)' }}
       >
-        <Play size={12} className="ml-0.5 text-black" fill="black" />
+        0:42
       </div>
     </div>
   );
@@ -76,11 +144,24 @@ function PreviewVideo() {
 function PreviewQuote() {
   return (
     <div className="flex items-stretch gap-2 px-1">
-      <div className="w-[3px] rounded-full" style={{ backgroundColor: '#BC0000' }} />
-      <div className="flex flex-1 flex-col gap-1.5 italic">
-        <div className="h-1.5 w-[88%] rounded-full bg-white/55" />
-        <div className="h-1.5 w-[72%] rounded-full bg-white/45" />
-        <div className="mt-0.5 h-1 w-[35%] rounded-full bg-white/30" />
+      <div
+        className="w-[3px] rounded-full"
+        style={{ backgroundColor: '#BC0000' }}
+      />
+      <div className="flex flex-1 flex-col gap-1">
+        <span
+          className="text-[8.5px] italic leading-[1.45] text-white/85"
+          style={{
+            fontFamily:
+              'var(--font-space-grotesk), ui-sans-serif, system-ui, serif',
+          }}
+        >
+          “We&rsquo;re not playing for moral victories anymore. We&rsquo;re
+          playing for January.”
+        </span>
+        <span className="text-[7px] uppercase tracking-[0.18em] text-white/45">
+          — Head Coach
+        </span>
       </div>
     </div>
   );
@@ -92,17 +173,29 @@ function PreviewSocialEmbed() {
       className="flex items-start gap-2 rounded-md p-2"
       style={{
         backgroundColor: 'rgba(255,255,255,0.04)',
-        border: '1px solid rgba(255,255,255,0.08)',
+        border: '1px solid rgba(255,255,255,0.1)',
       }}
     >
       <div
-        className="h-5 w-5 shrink-0 rounded-full"
-        style={{ background: 'linear-gradient(135deg, #00D4FF, #BC0000)' }}
+        className="h-6 w-6 shrink-0 rounded-full"
+        style={{
+          background:
+            'conic-gradient(from 220deg, #00D4FF, #BC0000, #D6B05E, #00D4FF)',
+        }}
       />
-      <div className="flex flex-1 flex-col gap-1">
-        <div className="h-1 w-[60%] rounded-full bg-white/55" />
-        <div className="h-1 w-[88%] rounded-full bg-white/35" />
-        <div className="h-1 w-[70%] rounded-full bg-white/30" />
+      <div className="flex flex-1 flex-col gap-0.5">
+        <div className="flex items-center gap-1 text-[8px]">
+          <span className="font-semibold text-white">Sports Mockery</span>
+          <span className="text-white/40">@sportsmockery</span>
+        </div>
+        <div className="text-[7.5px] leading-[1.45] text-white/75">
+          BREAKING: Bears reportedly engaged on a tackle. Front office not
+          done reshaping the line.
+        </div>
+        <div className="mt-1 flex items-center gap-3 text-[7px] text-white/45">
+          <span>♥ 2.1k</span>
+          <span>↻ 487</span>
+        </div>
       </div>
     </div>
   );

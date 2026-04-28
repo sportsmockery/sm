@@ -1,7 +1,10 @@
 'use client';
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { Eye, PenLine, Undo2, Redo2, Plus, Sparkles } from 'lucide-react';
+import {
+  Eye, PenLine, Undo2, Redo2, Plus, Sparkles, Type, Heading, ImageIcon,
+  ArrowDown,
+} from 'lucide-react';
 import type { ContentBlock, BlockType, ArticleDocument } from './types';
 import { createBlock, migrateBlock } from './types';
 import { BlockInserter } from './BlockInserter';
@@ -13,6 +16,35 @@ interface BlockEditorProps {
   initialBlocks?: ContentBlock[];
   initialTemplate?: string;
   onChange?: (doc: ArticleDocument) => void;
+}
+
+// Heuristic: after a block is added, what does a writer most often want next?
+function getSuggestion(lastBlockType: BlockType | undefined): {
+  type: BlockType;
+  label: string;
+} | null {
+  switch (lastBlockType) {
+    case 'heading':
+      return { type: 'paragraph', label: 'Add paragraph' };
+    case 'image':
+    case 'video':
+      return { type: 'paragraph', label: 'Add caption paragraph' };
+    case 'quote':
+    case 'social-embed':
+    case 'scout-insight':
+    case 'hot-take':
+    case 'update':
+    case 'sentiment-meter':
+    case 'stats-chart':
+    case 'player-comparison':
+    case 'trade-scenario':
+    case 'mock-draft':
+      return { type: 'paragraph', label: 'Add paragraph' };
+    case 'divider':
+      return { type: 'heading', label: 'Add heading' };
+    default:
+      return null;
+  }
 }
 
 export function BlockEditor({ initialBlocks, initialTemplate, onChange }: BlockEditorProps) {
@@ -29,9 +61,7 @@ export function BlockEditor({ initialBlocks, initialTemplate, onChange }: BlockE
 
   // Block picker modal state
   const [pickerOpen, setPickerOpen] = useState(false);
-  // Insert position: index *after* which to insert. null = append at end.
   const pickerInsertIndexRef = useRef<number | null>(null);
-  // Track the most recently inserted block so we can scroll to it + focus.
   const [pendingFocusId, setPendingFocusId] = useState<string | null>(null);
 
   const pushHistory = useCallback((prev: ContentBlock[]) => {
@@ -64,7 +94,16 @@ export function BlockEditor({ initialBlocks, initialTemplate, onChange }: BlockE
   }, [future, blocks, template, onChange]);
 
   const insertBlock = useCallback((type: BlockType, afterIndex?: number | null) => {
-    const newBlock = createBlock(type);
+    let newBlock: ContentBlock;
+    try {
+      newBlock = createBlock(type);
+    } catch (err) {
+      // Defensive: createBlock has a factory for every active type, but log
+      // explicitly if a future addition forgets to register one.
+      // eslint-disable-next-line no-console
+      console.error('[BlockEditor] createBlock failed for type:', type, err);
+      return;
+    }
     const idx = afterIndex === undefined || afterIndex === null
       ? blocks.length
       : afterIndex + 1;
@@ -116,7 +155,6 @@ export function BlockEditor({ initialBlocks, initialTemplate, onChange }: BlockE
     const focusable = el.querySelector<HTMLElement>(
       'textarea, input:not([type="hidden"]), [contenteditable="true"]'
     );
-    // Defer focus until the smooth scroll has had a tick to start.
     const t = window.setTimeout(() => {
       focusable?.focus();
     }, 120);
@@ -124,8 +162,7 @@ export function BlockEditor({ initialBlocks, initialTemplate, onChange }: BlockE
     return () => window.clearTimeout(t);
   }, [pendingFocusId, blocks]);
 
-  // "/" keyboard shortcut to open the picker — only when not already typing
-  // in an editable surface.
+  // "/" keyboard shortcut to open the picker.
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key !== '/') return;
@@ -138,7 +175,6 @@ export function BlockEditor({ initialBlocks, initialTemplate, onChange }: BlockE
         target?.isContentEditable === true;
       if (isEditable) return;
       e.preventDefault();
-      // Append at end when triggered by shortcut.
       openPicker(null);
     };
     document.addEventListener('keydown', handler);
@@ -146,6 +182,8 @@ export function BlockEditor({ initialBlocks, initialTemplate, onChange }: BlockE
   }, [pickerOpen, openPicker]);
 
   const hasStarted = blocks.length > 0;
+  const lastBlockType = blocks[blocks.length - 1]?.type;
+  const suggestion = hasStarted ? getSuggestion(lastBlockType) : null;
 
   return (
     <div className="space-y-4">
@@ -161,7 +199,7 @@ export function BlockEditor({ initialBlocks, initialTemplate, onChange }: BlockE
             <button
               type="button"
               onClick={() => setMode('edit')}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wide transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wide transition-colors active:scale-[0.98]"
               style={{
                 backgroundColor: mode === 'edit' ? 'rgba(0,212,255,0.15)' : 'transparent',
                 color: mode === 'edit' ? '#00D4FF' : '#A0A8B0',
@@ -172,7 +210,7 @@ export function BlockEditor({ initialBlocks, initialTemplate, onChange }: BlockE
             <button
               type="button"
               onClick={() => setMode('preview')}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wide transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wide transition-colors active:scale-[0.98]"
               style={{
                 backgroundColor: mode === 'preview' ? 'rgba(0,212,255,0.15)' : 'transparent',
                 color: mode === 'preview' ? '#00D4FF' : '#A0A8B0',
@@ -191,7 +229,7 @@ export function BlockEditor({ initialBlocks, initialTemplate, onChange }: BlockE
               type="button"
               onClick={undo}
               disabled={history.length === 0}
-              className="p-1.5 rounded-lg transition-colors disabled:opacity-30"
+              className="p-1.5 rounded-lg transition-colors disabled:opacity-30 active:scale-[0.95]"
               style={{ color: '#A0A8B0' }}
               aria-label="Undo"
             >
@@ -201,7 +239,7 @@ export function BlockEditor({ initialBlocks, initialTemplate, onChange }: BlockE
               type="button"
               onClick={redo}
               disabled={future.length === 0}
-              className="p-1.5 rounded-lg transition-colors disabled:opacity-30"
+              className="p-1.5 rounded-lg transition-colors disabled:opacity-30 active:scale-[0.95]"
               style={{ color: '#A0A8B0' }}
               aria-label="Redo"
             >
@@ -226,18 +264,33 @@ export function BlockEditor({ initialBlocks, initialTemplate, onChange }: BlockE
                     onMoveDown={index < blocks.length - 1 ? () => moveBlock(index, index + 1) : undefined}
                   />
                 </div>
-                <BlockInserter onRequestPicker={() => openPicker(index)} />
+                <BlockInserter
+                  onInsert={(type) => insertBlock(type, index)}
+                  onRequestModal={() => openPicker(index)}
+                />
               </React.Fragment>
             ))}
+
+            {suggestion && (
+              <SuggestionRow
+                label={suggestion.label}
+                onAccept={() => insertBlock(suggestion.type, blocks.length - 1)}
+              />
+            )}
+
             <div className="pt-1">
               <BlockInserter
                 variant="standalone"
-                onRequestPicker={() => openPicker(blocks.length - 1)}
+                onInsert={(type) => insertBlock(type, blocks.length - 1)}
+                onRequestModal={() => openPicker(blocks.length - 1)}
               />
             </div>
           </div>
         ) : (
-          <EmptyCanvas onAddContent={() => openPicker(null)} />
+          <EmptyCanvas
+            onAddContent={() => openPicker(null)}
+            onQuickInsert={(type) => insertBlock(type, null)}
+          />
         )
       ) : (
         <div
@@ -288,10 +341,20 @@ export function BlockEditor({ initialBlocks, initialTemplate, onChange }: BlockE
 }
 
 // ─── Empty State ────────────────────────────────────────────────────────────
-// Apple-style centered start panel. Replaces the old TemplateSelector entry
-// point. No template picking — writers go straight to "+ Add Content".
 
-function EmptyCanvas({ onAddContent }: { onAddContent: () => void }) {
+const SMART_START: { type: BlockType; label: string; Icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
+  { type: 'paragraph', label: 'Paragraph', Icon: Type },
+  { type: 'heading', label: 'Heading', Icon: Heading },
+  { type: 'image', label: 'Image', Icon: ImageIcon },
+];
+
+function EmptyCanvas({
+  onAddContent,
+  onQuickInsert,
+}: {
+  onAddContent: () => void;
+  onQuickInsert: (type: BlockType) => void;
+}) {
   return (
     <div
       className="empty-canvas-fadein relative overflow-hidden rounded-2xl"
@@ -301,7 +364,6 @@ function EmptyCanvas({ onAddContent }: { onAddContent: () => void }) {
         boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
       }}
     >
-      {/* Soft cyan glow accent */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 h-48"
@@ -355,16 +417,54 @@ function EmptyCanvas({ onAddContent }: { onAddContent: () => void }) {
         <button
           type="button"
           onClick={onAddContent}
-          className="mt-9 inline-flex h-12 items-center gap-2 rounded-full px-7 text-[14px] font-semibold tracking-wide transition-all hover:scale-[1.02] focus:scale-[1.02] focus:outline-none"
+          className="mt-9 inline-flex h-12 items-center gap-2 rounded-full px-7 text-[14px] font-semibold tracking-wide transition-all hover:scale-[1.02] focus:scale-[1.02] active:scale-[0.98] focus:outline-none"
           style={{
             backgroundColor: '#0B0F14',
             color: '#FAFAFB',
             boxShadow: '0 12px 32px rgba(11,15,20,0.25)',
+            transitionDelay: '80ms',
           }}
         >
           <Plus size={16} strokeWidth={2.4} />
           Add Content
         </button>
+
+        {/* Smart Start row */}
+        <div className="mt-10 flex flex-col items-center gap-3">
+          <span className="text-[11px] uppercase tracking-[0.22em] text-slate-400">
+            Start with
+          </span>
+          <div className="flex flex-wrap justify-center gap-2">
+            {SMART_START.map(({ type, label, Icon }) => (
+              <button
+                key={type}
+                type="button"
+                onClick={() => onQuickInsert(type)}
+                className="group flex items-center gap-2 rounded-full px-4 py-2 text-[12.5px] font-medium tracking-tight transition-all hover:-translate-y-[1px] active:scale-[0.97]"
+                style={{
+                  backgroundColor: 'rgba(11,15,20,0.04)',
+                  border: '1px solid rgba(11,15,20,0.08)',
+                  color: '#0B0F14',
+                  transitionDelay: '80ms',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = 'rgba(0,212,255,0.45)';
+                  e.currentTarget.style.backgroundColor = 'rgba(0,212,255,0.06)';
+                  e.currentTarget.style.boxShadow =
+                    '0 0 0 1px rgba(0,212,255,0.25), 0 6px 14px rgba(0,212,255,0.12)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'rgba(11,15,20,0.08)';
+                  e.currentTarget.style.backgroundColor = 'rgba(11,15,20,0.04)';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              >
+                <Icon size={13} className="text-slate-600 group-hover:text-[#00D4FF]" />
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       <style jsx>{`
@@ -383,6 +483,58 @@ function EmptyCanvas({ onAddContent }: { onAddContent: () => void }) {
         }
         @media (prefers-reduced-motion: reduce) {
           .empty-canvas-fadein {
+            animation: none;
+          }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+// ─── Context-Aware Suggestion ───────────────────────────────────────────────
+
+function SuggestionRow({
+  label,
+  onAccept,
+}: {
+  label: string;
+  onAccept: () => void;
+}) {
+  return (
+    <div className="suggestion-fadein flex justify-center pt-1">
+      <button
+        type="button"
+        onClick={onAccept}
+        className="group flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[11.5px] font-medium tracking-tight transition-all hover:-translate-y-[1px] active:scale-[0.98]"
+        style={{
+          backgroundColor: 'rgba(0,212,255,0.06)',
+          border: '1px dashed rgba(0,212,255,0.4)',
+          color: '#0B0F14',
+          transitionDelay: '80ms',
+        }}
+      >
+        <span className="text-[10px] uppercase tracking-[0.2em] text-[#00D4FF]">
+          Next
+        </span>
+        <span>{label}</span>
+        <ArrowDown size={12} className="text-[#00D4FF] transition-transform group-hover:translate-y-[1px]" />
+      </button>
+      <style jsx>{`
+        .suggestion-fadein {
+          animation: suggestion-fade 200ms ease-out;
+        }
+        @keyframes suggestion-fade {
+          from {
+            opacity: 0;
+            transform: translateY(-2px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .suggestion-fadein {
             animation: none;
           }
         }
