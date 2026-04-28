@@ -1432,7 +1432,12 @@ export default function AdvancedPostEditor({
               onKeyDown={(e) => {
                 if (e.key === 'Tab' && !e.shiftKey) {
                   e.preventDefault()
-                  contentEditorRef.current?.focus()
+                  document.dispatchEvent(new CustomEvent('sm-editor:focus-body'))
+                } else if (e.key === 'Enter') {
+                  // Move from title into the article body. The block editor
+                  // listens for this event and focuses (or seeds) a paragraph.
+                  e.preventDefault()
+                  document.dispatchEvent(new CustomEvent('sm-editor:focus-body'))
                 }
               }}
               placeholder="Article title..."

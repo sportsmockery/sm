@@ -6,14 +6,14 @@ import {
 } from 'lucide-react';
 import type { BlockType } from './types';
 
-// Quick-insert blocks shown directly in the inline picker. Anything else
-// is reachable via "Browse all blocks" → modal.
 interface QuickBlock {
   type: BlockType;
   label: string;
   Icon: React.ComponentType<{ size?: number; className?: string; style?: React.CSSProperties }>;
 }
 
+// Paragraph is intentionally first so that opening the panel and pressing
+// Enter (or Tab+Enter) always falls through to the most common block.
 const QUICK_BLOCKS: QuickBlock[] = [
   { type: 'paragraph', label: 'Paragraph', Icon: Type },
   { type: 'heading', label: 'Heading', Icon: Heading },
@@ -24,16 +24,17 @@ const QUICK_BLOCKS: QuickBlock[] = [
 ];
 
 interface BlockInserterProps {
-  // Insert directly into the document (used by quick blocks).
   onInsert: (type: BlockType) => void;
-  // Open the full modal for the long tail.
   onRequestModal: () => void;
-  variant?: 'inline' | 'standalone';
+  // When true, the trigger fades in even without hover (used to reveal the
+  // adjacent inserter while the writer's cursor is in the neighbouring block).
+  revealed?: boolean;
 }
 
-export function BlockInserter({ onInsert, onRequestModal, variant = 'inline' }: BlockInserterProps) {
+export function BlockInserter({ onInsert, onRequestModal, revealed = false }: BlockInserterProps) {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const firstBtnRef = useRef<HTMLButtonElement>(null);
 
   // Close on outside click.
   useEffect(() => {
@@ -57,6 +58,14 @@ export function BlockInserter({ onInsert, onRequestModal, variant = 'inline' }: 
     return () => document.removeEventListener('keydown', handler);
   }, [open]);
 
+  // Focus first quick block when panel opens — so Enter inserts a paragraph.
+  useEffect(() => {
+    if (open) {
+      const t = window.setTimeout(() => firstBtnRef.current?.focus(), 30);
+      return () => window.clearTimeout(t);
+    }
+  }, [open]);
+
   const handleQuick = (type: BlockType) => {
     onInsert(type);
     setOpen(false);
@@ -69,76 +78,61 @@ export function BlockInserter({ onInsert, onRequestModal, variant = 'inline' }: 
 
   return (
     <div ref={wrapRef} className="block-inserter-wrap">
-      {variant === 'standalone' ? (
+      <div className="group/inserter relative flex justify-center py-1.5">
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="group flex w-full items-center justify-center gap-2 rounded-xl py-4 transition-all active:scale-[0.985]"
+          className={`block-inserter-trigger flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-medium uppercase tracking-[0.16em] transition-all duration-100 hover:scale-[1.03] active:scale-[0.97] focus:outline-none ${
+            open || revealed
+              ? 'is-revealed'
+              : ''
+          }`}
           style={{
-            backgroundColor: open ? 'rgba(0,212,255,0.12)' : 'rgba(0,212,255,0.06)',
-            border: `1px dashed rgba(0,212,255,${open ? 0.6 : 0.35})`,
+            backgroundColor: open ? 'rgba(0,212,255,0.18)' : 'rgba(0,212,255,0.1)',
             color: '#00D4FF',
-            transitionDelay: '80ms',
+            border: `1px solid rgba(0,212,255,${open ? 0.5 : 0.3})`,
           }}
           aria-expanded={open}
-          aria-label="Add block"
+          aria-label="Add block here"
         >
-          {open ? <X size={14} /> : <Plus size={14} />}
-          <span className="text-[12px] font-semibold uppercase tracking-[0.18em]">
-            {open ? 'Close' : 'Add Block'}
-          </span>
+          {open ? <X size={11} /> : <Plus size={11} />}
+          {open ? 'Close' : 'Add Block'}
         </button>
-      ) : (
-        <div className="group/inserter relative flex justify-center py-1.5">
-          <button
-            type="button"
-            onClick={() => setOpen((v) => !v)}
-            className="flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-medium uppercase tracking-[0.16em] transition-all duration-150 hover:scale-[1.03] active:scale-[0.985] focus:outline-none"
-            style={{
-              backgroundColor: open ? 'rgba(0,212,255,0.18)' : 'rgba(0,212,255,0.1)',
-              color: '#00D4FF',
-              border: `1px solid rgba(0,212,255,${open ? 0.5 : 0.3})`,
-              opacity: open ? 1 : undefined,
-              transitionDelay: open ? '0ms' : '80ms',
-            }}
-            aria-expanded={open}
-            aria-label="Add block here"
-          >
-            {open ? <X size={11} /> : <Plus size={11} />}
-            {open ? 'Close' : 'Add Block'}
-          </button>
-          <span
-            aria-hidden
-            className={`pointer-events-none absolute left-0 right-0 top-1/2 h-px -translate-y-1/2 transition-opacity duration-150 ${
-              open ? 'opacity-100' : 'opacity-0 group-hover/inserter:opacity-100'
-            }`}
-            style={{
-              background:
-                'linear-gradient(90deg, transparent, rgba(0,212,255,0.25), transparent)',
-            }}
-          />
-          {/* Make the trigger reveal on hover even when not open */}
-          <style jsx>{`
-            .group\\/inserter button {
-              opacity: 0;
-            }
-            .group\\/inserter:hover button,
-            .group\\/inserter:focus-within button,
-            .group\\/inserter button[aria-expanded='true'] {
-              opacity: 1;
-            }
-          `}</style>
-        </div>
-      )}
+
+        <span
+          aria-hidden
+          className={`pointer-events-none absolute left-0 right-0 top-1/2 h-px -translate-y-1/2 transition-opacity duration-150 ${
+            open || revealed ? 'opacity-100' : 'opacity-0 group-hover/inserter:opacity-100'
+          }`}
+          style={{
+            background:
+              'linear-gradient(90deg, transparent, rgba(0,212,255,0.25), transparent)',
+          }}
+        />
+
+        <style jsx>{`
+          .block-inserter-trigger {
+            opacity: 0;
+            transition-property: opacity, transform, background-color, box-shadow, border-color;
+            transition-duration: 120ms;
+          }
+          .group\\/inserter:hover .block-inserter-trigger,
+          .group\\/inserter:focus-within .block-inserter-trigger,
+          .block-inserter-trigger.is-revealed {
+            opacity: 1;
+          }
+        `}</style>
+      </div>
 
       {open && (
-        <div className="block-inserter-panel mt-2">
+        <div className="block-inserter-panel mt-1">
           <div
             className="overflow-hidden rounded-2xl"
             style={{
               backgroundColor: '#ffffff',
               border: '1px solid rgba(0,0,0,0.08)',
-              boxShadow: '0 18px 50px rgba(11,15,20,0.12), 0 2px 6px rgba(11,15,20,0.06)',
+              boxShadow:
+                '0 18px 50px rgba(11,15,20,0.12), 0 2px 6px rgba(11,15,20,0.06)',
             }}
           >
             <div
@@ -164,16 +158,18 @@ export function BlockInserter({ onInsert, onRequestModal, variant = 'inline' }: 
             </div>
 
             <div className="grid grid-cols-3 gap-2 p-3">
-              {QUICK_BLOCKS.map(({ type, label, Icon }) => (
+              {QUICK_BLOCKS.map(({ type, label, Icon }, i) => (
                 <button
                   key={type}
+                  ref={i === 0 ? firstBtnRef : undefined}
                   type="button"
                   onClick={() => handleQuick(type)}
-                  className="group flex flex-col items-center gap-1.5 rounded-xl px-2 py-3 transition-all hover:-translate-y-[1px] active:scale-[0.98]"
+                  className="group flex flex-col items-center gap-1.5 rounded-xl px-2 py-3 transition-all hover:-translate-y-[1px] active:scale-[0.97] focus:outline-none focus:ring-2 focus:ring-[#00D4FF]/40"
                   style={{
                     backgroundColor: 'rgba(11,15,20,0.025)',
                     border: '1px solid rgba(11,15,20,0.06)',
-                    transitionDelay: '80ms',
+                    transitionProperty: 'transform, background-color, box-shadow, border-color',
+                    transitionDuration: '120ms',
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.borderColor = 'rgba(0,212,255,0.45)';
