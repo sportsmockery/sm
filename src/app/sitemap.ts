@@ -1,13 +1,23 @@
 import { MetadataRoute } from 'next'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { SITE_URL, IS_PRODUCTION_SITE } from '@/lib/site-url'
 
-const BASE_URL = 'https://sportsmockery.com'
+// Sitemap URLs always use the env-driven SITE_URL so preview deploys list
+// preview URLs (and stay deindexed via robots.ts + middleware), and production
+// lists production URLs.
+const BASE_URL = SITE_URL
 
 /**
  * Generate dynamic sitemap for SEO
  * Includes static pages, team pages, and all published articles
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // Belt-and-suspenders: even if a non-production deploy ever gets crawled,
+  // emit an empty sitemap so we never leak per-environment URLs as canonical signals.
+  if (!IS_PRODUCTION_SITE) {
+    return []
+  }
+
   // Static pages
   // Team slugs for sub-page generation
   const teams = ['chicago-bears', 'chicago-bulls', 'chicago-cubs', 'chicago-white-sox', 'chicago-blackhawks']

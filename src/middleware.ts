@@ -1,6 +1,26 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+// Production hosts that ARE allowed to be indexed by search engines.
+// Any other hostname (test.sportsmockery.com, *.vercel.app preview URLs,
+// localhost) gets an X-Robots-Tag: noindex, nofollow header injected on every
+// response. This is the load-bearing protection that prevents staging from
+// stealing production rankings if a sitemap or backlink leaks.
+const INDEXABLE_HOSTS = new Set<string>([
+  'sportsmockery.com',
+  'www.sportsmockery.com',
+  // Subdomain rewrites that surface to search engines as their own apex:
+  'masters.sportsmockery.com',
+])
+
+function applyNoindexIfStaging(request: NextRequest, response: NextResponse): NextResponse {
+  const hostname = (request.headers.get('host') || '').split(':')[0].toLowerCase()
+  if (!INDEXABLE_HOSTS.has(hostname)) {
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive')
+  }
+  return response
+}
+
 // Routes that don't require authentication
 const publicRoutes = [
   '/',
@@ -104,12 +124,12 @@ export async function middleware(request: NextRequest) {
 
   // 1. Allow static assets and API routes immediately
   if (isStaticAsset || isApiPath) {
-    return NextResponse.next()
+    return applyNoindexIfStaging(request, NextResponse.next())
   }
 
   // 2. Allow /home/* marketing pages through (no auth check needed)
   if (isHomePath) {
-    return NextResponse.next()
+    return applyNoindexIfStaging(request, NextResponse.next())
   }
 
   // 3. Allow public routes and content pages (articles, team pages, etc.)
@@ -117,14 +137,14 @@ export async function middleware(request: NextRequest) {
   const isPublicPath = publicPaths.some((path) => pathname.startsWith(path))
 
   if (isPublicRoute || isPublicPath) {
-    return NextResponse.next()
+    return applyNoindexIfStaging(request, NextResponse.next())
   }
 
   // 4. Allow article URLs — any /{category}/{slug} pattern (2+ path segments)
   //    These are content pages that should always be accessible for SEO and sharing
   const segments = pathname.split('/').filter(Boolean)
   if (segments.length >= 2 && !pathname.startsWith('/admin') && !pathname.startsWith('/gm') && !pathname.startsWith('/studio')) {
-    return NextResponse.next()
+    return applyNoindexIfStaging(request, NextResponse.next())
   }
 
   // 7. Admin route protection — require authentication
@@ -139,10 +159,10 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(loginUrl)
     }
 
-    return response
+    return applyNoindexIfStaging(request, response)
   }
 
-  return NextResponse.next()
+  return applyNoindexIfStaging(request, NextResponse.next())
 }
 
 export const config = {
