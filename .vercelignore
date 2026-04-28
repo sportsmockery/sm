@@ -1,0 +1,42 @@
+# Vercel deploy ignore list — keeps the upload tarball lean.
+# Vercel already auto-skips node_modules and .git.
+
+# Build artifacts (Vercel rebuilds these from source)
+.next
+out
+build
+dist
+
+# Native / non-web subprojects (not consumed by the Next.js app)
+mobile/
+postiq-test-venv/
+
+# Local-only assets that bloat the tarball
+screenshots/
+docs/
+*.pdf
+*.rtf
+edge-email-preview.png
+
+# IDE / OS / local caches
+.idea/
+.vscode/
+.DS_Store
+.cache/
+.turbo/
+.tsbuildinfo
+tsconfig.tsbuildinfo
+
+# Test / coverage / logs
+coverage/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Local env (Vercel injects its own)
+.env.local
+.env.vercel-check
+
+# Worktrees / experimental areas
+.claude/worktrees/
