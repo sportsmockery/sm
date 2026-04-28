@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { datalabAdmin } from '@/lib/supabase-datalab'
 
 /**
@@ -14,14 +14,32 @@ import { datalabAdmin } from '@/lib/supabase-datalab'
  * Authorization: Bearer <CRON_SECRET>
  */
 
-// Create admin client for SportsMockery DB
-const SM_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const SM_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!
-const smAdmin = createClient(SM_URL, SM_SERVICE_KEY, {
-  auth: { autoRefreshToken: false, persistSession: false },
-})
+// Force dynamic so Next.js does not try to collect page data at build time,
+// which previously imported this module without SUPABASE_SERVICE_ROLE_KEY in
+// scope and threw 'supabaseKey is required' during the build.
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
-// Cron secret for authentication
+// Lazy-initialized admin client. Building the client at module top-level
+// would crash builds whenever env vars aren't populated for the current
+// environment (e.g. preview deploys without service-role secret).
+let _smAdmin: SupabaseClient | null = null
+function getSmAdmin(): SupabaseClient {
+  if (_smAdmin) return _smAdmin
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!url || !key) {
+    throw new Error(
+      'sync-bears-data: missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY at runtime',
+    )
+  }
+  _smAdmin = createClient(url, key, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  })
+  return _smAdmin
+}
+
+// Cron secret for authentication — read at request time, not module load.
 const CRON_SECRET = process.env.CRON_SECRET || ''
 
 interface SyncResult {
@@ -180,10 +198,10 @@ async function syncTable(
 
     // Upsert to SportsMockery DB
     // First, try to delete existing data (full replace strategy)
-    await smAdmin.from(tableName).delete().neq(primaryKey, 'impossible_value_to_match_nothing')
+    await getSmAdmin().from(tableName).delete().neq(primaryKey, 'impossible_value_to_match_nothing')
 
     // Then insert all rows
-    const { error: insertError } = await smAdmin
+    const { error: insertError } = await getSmAdmin()
       .from(tableName)
       .insert(cleanedData)
 
@@ -191,7 +209,7 @@ async function syncTable(
       // Table might not exist, try upsert instead
       console.warn(`Insert failed for ${tableName}, trying upsert:`, insertError.message)
 
-      const { error: upsertError } = await smAdmin
+      const { error: upsertError } = await getSmAdmin()
         .from(tableName)
         .upsert(cleanedData, { onConflict: primaryKey })
 

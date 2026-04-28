@@ -5,10 +5,31 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
+// Resolve site URL once. NEXT_PUBLIC_SITE_URL is the canonical env var
+// (matches the runtime resolution in src/lib/site-url.ts). SITE_URL is
+// preserved as a fallback for backwards compatibility with any existing
+// deploys that still set the old name.
+const siteUrl = (
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  process.env.SITE_URL ||
+  'https://sportsmockery.com'
+).replace(/\/+$/, '')
+
+const isProductionSite =
+  siteUrl === 'https://sportsmockery.com' ||
+  siteUrl === 'https://www.sportsmockery.com'
+
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
-  siteUrl: process.env.SITE_URL || 'https://sportsmockery.com',
+  siteUrl,
+  // Only emit a permissive robots.txt for production. Non-production builds
+  // emit Disallow: / so any leaked staging deploy stays out of the index.
   generateRobotsTxt: true,
+  robotsTxtOptions: {
+    policies: isProductionSite
+      ? [{ userAgent: '*', allow: '/' }]
+      : [{ userAgent: '*', disallow: '/' }],
+  },
   generateIndexSitemap: false,
   additionalPaths: async (config) => {
     const paths = []
