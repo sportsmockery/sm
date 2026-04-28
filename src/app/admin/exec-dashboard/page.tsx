@@ -8,6 +8,7 @@ import {
   PolarAngleAxis, PolarRadiusAxis, Radar, BarChart, PieChart, Pie, Cell,
   AreaChart, ReferenceLine,
 } from 'recharts'
+import { GoogleTab } from '@/components/admin/exec-dashboard/google/google-tab'
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -54,7 +55,7 @@ interface Data {
 // ═══════════════════════════════════════════════════════════════════════════════
 // CONSTANTS & UTILS
 // ═══════════════════════════════════════════════════════════════════════════════
-const TABS = ['Overview', 'Writers', 'Social', 'SEO', 'Content', 'Payments', 'Freestar'] as const
+const TABS = ['Overview', 'Writers', 'Social', 'SEO', 'Content', 'Payments', 'Freestar', 'Google'] as const
 const RANGES = [
   { key: 'today', label: 'Today' },
   { key: 'yesterday', label: 'Yesterday' },
@@ -2097,6 +2098,9 @@ export default function ExecDashboard() {
               </div>
             </>
           })()}
+
+          {/* ═══════ GOOGLE TAB ═══════ */}
+          {tab === 'Google' && <GoogleTab active={tab === 'Google'} />}
         </div>
       )}
 
