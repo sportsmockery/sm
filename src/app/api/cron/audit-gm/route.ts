@@ -324,7 +324,7 @@ export async function GET(request: NextRequest) {
     const { data: eligibility, error } = await datalabAdmin
       .from('gm_draft_eligibility')
       .select('*')
-      .in('team_key', ['chi', 'chc', 'chw'])
+      .in('team_key', ['bears', 'bulls', 'blackhawks', 'cubs', 'whitesox'])
       .eq('draft_year', 2026)
 
     if (error) {
