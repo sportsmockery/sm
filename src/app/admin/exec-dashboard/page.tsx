@@ -712,6 +712,10 @@ export default function ExecDashboard() {
   const [editFormulaDate, setEditFormulaDate] = useState('')
   const [savingFormulaId, setSavingFormulaId] = useState<string | null>(null)
   const [expandedHistoryMonth, setExpandedHistoryMonth] = useState<string | null>(null)
+  // GSC state
+  const [gscData, setGscData] = useState<any>(null)
+  const [gscLoading, setGscLoading] = useState(false)
+  const [gscConnected, setGscConnected] = useState<boolean | null>(null)
   // Freestar P&L state
   const [freestarRevenue, setFreestarRevenue] = useState<number | null>(null)
   const [freestarMetrics, setFreestarMetrics] = useState<FreestarMetrics | null>(null)
@@ -829,6 +833,36 @@ export default function ExecDashboard() {
     }
     fetchFreestarMetrics()
   }, [tab, range, customStart, customEnd, data, freestarDateRange])
+
+  // Fetch Google Search Console data when SEO tab is active
+  useEffect(() => {
+    if (tab !== 'SEO') return
+    const { startStr, endStr } = freestarDateRange
+    let cancelled = false
+    const run = async () => {
+      setGscLoading(true)
+      try {
+        const r = await fetch(`/api/admin/google-search-console/data?start=${startStr}&end=${endStr}`)
+        if (!r.ok) {
+          if (!cancelled) {
+            setGscConnected(false)
+            setGscData(null)
+          }
+          return
+        }
+        const json = await r.json()
+        if (cancelled) return
+        setGscConnected(!!json.connected)
+        setGscData(json.connected ? json : null)
+      } catch {
+        if (!cancelled) setGscConnected(false)
+      } finally {
+        if (!cancelled) setGscLoading(false)
+      }
+    }
+    run()
+    return () => { cancelled = true }
+  }, [tab, freestarDateRange])
 
   // Listen for localStorage changes from the embedded Freestar iframe
   // The storage event fires when another window/tab/iframe modifies localStorage
@@ -1307,6 +1341,115 @@ export default function ExecDashboard() {
                 <p className="text-sm py-4 text-center" style={{ color: 'var(--sm-text-dim)' }}>No keyword data available. Check SEMRush API key.</p>
               )}
             </Section>
+            {/* Google Search Console */}
+            <Section
+              title="Google Search Console"
+              badge={
+                gscConnected === false ? (
+                  <span className="text-xs" style={{ color: 'var(--sm-text-dim)' }}>Not connected</span>
+                ) : gscConnected && gscData?.email ? (
+                  <span className="text-xs tabular-nums" style={{ color: 'var(--sm-text-dim)' }}>
+                    {gscData.email} · {gscData.property}
+                  </span>
+                ) : undefined
+              }
+              actions={
+                gscConnected ? (
+                  <a
+                    href="/api/admin/google-search-console/connect"
+                    className="text-xs font-bold px-2.5 py-1 rounded border transition-colors"
+                    style={{ borderColor: 'var(--sm-border)', color: 'var(--sm-text-muted)', background: 'var(--sm-surface)' }}
+                  >
+                    Reconnect
+                  </a>
+                ) : null
+              }
+            >
+              {gscLoading && gscData == null ? (
+                <p className="text-sm py-4 text-center" style={{ color: 'var(--sm-text-dim)' }}>Loading Search Console data…</p>
+              ) : gscConnected === false ? (
+                <div className="py-6 text-center">
+                  <p className="text-sm mb-3" style={{ color: 'var(--sm-text-muted)' }}>
+                    Connect a Google account with access to <code style={{ background: 'var(--sm-surface)', padding: '2px 6px', borderRadius: 4 }}>sportsmockery.com</code> to pull clicks, impressions, CTR, and queries directly from Search Console.
+                  </p>
+                  <a
+                    href="/api/admin/google-search-console/connect"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded text-sm font-bold transition-colors"
+                    style={{ background: '#00D4FF', color: '#fff' }}
+                  >
+                    Connect Search Console
+                  </a>
+                </div>
+              ) : gscData ? (
+                <div className="space-y-4">
+                  {/* KPI cards */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {[
+                      { l: 'Clicks',      v: fN(gscData.totals?.clicks || 0),      prev: gscData.previous?.clicks      || 0, curr: gscData.totals?.clicks      || 0, c: C.blue },
+                      { l: 'Impressions', v: fN(gscData.totals?.impressions || 0), prev: gscData.previous?.impressions || 0, curr: gscData.totals?.impressions || 0, c: C.purple },
+                      { l: 'CTR',         v: ((gscData.totals?.ctr || 0) * 100).toFixed(2) + '%', prev: gscData.previous?.ctr || 0, curr: gscData.totals?.ctr || 0, c: C.green },
+                      { l: 'Avg Position', v: (gscData.totals?.position || 0).toFixed(1), prev: gscData.previous?.position || 0, curr: gscData.totals?.position || 0, c: C.amber, lowerIsBetter: true },
+                    ].map(m => {
+                      const delta = m.curr - m.prev
+                      const pct = m.prev !== 0 ? (delta / m.prev) * 100 : 0
+                      const positive = m.lowerIsBetter ? delta < 0 : delta > 0
+                      return (
+                        <div key={m.l} className="rounded-lg border px-4 py-3" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
+                          <p className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--sm-text-dim)' }}>{m.l}</p>
+                          <p className="text-2xl font-extrabold tabular-nums mt-1" style={{ color: m.c }}>{m.v}</p>
+                          {m.prev !== 0 && (
+                            <p className="text-xs tabular-nums mt-0.5" style={{ color: positive ? '#10b981' : '#bc0000' }}>
+                              {delta > 0 ? '+' : ''}{pct.toFixed(1)}% vs. prev period
+                            </p>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+
+                  {/* Top queries */}
+                  {Array.isArray(gscData.topQueries) && gscData.topQueries.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-bold uppercase tracking-wide mb-2" style={{ color: 'var(--sm-text-dim)' }}>Top Queries</h4>
+                      <SortableTable
+                        columns={[
+                          { key: 'query', label: 'Query', render: (v: string) => <span className="font-medium">{v}</span> },
+                          { key: 'clicks',      label: 'Clicks',      align: 'right', render: (v: number) => <span className="font-bold tabular-nums" style={{ color: C.blue }}>{fN(v)}</span> },
+                          { key: 'impressions', label: 'Impressions', align: 'right', render: (v: number) => <span className="tabular-nums" style={{ color: 'var(--sm-text-muted)' }}>{fN(v)}</span> },
+                          { key: 'ctr',         label: 'CTR',         align: 'right', render: (v: number) => <span className="tabular-nums" style={{ color: C.green }}>{(v * 100).toFixed(2)}%</span> },
+                          { key: 'position',    label: 'Avg Position', align: 'right', render: (v: number) => <span className="tabular-nums" style={{ color: C.amber }}>{v.toFixed(1)}</span> },
+                        ]}
+                        data={gscData.topQueries}
+                        pageSize={10}
+                      />
+                    </div>
+                  )}
+
+                  {/* Top pages */}
+                  {Array.isArray(gscData.topPages) && gscData.topPages.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-bold uppercase tracking-wide mb-2" style={{ color: 'var(--sm-text-dim)' }}>Top Pages</h4>
+                      <SortableTable
+                        columns={[
+                          { key: 'page', label: 'Page', render: (v: string) => <span className="text-xs font-mono truncate block" style={{ maxWidth: 360 }}>{v.replace(/^https?:\/\/(www\.)?sportsmockery\.com/, '')}</span> },
+                          { key: 'clicks',      label: 'Clicks',      align: 'right', render: (v: number) => <span className="font-bold tabular-nums" style={{ color: C.blue }}>{fN(v)}</span> },
+                          { key: 'impressions', label: 'Impressions', align: 'right', render: (v: number) => <span className="tabular-nums" style={{ color: 'var(--sm-text-muted)' }}>{fN(v)}</span> },
+                          { key: 'ctr',         label: 'CTR',         align: 'right', render: (v: number) => <span className="tabular-nums" style={{ color: C.green }}>{(v * 100).toFixed(2)}%</span> },
+                          { key: 'position',    label: 'Avg Position', align: 'right', render: (v: number) => <span className="tabular-nums" style={{ color: C.amber }}>{v.toFixed(1)}</span> },
+                        ]}
+                        data={gscData.topPages}
+                        pageSize={10}
+                      />
+                    </div>
+                  )}
+
+                  {gscData.error && (
+                    <p className="text-xs" style={{ color: '#bc0000' }}>GSC error: {gscData.error}</p>
+                  )}
+                </div>
+              ) : null}
+            </Section>
+
             {/* Competitors */}
             {data.seo?.competitors && data.seo.competitors.length > 0 && (
               <Section title="Organic Competitors" badge={<span className="text-xs tabular-nums" style={{ color: 'var(--sm-text-dim)' }}>{data.seo.competitors.length} competitors</span>}>
