@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { requireAdmin, verifyCronSecret } from '@/lib/admin-auth'
 import { GoogleRescoreWorker } from '@/workers/google-rescore-worker'
 import { SmPostsArticleHydrator } from '@/lib/google/sm-posts-article-hydrator'
 import { SmTransparencyHydrator } from '@/lib/google/sm-transparency-hydrator'
@@ -14,15 +15,16 @@ export const revalidate = 0
 // Worker can fan out fetches per article; give it room.
 export const maxDuration = 60
 
-function authorized(req: NextRequest): boolean {
-  const cronSecret = process.env.CRON_SECRET
-  if (!cronSecret) return true // no secret configured = open in dev/preview
-  const header = req.headers.get('authorization') ?? ''
-  return header === `Bearer ${cronSecret}`
+async function authorized(req: NextRequest): Promise<boolean> {
+  // Vercel cron + curl: Bearer CRON_SECRET
+  if (verifyCronSecret(req)) return true
+  // In-UI clicks from /admin/exec-dashboard: authenticated admin session
+  const auth = await requireAdmin(req)
+  return !auth.error
 }
 
 async function runTick(req: NextRequest): Promise<NextResponse> {
-  if (!authorized(req)) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  if (!(await authorized(req))) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
 
   const url = new URL(req.url)
   const batchSize = Math.min(100, Math.max(1, parseInt(url.searchParams.get('batchSize') ?? '25', 10) || 25))
