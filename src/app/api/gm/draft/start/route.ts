@@ -5,12 +5,16 @@ import { datalabAdmin } from '@/lib/supabase-datalab'
 export const dynamic = 'force-dynamic'
 
 // Chicago team keys by sport
-const CHICAGO_TEAMS: Record<string, { key: string; name: string; sport: string }> = {
-  bears: { key: 'chi', name: 'Chicago Bears', sport: 'nfl' },
-  bulls: { key: 'chi', name: 'Chicago Bulls', sport: 'nba' },
-  blackhawks: { key: 'chi', name: 'Chicago Blackhawks', sport: 'nhl' },
-  cubs: { key: 'chc', name: 'Chicago Cubs', sport: 'mlb' },
-  whitesox: { key: 'chw', name: 'Chicago White Sox', sport: 'mlb' },
+// `keys` lists every team_key value DataLab's gm_draft_order may use for that team —
+// NBA/NHL #1 picks are tagged with the mascot key (e.g. 'bulls', 'blackhawks') while
+// later-round picks use the city key ('chi'). We must match all of them or pick #1
+// won't be flagged as a user pick.
+const CHICAGO_TEAMS: Record<string, { keys: string[]; name: string; sport: string }> = {
+  bears: { keys: ['chi', 'bears'], name: 'Chicago Bears', sport: 'nfl' },
+  bulls: { keys: ['chi', 'bulls'], name: 'Chicago Bulls', sport: 'nba' },
+  blackhawks: { keys: ['chi', 'blackhawks'], name: 'Chicago Blackhawks', sport: 'nhl' },
+  cubs: { keys: ['chc', 'cubs'], name: 'Chicago Cubs', sport: 'mlb' },
+  whitesox: { keys: ['chw', 'whitesox', 'white_sox'], name: 'Chicago White Sox', sport: 'mlb' },
 }
 
 export async function POST(request: NextRequest) {
@@ -155,7 +159,8 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. Create all picks using RPC
-    const chicagoTeamKey = teamInfo.key
+    const chicagoTeamKeys = teamInfo.keys
+    const isChicagoPick = (rawKey: any) => chicagoTeamKeys.includes(String(rawKey || '').toLowerCase())
     const picks = draftOrder.map((p: any) => ({
       mock_draft_id: mockId,
       sport: teamInfo.sport,
@@ -166,8 +171,8 @@ export async function POST(request: NextRequest) {
       team_name: p.team_name,
       team_logo: p.team_logo,
       team_color: p.team_color || null,
-      is_user_pick: p.team_key === chicagoTeamKey,
-      is_chicago_team: p.team_key === chicagoTeamKey,
+      is_user_pick: isChicagoPick(p.team_key),
+      is_chicago_team: isChicagoPick(p.team_key),
     }))
 
     const { error: picksError } = await datalabAdmin.rpc('create_mock_draft_picks', {

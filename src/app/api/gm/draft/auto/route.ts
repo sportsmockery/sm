@@ -63,11 +63,22 @@ export async function POST(request: NextRequest) {
     const allPicks = mockDraft.picks || []
     let currentPick = mockDraft.current_pick
 
+    // Sorted list of real pick numbers — used to advance across gaps
+    // (e.g. NBA round 1 ends at 30, round 2 picks are 42/50/55/58).
+    const sortedPickNumbers: number[] = allPicks
+      .map((p: any) => p.pick_number)
+      .sort((a: number, b: number) => a - b)
+    const lastPickNumber = sortedPickNumbers[sortedPickNumbers.length - 1] ?? mockDraft.total_picks
+    const getNextPickNumber = (current: number): number | null => {
+      const next = sortedPickNumbers.find((pn: number) => pn > current)
+      return next ?? null
+    }
+
     log(`Total picks in draft: ${allPicks.length}, current_pick: ${currentPick}`)
 
     // Find next user pick
     const userPickNumbers = allPicks.filter((p: any) => p.is_user_pick).map((p: any) => p.pick_number)
-    const nextUserPick = userPickNumbers.find((pn: number) => pn >= currentPick) || mockDraft.total_picks + 1
+    const nextUserPick = userPickNumbers.find((pn: number) => pn >= currentPick) || (lastPickNumber + 1)
 
     log(`User pick numbers: ${userPickNumbers.join(', ')}, nextUserPick: ${nextUserPick}`)
 
@@ -173,7 +184,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Simulate picks until we reach the user's pick or end of draft
-    const maxIterations = Math.min(nextUserPick - currentPick, 50)
+    const maxIterations = Math.min(sortedPickNumbers.length, 100)
     let iterations = 0
     let picksAdvanced = 0
 
@@ -182,16 +193,40 @@ export async function POST(request: NextRequest) {
 
     log(`Starting simulation loop: maxIterations=${maxIterations}, from pick ${currentPick} to ${nextUserPick}`)
 
-    while (currentPick < nextUserPick && currentPick <= mockDraft.total_picks && iterations < maxIterations) {
+    while (currentPick < nextUserPick && iterations < maxIterations) {
       const pickData = allPicks.find((p: any) => p.pick_number === currentPick)
 
       if (!pickData) {
-        log(`ERROR: No pick data found for pick ${currentPick}`)
-        break
+        // current_pick references a slot that doesn't exist (e.g. left at 31 in NBA where
+        // picks jump from 30 to 42). Skip forward to the next real pick number.
+        const fallbackNext = getNextPickNumber(currentPick - 1) ?? getNextPickNumber(currentPick)
+        if (fallbackNext === null || fallbackNext >= nextUserPick) {
+          log(`No more picks before user pick ${nextUserPick} (current=${currentPick}), stopping`)
+          await datalabAdmin
+            .from('gm_mock_drafts')
+            .update({
+              current_pick: fallbackNext ?? currentPick,
+              status: fallbackNext === null ? 'completed' : 'in_progress',
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', mock_id)
+          if (fallbackNext !== null) currentPick = fallbackNext
+          break
+        }
+        log(`Skipping non-existent pick ${currentPick} → ${fallbackNext}`)
+        currentPick = fallbackNext
+        continue
       }
 
       if (pickData.is_user_pick) {
         log(`Reached user pick at ${currentPick}, stopping`)
+        // Make sure DB current_pick matches
+        if (mockDraft.current_pick !== currentPick) {
+          await datalabAdmin
+            .from('gm_mock_drafts')
+            .update({ current_pick: currentPick, updated_at: new Date().toISOString() })
+            .eq('id', mock_id)
+        }
         break
       }
 
@@ -236,13 +271,14 @@ export async function POST(request: NextRequest) {
         log(`No more prospects at pick ${currentPick}, advancing without selection`)
       }
 
-      // Advance pick directly in the database (bypassing problematic RPC)
-      const nextPick = currentPick + 1
-      const isNowComplete = nextPick > mockDraft.total_picks
+      // Advance to the next real pick number (handles gaps in pick_number sequence)
+      const nextPickNumber = getNextPickNumber(currentPick)
+      const isNowComplete = nextPickNumber === null
+      const newCurrentPick = nextPickNumber ?? currentPick
       const { error: advanceError } = await datalabAdmin
         .from('gm_mock_drafts')
         .update({
-          current_pick: nextPick,
+          current_pick: newCurrentPick,
           status: isNowComplete ? 'completed' : 'in_progress',
           updated_at: new Date().toISOString(),
         })
@@ -251,12 +287,14 @@ export async function POST(request: NextRequest) {
       if (advanceError) {
         log(`ERROR advancing from pick ${currentPick}: ${JSON.stringify(advanceError)}`)
       } else {
-        log(`Advanced from pick ${currentPick} to ${currentPick + 1}`)
+        log(`Advanced from pick ${currentPick} to ${newCurrentPick}${isNowComplete ? ' (complete)' : ''}`)
       }
 
-      currentPick++
       iterations++
       picksAdvanced++
+
+      if (isNowComplete) break
+      currentPick = newCurrentPick
     }
 
     log(`Local picks tracked: ${Object.keys(localPicksMap).length}`)
@@ -283,7 +321,9 @@ export async function POST(request: NextRequest) {
       }, { status: 500 })
     }
 
-    const isComplete = updatedDraft.current_pick > updatedDraft.total_picks || updatedDraft.status === 'completed'
+    // Completion: status flag set during loop OR current_pick has no successor in the
+    // pick list (so e.g. current_pick=58 in NBA with last pick=58 means done after a pick).
+    const isComplete = updatedDraft.status === 'completed' || getNextPickNumber(updatedDraft.current_pick - 1) === null
 
     log(`Final state: current_pick=${updatedDraft.current_pick}, total_picks=${updatedDraft.total_picks}, isComplete=${isComplete}`)
 

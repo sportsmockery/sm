@@ -49,8 +49,18 @@ export async function POST(request: NextRequest) {
     const prospectName = prospect_name || 'Unknown'
     const prospectPosition = position || 'Unknown'
 
-    // Check for duplicate pick — ensure this prospect hasn't already been selected
+    // Sorted real pick numbers — needed because some sports have gaps
+    // (e.g. NBA: 1-30 then 42, 50, 55, 58). We can't just do currentPick + 1.
     const allPicks = mockDraft.picks || []
+    const sortedPickNumbers: number[] = allPicks
+      .map((p: any) => p.pick_number)
+      .sort((a: number, b: number) => a - b)
+    const getNextPickNumber = (current: number): number | null => {
+      const next = sortedPickNumbers.find((pn: number) => pn > current)
+      return next ?? null
+    }
+
+    // Check for duplicate pick — ensure this prospect hasn't already been selected
     const alreadyPicked = allPicks.some((p: any) =>
       p.prospect_id && String(p.prospect_id) === String(prospect_id) &&
       p.prospect_name && p.prospect_name !== 'null' && p.prospect_name !== '' &&
@@ -75,14 +85,16 @@ export async function POST(request: NextRequest) {
       throw new Error(`Failed to update pick: ${updateError.message}`)
     }
 
-    // Advance to next pick by updating current_pick in the mock draft
-    const nextPick = actualPickNumber + 1
-    const isNowComplete = nextPick > mockDraft.total_picks
+    // Advance to next pick by updating current_pick in the mock draft.
+    // Use the next real pick number so we skip gaps (e.g. NBA 30 → 42).
+    const nextPickNumber = getNextPickNumber(actualPickNumber)
+    const isNowComplete = nextPickNumber === null
+    const newCurrentPick = nextPickNumber ?? actualPickNumber
 
     const { error: advanceError } = await datalabAdmin
       .from('gm_mock_drafts')
       .update({
-        current_pick: nextPick,
+        current_pick: newCurrentPick,
         status: isNowComplete ? 'completed' : 'in_progress',
         updated_at: new Date().toISOString(),
       })
@@ -101,7 +113,8 @@ export async function POST(request: NextRequest) {
     // RPC can return array or single object
     const updatedDraft = Array.isArray(updatedDraftData) ? updatedDraftData[0] : updatedDraftData
 
-    const isComplete = updatedDraft?.current_pick > updatedDraft?.total_picks || updatedDraft?.status === 'completed'
+    // Completion: status flag set above OR no further pick numbers exist after current_pick
+    const isComplete = updatedDraft?.status === 'completed' || isNowComplete
 
     // Build response
     const picks = (updatedDraft?.picks || []).map((p: any) => ({
