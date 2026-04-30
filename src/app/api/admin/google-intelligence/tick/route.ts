@@ -24,26 +24,34 @@ async function authorized(req: NextRequest): Promise<boolean> {
 }
 
 async function runTick(req: NextRequest): Promise<NextResponse> {
-  if (!(await authorized(req))) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  try {
+    if (!(await authorized(req))) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
 
-  const url = new URL(req.url)
-  const batchSize = Math.min(100, Math.max(1, parseInt(url.searchParams.get('batchSize') ?? '25', 10) || 25))
-  const maxBatches = Math.min(20, Math.max(1, parseInt(url.searchParams.get('maxBatches') ?? '1', 10) || 1))
+    const url = new URL(req.url)
+    const batchSize = Math.min(100, Math.max(1, parseInt(url.searchParams.get('batchSize') ?? '25', 10) || 25))
+    const maxBatches = Math.min(20, Math.max(1, parseInt(url.searchParams.get('maxBatches') ?? '1', 10) || 1))
 
-  const articleHydrator = new SmPostsArticleHydrator(supabaseAdmin)
-  const transparencyHydrator = new SmTransparencyHydrator(supabaseAdmin)
-  const worker = new GoogleRescoreWorker(supabaseAdmin, articleHydrator, transparencyHydrator)
+    const articleHydrator = new SmPostsArticleHydrator(supabaseAdmin)
+    const transparencyHydrator = new SmTransparencyHydrator(supabaseAdmin)
+    const worker = new GoogleRescoreWorker(supabaseAdmin, articleHydrator, transparencyHydrator)
 
-  let processed = 0
-  let failed = 0
-  for (let i = 0; i < maxBatches; i += 1) {
-    const result = await worker.tick(batchSize)
-    processed += result.processed
-    failed += result.failed
-    if (result.processed === 0 && result.failed === 0) break // queue empty
+    let processed = 0
+    let failed = 0
+    for (let i = 0; i < maxBatches; i += 1) {
+      const result = await worker.tick(batchSize)
+      processed += result.processed
+      failed += result.failed
+      if (result.processed === 0 && result.failed === 0) break // queue empty
+    }
+
+    return NextResponse.json({ processed, failed, batchSize, maxBatches })
+  } catch (e) {
+    console.error('[tick] unhandled error:', e)
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : String(e), stack: e instanceof Error ? e.stack : undefined },
+      { status: 500 },
+    )
   }
-
-  return NextResponse.json({ processed, failed, batchSize, maxBatches })
 }
 
 export async function GET(req: NextRequest) {
