@@ -720,6 +720,11 @@ export default function ExecDashboard() {
   const [execIq, setExecIq] = useState<any>(null)
   const [execIqLoading, setExecIqLoading] = useState(false)
   const [execIqRefreshing, setExecIqRefreshing] = useState(false)
+  const [execIqHistoryOpen, setExecIqHistoryOpen] = useState(false)
+  const [execIqItems, setExecIqItems] = useState<any[]>([])
+  const [execIqItemsLoading, setExecIqItemsLoading] = useState(false)
+  const [execIqHistoryFilter, setExecIqHistoryFilter] = useState<'all' | 'open' | 'completed'>('all')
+  const [updatingItemId, setUpdatingItemId] = useState<number | null>(null)
   // Freestar P&L state
   const [freestarRevenue, setFreestarRevenue] = useState<number | null>(null)
   const [freestarMetrics, setFreestarMetrics] = useState<FreestarMetrics | null>(null)
@@ -856,6 +861,47 @@ export default function ExecDashboard() {
     return () => { cancelled = true }
   }, [tab])
 
+  const loadExecIqItems = useCallback(async () => {
+    setExecIqItemsLoading(true)
+    try {
+      const status = execIqHistoryFilter === 'all' ? '' : `?status=${execIqHistoryFilter}`
+      const r = await fetch(`/api/admin/exec-iq/items${status}`)
+      if (r.ok) {
+        const json = await r.json()
+        setExecIqItems(json.items || [])
+      }
+    } catch {}
+    finally { setExecIqItemsLoading(false) }
+  }, [execIqHistoryFilter])
+
+  // Load history when expanded or filter changes
+  useEffect(() => {
+    if (!execIqHistoryOpen) return
+    loadExecIqItems()
+  }, [execIqHistoryOpen, loadExecIqItems])
+
+  const setActionStatus = useCallback(async (id: number, status: 'open' | 'completed') => {
+    setUpdatingItemId(id)
+    try {
+      const r = await fetch(`/api/admin/exec-iq/items/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      })
+      if (!r.ok) {
+        const err = await r.json().catch(() => ({}))
+        alert(err.error || `Update failed (${r.status})`)
+        return
+      }
+      // Optimistic local update
+      setExecIqItems(prev => prev.map(it => it.id === id ? { ...it, status, completed_at: status === 'completed' ? new Date().toISOString() : null } : it))
+    } catch (e: any) {
+      alert(e?.message || 'Update failed')
+    } finally {
+      setUpdatingItemId(null)
+    }
+  }, [])
+
   const refreshExecIq = useCallback(async () => {
     setExecIqRefreshing(true)
     try {
@@ -875,12 +921,13 @@ export default function ExecDashboard() {
         const json = await fresh.json()
         setExecIq(json.row ?? null)
       }
+      if (execIqHistoryOpen) await loadExecIqItems()
     } catch (e: any) {
       alert(e?.message || 'Refresh failed')
     } finally {
       setExecIqRefreshing(false)
     }
-  }, [range])
+  }, [range, execIqHistoryOpen, loadExecIqItems])
 
   // Fetch Google Search Console data when SEO tab is active
   useEffect(() => {
@@ -1156,15 +1203,21 @@ export default function ExecDashboard() {
             <Section
               title="ExecIQ"
               badge={
-                execIq?.generated_at ? (
-                  <span className="text-xs tabular-nums" style={{ color: 'var(--sm-text-dim)' }}>
-                    Generated {new Date(execIq.generated_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })} · {execIq.model}
+                <div className="flex items-center gap-2">
+                  <span className="relative inline-flex" style={{ width: 10, height: 10 }} title="Live">
+                    <span className="absolute inline-flex w-full h-full rounded-full opacity-75 animate-ping" style={{ backgroundColor: '#10b981' }} />
+                    <span className="relative inline-flex rounded-full" style={{ width: 10, height: 10, backgroundColor: '#10b981' }} />
                   </span>
-                ) : execIqLoading ? (
-                  <span className="text-xs" style={{ color: 'var(--sm-text-dim)' }}>Loading…</span>
-                ) : (
-                  <span className="text-xs" style={{ color: 'var(--sm-text-dim)' }}>No insights yet</span>
-                )
+                  {execIq?.generated_at ? (
+                    <span className="text-xs tabular-nums" style={{ color: 'var(--sm-text-dim)' }}>
+                      Generated {new Date(execIq.generated_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })} · {execIq.model}
+                    </span>
+                  ) : execIqLoading ? (
+                    <span className="text-xs" style={{ color: 'var(--sm-text-dim)' }}>Loading…</span>
+                  ) : (
+                    <span className="text-xs" style={{ color: 'var(--sm-text-dim)' }}>No insights yet</span>
+                  )}
+                </div>
               }
               actions={
                 <button
@@ -1203,8 +1256,8 @@ export default function ExecDashboard() {
                         <p className="text-sm font-bold mb-1" style={{ color: 'var(--sm-text)' }}>{ins.title}</p>
                         <p className="text-xs mb-2" style={{ color: 'var(--sm-text-muted)' }}>{ins.detail}</p>
                         <div className="rounded p-2" style={{ background: 'var(--sm-surface)' }}>
-                          <p className="text-[10px] font-bold uppercase tracking-wide mb-0.5" style={{ color: 'var(--sm-text-dim)' }}>Action</p>
-                          <p className="text-xs font-medium" style={{ color: 'var(--sm-text)' }}>{ins.action}</p>
+                          <p className="text-[10px] font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--sm-text-dim)' }}>Action</p>
+                          <p className="text-xs font-medium whitespace-pre-line leading-relaxed" style={{ color: 'var(--sm-text)' }}>{ins.action}</p>
                         </div>
                         {ins.metric && (
                           <p className="text-[10px] font-mono mt-2" style={{ color: 'var(--sm-text-dim)' }}>{ins.metric}</p>
@@ -1219,6 +1272,120 @@ export default function ExecDashboard() {
                 </p>
               ) : null}
             </Section>
+
+            {/* ExecIQ History (collapsed by default) */}
+            <div className="rounded-lg border" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
+              <button
+                onClick={() => setExecIqHistoryOpen(o => !o)}
+                className="w-full flex items-center justify-between px-4 py-3 transition-colors"
+                style={{ background: execIqHistoryOpen ? 'var(--sm-surface)' : 'transparent' }}
+              >
+                <div className="flex items-center gap-2">
+                  <svg
+                    width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                    className="transition-transform"
+                    style={{ color: 'var(--sm-text-dim)', transform: execIqHistoryOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}
+                  >
+                    <path d="M9 18l6-6-6-6" />
+                  </svg>
+                  <span className="text-sm font-semibold" style={{ color: 'var(--sm-text)' }}>ExecIQ History</span>
+                  <span className="text-xs" style={{ color: 'var(--sm-text-dim)' }}>
+                    — every action item ever generated, completed or open
+                  </span>
+                </div>
+              </button>
+              {execIqHistoryOpen && (
+                <div className="border-t px-4 py-3" style={{ borderColor: 'var(--sm-border)' }}>
+                  <div className="flex items-center gap-2 mb-3">
+                    {(['all', 'open', 'completed'] as const).map(f => (
+                      <button
+                        key={f}
+                        onClick={() => setExecIqHistoryFilter(f)}
+                        className="text-xs font-bold px-2.5 py-1 rounded border transition-colors"
+                        style={{
+                          background: execIqHistoryFilter === f ? '#00D4FF' : 'var(--sm-surface)',
+                          color: execIqHistoryFilter === f ? '#fff' : 'var(--sm-text-muted)',
+                          borderColor: execIqHistoryFilter === f ? '#00D4FF' : 'var(--sm-border)',
+                        }}
+                      >
+                        {f === 'all' ? 'All' : f === 'open' ? 'Open' : 'Completed'}
+                      </button>
+                    ))}
+                    <span className="text-xs ml-auto" style={{ color: 'var(--sm-text-dim)' }}>
+                      {execIqItemsLoading ? 'Loading…' : `${execIqItems.length} item${execIqItems.length === 1 ? '' : 's'}`}
+                    </span>
+                  </div>
+                  {execIqItems.length === 0 && !execIqItemsLoading ? (
+                    <p className="text-sm py-4 text-center" style={{ color: 'var(--sm-text-dim)' }}>No action items yet.</p>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full min-w-[800px]">
+                        <thead>
+                          <tr className="border-b" style={{ borderColor: 'var(--sm-border)' }}>
+                            {['Date', 'Severity', 'Category', 'Title', 'Status', ''].map(h => (
+                              <th key={h} className="px-2 py-2 text-xs font-semibold uppercase tracking-wide text-left" style={{ color: 'var(--sm-text-dim)' }}>{h}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {execIqItems.map(it => {
+                            const sevColor = it.severity === 'win' ? '#10b981' : it.severity === 'risk' ? '#bc0000' : '#00D4FF'
+                            const sevBg = it.severity === 'win' ? 'rgba(16,185,129,0.10)' : it.severity === 'risk' ? 'rgba(188,0,0,0.10)' : 'rgba(0,212,255,0.10)'
+                            const isCompleted = it.status === 'completed'
+                            return (
+                              <tr key={it.id} className="border-b" style={{ borderColor: 'var(--sm-border)', opacity: isCompleted ? 0.55 : 1 }}>
+                                <td className="px-2 py-2 text-xs tabular-nums" style={{ color: 'var(--sm-text-muted)' }}>
+                                  {new Date(it.generated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                </td>
+                                <td className="px-2 py-2">
+                                  <span className="text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded" style={{ background: sevBg, color: sevColor }}>{it.severity}</span>
+                                </td>
+                                <td className="px-2 py-2 text-[11px] uppercase tracking-wide" style={{ color: 'var(--sm-text-dim)' }}>{it.category}</td>
+                                <td className="px-2 py-2 text-sm" style={{ color: 'var(--sm-text)', textDecoration: isCompleted ? 'line-through' : 'none' }}>
+                                  {it.title}
+                                  {it.detail && <p className="text-xs mt-0.5" style={{ color: 'var(--sm-text-muted)' }}>{it.detail}</p>}
+                                </td>
+                                <td className="px-2 py-2 text-xs">
+                                  {isCompleted ? (
+                                    <span style={{ color: '#10b981' }}>
+                                      Completed{it.completed_at ? ` · ${new Date(it.completed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''}
+                                      {it.completed_by ? <span className="block text-[10px]" style={{ color: 'var(--sm-text-dim)' }}>by {it.completed_by}</span> : null}
+                                    </span>
+                                  ) : (
+                                    <span style={{ color: 'var(--sm-text-muted)' }}>Open</span>
+                                  )}
+                                </td>
+                                <td className="px-2 py-2 text-right">
+                                  {isCompleted ? (
+                                    <button
+                                      onClick={() => setActionStatus(it.id, 'open')}
+                                      disabled={updatingItemId === it.id}
+                                      className="text-[10px] font-bold px-2 py-1 rounded border transition-colors disabled:opacity-50"
+                                      style={{ borderColor: 'var(--sm-border)', color: 'var(--sm-text-muted)', background: 'var(--sm-surface)' }}
+                                    >
+                                      {updatingItemId === it.id ? '…' : 'Reopen'}
+                                    </button>
+                                  ) : (
+                                    <button
+                                      onClick={() => setActionStatus(it.id, 'completed')}
+                                      disabled={updatingItemId === it.id}
+                                      className="text-[10px] font-bold px-2 py-1 rounded transition-colors disabled:opacity-50"
+                                      style={{ background: '#10b981', color: '#fff' }}
+                                    >
+                                      {updatingItemId === it.id ? '…' : 'Mark Complete'}
+                                    </button>
+                                  )}
+                                </td>
+                              </tr>
+                            )
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
 
             {/* Traffic trends */}
             <Section title="Traffic Trends">
