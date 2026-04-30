@@ -7,7 +7,7 @@ interface UseGoogleTabDataResult {
   data: GoogleTabPayload | null
   loading: boolean
   error: string | null
-  source: 'db' | 'mock' | 'mock-fallback' | null
+  source: 'db' | 'mock' | 'mock-fallback' | 'mock-articles+db-transparency' | null
   refresh: () => void
   // Transparency surfaces re-exported for ergonomic access from panels that
   // only need the asset slice (so they don't have to defensively read .data?).

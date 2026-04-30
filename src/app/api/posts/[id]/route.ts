@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { GoogleIngestionService } from '@/lib/google/google-ingestion-service'
 
 export async function POST(
   request: NextRequest,
@@ -137,6 +138,16 @@ export async function POST(
         }))
         await supabaseAdmin.from('sm_post_tags').insert(tagRows)
       }
+    }
+
+    // Enqueue a Google-intelligence rescore on update / republish. Fire-and-
+    // forget — the worker idempotency-checks content + author hashes so this
+    // is safe to call on every update, even if nothing meaningful changed.
+    if (status === 'published') {
+      const ingest = new GoogleIngestionService(supabaseAdmin)
+      ingest.onArticleUpdated(String(id), 'editor').catch((e) => {
+        console.error('[google-intelligence] enqueue on update failed:', e)
+      })
     }
 
     // Auto-generate TOC via Scout when publishing (fire-and-forget)

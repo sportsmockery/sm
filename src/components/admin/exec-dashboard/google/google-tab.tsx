@@ -4,7 +4,7 @@
 // data loading (via useGoogleTabData) and arranges every section in the order
 // specified in the system spec. Existing dashboard tabs are not touched.
 
-import React from 'react'
+import React, { useState } from 'react'
 import { useGoogleTabData } from '@/hooks/use-google-tab-data'
 import { GoogleOverviewCards } from './google-overview-cards'
 import { GoogleScoreDistribution } from './google-score-distribution'
@@ -18,6 +18,37 @@ import { GoogleTransparencyAssetsPanel } from './google-transparency-assets-pane
 
 export function GoogleTab({ active }: { active: boolean }) {
   const { data, loading, error, source, refresh } = useGoogleTabData(active)
+  const [busy, setBusy] = useState<null | 'backfill' | 'tick'>(null)
+  const [opMessage, setOpMessage] = useState<string | null>(null)
+
+  const runBackfill = async () => {
+    setBusy('backfill'); setOpMessage(null)
+    try {
+      const res = await fetch('/api/admin/google-intelligence/backfill?limit=500', { method: 'POST' })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? `HTTP ${res.status}`)
+      setOpMessage(`Enqueued ${json.enqueued} (deduped ${json.deduplicated}, skipped ${json.skipped}). Now run the worker.`)
+    } catch (e) {
+      setOpMessage(`Backfill failed: ${e instanceof Error ? e.message : String(e)}`)
+    } finally {
+      setBusy(null)
+    }
+  }
+
+  const runTick = async () => {
+    setBusy('tick'); setOpMessage(null)
+    try {
+      const res = await fetch('/api/admin/google-intelligence/tick?maxBatches=8&batchSize=25', { method: 'POST' })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? `HTTP ${res.status}`)
+      setOpMessage(`Worker processed ${json.processed} (failed ${json.failed}). Refresh to see updated scores.`)
+      refresh()
+    } catch (e) {
+      setOpMessage(`Tick failed: ${e instanceof Error ? e.message : String(e)}`)
+    } finally {
+      setBusy(null)
+    }
+  }
 
   if (!active) return null
 
@@ -47,8 +78,29 @@ export function GoogleTab({ active }: { active: boolean }) {
   return (
     <div className="flex flex-col gap-4">
       {source !== 'db' && (
-        <div className="rounded-md border px-3 py-2 text-[12px]" style={{ background: 'rgba(214,176,94,0.08)', borderColor: 'rgba(214,176,94,0.4)', color: '#D6B05E' }}>
-          Showing {source === 'mock-fallback' ? 'mock fallback (DB unreachable)' : 'mock data'} — apply migration <code>20260428_google_intelligence.sql</code> and run the rescore worker to populate live scores.
+        <div className="rounded-md border px-3 py-3 text-[12px] flex flex-col gap-2" style={{ background: 'rgba(214,176,94,0.08)', borderColor: 'rgba(214,176,94,0.4)', color: '#D6B05E' }}>
+          <div>
+            Showing {source === 'mock-fallback' ? 'mock fallback (DB unreachable)' : source === 'mock-articles+db-transparency' ? 'mock article scores (transparency assets are real)' : 'mock data'} — articles haven&apos;t been scored yet. Click <strong>Run backfill</strong> to enqueue every published post, then <strong>Run worker</strong> to score the queue. The cron will keep things fresh automatically every 5 minutes after that.
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              onClick={runBackfill}
+              disabled={busy !== null}
+              className="px-3 py-1.5 rounded text-[11px] font-bold uppercase tracking-wide disabled:opacity-40"
+              style={{ background: '#BC0000', color: '#FAFAFB' }}
+            >
+              {busy === 'backfill' ? 'Backfilling…' : 'Run backfill'}
+            </button>
+            <button
+              onClick={runTick}
+              disabled={busy !== null}
+              className="px-3 py-1.5 rounded text-[11px] font-bold uppercase tracking-wide disabled:opacity-40"
+              style={{ background: '#00D4FF', color: '#0B0F14' }}
+            >
+              {busy === 'tick' ? 'Running…' : 'Run worker'}
+            </button>
+            {opMessage && <span className="text-[11px]" style={{ color: '#FAFAFB' }}>{opMessage}</span>}
+          </div>
         </div>
       )}
 
