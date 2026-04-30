@@ -185,6 +185,31 @@ function AnswerCards({ answers }: { answers: Array<{ q: string; a: string; actio
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// useSortedRows — small sort hook for inline tables that don't use SortableTable
+// ═══════════════════════════════════════════════════════════════════════════════
+function useSortedRows<T extends Record<string, any>>(rows: T[], initialKey: keyof T | null = null, initialDir: 'asc' | 'desc' = 'desc') {
+  const [sortKey, setSortKey] = useState<keyof T | null>(initialKey)
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>(initialDir)
+  const toggle = (key: keyof T) => {
+    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    else { setSortKey(key); setSortDir('desc') }
+  }
+  const sorted = useMemo(() => {
+    if (!sortKey) return rows
+    return [...rows].sort((a, b) => {
+      const av = a[sortKey], bv = b[sortKey]
+      const aNum = typeof av === 'number'
+      const bNum = typeof bv === 'number'
+      let cmp: number
+      if (aNum && bNum) cmp = (av as number) - (bv as number)
+      else cmp = String(av ?? '').localeCompare(String(bv ?? ''), undefined, { numeric: true })
+      return sortDir === 'asc' ? cmp : -cmp
+    })
+  }, [rows, sortKey, sortDir])
+  return { sorted, sortKey, sortDir, toggle }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // SORTABLE TABLE with search + pagination + row click
 // ═══════════════════════════════════════════════════════════════════════════════
 function SortableTable({ columns, data, onRowClick, pageSize = 25 }: {
@@ -301,6 +326,210 @@ function Section({ title, badge, children, actions }: { title: string; badge?: R
       </div>
       <div className="p-4">{children}</div>
     </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// WRITER PAYMENTS TABLE — sortable inline table on Payments tab
+// ═══════════════════════════════════════════════════════════════════════════════
+function WriterPaymentsTable({
+  payments: rawPayments,
+  payBreakdownOpen,
+  setPayBreakdownOpen,
+}: {
+  payments: any[]
+  payBreakdownOpen: string | null
+  setPayBreakdownOpen: (v: string | null) => void
+}) {
+  const cols: Array<{ key: string; label: string; sortable?: boolean }> = [
+    { key: 'writer_name',    label: 'Writer' },
+    { key: 'total_posts',    label: 'Posts' },
+    { key: 'total_views',    label: 'Views' },
+    { key: 'formula_name',   label: 'Formula' },
+    { key: 'calculated_pay', label: 'Calculated Pay' },
+    { key: 'status',         label: 'Status' },
+    { key: 'actions',        label: 'Actions', sortable: false },
+  ]
+  const { sorted, sortKey, sortDir, toggle } = useSortedRows<any>(rawPayments, 'calculated_pay', 'desc')
+
+  if (rawPayments.length === 0) {
+    return <p className="text-sm py-4 text-center" style={{ color: 'var(--sm-text-dim)' }}>No payment data for this period. Run the sync cron to populate.</p>
+  }
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[800px]">
+        <thead>
+          <tr className="border-b" style={{ borderColor: 'var(--sm-border)' }}>
+            {cols.map(c => {
+              const isSortable = c.sortable !== false
+              const isActive = sortKey === c.key
+              return (
+                <th
+                  key={c.key}
+                  onClick={() => isSortable && toggle(c.key)}
+                  className={`px-3 py-2.5 text-sm font-semibold uppercase tracking-wide text-left whitespace-nowrap select-none ${isSortable ? 'cursor-pointer' : ''}`}
+                  style={{ color: isActive ? C.blue : 'var(--sm-text-dim)' }}
+                >
+                  {c.label}
+                  {isActive && <span className="ml-1">{sortDir === 'asc' ? '▲' : '▼'}</span>}
+                </th>
+              )
+            })}
+          </tr>
+        </thead>
+        <tbody>
+          {sorted.map((w: any) => {
+            const status = (w.status || 'pending').charAt(0).toUpperCase() + (w.status || 'pending').slice(1)
+            return (
+              <tr key={w.writer_name} className="border-b transition-colors" style={{ borderColor: 'var(--sm-border)' }}
+                onMouseEnter={e => (e.currentTarget.style.background = 'var(--sm-card-hover)')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                <td className="px-3 py-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}>
+                      {w.writer_name.split(' ').map((n: string) => n[0]).join('')}
+                    </div>
+                    <span className="text-sm font-medium" style={{ color: 'var(--sm-text)' }}>{w.writer_name}</span>
+                  </div>
+                </td>
+                <td className="px-3 py-3 text-sm tabular-nums" style={{ color: 'var(--sm-text-muted)' }}>{w.total_posts}</td>
+                <td className="px-3 py-3 text-sm font-bold tabular-nums" style={{ color: C.blue }}>{(w.total_views || 0).toLocaleString()}</td>
+                <td className="px-3 py-3 text-xs font-mono" style={{ color: 'var(--sm-text-dim)' }}>{w.formula_name || '—'}</td>
+                <td className="px-3 py-3">
+                  <div className="relative inline-block">
+                    <button
+                      onMouseEnter={() => setPayBreakdownOpen(w.writer_name)}
+                      onMouseLeave={() => setPayBreakdownOpen(null)}
+                      onClick={() => setPayBreakdownOpen(payBreakdownOpen === w.writer_name ? null : w.writer_name)}
+                      className="text-sm font-bold tabular-nums cursor-pointer underline decoration-dotted underline-offset-2"
+                      style={{ color: '#00D4FF' }}
+                    >
+                      ${(w.calculated_pay || 0).toFixed(2)}
+                    </button>
+                    {payBreakdownOpen === w.writer_name && (
+                      <div
+                        className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 rounded-lg border shadow-xl"
+                        style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}
+                      >
+                        <div className="px-3 py-2 border-b" style={{ borderColor: 'var(--sm-border)' }}>
+                          <p className="text-sm font-bold" style={{ color: 'var(--sm-text)' }}>{w.writer_name}</p>
+                          <p className="text-xs" style={{ color: 'var(--sm-text-dim)' }}>{w.period_start} — {w.period_end}</p>
+                        </div>
+                        <div className="px-3 py-2 space-y-1.5">
+                          <div className="flex justify-between text-xs">
+                            <span style={{ color: 'var(--sm-text-muted)' }}>Posts</span>
+                            <span className="font-bold tabular-nums" style={{ color: 'var(--sm-text)' }}>{w.total_posts}</span>
+                          </div>
+                          <div className="flex justify-between text-xs">
+                            <span style={{ color: 'var(--sm-text-muted)' }}>Views</span>
+                            <span className="font-bold tabular-nums" style={{ color: 'var(--sm-text)' }}>{(w.total_views || 0).toLocaleString()}</span>
+                          </div>
+                          {w.formula_name && (
+                            <div className="pt-1 border-t" style={{ borderColor: 'var(--sm-border)' }}>
+                              <p className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--sm-text-dim)' }}>Formula</p>
+                              <p className="text-xs font-mono p-1.5 rounded" style={{ background: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}>
+                                {w.formula_name}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                        <div className="px-3 py-2 border-t flex justify-between items-center" style={{ borderColor: 'var(--sm-border)', background: 'rgba(5,150,105,0.06)' }}>
+                          <span className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--sm-text-dim)' }}>Total Pay</span>
+                          <span className="text-base font-extrabold tabular-nums" style={{ color: '#00D4FF' }}>${(w.calculated_pay || 0).toFixed(2)}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </td>
+                <td className="px-3 py-3">
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{
+                    background: status === 'Paid' ? 'rgba(16,185,129,0.12)' : status === 'Approved' ? 'rgba(59,130,246,0.12)' : 'rgba(245,158,11,0.12)',
+                    color: status === 'Paid' ? C.green : status === 'Approved' ? C.blue : C.amber,
+                  }}>{status}</span>
+                </td>
+                <td className="px-3 py-3">
+                  {status === 'Pending' && (
+                    <button className="text-xs font-bold px-2.5 py-1 rounded transition-colors" style={{ background: 'var(--sm-red)', color: '#fff' }}>
+                      Approve
+                    </button>
+                  )}
+                  {status === 'Approved' && (
+                    <div className="flex items-center gap-1.5">
+                      <button className="text-xs font-bold px-2.5 py-1 rounded transition-colors" style={{ background: '#00D4FF', color: '#fff' }}>
+                        Mark Paid
+                      </button>
+                      <button className="text-xs font-bold px-2.5 py-1 rounded border transition-colors" style={{ borderColor: 'var(--sm-border)', color: 'var(--sm-text-muted)', background: 'var(--sm-surface)' }}>
+                        Revert
+                      </button>
+                    </div>
+                  )}
+                  {status === 'Paid' && (
+                    <span className="text-xs font-bold px-2.5 py-1 rounded" style={{ background: 'var(--sm-surface)', color: 'var(--sm-text-dim)' }}>
+                      Completed
+                    </span>
+                  )}
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PAYMENT HISTORY DETAIL TABLE — sortable per-month writer breakdown
+// ═══════════════════════════════════════════════════════════════════════════════
+function PaymentHistoryDetailTable({ rows }: { rows: Array<{ name: string; posts: number; views: number; formula: string; calcPay: number; status: string }> }) {
+  const cols: Array<{ key: 'name' | 'posts' | 'views' | 'formula' | 'calcPay' | 'status'; label: string }> = [
+    { key: 'name',    label: 'Writer' },
+    { key: 'posts',   label: 'Posts' },
+    { key: 'views',   label: 'Views' },
+    { key: 'formula', label: 'Formula' },
+    { key: 'calcPay', label: 'Calculated Pay' },
+    { key: 'status',  label: 'Status' },
+  ]
+  const { sorted, sortKey, sortDir, toggle } = useSortedRows(rows, 'calcPay', 'desc')
+
+  return (
+    <table className="w-full min-w-[600px]">
+      <thead>
+        <tr className="border-b" style={{ borderColor: 'var(--sm-border)' }}>
+          {cols.map(c => {
+            const isActive = sortKey === c.key
+            return (
+              <th
+                key={c.key}
+                onClick={() => toggle(c.key)}
+                className="px-2 py-2 text-xs font-semibold uppercase tracking-wide text-left cursor-pointer select-none"
+                style={{ color: isActive ? C.blue : 'var(--sm-text-dim)' }}
+              >
+                {c.label}
+                {isActive && <span className="ml-1">{sortDir === 'asc' ? '▲' : '▼'}</span>}
+              </th>
+            )
+          })}
+        </tr>
+      </thead>
+      <tbody>
+        {sorted.map(w => (
+          <tr key={w.name} className="border-b last:border-b-0" style={{ borderColor: 'var(--sm-border)' }}>
+            <td className="px-2 py-2 text-sm font-medium" style={{ color: 'var(--sm-text)' }}>{w.name}</td>
+            <td className="px-2 py-2 text-sm tabular-nums" style={{ color: 'var(--sm-text-muted)' }}>{w.posts}</td>
+            <td className="px-2 py-2 text-sm tabular-nums" style={{ color: 'var(--sm-text-muted)' }}>{w.views.toLocaleString()}</td>
+            <td className="px-2 py-2 text-[10px] font-mono" style={{ color: 'var(--sm-text-dim)' }}>{w.formula}</td>
+            <td className="px-2 py-2 text-sm font-bold tabular-nums" style={{ color: '#00D4FF' }}>${w.calcPay.toFixed(2)}</td>
+            <td className="px-2 py-2">
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(16,185,129,0.12)', color: '#00D4FF' }}>
+                {w.status}
+              </span>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   )
 }
 
@@ -1181,135 +1410,11 @@ export default function ExecDashboard() {
 
             {/* 3. Writer Payment Table */}
             <Section title="Writer Payments">
-              {(() => {
-                const payments: any[] = data.paymentSync?.payments || []
-
-                if (payments.length === 0) {
-                  return <p className="text-sm py-4 text-center" style={{ color: 'var(--sm-text-dim)' }}>No payment data for this period. Run the sync cron to populate.</p>
-                }
-
-                const cols = [
-                  { key: 'name', label: 'Writer' },
-                  { key: 'posts', label: 'Posts' },
-                  { key: 'views', label: 'Views' },
-                  { key: 'formula', label: 'Formula' },
-                  { key: 'calcPay', label: 'Calculated Pay' },
-                  { key: 'status', label: 'Status' },
-                  { key: 'actions', label: 'Actions' },
-                ]
-
-                return (
-                  <div className="overflow-x-auto">
-                    <table className="w-full min-w-[800px]">
-                      <thead>
-                        <tr className="border-b" style={{ borderColor: 'var(--sm-border)' }}>
-                          {cols.map(c => (
-                            <th key={c.key} className="px-3 py-2.5 text-sm font-semibold uppercase tracking-wide text-left whitespace-nowrap" style={{ color: 'var(--sm-text-dim)' }}>
-                              {c.label}
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {payments.map((w: any) => {
-                          const status = (w.status || 'pending').charAt(0).toUpperCase() + (w.status || 'pending').slice(1)
-                          return (
-                            <tr key={w.writer_name} className="border-b transition-colors" style={{ borderColor: 'var(--sm-border)' }}
-                              onMouseEnter={e => (e.currentTarget.style.background = 'var(--sm-card-hover)')}
-                              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-                              <td className="px-3 py-3">
-                                <div className="flex items-center gap-2">
-                                  <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}>
-                                    {w.writer_name.split(' ').map((n: string) => n[0]).join('')}
-                                  </div>
-                                  <span className="text-sm font-medium" style={{ color: 'var(--sm-text)' }}>{w.writer_name}</span>
-                                </div>
-                              </td>
-                              <td className="px-3 py-3 text-sm tabular-nums" style={{ color: 'var(--sm-text-muted)' }}>{w.total_posts}</td>
-                              <td className="px-3 py-3 text-sm font-bold tabular-nums" style={{ color: C.blue }}>{(w.total_views || 0).toLocaleString()}</td>
-                              <td className="px-3 py-3 text-xs font-mono" style={{ color: 'var(--sm-text-dim)' }}>{w.formula_name || '—'}</td>
-                              <td className="px-3 py-3">
-                                <div className="relative inline-block">
-                                  <button
-                                    onMouseEnter={() => setPayBreakdownOpen(w.writer_name)}
-                                    onMouseLeave={() => setPayBreakdownOpen(null)}
-                                    onClick={() => setPayBreakdownOpen(payBreakdownOpen === w.writer_name ? null : w.writer_name)}
-                                    className="text-sm font-bold tabular-nums cursor-pointer underline decoration-dotted underline-offset-2"
-                                    style={{ color: '#00D4FF' }}
-                                  >
-                                    ${(w.calculated_pay || 0).toFixed(2)}
-                                  </button>
-                                  {payBreakdownOpen === w.writer_name && (
-                                    <div
-                                      className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 rounded-lg border shadow-xl"
-                                      style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}
-                                    >
-                                      <div className="px-3 py-2 border-b" style={{ borderColor: 'var(--sm-border)' }}>
-                                        <p className="text-sm font-bold" style={{ color: 'var(--sm-text)' }}>{w.writer_name}</p>
-                                        <p className="text-xs" style={{ color: 'var(--sm-text-dim)' }}>{w.period_start} — {w.period_end}</p>
-                                      </div>
-                                      <div className="px-3 py-2 space-y-1.5">
-                                        <div className="flex justify-between text-xs">
-                                          <span style={{ color: 'var(--sm-text-muted)' }}>Posts</span>
-                                          <span className="font-bold tabular-nums" style={{ color: 'var(--sm-text)' }}>{w.total_posts}</span>
-                                        </div>
-                                        <div className="flex justify-between text-xs">
-                                          <span style={{ color: 'var(--sm-text-muted)' }}>Views</span>
-                                          <span className="font-bold tabular-nums" style={{ color: 'var(--sm-text)' }}>{(w.total_views || 0).toLocaleString()}</span>
-                                        </div>
-                                        {w.formula_name && (
-                                          <div className="pt-1 border-t" style={{ borderColor: 'var(--sm-border)' }}>
-                                            <p className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--sm-text-dim)' }}>Formula</p>
-                                            <p className="text-xs font-mono p-1.5 rounded" style={{ background: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}>
-                                              {w.formula_name}
-                                            </p>
-                                          </div>
-                                        )}
-                                      </div>
-                                      <div className="px-3 py-2 border-t flex justify-between items-center" style={{ borderColor: 'var(--sm-border)', background: 'rgba(5,150,105,0.06)' }}>
-                                        <span className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--sm-text-dim)' }}>Total Pay</span>
-                                        <span className="text-base font-extrabold tabular-nums" style={{ color: '#00D4FF' }}>${(w.calculated_pay || 0).toFixed(2)}</span>
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-                              </td>
-                              <td className="px-3 py-3">
-                                <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{
-                                  background: status === 'Paid' ? 'rgba(16,185,129,0.12)' : status === 'Approved' ? 'rgba(59,130,246,0.12)' : 'rgba(245,158,11,0.12)',
-                                  color: status === 'Paid' ? C.green : status === 'Approved' ? C.blue : C.amber,
-                                }}>{status}</span>
-                              </td>
-                              <td className="px-3 py-3">
-                                {status === 'Pending' && (
-                                  <button className="text-xs font-bold px-2.5 py-1 rounded transition-colors" style={{ background: 'var(--sm-red)', color: '#fff' }}>
-                                    Approve
-                                  </button>
-                                )}
-                                {status === 'Approved' && (
-                                  <div className="flex items-center gap-1.5">
-                                    <button className="text-xs font-bold px-2.5 py-1 rounded transition-colors" style={{ background: '#00D4FF', color: '#fff' }}>
-                                      Mark Paid
-                                    </button>
-                                    <button className="text-xs font-bold px-2.5 py-1 rounded border transition-colors" style={{ borderColor: 'var(--sm-border)', color: 'var(--sm-text-muted)', background: 'var(--sm-surface)' }}>
-                                      Revert
-                                    </button>
-                                  </div>
-                                )}
-                                {status === 'Paid' && (
-                                  <span className="text-xs font-bold px-2.5 py-1 rounded" style={{ background: 'var(--sm-surface)', color: 'var(--sm-text-dim)' }}>
-                                    Completed
-                                  </span>
-                                )}
-                              </td>
-                            </tr>
-                          )
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                )
-              })()}
+              <WriterPaymentsTable
+                payments={data.paymentSync?.payments || []}
+                payBreakdownOpen={payBreakdownOpen}
+                setPayBreakdownOpen={setPayBreakdownOpen}
+              />
             </Section>
 
             {/* 4. Writer Formulas Panel */}
@@ -1558,31 +1663,7 @@ export default function ExecDashboard() {
                             <div className="border-t px-4 py-3" style={{ borderColor: 'var(--sm-border)' }}>
                               {m.writers.length > 0 ? (
                                 <div className="overflow-x-auto">
-                                  <table className="w-full min-w-[600px]">
-                                    <thead>
-                                      <tr className="border-b" style={{ borderColor: 'var(--sm-border)' }}>
-                                        {['Writer', 'Posts', 'Views', 'Formula', 'Calculated Pay', 'Status'].map(h => (
-                                          <th key={h} className="px-2 py-2 text-xs font-semibold uppercase tracking-wide text-left" style={{ color: 'var(--sm-text-dim)' }}>{h}</th>
-                                        ))}
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-                                      {m.writers.map(w => (
-                                        <tr key={w.name} className="border-b last:border-b-0" style={{ borderColor: 'var(--sm-border)' }}>
-                                          <td className="px-2 py-2 text-sm font-medium" style={{ color: 'var(--sm-text)' }}>{w.name}</td>
-                                          <td className="px-2 py-2 text-sm tabular-nums" style={{ color: 'var(--sm-text-muted)' }}>{w.posts}</td>
-                                          <td className="px-2 py-2 text-sm tabular-nums" style={{ color: 'var(--sm-text-muted)' }}>{w.views.toLocaleString()}</td>
-                                          <td className="px-2 py-2 text-[10px] font-mono" style={{ color: 'var(--sm-text-dim)' }}>{w.formula}</td>
-                                          <td className="px-2 py-2 text-sm font-bold tabular-nums" style={{ color: '#00D4FF' }}>${w.calcPay.toFixed(2)}</td>
-                                          <td className="px-2 py-2">
-                                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(16,185,129,0.12)', color: '#00D4FF' }}>
-                                              {w.status}
-                                            </span>
-                                          </td>
-                                        </tr>
-                                      ))}
-                                    </tbody>
-                                  </table>
+                                  <PaymentHistoryDetailTable rows={m.writers} />
                                 </div>
                               ) : (
                                 <p className="text-sm py-2" style={{ color: 'var(--sm-text-dim)' }}>Detailed breakdown not available for this period.</p>
