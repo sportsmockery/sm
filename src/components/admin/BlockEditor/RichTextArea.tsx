@@ -249,7 +249,6 @@ export function RichTextArea({ value, onChange, placeholder = 'Write here...', m
           lineHeight: 1.6,
         }}
         data-placeholder={placeholder}
-        dangerouslySetInnerHTML={{ __html: value }}
       />
     </div>
   );

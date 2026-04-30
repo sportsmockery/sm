@@ -43,6 +43,7 @@ const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>(functi
   const isTikTokUrl = (url: string) => /^https?:\/\/(www\.)?(tiktok\.com\/@[^/]+\/video\/|vm\.tiktok\.com\/)/.test(url)
 
   const autoEmbedUrlRef = useRef<((url: string) => boolean) | null>(null)
+  const isInternalChange = useRef(false)
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -77,6 +78,7 @@ const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>(functi
     ],
     content,
     onUpdate: ({ editor }) => {
+      isInternalChange.current = true
       onChange(editor.getHTML())
       onWordCountChange?.(editor.storage.characterCount.words())
     },
@@ -144,8 +146,13 @@ const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>(functi
   }), [editor])
 
   useEffect(() => {
-    if (editor && content !== editor.getHTML()) {
-      editor.commands.setContent(content)
+    if (!editor) return
+    if (isInternalChange.current) {
+      isInternalChange.current = false
+      return
+    }
+    if (content !== editor.getHTML()) {
+      editor.commands.setContent(content, { emitUpdate: false })
     }
   }, [content, editor])
 

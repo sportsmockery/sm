@@ -381,7 +381,6 @@ export function BlockEditor({ initialBlocks, initialTemplate, onChange }: BlockE
                 <BlockInserter
                   // Reveal when this block (above) or the next (below) is focused
                   revealed={focusedIndex === index || focusedIndex === index + 1}
-                  onInsert={(type) => insertBlock(type, index)}
                   onRequestModal={() => openPicker(index)}
                 />
               </React.Fragment>
