@@ -328,20 +328,13 @@ async function fetchEditorial(startDate: Date, prevStart: Date, now: Date, days:
     }
   }
 
-  // Sort top content by views from SMED data
-  const topContent = [...(smedTopPosts || [])].slice(0, 15).map((sp: any) => {
-    const postId = parseInt(sp.post_id)
-    return {
-      id: postId,
-      title: sp.title || '',
-      slug: sp.slug || '',
-      published_at: sp.published_at || '',
-      author_name: sp.author_name || '',
-      category_name: postCatMap.get(postId) || '',
-      views: parseInt(sp.views || '0'),
-      featured_image: postImageMap.get(postId) || null,
-    }
-  })
+  // Top content — articles published in the selected period, sorted by views.
+  // Previously used smedTopPosts directly which surfaced perennial-traffic posts
+  // from years ago when "This Month" was selected.
+  const topContent = period
+    .map(enrichPost)
+    .sort((a: any, b: any) => (b.views || 0) - (a.views || 0))
+    .slice(0, 15)
   // Fall back to period posts if SMED data unavailable
   const recentPosts = period.slice(0, 25).map(enrichPost)
 
