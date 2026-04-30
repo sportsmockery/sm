@@ -308,7 +308,7 @@ function StatusDot({ status }: { status: 'green' | 'amber' | 'red' }) {
   return <span className="inline-block w-2 h-2 rounded-full" style={{ background: m[status] }} />
 }
 function pick(a: ArticleAnalysisRow, k: SortKey): number {
-  if (k === 'publishedAt' || k === 'updatedAt') return Date.parse((a as Record<string, string>)[k]) || 0
+  if (k === 'publishedAt' || k === 'updatedAt') return Date.parse((a as unknown as Record<string, string>)[k]) || 0
   if (k === 'total' || k === 'recommendationCount' || k === 'headlineScore') return (a as unknown as Record<string, number>)[k]
   return (a.sub as unknown as Record<string, number>)[k]
 }
