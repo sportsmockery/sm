@@ -123,7 +123,7 @@ export function GoogleTab({ active }: { active: boolean }) {
       <WriterGoogleLeaderboard writers={data.writers} />
 
       {/* 4. Article analysis */}
-      <GoogleArticleAnalysisTable articles={data.articles} />
+      <GoogleArticleAnalysisTable articles={data.articles} rules={data.rules} recommendations={data.recommendations} />
 
       {/* 5. Transparency assets (/about, author pages, contact, publisher) */}
       <GoogleTransparencyAssetsPanel data={data} />
