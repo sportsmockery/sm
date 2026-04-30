@@ -21,12 +21,23 @@ export function GoogleTab({ active }: { active: boolean }) {
   const [busy, setBusy] = useState<null | 'backfill' | 'tick'>(null)
   const [opMessage, setOpMessage] = useState<string | null>(null)
 
+  const callApi = async (path: string): Promise<Record<string, unknown>> => {
+    const res = await fetch(path, { method: 'POST' })
+    const text = await res.text()
+    let json: Record<string, unknown>
+    try {
+      json = JSON.parse(text) as Record<string, unknown>
+    } catch {
+      throw new Error(`HTTP ${res.status}: ${text.slice(0, 200)}`)
+    }
+    if (!res.ok) throw new Error(String(json.error ?? `HTTP ${res.status}`))
+    return json
+  }
+
   const runBackfill = async () => {
     setBusy('backfill'); setOpMessage(null)
     try {
-      const res = await fetch('/api/admin/google-intelligence/backfill?limit=500', { method: 'POST' })
-      const json = await res.json()
-      if (!res.ok) throw new Error(json.error ?? `HTTP ${res.status}`)
+      const json = await callApi('/api/admin/google-intelligence/backfill?limit=500')
       setOpMessage(`Enqueued ${json.enqueued} (deduped ${json.deduplicated}, skipped ${json.skipped}). Now run the worker.`)
     } catch (e) {
       setOpMessage(`Backfill failed: ${e instanceof Error ? e.message : String(e)}`)
@@ -38,9 +49,7 @@ export function GoogleTab({ active }: { active: boolean }) {
   const runTick = async () => {
     setBusy('tick'); setOpMessage(null)
     try {
-      const res = await fetch('/api/admin/google-intelligence/tick?maxBatches=8&batchSize=25', { method: 'POST' })
-      const json = await res.json()
-      if (!res.ok) throw new Error(json.error ?? `HTTP ${res.status}`)
+      const json = await callApi('/api/admin/google-intelligence/tick?maxBatches=8&batchSize=25')
       setOpMessage(`Worker processed ${json.processed} (failed ${json.failed}). Refresh to see updated scores.`)
       refresh()
     } catch (e) {
