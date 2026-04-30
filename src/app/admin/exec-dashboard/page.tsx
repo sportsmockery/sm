@@ -716,6 +716,10 @@ export default function ExecDashboard() {
   const [gscData, setGscData] = useState<any>(null)
   const [gscLoading, setGscLoading] = useState(false)
   const [gscConnected, setGscConnected] = useState<boolean | null>(null)
+  // ExecIQ state
+  const [execIq, setExecIq] = useState<any>(null)
+  const [execIqLoading, setExecIqLoading] = useState(false)
+  const [execIqRefreshing, setExecIqRefreshing] = useState(false)
   // Freestar P&L state
   const [freestarRevenue, setFreestarRevenue] = useState<number | null>(null)
   const [freestarMetrics, setFreestarMetrics] = useState<FreestarMetrics | null>(null)
@@ -833,6 +837,50 @@ export default function ExecDashboard() {
     }
     fetchFreestarMetrics()
   }, [tab, range, customStart, customEnd, data, freestarDateRange])
+
+  // Load latest ExecIQ row when Overview is active
+  useEffect(() => {
+    if (tab !== 'Overview') return
+    let cancelled = false
+    const run = async () => {
+      setExecIqLoading(true)
+      try {
+        const r = await fetch('/api/admin/exec-iq')
+        if (!r.ok) return
+        const json = await r.json()
+        if (!cancelled) setExecIq(json.row ?? null)
+      } catch {}
+      finally { if (!cancelled) setExecIqLoading(false) }
+    }
+    run()
+    return () => { cancelled = true }
+  }, [tab])
+
+  const refreshExecIq = useCallback(async () => {
+    setExecIqRefreshing(true)
+    try {
+      const r = await fetch('/api/admin/exec-iq', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ range }),
+      })
+      if (!r.ok) {
+        const err = await r.json().catch(() => ({}))
+        alert(err.error || `Refresh failed (${r.status})`)
+        return
+      }
+      // refetch latest row
+      const fresh = await fetch('/api/admin/exec-iq')
+      if (fresh.ok) {
+        const json = await fresh.json()
+        setExecIq(json.row ?? null)
+      }
+    } catch (e: any) {
+      alert(e?.message || 'Refresh failed')
+    } finally {
+      setExecIqRefreshing(false)
+    }
+  }, [range])
 
   // Fetch Google Search Console data when SEO tab is active
   useEffect(() => {
@@ -1104,6 +1152,74 @@ export default function ExecDashboard() {
 
           {/* ═══════ OVERVIEW TAB ═══════ */}
           {tab === 'Overview' && <>
+            {/* ExecIQ — daily AI insights */}
+            <Section
+              title="ExecIQ"
+              badge={
+                execIq?.generated_at ? (
+                  <span className="text-xs tabular-nums" style={{ color: 'var(--sm-text-dim)' }}>
+                    Generated {new Date(execIq.generated_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })} · {execIq.model}
+                  </span>
+                ) : execIqLoading ? (
+                  <span className="text-xs" style={{ color: 'var(--sm-text-dim)' }}>Loading…</span>
+                ) : (
+                  <span className="text-xs" style={{ color: 'var(--sm-text-dim)' }}>No insights yet</span>
+                )
+              }
+              actions={
+                <button
+                  onClick={refreshExecIq}
+                  disabled={execIqRefreshing}
+                  className="text-xs font-bold px-3 py-1.5 rounded transition-colors disabled:opacity-50"
+                  style={{ background: '#00D4FF', color: '#fff' }}
+                >
+                  {execIqRefreshing ? 'Refreshing…' : execIq ? 'Refresh' : 'Generate'}
+                </button>
+              }
+            >
+              {execIq?.summary && (
+                <p className="text-sm leading-relaxed mb-4 pb-3 border-b" style={{ color: 'var(--sm-text)', borderColor: 'var(--sm-border)' }}>
+                  {execIq.summary}
+                </p>
+              )}
+              {Array.isArray(execIq?.insights) && execIq.insights.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {execIq.insights.map((ins: any, i: number) => {
+                    const sevColor = ins.severity === 'win' ? '#10b981' : ins.severity === 'risk' ? '#bc0000' : '#00D4FF'
+                    const sevBg = ins.severity === 'win' ? 'rgba(16,185,129,0.10)' : ins.severity === 'risk' ? 'rgba(188,0,0,0.10)' : 'rgba(0,212,255,0.10)'
+                    return (
+                      <div key={i} className="rounded-lg border p-3" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span
+                            className="text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded"
+                            style={{ background: sevBg, color: sevColor }}
+                          >
+                            {ins.severity}
+                          </span>
+                          <span className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--sm-text-dim)' }}>
+                            {ins.category}
+                          </span>
+                        </div>
+                        <p className="text-sm font-bold mb-1" style={{ color: 'var(--sm-text)' }}>{ins.title}</p>
+                        <p className="text-xs mb-2" style={{ color: 'var(--sm-text-muted)' }}>{ins.detail}</p>
+                        <div className="rounded p-2" style={{ background: 'var(--sm-surface)' }}>
+                          <p className="text-[10px] font-bold uppercase tracking-wide mb-0.5" style={{ color: 'var(--sm-text-dim)' }}>Action</p>
+                          <p className="text-xs font-medium" style={{ color: 'var(--sm-text)' }}>{ins.action}</p>
+                        </div>
+                        {ins.metric && (
+                          <p className="text-[10px] font-mono mt-2" style={{ color: 'var(--sm-text-dim)' }}>{ins.metric}</p>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              ) : !execIqLoading ? (
+                <p className="text-sm py-4 text-center" style={{ color: 'var(--sm-text-dim)' }}>
+                  No insights yet. Click <span className="font-bold">Generate</span> to produce the first batch — runs daily at 6:30am Central after that.
+                </p>
+              ) : null}
+            </Section>
+
             {/* Traffic trends */}
             <Section title="Traffic Trends">
               <ResponsiveContainer width="100%" height={380}>

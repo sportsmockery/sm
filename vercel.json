@@ -59,6 +59,10 @@
       "schedule": "0 5 * * *"
     },
     {
+      "path": "/api/cron/exec-iq",
+      "schedule": "30 11 * * *"
+    },
+    {
       "path": "/api/cron/sync-article-views",
       "schedule": "0 * * * *"
     },
