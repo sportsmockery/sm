@@ -71,23 +71,74 @@ export async function GET() {
       })
     }
 
-    const articles: ArticleAnalysisRow[] = scoreRows.map((r) => ({
-      articleId: String(r.article_id),
-      title: String(r.article_id),                       // joined to posts table in production
-      author: String(r.author_id ?? '—'),
-      authorId: (r.author_id as string | null) ?? null,
-      publishedAt: String(r.scored_at),
-      updatedAt: String(r.updated_at ?? r.scored_at),
-      lastRescoredAt: String(r.scored_at),
-      category: '—',
-      topic: '—',
-      total: Number(r.total ?? 0),
-      sub: r.sub as SubScores,
-      headlineScore: Number(r.headline_score ?? 0),
-      recommendationCount: 0,
-      rulesetVersion: String(r.ruleset_version),
-      status: (r.status as 'green' | 'amber' | 'red') ?? 'amber',
-    }))
+    // ── Resolve human-readable names for the score rows we're returning.
+    //    The score tables only carry article_id + author_id; join sm_posts
+    //    and sm_authors so the UI shows titles + names instead of UUIDs.
+    const articleIds = Array.from(new Set(scoreRows.map((r) => String(r.article_id))))
+    const authorIdsRaw = Array.from(new Set([
+      ...scoreRows.map((r) => r.author_id as string | null).filter((v): v is string => Boolean(v)),
+      ...((writersRes.data ?? []) as Array<Record<string, unknown>>).map((w) => String(w.author_id)),
+    ]))
+
+    const [postsLookupRes, authorsLookupRes] = await Promise.all([
+      articleIds.length > 0
+        ? db.from('sm_posts').select('id,title,slug,published_at,updated_at,category_id').in('id', articleIds)
+        : Promise.resolve({ data: [] as Array<Record<string, unknown>> }),
+      authorIdsRaw.length > 0
+        ? db.from('sm_authors').select('id,display_name,avatar_url').in('id', authorIdsRaw)
+        : Promise.resolve({ data: [] as Array<Record<string, unknown>> }),
+    ])
+
+    const categoryIds = Array.from(new Set(((postsLookupRes.data ?? []) as Array<Record<string, unknown>>).map((p) => p.category_id as string | null).filter((v): v is string => Boolean(v))))
+    const categoriesLookupRes = categoryIds.length > 0
+      ? await db.from('sm_categories').select('id,name,slug').in('id', categoryIds)
+      : { data: [] as Array<Record<string, unknown>> }
+
+    const postById = new Map<string, { title: string; slug: string; publishedAt: string | null; updatedAt: string | null; categoryId: string | null }>()
+    for (const p of (postsLookupRes.data ?? []) as Array<Record<string, unknown>>) {
+      postById.set(String(p.id), {
+        title: String(p.title ?? '(untitled)'),
+        slug: String(p.slug ?? ''),
+        publishedAt: (p.published_at as string | null) ?? null,
+        updatedAt:   (p.updated_at as string | null) ?? null,
+        categoryId:  (p.category_id as string | null) ?? null,
+      })
+    }
+    const authorById = new Map<string, { name: string; avatar: string | null }>()
+    for (const a of (authorsLookupRes.data ?? []) as Array<Record<string, unknown>>) {
+      authorById.set(String(a.id), {
+        name:   String(a.display_name ?? '(unknown)'),
+        avatar: (a.avatar_url as string | null) ?? null,
+      })
+    }
+    const categoryById = new Map<string, string>()
+    for (const c of (categoriesLookupRes.data ?? []) as Array<Record<string, unknown>>) {
+      categoryById.set(String(c.id), String(c.name ?? '—'))
+    }
+
+    const articles: ArticleAnalysisRow[] = scoreRows.map((r) => {
+      const articleId = String(r.article_id)
+      const authorId = (r.author_id as string | null) ?? null
+      const post = postById.get(articleId)
+      const author = authorId ? authorById.get(authorId) : null
+      return {
+        articleId,
+        title: post?.title ?? articleId,
+        author: author?.name ?? '—',
+        authorId,
+        publishedAt: post?.publishedAt ?? String(r.scored_at),
+        updatedAt:   post?.updatedAt   ?? String(r.updated_at ?? r.scored_at),
+        lastRescoredAt: String(r.scored_at),
+        category: post?.categoryId ? (categoryById.get(post.categoryId) ?? '—') : '—',
+        topic: '—',
+        total: Number(r.total ?? 0),
+        sub: r.sub as SubScores,
+        headlineScore: Number(r.headline_score ?? 0),
+        recommendationCount: 0,
+        rulesetVersion: String(r.ruleset_version),
+        status: (r.status as 'green' | 'amber' | 'red') ?? 'amber',
+      }
+    })
 
     // Aggregate writer leaderboard.
     const writerAgg = new Map<string, { total: number; n: number; sub: SubScores }>()
@@ -105,25 +156,28 @@ export async function GET() {
       cur.sub.opportunity      += sub.opportunity
       writerAgg.set(id, cur)
     }
-    const writers: WriterLeaderboardRow[] = Array.from(writerAgg.entries()).map(([id, agg]) => ({
-      authorId: id,
-      name: id,
-      avatar: null,
-      articlesAnalyzed: agg.n,
-      total: Math.round(agg.total / agg.n),
-      sub: {
-        searchEssentials: round1(agg.sub.searchEssentials / agg.n),
-        googleNews:       round1(agg.sub.googleNews / agg.n),
-        trust:            round1(agg.sub.trust / agg.n),
-        spamSafety:       round1(agg.sub.spamSafety / agg.n),
-        technical:        round1(agg.sub.technical / agg.n),
-        opportunity:      round1(agg.sub.opportunity / agg.n),
-      },
-      recommendationCount: 0,
-      trend: 0,
-      lastRescoredAt: new Date().toISOString(),
-      status: agg.total / agg.n >= 80 ? 'green' : agg.total / agg.n >= 60 ? 'amber' : 'red',
-    }))
+    const writers: WriterLeaderboardRow[] = Array.from(writerAgg.entries()).map(([id, agg]) => {
+      const author = authorById.get(id)
+      return {
+        authorId: id,
+        name: author?.name ?? id,
+        avatar: author?.avatar ?? null,
+        articlesAnalyzed: agg.n,
+        total: Math.round(agg.total / agg.n),
+        sub: {
+          searchEssentials: round1(agg.sub.searchEssentials / agg.n),
+          googleNews:       round1(agg.sub.googleNews / agg.n),
+          trust:            round1(agg.sub.trust / agg.n),
+          spamSafety:       round1(agg.sub.spamSafety / agg.n),
+          technical:        round1(agg.sub.technical / agg.n),
+          opportunity:      round1(agg.sub.opportunity / agg.n),
+        },
+        recommendationCount: 0,
+        trend: 0,
+        lastRescoredAt: new Date().toISOString(),
+        status: agg.total / agg.n >= 80 ? 'green' : agg.total / agg.n >= 60 ? 'amber' : 'red',
+      }
+    })
 
     const recommendations: Recommendation[] = ((recsRes.data ?? []) as Array<Record<string, unknown>>).map((r) => ({
       id: String(r.id),
