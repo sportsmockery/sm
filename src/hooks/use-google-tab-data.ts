@@ -15,7 +15,12 @@ interface UseGoogleTabDataResult {
   transparencyEvaluations: TransparencyAssetEvaluation[]
 }
 
-export function useGoogleTabData(active: boolean): UseGoogleTabDataResult {
+export function useGoogleTabData(
+  active: boolean,
+  range?: string,
+  customStart?: string,
+  customEnd?: string,
+): UseGoogleTabDataResult {
   const [data, setData] = useState<GoogleTabPayload | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -29,7 +34,15 @@ export function useGoogleTabData(active: boolean): UseGoogleTabDataResult {
     let cancelled = false
     setLoading(true)
     setError(null)
-    fetch('/api/admin/google-intelligence', { cache: 'no-store' })
+    const params = new URLSearchParams()
+    if (range) params.set('range', range)
+    if (range === 'custom' && customStart && customEnd) {
+      params.set('start', customStart)
+      params.set('end', customEnd)
+    }
+    const qs = params.toString()
+    const url = qs ? `/api/admin/google-intelligence?${qs}` : '/api/admin/google-intelligence'
+    fetch(url, { cache: 'no-store' })
       .then(async (r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`)
         return r.json() as Promise<GoogleTabPayload & { source: UseGoogleTabDataResult['source'] }>
@@ -48,7 +61,7 @@ export function useGoogleTabData(active: boolean): UseGoogleTabDataResult {
         if (!cancelled) setLoading(false)
       })
     return () => { cancelled = true }
-  }, [active, tick])
+  }, [active, tick, range, customStart, customEnd])
 
   return {
     data, loading, error, source, refresh,

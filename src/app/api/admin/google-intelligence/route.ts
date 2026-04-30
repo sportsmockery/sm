@@ -16,14 +16,96 @@ import type {
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-export async function GET() {
+// The exec dashboard's date-range selector is the source of truth for "what
+// timeframe should the Google tab reflect." We mirror the page-level options
+// (today, yesterday, this-week, this-month, last-month, ytd, last-year, custom)
+// and translate them to a published_at window over sm_posts. The score and
+// leaderboard tables aren't time-keyed themselves, so we resolve eligible
+// article ids from sm_posts first and then filter score rows by id.
+function resolveDateRange(searchParams: URLSearchParams): { startISO: string; endISO: string } | null {
+  const range = searchParams.get('range')
+  if (!range || range === 'all-time') return null
+
+  const now = new Date()
+  let start: Date
+  let end: Date
+  if (range === 'today') {
+    start = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    end = now
+  } else if (range === 'yesterday') {
+    start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1)
+    end = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  } else if (range === 'this-week') {
+    const day = now.getDay()
+    start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - day)
+    end = now
+  } else if (range === 'this-month') {
+    start = new Date(now.getFullYear(), now.getMonth(), 1)
+    end = now
+  } else if (range === 'last-month') {
+    start = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+    end = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59)
+  } else if (range === 'ytd') {
+    start = new Date(now.getFullYear(), 0, 1)
+    end = now
+  } else if (range === 'last-year') {
+    start = new Date(now.getFullYear() - 1, 0, 1)
+    end = new Date(now.getFullYear() - 1, 11, 31, 23, 59, 59)
+  } else if (range === 'custom') {
+    const startStr = searchParams.get('start')
+    const endStr = searchParams.get('end')
+    if (!startStr || !endStr) return null
+    start = new Date(startStr)
+    end = new Date(`${endStr}T23:59:59`)
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return null
+  } else {
+    return null
+  }
+  return { startISO: start.toISOString(), endISO: end.toISOString() }
+}
+
+function safeAvg(values: number[]): number {
+  if (values.length === 0) return 0
+  return values.reduce((s, n) => s + n, 0) / values.length
+}
+
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url)
+    const dateWindow = resolveDateRange(searchParams)
     const db = createServerClient()
+
+    // Resolve the article-id filter for the requested window before fetching
+    // scores. An empty list is meaningful (window simply has no articles) —
+    // we mark it with a sentinel so the IN-clause below returns zero rows.
+    let articleIdFilter: string[] | null = null
+    if (dateWindow) {
+      const postsInWindow = await db
+        .from('sm_posts')
+        .select('id')
+        .gte('published_at', dateWindow.startISO)
+        .lte('published_at', dateWindow.endISO)
+      articleIdFilter = ((postsInWindow.data ?? []) as Array<Record<string, unknown>>).map((p) => String(p.id))
+    }
+
+    let scoresQuery = db.from('google_article_scores').select('*').order('total', { ascending: true }).limit(500)
+    let writersQuery = db.from('google_article_scores').select('author_id, total, sub, article_id').not('author_id', 'is', null)
+    if (articleIdFilter) {
+      if (articleIdFilter.length === 0) {
+        // Force empty result without dropping the rest of the payload (we still
+        // want transparency + ops to render for the window-empty case).
+        scoresQuery = scoresQuery.eq('article_id', '00000000-0000-0000-0000-000000000000')
+        writersQuery = writersQuery.eq('article_id', '00000000-0000-0000-0000-000000000000')
+      } else {
+        scoresQuery = scoresQuery.in('article_id', articleIdFilter)
+        writersQuery = writersQuery.in('article_id', articleIdFilter)
+      }
+    }
 
     // 1. Pull the score corpus + sitewide context first.
     const [scoresRes, writersRes, queueRes, eventsRes, auditRes, rulesetRes, assetsRes, assetEvalsRes] = await Promise.all([
-      db.from('google_article_scores').select('*').order('total', { ascending: true }).limit(500),
-      db.from('google_article_scores').select('author_id, total, sub').not('author_id', 'is', null),
+      scoresQuery,
+      writersQuery,
       db.from('google_scoring_jobs').select('id, trigger, status, completed_at, enqueued_at').order('enqueued_at', { ascending: false }).limit(500),
       db.from('google_system_events').select('id, type, occurred_at').order('occurred_at', { ascending: false }).limit(50),
       db.from('google_audit_log').select('id, actor, action, target, metadata, occurred_at').order('occurred_at', { ascending: false }).limit(25),
@@ -50,10 +132,13 @@ export async function GET() {
     // If transparency is seeded but articles aren't scored yet (post-migration,
     // pre-worker-run state), serve mock articles + real transparency so the
     // Transparency Assets panel reflects DB reality.
-    if (scoreRows.length === 0 && transparencyAssetsRawForGate.length === 0) {
+    // Skip the mock path entirely when a date window is in play — an empty
+    // result there means "no articles in the selected window," which the UI
+    // should render as zeros, not as fabricated mock data.
+    if (!dateWindow && scoreRows.length === 0 && transparencyAssetsRawForGate.length === 0) {
       return NextResponse.json({ ...buildMockPayload(), source: 'mock' })
     }
-    if (scoreRows.length === 0) {
+    if (!dateWindow && scoreRows.length === 0) {
       const base = buildMockPayload()
       const realTransparency = mapTransparencyAssets(transparencyAssetsRawForGate)
       const realEvals = mapTransparencyEvaluations((assetEvalsRes.data ?? []) as Array<Record<string, unknown>>)
@@ -266,14 +351,14 @@ export async function GET() {
     }
 
     const overviewSub: SubScores = {
-      searchEssentials: round1(articles.reduce((s, a) => s + a.sub.searchEssentials, 0) / articles.length),
-      googleNews:       round1(articles.reduce((s, a) => s + a.sub.googleNews, 0)       / articles.length),
-      trust:            round1(articles.reduce((s, a) => s + a.sub.trust, 0)            / articles.length),
-      spamSafety:       round1(articles.reduce((s, a) => s + a.sub.spamSafety, 0)       / articles.length),
-      technical:        round1(articles.reduce((s, a) => s + a.sub.technical, 0)        / articles.length),
-      opportunity:      round1(articles.reduce((s, a) => s + a.sub.opportunity, 0)      / articles.length),
+      searchEssentials: round1(safeAvg(articles.map((a) => a.sub.searchEssentials))),
+      googleNews:       round1(safeAvg(articles.map((a) => a.sub.googleNews))),
+      trust:            round1(safeAvg(articles.map((a) => a.sub.trust))),
+      spamSafety:       round1(safeAvg(articles.map((a) => a.sub.spamSafety))),
+      technical:        round1(safeAvg(articles.map((a) => a.sub.technical))),
+      opportunity:      round1(safeAvg(articles.map((a) => a.sub.opportunity))),
     }
-    const googleScore = Math.round(articles.reduce((s, a) => s + a.total, 0) / articles.length)
+    const googleScore = Math.round(safeAvg(articles.map((a) => a.total)))
 
     // ── Transparency assets payload (uses shared mappers) ────────────────
     const transparencyAssets: TransparencyAsset[] = mapTransparencyAssets(transparencyAssetsRaw ?? [])
@@ -292,9 +377,9 @@ export async function GET() {
       overview: {
         googleScore,
         sub: overviewSub,
-        avgWriterScore: Math.round(writers.reduce((s, w) => s + w.total, 0) / Math.max(1, writers.length)),
+        avgWriterScore: Math.round(safeAvg(writers.map((w) => w.total))),
         highRiskArticleCount: articles.filter((a) => a.total < 60).length,
-        newsReadyArticlePct:  Math.round((articles.filter((a) => a.sub.googleNews >= 15).length / articles.length) * 100),
+        newsReadyArticlePct:  articles.length === 0 ? 0 : Math.round((articles.filter((a) => a.sub.googleNews >= 15).length / articles.length) * 100),
         deltaVsPriorPeriod:   0,
         lastScoringRunAt:     operations.lastArticleScoredAt ?? new Date().toISOString(),
       },

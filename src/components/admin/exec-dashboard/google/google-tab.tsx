@@ -16,8 +16,18 @@ import { GoogleKnowledgePanel } from './google-knowledge-panel'
 import { GoogleOperationsProofPanel } from './google-operations-proof-panel'
 import { GoogleTransparencyAssetsPanel } from './google-transparency-assets-panel'
 
-export function GoogleTab({ active }: { active: boolean }) {
-  const { data, loading, error, source, refresh } = useGoogleTabData(active)
+export function GoogleTab({
+  active,
+  range,
+  customStart,
+  customEnd,
+}: {
+  active: boolean
+  range?: string
+  customStart?: string
+  customEnd?: string
+}) {
+  const { data, loading, error, source, refresh } = useGoogleTabData(active, range, customStart, customEnd)
   const [busy, setBusy] = useState<null | 'backfill' | 'tick'>(null)
   const [opMessage, setOpMessage] = useState<string | null>(null)
 

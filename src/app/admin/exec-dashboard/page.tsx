@@ -1855,7 +1855,14 @@ export default function ExecDashboard() {
           })()}
 
           {/* ═══════ GOOGLE TAB ═══════ */}
-          {tab === 'Google' && <GoogleTab active={tab === 'Google'} />}
+          {tab === 'Google' && (
+            <GoogleTab
+              active={tab === 'Google'}
+              range={range}
+              customStart={customStart}
+              customEnd={customEnd}
+            />
+          )}
         </div>
       )}
 
