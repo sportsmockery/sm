@@ -341,23 +341,44 @@ export default function AdvancedPostEditor({
   // Autosave function — saves silently as draft without redirecting
   const performAutoSave = useCallback(async () => {
     const currentData = formDataRef.current
-    if (!currentData?.title?.trim()) return // Need at least a title
+    if (!currentData) return
     if (autoSaveInFlightRef.current) return // Already saving
     if (saving) return // Manual save in progress
+
+    const contentToSave = editorMode === 'blocks' && blockDoc
+      ? serializeDocument(blockDoc)
+      : currentData.content
+    const hasBlocks = editorMode === 'blocks' && (blockDoc?.blocks?.length ?? 0) > 0
+    const hasContent = !!(
+      currentData.title?.trim() ||
+      hasBlocks ||
+      (currentData.content && currentData.content.replace(/<[^>]*>/g, '').trim()) ||
+      currentData.excerpt?.trim() ||
+      currentData.featured_image
+    )
+    if (!hasContent) return // Nothing worth saving yet
+
+    // Fall back to placeholder title/slug so drafts persist even before
+    // the writer types a headline. Real values overwrite on the next save.
+    const trimmedTitle = currentData.title?.trim()
+    const effectiveTitle = trimmedTitle || 'Untitled draft'
+    const effectiveSlug =
+      currentData.slug?.trim() ||
+      (trimmedTitle
+        ? generateSlug(trimmedTitle, currentData.category_id)
+        : `untitled-draft-${Date.now()}`)
 
     autoSaveInFlightRef.current = true
     setAutoSaveStatus('saving')
 
     try {
-      const contentToSave = editorMode === 'blocks' && blockDoc
-        ? serializeDocument(blockDoc)
-        : currentData.content
-
       const postId = autoSavedPostId
       const endpoint = postId ? `/api/posts/${postId}` : '/api/admin/posts'
 
       const payload = {
         ...currentData,
+        title: effectiveTitle,
+        slug: effectiveSlug,
         content: contentToSave,
         status: postId ? currentData.status : 'draft', // New posts save as draft
         category_id: currentData.category_id || null,
@@ -392,12 +413,18 @@ export default function AdvancedPostEditor({
     } finally {
       autoSaveInFlightRef.current = false
     }
-  }, [autoSavedPostId, saving, editorMode, blockDoc])
+  }, [autoSavedPostId, saving, editorMode, blockDoc, generateSlug, selectedTags])
 
   // Schedule autosave 2 seconds after any form change
   useEffect(() => {
-    // Don't autosave on initial mount
-    if (!formData.title?.trim() && !formData.content?.trim()) return
+    const hasBlocks = editorMode === 'blocks' && (blockDoc?.blocks?.length ?? 0) > 0
+    const hasContent =
+      !!formData.title?.trim() ||
+      !!formData.content?.trim() ||
+      !!formData.excerpt?.trim() ||
+      !!formData.featured_image ||
+      hasBlocks
+    if (!hasContent) return
 
     if (autoSaveTimerRef.current) {
       clearTimeout(autoSaveTimerRef.current)
@@ -412,27 +439,7 @@ export default function AdvancedPostEditor({
         clearTimeout(autoSaveTimerRef.current)
       }
     }
-  }, [formData.title, formData.content, formData.excerpt, formData.category_id, formData.author_id, formData.featured_image, formData.seo_title, formData.seo_description, formData.seo_keywords, performAutoSave])
-
-  // Also autosave when block doc changes
-  useEffect(() => {
-    if (!blockDoc || editorMode !== 'blocks') return
-    if (!formData.title?.trim()) return
-
-    if (autoSaveTimerRef.current) {
-      clearTimeout(autoSaveTimerRef.current)
-    }
-
-    autoSaveTimerRef.current = setTimeout(() => {
-      performAutoSave()
-    }, 2000)
-
-    return () => {
-      if (autoSaveTimerRef.current) {
-        clearTimeout(autoSaveTimerRef.current)
-      }
-    }
-  }, [blockDoc, editorMode, performAutoSave])
+  }, [formData.title, formData.content, formData.excerpt, formData.category_id, formData.author_id, formData.featured_image, formData.seo_title, formData.seo_description, formData.seo_keywords, blockDoc, editorMode, performAutoSave])
 
   // AI Actions
   // Extract team key from category name
