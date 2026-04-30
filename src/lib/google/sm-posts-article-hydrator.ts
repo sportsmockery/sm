@@ -51,7 +51,9 @@ interface SmCategoryRow {
 }
 
 interface SmTagJoinRow {
-  tag: { id: string; name: string | null; slug: string | null } | null
+  // Supabase row types model joined relations as arrays even when the FK is
+  // 1:1, so `tag` is `{ ... }[]`. We take the first element below.
+  tag: Array<{ id: string; name: string | null; slug: string | null }> | null
 }
 
 const TEAM_BY_CATEGORY_SLUG: Record<string, string> = {
@@ -253,7 +255,9 @@ export class SmPostsArticleHydrator implements ArticleHydrator {
 
     const category = (categoryRes.data ?? null) as SmCategoryRow | null
     const author = (authorRes.data ?? null) as SmAuthorRow | null
-    const tagRows = ((tagsRes.data ?? []) as SmTagJoinRow[]).map((r) => r.tag).filter(Boolean) as Array<{ id: string; name: string | null; slug: string | null }>
+    const tagRows = ((tagsRes.data ?? []) as SmTagJoinRow[])
+      .map((r) => (Array.isArray(r.tag) ? r.tag[0] : r.tag))
+      .filter((t): t is { id: string; name: string | null; slug: string | null } => t !== null && t !== undefined)
     const tagNames = tagRows.map((t) => t.name ?? '').filter(Boolean)
     const publishedArticleCount = Number((authorPostCountRes as { count?: number | null }).count ?? 0)
 
