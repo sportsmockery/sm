@@ -620,7 +620,7 @@ export default function ExecDashboard() {
     const amount = parseFloat(newExpenseAmount)
     if (isNaN(amount) || amount <= 0) return
     setFreehandExpenses(prev => [...prev, {
-      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      id: crypto.randomUUID(),
       desc: newExpenseDesc.trim(),
       amount,
       date: newExpenseDate,

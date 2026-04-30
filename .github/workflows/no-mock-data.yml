@@ -1,0 +1,51 @@
+name: No Mock Data
+on:
+  pull_request:
+    paths:
+      - 'src/app/admin/exec-dashboard/**'
+      - 'src/app/api/exec-dashboard/**'
+      - 'src/app/api/freestar-revenue/**'
+      - 'src/app/api/social/**'
+      - 'src/app/api/seo/**'
+      - 'src/app/api/payment-sync/**'
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan for mock/synthetic patterns
+        run: |
+          set -e
+          PATTERNS='Math\.random|simulated|synthetic|hardcoded|trafficSplit|evergreenPct|periodViews \* 0\.|mockData|fakeData|dummyData|placeholderData|generateFake|generateMock|seedData'
+          # Scope: dashboard surface only
+          # Exclude health endpoint (it's the guard, not the guarded code)
+          # Exclude CONTRACT comment lines (they describe what's forbidden, not violations)
+          MATCHES=$(grep -rEn "$PATTERNS" \
+            src/app/admin/exec-dashboard \
+            src/app/api/exec-dashboard \
+            src/app/api/freestar-revenue \
+            src/app/api/social \
+            src/app/api/seo \
+            src/app/api/payment-sync \
+            --include="*.ts" --include="*.tsx" \
+            --exclude-dir="health" 2>/dev/null \
+            | grep -v '// CONTRACT:' \
+            | grep -v '// NO synthetic' || true)
+          if [ -n "$MATCHES" ]; then
+            echo "::error::Forbidden mock-data patterns detected in dashboard files:"
+            echo "$MATCHES"
+            echo ""
+            echo "Per the no-mock-data contract, the dashboard must use real data sources only."
+            echo "If a source is unavailable, return null/empty — never fabricate values."
+            exit 1
+          fi
+          echo "✓ No mock-data patterns detected"
+      - name: Verify CONTRACT comment present
+        run: |
+          for f in src/app/admin/exec-dashboard/page.tsx src/app/api/exec-dashboard/route.ts; do
+            if ! grep -q "CONTRACT: This dashboard returns ONLY real data" "$f"; then
+              echo "::error::Missing CONTRACT comment in $f"
+              exit 1
+            fi
+          done
+          echo "✓ CONTRACT comments present"
