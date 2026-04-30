@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { requireAdmin } from '@/lib/admin-auth'
 import { auditLog, getAuditContext } from '@/lib/audit-log'
+import { GoogleIngestionService } from '@/lib/google/google-ingestion-service'
 
 /**
  * GET /api/admin/posts
@@ -187,6 +188,16 @@ export async function POST(request: NextRequest) {
       details: { title: body.title, slug: body.slug, status: postData.status },
       ...getAuditContext(request),
     })
+
+    // Enqueue a Google-intelligence scoring job. Fire-and-forget — failures
+    // here must not break post creation. Only published posts score; drafts
+    // are skipped until their next publish.
+    if (postData.status === 'published') {
+      const ingest = new GoogleIngestionService(supabaseAdmin)
+      ingest.onArticlePublished(String(post.id), `user:${auth.user!.id}`).catch((e) => {
+        console.error('[google-intelligence] enqueue on create failed:', e)
+      })
+    }
 
     return NextResponse.json(post, { status: 201 })
   } catch (error) {
