@@ -1,3 +1,7 @@
+// CONTRACT: This dashboard returns ONLY real data from live sources
+// (WordPress REST, SMED MySQL, Supabase, SEMRush, YouTube/X/Facebook APIs, Freestar Cube.js).
+// NO synthetic, simulated, estimated, or hash-based fallbacks are permitted.
+// If a data source is unavailable, return null/empty — never fabricate.
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 

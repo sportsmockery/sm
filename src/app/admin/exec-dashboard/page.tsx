@@ -1,3 +1,7 @@
+// CONTRACT: This dashboard returns ONLY real data from live sources
+// (WordPress REST, SMED MySQL, Supabase, SEMRush, YouTube/X/Facebook APIs, Freestar Cube.js).
+// NO synthetic, simulated, estimated, or hash-based fallbacks are permitted.
+// If a data source is unavailable, return null/empty — never fabricate.
 'use client'
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
@@ -480,7 +484,7 @@ export default function ExecDashboard() {
   const [freestarRevenue, setFreestarRevenue] = useState<number | null>(null)
   const [freestarMetrics, setFreestarMetrics] = useState<FreestarMetrics | null>(null)
   const [freestarLoading, setFreestarLoading] = useState(false)
-  const [revenueSource, setRevenueSource] = useState<'local' | 'api' | 'estimate'>('estimate')
+  const [revenueSource, setRevenueSource] = useState<'local' | 'api' | 'unavailable'>('unavailable')
   const [freehandExpenses, setFreehandExpenses] = useState<Array<{ id: string; desc: string; amount: number; date: string }>>([])
   const [newExpenseDesc, setNewExpenseDesc] = useState('')
   const [newExpenseAmount, setNewExpenseAmount] = useState('')
@@ -577,17 +581,15 @@ export default function ExecDashboard() {
             if (json.revenue !== null) {
               setFreestarRevenue(json.revenue)
               setRevenueSource('api')
-            } else if (data?.overview) {
-              setFreestarRevenue(Math.round(data.overview.periodViews * 0.00186))
-              setRevenueSource('estimate')
+            } else {
+              setRevenueSource('unavailable')
             }
           }
         }
       } catch {
-        // Fallback: estimate from dashboard data
-        if (localRevenue === null && data?.overview) {
-          setFreestarRevenue(Math.round(data.overview.periodViews * 0.00186))
-          setRevenueSource('estimate')
+        // API failed — mark revenue as unavailable (never fabricate)
+        if (localRevenue === null) {
+          setRevenueSource('unavailable')
         }
       } finally {
         setFreestarLoading(false)
@@ -1574,10 +1576,10 @@ export default function ExecDashboard() {
             // Freehand expenses total
             const freehandTotal = freehandExpenses.reduce((s, e) => s + e.amount, 0)
             const totalExpenses = writerExpenses + freehandTotal
-            // Revenue from Freestar (fetched or estimated)
-            const revenue = freestarRevenue ?? (data.overview ? Math.round(data.overview.periodViews * 0.00186) : 0)
-            const profit = revenue - totalExpenses
-            const margin = revenue > 0 ? ((profit / revenue) * 100).toFixed(1) : '0.0'
+            // Revenue from Freestar (real data only — null if unavailable)
+            const revenue = freestarRevenue
+            const profit = revenue != null ? revenue - totalExpenses : null
+            const margin = revenue != null && revenue > 0 ? ((profit! / revenue) * 100).toFixed(1) : '0.0'
 
             // PoP delta helper
             const popDelta = (curr: number | null | undefined, prev: number | null | undefined): { pct: string; up: boolean } | null => {
@@ -1593,7 +1595,7 @@ export default function ExecDashboard() {
 
             // Build the 6-metric card definitions mirroring pub.network
             const metricCards: Array<{ label: string; value: string; prev: number | null | undefined; curr: number | null | undefined }> = [
-              { label: 'Net Revenue', value: fmtCurrency(freestarMetrics?.revenue ?? (revenueSource !== 'estimate' ? revenue : null)), curr: freestarMetrics?.revenue ?? (revenueSource !== 'estimate' ? revenue : null), prev: freestarMetrics?.prevRevenue },
+              { label: 'Net Revenue', value: fmtCurrency(freestarMetrics?.revenue ?? revenue), curr: freestarMetrics?.revenue ?? revenue, prev: freestarMetrics?.prevRevenue },
               { label: 'Impressions', value: fmtInt(freestarMetrics?.impressions), curr: freestarMetrics?.impressions, prev: freestarMetrics?.prevImpressions },
               { label: 'Net CPM', value: fmtCurrency(freestarMetrics?.netCpm), curr: freestarMetrics?.netCpm, prev: freestarMetrics?.prevNetCpm },
               { label: 'Viewability', value: fmtPct(freestarMetrics?.viewability), curr: freestarMetrics?.viewability, prev: freestarMetrics?.prevViewability },
@@ -1613,7 +1615,7 @@ export default function ExecDashboard() {
                   {revenueSource === 'api' && <path d="M22 4L12 14.01l-3-3" />}
                   {revenueSource === 'local' && <><path d="M14 2v6h6" /><path d="M16 13H8m8 4H8m2-8H8" /></>}
                 </svg>
-                {revenueSource === 'api' ? 'Live from Freestar API' : revenueSource === 'local' ? 'From uploaded CSV reports' : 'Estimated from views'}
+                {revenueSource === 'api' ? 'Live from Freestar API' : revenueSource === 'local' ? 'From uploaded CSV reports' : 'Freestar data unavailable \u2014 check API token'}
                 {freestarLoading && <span className="ml-2 text-xs opacity-70">(refreshing...)</span>}
               </div>
 
@@ -1660,8 +1662,8 @@ export default function ExecDashboard() {
                       <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
                     </svg>
                     <h3 className="text-lg font-bold" style={{ color: 'var(--sm-text)' }}>Profit & Loss</h3>
-                    <span className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style={{ background: profit >= 0 ? 'rgba(16,185,129,0.12)' : 'rgba(188,0,0,0.12)', color: profit >= 0 ? '#10b981' : '#bc0000' }}>
-                      {profit >= 0 ? 'Profitable' : 'Loss'}
+                    <span className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style={{ background: profit != null && profit >= 0 ? 'rgba(16,185,129,0.12)' : 'rgba(188,0,0,0.12)', color: profit != null && profit >= 0 ? '#10b981' : '#bc0000' }}>
+                      {profit == null ? '\u2014' : profit >= 0 ? 'Profitable' : 'Loss'}
                     </span>
                   </div>
                   <span className="text-xs" style={{ color: 'var(--sm-text-dim)' }}>
@@ -1677,10 +1679,10 @@ export default function ExecDashboard() {
                       <div className="absolute top-0 left-0 w-1 h-full" style={{ background: '#10b981' }} />
                       <p className="text-xs font-bold uppercase tracking-wider mb-1" style={{ color: '#10b981' }}>Revenue</p>
                       <p className="text-3xl font-extrabold tabular-nums" style={{ color: '#10b981' }}>
-                        ${revenue.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                        {revenue != null ? `$${revenue.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : '\u2014'}
                       </p>
                       <p className="text-xs mt-1" style={{ color: 'var(--sm-text-dim)' }}>
-                        {revenueSource === 'local' ? 'From uploaded reports' : revenueSource === 'api' ? 'Freestar API' : 'Estimated from views'}
+                        {revenueSource === 'local' ? 'From uploaded reports' : revenueSource === 'api' ? 'Freestar API' : 'Freestar data unavailable \u2014 check API token'}
                       </p>
                     </div>
                     {/* Expenses */}
@@ -1696,11 +1698,11 @@ export default function ExecDashboard() {
                       </div>
                     </div>
                     {/* Profit */}
-                    <div className="rounded-xl border px-5 py-4 relative overflow-hidden" style={{ background: 'var(--sm-card)', borderColor: profit >= 0 ? 'rgba(16,185,129,0.25)' : 'rgba(188,0,0,0.25)' }}>
-                      <div className="absolute top-0 left-0 w-1 h-full" style={{ background: profit >= 0 ? '#10b981' : '#bc0000' }} />
-                      <p className="text-xs font-bold uppercase tracking-wider mb-1" style={{ color: profit >= 0 ? '#10b981' : '#bc0000' }}>Profit</p>
-                      <p className="text-3xl font-extrabold tabular-nums" style={{ color: profit >= 0 ? '#10b981' : '#bc0000' }}>
-                        {profit < 0 ? '-' : ''}${Math.abs(profit).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    <div className="rounded-xl border px-5 py-4 relative overflow-hidden" style={{ background: 'var(--sm-card)', borderColor: profit != null && profit >= 0 ? 'rgba(16,185,129,0.25)' : 'rgba(188,0,0,0.25)' }}>
+                      <div className="absolute top-0 left-0 w-1 h-full" style={{ background: profit != null && profit >= 0 ? '#10b981' : '#bc0000' }} />
+                      <p className="text-xs font-bold uppercase tracking-wider mb-1" style={{ color: profit != null && profit >= 0 ? '#10b981' : '#bc0000' }}>Profit</p>
+                      <p className="text-3xl font-extrabold tabular-nums" style={{ color: profit != null && profit >= 0 ? '#10b981' : '#bc0000' }}>
+                        {profit != null ? `${profit < 0 ? '-' : ''}$${Math.abs(profit).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '\u2014'}
                       </p>
                       <p className="text-xs mt-1" style={{ color: 'var(--sm-text-dim)' }}>{margin}% margin</p>
                     </div>
