@@ -38,7 +38,7 @@ export function GoogleTab({ active }: { active: boolean }) {
     setBusy('backfill'); setOpMessage(null)
     try {
       const json = await callApi('/api/admin/google-intelligence/backfill?limit=500')
-      setOpMessage(`Enqueued ${json.enqueued} (deduped ${json.deduplicated}, skipped ${json.skipped}). Now run the worker.`)
+      setOpMessage(`Enqueued ${json.enqueued} articles + ${json.transparencyEnqueued ?? 0} transparency assets (deduped ${json.deduplicated}, skipped ${json.skipped}). Now run the worker.`)
     } catch (e) {
       setOpMessage(`Backfill failed: ${e instanceof Error ? e.message : String(e)}`)
     } finally {
