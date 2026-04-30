@@ -88,14 +88,18 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
     }
   }
 
-  const title = post.seo_title || post.title
+  const baseTitle = post.seo_title || post.title
+  const title = baseTitle.length > 55 ? baseTitle.substring(0, 55).trim() : `${baseTitle} | Sports Mockery`
   const description = post.seo_description || post.excerpt || ''
 
   return {
     title,
     description,
+    alternates: {
+      canonical: `https://sportsmockery.com/${category}/${slug}`,
+    },
     openGraph: {
-      title,
+      title: baseTitle,
       description,
       type: 'article',
       publishedTime: post.published_at,
@@ -115,7 +119,7 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
     },
     twitter: {
       card: 'summary_large_image',
-      title,
+      title: baseTitle,
       description,
       images: post.featured_image ? [post.featured_image] : [],
       site: '@sportsmockery',
