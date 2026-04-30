@@ -24,7 +24,7 @@ const RULE_FAMILY_LABEL: Record<string, string> = {
 }
 
 const SEVERITY_LABEL: Record<string, string> = {
-  blocker: 'Blocker',
+  critical: 'Critical',
   high: 'High',
   medium: 'Medium',
   low: 'Low',
@@ -283,10 +283,10 @@ function Pill({ tone, children }: { tone: 'red' | 'gold' | 'cyan' | 'muted'; chi
 }
 
 function severityRank(s: Recommendation['severity']): number {
-  return ({ blocker: 4, high: 3, medium: 2, low: 1, info: 0 } as Record<string, number>)[s] ?? 0
+  return ({ critical: 4, high: 3, medium: 2, low: 1, info: 0 } as Record<string, number>)[s] ?? 0
 }
 function severityTone(s: Recommendation['severity']): 'red' | 'gold' | 'cyan' | 'muted' {
-  if (s === 'blocker' || s === 'high') return 'red'
+  if (s === 'critical' || s === 'high') return 'red'
   if (s === 'medium') return 'gold'
   return 'cyan'
 }
