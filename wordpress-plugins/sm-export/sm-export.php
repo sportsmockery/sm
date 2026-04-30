@@ -3,7 +3,7 @@
  * Plugin Name: SM Export
  * Plugin URI: https://sportsmockery.com
  * Description: REST API endpoints for exporting WordPress content to the Next.js frontend. Exposes /authors, /categories, /posts, /post-views, and /post-comments endpoints.
- * Version: 1.3.0
+ * Version: 1.4.0
  * Author: SportsMockery
  * Author URI: https://sportsmockery.com
  * License: GPL-2.0+
@@ -54,8 +54,10 @@ add_action('rest_api_init', function () {
  * Get all authors and editors
  */
 function sm_export_get_authors() {
+    // Include every role that can be a post_author so the frontend doesn't fall back
+    // to "Sports Mockery" for posts written by admins/contributors.
     $users = get_users(array(
-        'role__in' => array('author', 'editor'),
+        'role__in' => array('administrator', 'editor', 'author', 'contributor'),
         'orderby'  => 'display_name',
         'order'    => 'ASC',
     ));
