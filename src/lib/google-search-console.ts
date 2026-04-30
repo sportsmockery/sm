@@ -8,7 +8,7 @@
 import { supabaseAdmin } from './supabase-server'
 
 export const GSC_PROVIDER = 'google_search_console'
-export const GSC_SCOPE = 'https://www.googleapis.com/auth/webmasters.readonly'
+export const GSC_SCOPE = 'openid email https://www.googleapis.com/auth/webmasters.readonly'
 
 export type GscTokenRow = {
   id: number
