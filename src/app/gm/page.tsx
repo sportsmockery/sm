@@ -1260,6 +1260,7 @@ export default function GMPage() {
   if (authLoading || pageLoading) {
     return (
       <div className="sm-hero-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <h1 className="sr-only">GM Trade Simulator — War Room</h1>
         <div className="sm-grid-overlay" />
         <div style={{ width: 32, height: 32, border: '3px solid var(--sm-red)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin-2030 1s linear infinite' }} />
       </div>
