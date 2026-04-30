@@ -12,9 +12,9 @@ const WP_SMED = 'https://www.sportsmockery.com/wp-json/smed/v1'
 function calculatePay(formulaCode: string, posts: number, views: number): number {
   try {
     // Sanitize: only allow digits, arithmetic operators, parentheses, whitespace, decimal points,
-    // and the variable names 'posts' and 'views'
+    // ternary/comparison operators, and the variable names 'posts' and 'views'
     const sanitized = formulaCode.replace(/\b(posts|views)\b/g, '__VAR__')
-    if (!/^[\d\s+\-*/()._%VAR_]+$/.test(sanitized)) {
+    if (!/^[\d\s+\-*/()._%VAR_<>?:]+$/.test(sanitized)) {
       console.error('[Writer Views] Rejected unsafe formula:', formulaCode)
       return 0
     }
