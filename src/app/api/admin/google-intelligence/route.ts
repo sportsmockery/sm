@@ -116,6 +116,17 @@ export async function GET() {
       categoryById.set(String(c.id), String(c.name ?? '—'))
     }
 
+    // Count open recommendations per article + per author so the leaderboard
+    // and analysis table can show "N issues to fix" accurately.
+    const articleRecCount = new Map<string, number>()
+    const authorRecCount = new Map<string, number>()
+    for (const r of (recsRes.data ?? []) as Array<Record<string, unknown>>) {
+      const scope = r.scope as string
+      const scopeId = String(r.scope_id)
+      if (scope === 'article')      articleRecCount.set(scopeId, (articleRecCount.get(scopeId) ?? 0) + 1)
+      else if (scope === 'author')  authorRecCount.set(scopeId,  (authorRecCount.get(scopeId)  ?? 0) + 1)
+    }
+
     const articles: ArticleAnalysisRow[] = scoreRows.map((r) => {
       const articleId = String(r.article_id)
       const authorId = (r.author_id as string | null) ?? null
@@ -134,7 +145,7 @@ export async function GET() {
         total: Number(r.total ?? 0),
         sub: r.sub as SubScores,
         headlineScore: Number(r.headline_score ?? 0),
-        recommendationCount: 0,
+        recommendationCount: articleRecCount.get(articleId) ?? 0,
         rulesetVersion: String(r.ruleset_version),
         status: (r.status as 'green' | 'amber' | 'red') ?? 'amber',
       }
@@ -172,7 +183,7 @@ export async function GET() {
           technical:        round1(agg.sub.technical / agg.n),
           opportunity:      round1(agg.sub.opportunity / agg.n),
         },
-        recommendationCount: 0,
+        recommendationCount: authorRecCount.get(id) ?? 0,
         trend: 0,
         lastRescoredAt: new Date().toISOString(),
         status: agg.total / agg.n >= 80 ? 'green' : agg.total / agg.n >= 60 ? 'amber' : 'red',

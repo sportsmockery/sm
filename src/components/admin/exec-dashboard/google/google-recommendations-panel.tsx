@@ -11,6 +11,7 @@ const SCOPE_LABEL: Record<Recommendation['scope'], string> = {
 }
 
 export function GoogleRecommendationsPanel({ recommendations }: { recommendations: Recommendation[] }) {
+  const [open, setOpen] = useState(false)
   const [scope, setScope] = useState<Recommendation['scope'] | 'all'>('all')
   const [severity, setSeverity] = useState<Recommendation['severity'] | 'all'>('all')
 
@@ -19,25 +20,42 @@ export function GoogleRecommendationsPanel({ recommendations }: { recommendation
     (severity === 'all' || r.severity === severity)
   ).sort((a, b) => sevWeight(b.severity) - sevWeight(a.severity) || b.impactScore - a.impactScore), [recommendations, scope, severity])
 
+  const criticalCount = recommendations.filter((r) => r.severity === 'critical' || r.severity === 'high').length
+
   return (
     <div className="rounded-lg border" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
-      <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-b" style={{ borderColor: 'var(--sm-border)' }}>
-        <h3 className="text-lg font-semibold" style={{ color: 'var(--sm-text)' }}>Recommendations</h3>
-        <div className="flex flex-wrap gap-2">
-          {(['all', 'article', 'author', 'sitewide', 'transparency_asset'] as const).map((s) => (
-            <Pill key={s} active={scope === s} onClick={() => setScope(s)} label={s === 'transparency_asset' ? 'transparency' : s} />
-          ))}
-          <span className="mx-1" style={{ color: 'var(--sm-text-dim)' }}>·</span>
-          {(['all', 'critical', 'high', 'medium', 'low', 'info'] as const).map((s) => (
-            <Pill key={s} active={severity === s} onClick={() => setSeverity(s)} label={s} />
-          ))}
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left"
+        style={{ borderBottom: open ? '1px solid var(--sm-border)' : 'none' }}
+      >
+        <div className="flex items-center gap-3">
+          <span style={{ display: 'inline-block', transform: open ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 150ms', color: 'var(--sm-text-dim)' }}>▶</span>
+          <h3 className="text-lg font-semibold" style={{ color: 'var(--sm-text)' }}>Recommendations</h3>
+          <span className="text-xs tabular-nums" style={{ color: 'var(--sm-text-dim)' }}>{recommendations.length} total</span>
+          {criticalCount > 0 && (
+            <span className="text-[10px] font-extrabold uppercase tracking-wider px-1.5 py-0.5 rounded" style={{ background: 'rgba(188,0,0,0.12)', color: C.red }}>{criticalCount} high+</span>
+          )}
         </div>
-      </div>
-      <div>
-        {filtered.length === 0 && (
-          <p className="px-4 py-8 text-center text-sm" style={{ color: 'var(--sm-text-dim)' }}>No recommendations match the current filters.</p>
-        )}
-        {filtered.map((r) => (
+        <span className="text-[11px] uppercase tracking-wider" style={{ color: 'var(--sm-text-dim)' }}>{open ? 'Hide' : 'Show'}</span>
+      </button>
+      {open && (
+        <>
+          <div className="flex flex-wrap items-center gap-2 px-4 py-3 border-b" style={{ borderColor: 'var(--sm-border)' }}>
+            {(['all', 'article', 'author', 'sitewide', 'transparency_asset'] as const).map((s) => (
+              <Pill key={s} active={scope === s} onClick={() => setScope(s)} label={s === 'transparency_asset' ? 'transparency' : s} />
+            ))}
+            <span className="mx-1" style={{ color: 'var(--sm-text-dim)' }}>·</span>
+            {(['all', 'critical', 'high', 'medium', 'low', 'info'] as const).map((s) => (
+              <Pill key={s} active={severity === s} onClick={() => setSeverity(s)} label={s} />
+            ))}
+          </div>
+          <div className="max-h-[600px] overflow-y-auto">
+            {filtered.length === 0 && (
+              <p className="px-4 py-8 text-center text-sm" style={{ color: 'var(--sm-text-dim)' }}>No recommendations match the current filters.</p>
+            )}
+            {filtered.map((r) => (
           <div key={r.id} className="px-4 py-3 flex items-start gap-4" style={{ borderBottom: '1px solid var(--sm-border)' }}>
             <SeverityBadge severity={r.severity} />
             <div className="flex-1 min-w-0">
@@ -59,7 +77,9 @@ export function GoogleRecommendationsPanel({ recommendations }: { recommendation
             </div>
           </div>
         ))}
-      </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }
