@@ -45,6 +45,8 @@ interface Data {
     overview: { rank: number; organicKeywords: number; organicTraffic: number; organicCost: number; adwordsKeywords: number; adwordsTraffic: number } | null
     keywords: Array<{ keyword: string; position: number; previousPosition: number; searchVolume: number; cpc: number; url: string; trafficPct: number; competition: number }>
     competitors: Array<{ domain: string; relevance: number; commonKeywords: number; organicKeywords: number; organicTraffic: number }>
+    monthLabel?: string
+    isHistorical?: boolean
   } | null
   paymentSync?: {
     sync: { status: string; lastSync: string | null; errorMessage?: string; writersSynced?: number; totalViewsSynced?: number }
@@ -1249,6 +1251,22 @@ export default function ExecDashboard() {
 
           {/* ═══════ SEO TAB ═══════ */}
           {tab === 'SEO' && <>
+            {data.seo?.monthLabel && (
+              <div
+                className="rounded-lg border px-4 py-2 text-xs flex items-center gap-2"
+                style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)', color: 'var(--sm-text-muted)' }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: C.blue }}>
+                  <rect x="3" y="4" width="18" height="18" rx="2" />
+                  <path d="M16 2v4M8 2v4M3 10h18" />
+                </svg>
+                <span>
+                  SEMRush data is monthly — showing snapshot for{' '}
+                  <span className="font-bold" style={{ color: 'var(--sm-text)' }}>{data.seo.monthLabel}</span>
+                  {data.seo.isHistorical && <span className="ml-1 opacity-70">(historical)</span>}
+                </span>
+              </div>
+            )}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[
                 { l: 'Domain Rank', v: data.seo?.overview ? fN(data.seo.overview.rank) : 'N/A', c: C.green, s: 'SEMRush' },

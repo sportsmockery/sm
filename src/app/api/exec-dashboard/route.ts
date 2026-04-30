@@ -80,7 +80,7 @@ export async function GET(request: Request) {
     const [editorial, social, seo, paymentSync] = await Promise.all([
       fetchEditorial(startDate, prevStart, endDate, days),
       fetchSocial(),
-      fetchSEO(),
+      fetchSEO(endDate, now),
       fetchPaymentSyncStatus(),
     ])
     return NextResponse.json({ ...editorial, social, seo, paymentSync, range, days, timestamp: Date.now() })
@@ -449,13 +449,33 @@ function parseSemrushCSV(csv: string): any[] {
   })
 }
 
-async function fetchSEO() {
+/**
+ * SEMRush historical data is monthly. Pick the right snapshot for the selected
+ * range's end date — but if the end is inside the current month, fall back to
+ * the live (current) snapshot since SEMRush hasn't published this month yet.
+ */
+function semrushSnapshotMonth(end: Date, now: Date): { displayDate: string | null; monthLabel: string } {
+  const endIsCurrentMonth =
+    end.getFullYear() === now.getFullYear() && end.getMonth() === now.getMonth()
+  if (endIsCurrentMonth) {
+    return { displayDate: null, monthLabel: 'Current (live snapshot)' }
+  }
+  const yyyy = end.getFullYear()
+  const mm = String(end.getMonth() + 1).padStart(2, '0')
+  const monthLabel = end.toLocaleString('en-US', { month: 'long', year: 'numeric' })
+  return { displayDate: `${yyyy}${mm}15`, monthLabel }
+}
+
+async function fetchSEO(endDate: Date, now: Date) {
   const key = process.env.SEMRUSH_API_KEY; if (!key) return null
   const domain = 'sportsmockery.com'
+  const { displayDate, monthLabel } = semrushSnapshotMonth(endDate, now)
+  const ddParam = displayDate ? `&display_date=${displayDate}` : ''
   try {
     const [overviewRes, keywordsRes, competitorsRes] = await Promise.allSettled([
-      fetch(`${SEMRUSH_API}/?type=domain_rank&key=${key}&export_columns=Db,Dn,Rk,Or,Ot,Oc,Ad,At,Ac&domain=${domain}&database=us`, { next: { revalidate: 3600 } }),
-      fetch(`${SEMRUSH_API}/?type=domain_organic&key=${key}&export_columns=Ph,Po,Pp,Pd,Nq,Cp,Ur,Tr,Tc,Co,Nr&domain=${domain}&database=us&display_limit=20&display_sort=tr_desc`, { next: { revalidate: 3600 } }),
+      fetch(`${SEMRUSH_API}/?type=domain_rank&key=${key}&export_columns=Db,Dn,Rk,Or,Ot,Oc,Ad,At,Ac&domain=${domain}&database=us${ddParam}`, { next: { revalidate: 3600 } }),
+      fetch(`${SEMRUSH_API}/?type=domain_organic&key=${key}&export_columns=Ph,Po,Pp,Pd,Nq,Cp,Ur,Tr,Tc,Co,Nr&domain=${domain}&database=us&display_limit=20&display_sort=tr_desc${ddParam}`, { next: { revalidate: 3600 } }),
+      // Competitor list — current snapshot (no historical equivalent)
       fetch(`${SEMRUSH_API}/?type=domain_organic_organic&key=${key}&export_columns=Dn,Cr,Np,Or,Ot,Oc,Ad&domain=${domain}&database=us&display_limit=10`, { next: { revalidate: 3600 } }),
     ])
 
@@ -502,7 +522,7 @@ async function fetchSEO() {
       }))
     }
 
-    return { overview, keywords, competitors }
+    return { overview, keywords, competitors, monthLabel, isHistorical: !!displayDate }
   } catch (e) {
     console.error('[Exec] SEMRush error:', e)
     return null
