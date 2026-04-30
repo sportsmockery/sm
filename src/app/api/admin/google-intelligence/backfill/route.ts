@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { requireAdmin, verifyCronSecret } from '@/lib/admin-auth'
 import { GoogleIngestionService } from '@/lib/google/google-ingestion-service'
 
 export const dynamic = 'force-dynamic'
@@ -14,15 +15,14 @@ export const maxDuration = 60
 
 const DEFAULT_LIMIT = 500
 
-function authorized(req: NextRequest): boolean {
-  const cronSecret = process.env.CRON_SECRET
-  if (!cronSecret) return true
-  const header = req.headers.get('authorization') ?? ''
-  return header === `Bearer ${cronSecret}`
+async function authorized(req: NextRequest): Promise<boolean> {
+  if (verifyCronSecret(req)) return true
+  const auth = await requireAdmin(req)
+  return !auth.error
 }
 
 async function runBackfill(req: NextRequest): Promise<NextResponse> {
-  if (!authorized(req)) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  if (!(await authorized(req))) return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
 
   const url = new URL(req.url)
   const limit = Math.min(5000, Math.max(1, parseInt(url.searchParams.get('limit') ?? String(DEFAULT_LIMIT), 10) || DEFAULT_LIMIT))
