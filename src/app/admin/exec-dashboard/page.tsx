@@ -479,6 +479,7 @@ export default function ExecDashboard() {
   const [editFormulaDesc, setEditFormulaDesc] = useState('')
   const [editFormulaCode, setEditFormulaCode] = useState('')
   const [editFormulaDate, setEditFormulaDate] = useState('')
+  const [savingFormulaId, setSavingFormulaId] = useState<string | null>(null)
   const [expandedHistoryMonth, setExpandedHistoryMonth] = useState<string | null>(null)
   // Freestar P&L state
   const [freestarRevenue, setFreestarRevenue] = useState<number | null>(null)
@@ -1334,6 +1335,33 @@ export default function ExecDashboard() {
                   setEditFormulaDate('')
                 }
 
+                const saveFormula = async (id: string) => {
+                  setSavingFormulaId(id)
+                  try {
+                    const r = await fetch('/api/admin/writer-formulas', {
+                      method: 'PATCH',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        id,
+                        formula_description: editFormulaDesc,
+                        formula_code: editFormulaCode,
+                        effective_from: editFormulaDate,
+                      }),
+                    })
+                    if (!r.ok) {
+                      const err = await r.json().catch(() => ({}))
+                      alert(err.error || `Save failed (${r.status})`)
+                      return
+                    }
+                    cancelEdit()
+                    await load(true)
+                  } catch (e: any) {
+                    alert(e?.message || 'Save failed')
+                  } finally {
+                    setSavingFormulaId(null)
+                  }
+                }
+
                 return (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     {formulas.map(f => (
@@ -1381,11 +1409,12 @@ export default function ExecDashboard() {
                                 Cancel
                               </button>
                               <button
-                                onClick={cancelEdit}
-                                className="text-xs font-bold px-2.5 py-1 rounded transition-colors"
+                                onClick={() => saveFormula(f.id)}
+                                disabled={savingFormulaId === f.id}
+                                className="text-xs font-bold px-2.5 py-1 rounded transition-colors disabled:opacity-50"
                                 style={{ background: 'var(--sm-red)', color: '#fff' }}
                               >
-                                Save
+                                {savingFormulaId === f.id ? 'Saving…' : 'Save'}
                               </button>
                             </div>
                           </div>

@@ -1,31 +1,11 @@
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { calculatePay } from '@/lib/payment-formula'
 
 export const maxDuration = 60
 export const dynamic = 'force-dynamic'
 
 const WP_SMED = 'https://www.sportsmockery.com/wp-json/smed/v1'
-
-// Payment formulas — safely evaluated with { posts, views } in scope
-// These match the formulas stored in writer_payment_formulas table
-// Only allows simple arithmetic expressions with posts/views variables
-function calculatePay(formulaCode: string, posts: number, views: number): number {
-  try {
-    // Sanitize: only allow digits, arithmetic operators, parentheses, whitespace, decimal points,
-    // ternary/comparison operators, and the variable names 'posts' and 'views'
-    const sanitized = formulaCode.replace(/\b(posts|views)\b/g, '__VAR__')
-    if (!/^[\d\s+\-*/()._%VAR_<>?:]+$/.test(sanitized)) {
-      console.error('[Writer Views] Rejected unsafe formula:', formulaCode)
-      return 0
-    }
-    const fn = new Function('posts', 'views', `"use strict"; return ${formulaCode}`)
-    const result = fn(posts, views)
-    if (typeof result !== 'number' || !isFinite(result)) return 0
-    return Math.round(result * 100) / 100
-  } catch {
-    return 0
-  }
-}
 
 export async function GET(request: Request) {
   // Verify cron authorization (required)
@@ -89,6 +69,44 @@ export async function GET(request: Request) {
     const formulaMap = new Map(
       (formulas || []).map((f: any) => [f.writer_name.toLowerCase(), f])
     )
+
+    // 2b. Auto-create stub formula rows for any new writer that has no formula yet,
+    // so they show up in the admin dashboard's Formulas panel and can be edited via UI.
+    const writersMissingFormula = writers.filter(
+      w => !formulaMap.has(w.display_name.toLowerCase())
+    )
+    if (writersMissingFormula.length > 0) {
+      // Skip writers that already have any formula row (active or not) to avoid duplicates
+      const { data: existingRows } = await supabaseAdmin
+        .from('writer_payment_formulas')
+        .select('writer_name')
+        .in('writer_name', writersMissingFormula.map(w => w.display_name))
+      const alreadyHasRow = new Set(
+        (existingRows || []).map((r: any) => String(r.writer_name).toLowerCase())
+      )
+      const stubs = writersMissingFormula
+        .filter(w => !alreadyHasRow.has(w.display_name.toLowerCase()))
+        .map(w => ({
+          writer_name: w.display_name,
+          writer_id: w.author_id,
+          formula_code: '0',
+          formula_description: 'Not configured — edit in dashboard',
+          is_active: true,
+        }))
+      if (stubs.length > 0) {
+        const { data: inserted, error: insertErr } = await supabaseAdmin
+          .from('writer_payment_formulas')
+          .insert(stubs)
+          .select()
+        if (insertErr) {
+          console.error('[sync-writer-views] Stub formula insert failed:', insertErr)
+        } else {
+          for (const f of inserted || []) {
+            formulaMap.set(String((f as any).writer_name).toLowerCase(), f)
+          }
+        }
+      }
+    }
 
     // 3. Calculate payments and upsert
     const paymentRows = writers.map(w => {
