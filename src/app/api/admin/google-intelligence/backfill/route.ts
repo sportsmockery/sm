@@ -37,9 +37,37 @@ async function runBackfill(req: NextRequest): Promise<NextResponse> {
     const url = new URL(req.url)
     const limit = Math.min(5000, Math.max(1, parseInt(url.searchParams.get('limit') ?? String(DEFAULT_LIMIT), 10) || DEFAULT_LIMIT))
     const onlyMissing = url.searchParams.get('onlyMissing') !== 'false'
+    const includeTransparency = url.searchParams.get('transparency') !== 'false'
 
     const ingest = new GoogleIngestionService(supabaseAdmin)
     const ruleset = await ingest.getActiveRuleset()
+
+    // Re-enqueue every transparency asset on each backfill so heuristics drift
+    // (loosened keywords, new social platforms, etc.) gets picked up the next
+    // time the worker ticks.
+    let transparencyEnqueued = 0
+    if (includeTransparency) {
+      const { data: assets } = await supabaseAdmin
+        .from('google_transparency_assets')
+        .select('id,asset_type')
+      for (const a of (assets ?? []) as Array<{ id: string; asset_type: string }>) {
+        const trigger = ({
+          about_page: 'transparency.about_updated',
+          contact_page: 'transparency.contact_updated',
+          author_page: 'transparency.author_page_updated',
+          publisher_identity: 'transparency.publisher_updated',
+          editorial_policy_page: 'transparency.editorial_policy_updated',
+          disclosure_page: 'transparency.editorial_policy_updated',
+        } as Record<string, string>)[a.asset_type]
+        if (!trigger) continue
+        try {
+          await ingest.enqueue({ articleId: a.id, trigger: trigger as Parameters<typeof ingest.enqueue>[0]['trigger'], actor: 'backfill', payload: { kind: 'transparency_asset', assetId: a.id } })
+          transparencyEnqueued += 1
+        } catch (e) {
+          console.warn('[backfill] transparency enqueue failed for', a.id, e)
+        }
+      }
+    }
 
     // 1. Pull recent published posts.
     const { data: posts, error: postsErr } = await supabaseAdmin
@@ -127,6 +155,7 @@ async function runBackfill(req: NextRequest): Promise<NextResponse> {
       enqueued,
       deduplicated,
       skipped,
+      transparencyEnqueued,
       insertErrors: insertErrors.slice(0, 5),
       insertErrorCount: insertErrors.length,
     })

@@ -20,20 +20,30 @@ export async function GET() {
   try {
     const db = createServerClient()
 
-    const [scoresRes, writersRes, recsRes, rulesRes, queueRes, eventsRes, auditRes, rulesetRes, assetsRes, assetEvalsRes] = await Promise.all([
-      db.from('google_article_scores').select('*').order('total', { ascending: true }).limit(50),
+    // 1. Pull the score corpus + sitewide context first.
+    const [scoresRes, writersRes, queueRes, eventsRes, auditRes, rulesetRes, assetsRes, assetEvalsRes] = await Promise.all([
+      db.from('google_article_scores').select('*').order('total', { ascending: true }).limit(500),
       db.from('google_article_scores').select('author_id, total, sub').not('author_id', 'is', null),
-      db.from('google_recommendations').select('*').neq('status', 'expired').order('severity', { ascending: false }).limit(100),
-      db.from('google_rule_evaluations').select('*').neq('status', 'pass').order('evaluated_at', { ascending: false }).limit(200),
       db.from('google_scoring_jobs').select('id, trigger, status, completed_at, enqueued_at').order('enqueued_at', { ascending: false }).limit(500),
       db.from('google_system_events').select('id, type, occurred_at').order('occurred_at', { ascending: false }).limit(50),
       db.from('google_audit_log').select('id, actor, action, target, metadata, occurred_at').order('occurred_at', { ascending: false }).limit(25),
       db.from('google_ruleset_versions').select('version, weighting, rule_count, published_at').eq('is_active', true).maybeSingle(),
       db.from('google_transparency_assets').select('*').order('asset_type', { ascending: true }),
-      db.from('google_transparency_asset_evaluations').select('*').neq('status', 'pass').order('evaluated_at', { ascending: false }).limit(200),
+      db.from('google_transparency_asset_evaluations').select('*').neq('status', 'pass').order('evaluated_at', { ascending: false }).limit(500),
     ])
 
     const scoreRows = (scoresRes.data ?? []) as Array<Record<string, unknown>>
+
+    // 2. Now fetch rule evaluations + recommendations scoped to the article
+    //    ids we actually have scores for, so per-article expansion always
+    //    reflects real DB state instead of being capped by a sitewide limit.
+    const scoredArticleIds = scoreRows.map((r) => String(r.article_id))
+    const [recsRes, rulesRes] = scoredArticleIds.length > 0
+      ? await Promise.all([
+          db.from('google_recommendations').select('*').neq('status', 'expired').or(`scope_id.in.(${scoredArticleIds.map((id) => `"${id}"`).join(',')}),scope.eq.sitewide,scope.eq.author`).order('severity', { ascending: false }).limit(2000),
+          db.from('google_rule_evaluations').select('*').neq('status', 'pass').in('article_id', scoredArticleIds).order('evaluated_at', { ascending: false }).limit(5000),
+        ])
+      : [{ data: [] as Array<Record<string, unknown>> }, { data: [] as Array<Record<string, unknown>> }]
     const transparencyAssetsRawForGate = (assetsRes.data ?? []) as Array<Record<string, unknown>>
 
     // Full mock only when *both* article scores and transparency assets are empty.
