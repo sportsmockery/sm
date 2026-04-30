@@ -4,9 +4,8 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import Image from 'next/image'
 import {
   ResponsiveContainer, ComposedChart, Area, Line, Bar, XAxis, YAxis,
-  CartesianGrid, Tooltip as RTooltip, Legend, RadarChart, PolarGrid,
-  PolarAngleAxis, PolarRadiusAxis, Radar, BarChart, PieChart, Pie, Cell,
-  AreaChart, ReferenceLine,
+  CartesianGrid, Tooltip as RTooltip, Legend, BarChart, Cell,
+  ReferenceLine,
 } from 'recharts'
 import { GoogleTab } from '@/components/admin/exec-dashboard/google/google-tab'
 
@@ -80,23 +79,6 @@ const pctUp = (c: number, p: number) => p === 0 ? c > 0 : c >= p
 const fD = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 const fM = (m: string) => { const [y, mo] = m.split('-'); return new Date(+y, +mo - 1).toLocaleDateString('en-US', { month: 'short', year: '2-digit' }) }
 const tAgo = (t: number) => { const s = Math.floor((Date.now() - t) / 1000); return s < 60 ? 'just now' : s < 3600 ? Math.floor(s / 60) + 'm ago' : s < 86400 ? Math.floor(s / 3600) + 'h ago' : Math.floor(s / 86400) + 'd ago' }
-
-// Simulated traffic source splits per writer (deterministic from name hash)
-function trafficSplit(name: string) {
-  let h = 0; for (let i = 0; i < name.length; i++) h = ((h << 5) - h + name.charCodeAt(i)) | 0
-  const abs = Math.abs(h)
-  const organic = 20 + (abs % 40)
-  const discover = 10 + ((abs >> 4) % 25)
-  const social = 5 + ((abs >> 8) % 35)
-  const direct = 100 - organic - discover - social
-  return { organic: Math.max(5, organic), discover: Math.max(5, discover), social: Math.max(5, Math.min(social, 60)), direct: Math.max(5, direct) }
-}
-
-// Simulated evergreen % per writer
-function evergreenPct(name: string) {
-  let h = 0; for (let i = 0; i < name.length; i++) h = ((h << 5) - h + name.charCodeAt(i)) | 0
-  return 15 + Math.abs(h % 55)
-}
 
 // Freestar metrics type (mirrors pub.network dashboard)
 type FreestarMetrics = {
@@ -194,149 +176,6 @@ function AnswerCards({ answers }: { answers: Array<{ q: string; a: string; actio
           <p className="text-sm leading-relaxed" style={{ color: 'var(--sm-text)' }}>{ans.a}</p>
         </div>
       ))}
-    </div>
-  )
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// TRAFFIC SOURCE BREAKDOWN
-// ═══════════════════════════════════════════════════════════════════════════════
-function TrafficSourceBreakdown({ writers }: { writers: Data['writers'] }) {
-  // Aggregate sitewide traffic split
-  const totals = { organic: 0, discover: 0, social: 0, direct: 0, total: 0 }
-  writers.forEach(w => {
-    const s = trafficSplit(w.name)
-    const v = Math.max(w.views, w.posts * 200)
-    totals.organic += v * s.organic / 100
-    totals.discover += v * s.discover / 100
-    totals.social += v * s.social / 100
-    totals.direct += v * s.direct / 100
-    totals.total += v
-  })
-  const pcts = totals.total > 0
-    ? { organic: (totals.organic / totals.total * 100).toFixed(1), discover: (totals.discover / totals.total * 100).toFixed(1), social: (totals.social / totals.total * 100).toFixed(1), direct: (totals.direct / totals.total * 100).toFixed(1) }
-    : { organic: '0', discover: '0', social: '0', direct: '0' }
-  const pieData = [
-    { name: 'Organic', value: totals.organic, fill: C.green },
-    { name: 'Discover', value: totals.discover, fill: C.blue },
-    { name: 'Social', value: totals.social, fill: C.purple },
-    { name: 'Direct', value: totals.direct, fill: C.amber },
-  ]
-  // Writers with high social reliance
-  const socialRisk = writers
-    .map(w => ({ name: w.name, pct: trafficSplit(w.name).social }))
-    .filter(w => w.pct > 40)
-    .sort((a, b) => b.pct - a.pct)
-
-  return (
-    <div className="rounded-lg border overflow-visible" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
-      <div className="px-4 py-3 border-b flex items-center justify-between" style={{ borderColor: 'var(--sm-border)' }}>
-        <h3 className="text-lg font-semibold" style={{ color: 'var(--sm-text)' }}>Traffic Source Breakdown</h3>
-        {socialRisk.length > 0 && (
-          <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(239,68,68,0.12)', color: C.red }}>
-            {socialRisk.length} writer{socialRisk.length > 1 ? 's' : ''} social-reliant
-          </span>
-        )}
-      </div>
-      <div className="p-4 flex gap-6 items-start">
-        {/* Pie chart */}
-        <div style={{ width: 180, height: 180, flexShrink: 0 }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie data={pieData} dataKey="value" cx="50%" cy="50%" innerRadius={45} outerRadius={75} strokeWidth={0}>
-                {pieData.map((d, i) => <Cell key={i} fill={d.fill} />)}
-              </Pie>
-              <RTooltip content={<ChartTip />} />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-        {/* Breakdown + risk */}
-        <div className="flex-1 min-w-0">
-          <div className="grid grid-cols-2 gap-x-6 gap-y-3 mb-4">
-            {[
-              { label: 'Organic', pct: pcts.organic, color: C.green },
-              { label: 'Discover', pct: pcts.discover, color: C.blue },
-              { label: 'Social', pct: pcts.social, color: C.purple },
-              { label: 'Direct', pct: pcts.direct, color: C.amber },
-            ].map(s => (
-              <div key={s.label} className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-sm flex-shrink-0" style={{ background: s.color }} />
-                <span className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>{s.label}</span>
-                <span className="text-sm font-bold tabular-nums ml-auto" style={{ color: s.color }}>{s.pct}%</span>
-              </div>
-            ))}
-          </div>
-          {socialRisk.length > 0 && (
-            <div className="rounded border p-3" style={{ background: 'rgba(239,68,68,0.04)', borderColor: 'rgba(239,68,68,0.15)' }}>
-              <p className="text-xs font-bold mb-1.5" style={{ color: C.red }}>Social Reliance Warnings ({'>'}40%)</p>
-              {socialRisk.slice(0, 5).map(w => (
-                <div key={w.name} className="flex items-center justify-between py-0.5">
-                  <span className="text-sm" style={{ color: 'var(--sm-text)' }}>{w.name}</span>
-                  <span className="text-sm font-bold tabular-nums" style={{ color: C.red }}>{w.pct}%</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// EVERGREEN INDEX
-// ═══════════════════════════════════════════════════════════════════════════════
-function EvergreenIndex({ writers, publishingTrend }: { writers: Data['writers']; publishingTrend: Data['publishingTrend'] }) {
-  const avgEvergreen = writers.length > 0 ? Math.round(writers.reduce((s, w) => s + evergreenPct(w.name), 0) / writers.length) : 0
-  const trendData = publishingTrend.slice(-14).map((d, i) => ({
-    date: fD(d.date),
-    evergreen: Math.max(10, avgEvergreen + Math.round(Math.sin(i * 0.5) * 8)),
-  }))
-  const topEvergreen = [...writers].sort((a, b) => evergreenPct(b.name) - evergreenPct(a.name)).slice(0, 5)
-
-  return (
-    <div className="rounded-lg border overflow-visible" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
-      <div className="px-4 py-3 border-b flex items-center gap-3" style={{ borderColor: 'var(--sm-border)' }}>
-        <h3 className="text-lg font-semibold" style={{ color: 'var(--sm-text)' }}>Evergreen Index</h3>
-        <span className="text-sm font-bold tabular-nums px-2 py-0.5 rounded-full" style={{ background: 'rgba(16,185,129,0.12)', color: C.green }}>{avgEvergreen}% overall</span>
-      </div>
-      <div className="p-4 flex gap-6 items-start">
-        {/* Trend */}
-        <div className="flex-1" style={{ minHeight: 160 }}>
-          <p className="text-xs font-bold uppercase tracking-wide mb-2" style={{ color: 'var(--sm-text-dim)' }}>Evergreen % Trend (14d)</p>
-          <ResponsiveContainer width="100%" height={140}>
-            <AreaChart data={trendData}>
-              <defs>
-                <linearGradient id="egGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={C.green} stopOpacity={0.3} />
-                  <stop offset="100%" stopColor={C.green} stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <XAxis dataKey="date" tick={{ fill: '#55556a', fontSize: 11 }} tickLine={false} axisLine={false} />
-              <YAxis domain={[0, 100]} tick={{ fill: '#55556a', fontSize: 11 }} tickLine={false} axisLine={false} width={30} />
-              <RTooltip content={<ChartTip />} />
-              <Area type="monotone" dataKey="evergreen" stroke={C.green} fill="url(#egGrad)" strokeWidth={2} dot={false} activeDot={{ r: 4, fill: C.green }} name="Evergreen %" />
-              <ReferenceLine y={avgEvergreen} stroke={C.green} strokeDasharray="4 4" strokeOpacity={0.5} />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-        {/* Top evergreen creators */}
-        <div style={{ width: 200, flexShrink: 0 }}>
-          <p className="text-xs font-bold uppercase tracking-wide mb-2" style={{ color: 'var(--sm-text-dim)' }}>Top Evergreen Creators</p>
-          {topEvergreen.map(w => {
-            const pct = evergreenPct(w.name)
-            return (
-              <div key={w.id} className="flex items-center gap-2 py-1.5">
-                <span className="text-sm truncate flex-1" style={{ color: 'var(--sm-text)' }}>{w.name}</span>
-                <div className="w-16 h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--sm-border)' }}>
-                  <div className="h-full rounded-full" style={{ width: `${pct}%`, background: C.green }} />
-                </div>
-                <span className="text-xs font-bold tabular-nums w-8 text-right" style={{ color: C.green }}>{pct}%</span>
-              </div>
-            )
-          })}
-        </div>
-      </div>
     </div>
   )
 }
@@ -464,19 +303,8 @@ function Section({ title, badge, children, actions }: { title: string; badge?: R
 // ═══════════════════════════════════════════════════════════════════════════════
 // WRITER DRAWER CONTENT
 // ═══════════════════════════════════════════════════════════════════════════════
-function WriterDrawerContent({ writer }: { writer: Data['writers'][0] }) {
-  const ts = trafficSplit(writer.name)
-  const eg = evergreenPct(writer.name)
-  const sourceData = [
-    { name: 'Organic', value: ts.organic, fill: C.green },
-    { name: 'Discover', value: ts.discover, fill: C.blue },
-    { name: 'Social', value: ts.social, fill: C.purple },
-    { name: 'Direct', value: ts.direct, fill: C.amber },
-  ]
-  const monthlyOutput = Array.from({ length: 6 }, (_, i) => ({
-    month: new Date(Date.now() - (5 - i) * 30 * 86400000).toLocaleDateString('en-US', { month: 'short' }),
-    posts: Math.max(1, Math.round(writer.posts / 6 + (Math.sin(i) * writer.posts / 12))),
-  }))
+function WriterDrawerContent({ writer, trend }: { writer: Data['writers'][0]; trend: Array<{ month: string; count: number }> }) {
+  const monthlyOutput = trend.map(d => ({ month: fM(d.month), posts: d.count }))
 
   return (
     <>
@@ -503,42 +331,20 @@ function WriterDrawerContent({ writer }: { writer: Data['writers'][0] }) {
           </div>
         ))}
       </div>
-      {/* Traffic by source */}
-      <div>
-        <p className="text-sm font-bold uppercase tracking-wide mb-2" style={{ color: 'var(--sm-text-dim)' }}>Traffic by Source</p>
-        <ResponsiveContainer width="100%" height={180}>
-          <PieChart>
-            <Pie data={sourceData} dataKey="value" cx="50%" cy="50%" innerRadius={40} outerRadius={70} strokeWidth={0}>
-              {sourceData.map((d, i) => <Cell key={i} fill={d.fill} />)}
-            </Pie>
-            <RTooltip content={<ChartTip />} />
-            <Legend iconType="circle" iconSize={8} formatter={(v: string) => <span style={{ color: 'var(--sm-text-muted)', fontSize: 13 }}>{v}</span>} />
-          </PieChart>
-        </ResponsiveContainer>
-        {ts.social > 40 && (
-          <div className="rounded border px-3 py-2 mt-2" style={{ background: 'rgba(239,68,68,0.06)', borderColor: 'rgba(239,68,68,0.2)' }}>
-            <p className="text-sm font-bold" style={{ color: C.red }}>Social Reliance: {ts.social}%</p>
-            <p className="text-xs" style={{ color: 'var(--sm-text-muted)' }}>Above 40% threshold. This writer may be over-reliant on social traffic.</p>
-          </div>
-        )}
-      </div>
-      {/* Evergreen */}
-      <div className="flex items-center justify-between rounded-lg p-3" style={{ background: 'var(--sm-card-hover)' }}>
-        <span className="text-sm" style={{ color: 'var(--sm-text-muted)' }}>Evergreen Index</span>
-        <span className="text-lg font-extrabold tabular-nums" style={{ color: C.green }}>{eg}%</span>
-      </div>
-      {/* Monthly output */}
-      <div>
-        <p className="text-sm font-bold uppercase tracking-wide mb-2" style={{ color: 'var(--sm-text-dim)' }}>Monthly Output</p>
-        <ResponsiveContainer width="100%" height={120}>
-          <BarChart data={monthlyOutput}>
-            <XAxis dataKey="month" tick={{ fill: '#55556a', fontSize: 12 }} tickLine={false} axisLine={false} />
-            <YAxis tick={{ fill: '#55556a', fontSize: 12 }} tickLine={false} axisLine={false} width={25} />
-            <RTooltip content={<ChartTip />} />
-            <Bar dataKey="posts" fill={C.blue} radius={[4, 4, 0, 0]} name="Posts" />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+      {/* Monthly output (real data) */}
+      {monthlyOutput.length > 0 && (
+        <div>
+          <p className="text-sm font-bold uppercase tracking-wide mb-2" style={{ color: 'var(--sm-text-dim)' }}>Monthly Output</p>
+          <ResponsiveContainer width="100%" height={120}>
+            <BarChart data={monthlyOutput}>
+              <XAxis dataKey="month" tick={{ fill: '#55556a', fontSize: 12 }} tickLine={false} axisLine={false} />
+              <YAxis tick={{ fill: '#55556a', fontSize: 12 }} tickLine={false} axisLine={false} width={25} allowDecimals={false} />
+              <RTooltip content={<ChartTip />} />
+              <Bar dataKey="posts" fill={C.blue} radius={[4, 4, 0, 0]} name="Posts" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
       {/* Categories */}
       {writer.topCategories.length > 0 && (
         <div>
@@ -558,19 +364,6 @@ function WriterDrawerContent({ writer }: { writer: Data['writers'][0] }) {
 // POST DRAWER CONTENT
 // ═══════════════════════════════════════════════════════════════════════════════
 function PostDrawerContent({ post }: { post: any }) {
-  const ts = trafficSplit(post.author_name || 'unknown')
-  const sourceData = [
-    { name: 'Organic', value: ts.organic, fill: C.green },
-    { name: 'Discover', value: ts.discover, fill: C.blue },
-    { name: 'Social', value: ts.social, fill: C.purple },
-    { name: 'Direct', value: ts.direct, fill: C.amber },
-  ]
-  const eg = evergreenPct(post.title || 'x')
-  const trendData = Array.from({ length: 7 }, (_, i) => ({
-    day: `Day ${i + 1}`,
-    views: Math.round((post.views || 100) / 7 * (1 + Math.sin(i * 0.8) * 0.5)),
-  }))
-
   return (
     <>
       <div>
@@ -582,7 +375,7 @@ function PostDrawerContent({ post }: { post: any }) {
       <div className="grid grid-cols-2 gap-3">
         {[
           { l: 'Views', v: fN(post.views || 0), c: C.blue },
-          { l: 'Evergreen', v: eg + '%', c: C.green },
+          { l: 'Published', v: fD(post.published_at), c: C.purple },
         ].map(s => (
           <div key={s.l} className="rounded-lg p-3 text-center" style={{ background: 'var(--sm-card-hover)' }}>
             <p className="text-xs font-semibold uppercase" style={{ color: 'var(--sm-text-dim)' }}>{s.l}</p>
@@ -590,31 +383,11 @@ function PostDrawerContent({ post }: { post: any }) {
           </div>
         ))}
       </div>
-      {/* Trend chart */}
-      <div>
-        <p className="text-sm font-bold uppercase tracking-wide mb-2" style={{ color: 'var(--sm-text-dim)' }}>Views Trend</p>
-        <ResponsiveContainer width="100%" height={140}>
-          <AreaChart data={trendData}>
-            <XAxis dataKey="day" tick={{ fill: '#55556a', fontSize: 12 }} tickLine={false} axisLine={false} />
-            <YAxis tick={{ fill: '#55556a', fontSize: 12 }} tickLine={false} axisLine={false} width={35} />
-            <RTooltip content={<ChartTip />} />
-            <Area type="monotone" dataKey="views" stroke={C.blue} fill={C.blue + '20'} strokeWidth={2} dot={false} name="Views" />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
-      {/* Traffic by source */}
-      <div>
-        <p className="text-sm font-bold uppercase tracking-wide mb-2" style={{ color: 'var(--sm-text-dim)' }}>Traffic by Source</p>
-        <ResponsiveContainer width="100%" height={160}>
-          <PieChart>
-            <Pie data={sourceData} dataKey="value" cx="50%" cy="50%" innerRadius={35} outerRadius={60} strokeWidth={0}>
-              {sourceData.map((d, i) => <Cell key={i} fill={d.fill} />)}
-            </Pie>
-            <RTooltip content={<ChartTip />} />
-            <Legend iconType="circle" iconSize={8} formatter={(v: string) => <span style={{ color: 'var(--sm-text-muted)', fontSize: 13 }}>{v}</span>} />
-          </PieChart>
-        </ResponsiveContainer>
-      </div>
+      {post.featured_image && (
+        <div className="rounded-lg overflow-hidden" style={{ border: '1px solid var(--sm-border)' }}>
+          <Image src={post.featured_image} alt="" width={448} height={252} className="w-full h-auto" />
+        </div>
+      )}
       {post.slug && (
         <a href={`https://www.sportsmockery.com/${post.slug}`} target="_blank" rel="noopener noreferrer"
           className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold transition-colors"
@@ -628,69 +401,46 @@ function PostDrawerContent({ post }: { post: any }) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// CONTENT SCORE (redesigned: no internal scroll)
+// TOP ARTICLES BY VIEWS
 // ═══════════════════════════════════════════════════════════════════════════════
-function ContentScoreModule({ topContent, overview, onPostClick }: { topContent: any[]; overview: Data['overview']; onPostClick: (post: any) => void }) {
-  const weights = { views: 0.35, engagement: 0.25, timeOnPage: 0.15, social: 0.15, velocity: 0.10 }
-  const scored = topContent.map(p => {
-    let h = 0; for (let i = 0; i < (p.title || '').length; i++) h = ((h << 5) - h + (p.title || '').charCodeAt(i)) | 0
-    const abs = Math.abs(h)
-    const dims = {
-      views: Math.min(100, 20 + (abs % 60)),
-      engagement: Math.min(100, 15 + ((abs >> 3) % 55)),
-      timeOnPage: Math.min(100, 25 + ((abs >> 6) % 50)),
-      social: Math.min(100, 10 + ((abs >> 9) % 65)),
-      velocity: Math.min(100, 30 + ((abs >> 12) % 50)),
-    }
-    const score = Math.round(dims.views * weights.views + dims.engagement * weights.engagement + dims.timeOnPage * weights.timeOnPage + dims.social * weights.social + dims.velocity * weights.velocity)
-    return { ...p, dims, score }
-  }).sort((a, b) => b.score - a.score)
-
-  const barData = scored.slice(0, 10).map(p => ({
+function TopArticlesModule({ topContent, onPostClick }: { topContent: any[]; onPostClick: (post: any) => void }) {
+  const ranked = [...topContent].sort((a, b) => (b.views || 0) - (a.views || 0))
+  const barData = ranked.slice(0, 10).map(p => ({
     name: (p.title || '').substring(0, 30) + ((p.title || '').length > 30 ? '...' : ''),
-    score: p.score,
-    fill: p.score >= 70 ? C.green : p.score >= 50 ? C.amber : C.red,
+    views: p.views || 0,
   }))
+
+  if (ranked.length === 0) {
+    return (
+      <Section title="Top Articles">
+        <p className="text-sm py-4 text-center" style={{ color: 'var(--sm-text-dim)' }}>No view data available for this period.</p>
+      </Section>
+    )
+  }
 
   return (
     <>
-      {/* Score Overview: weights + bar chart */}
-      <Section title="Content Score" badge={<span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: C.blue + '15', color: C.blue }}>COMPOSITE</span>}>
-        <div className="flex gap-6 items-start">
-          <div style={{ width: 180, flexShrink: 0 }}>
-            <p className="text-xs font-bold uppercase tracking-wide mb-2" style={{ color: 'var(--sm-text-dim)' }}>Weights</p>
-            {Object.entries(weights).map(([k, v]) => (
-              <div key={k} className="flex items-center justify-between py-1">
-                <span className="text-sm capitalize" style={{ color: 'var(--sm-text-muted)' }}>{k.replace(/([A-Z])/g, ' $1')}</span>
-                <span className="text-sm font-bold tabular-nums" style={{ color: C.blue }}>{Math.round(v * 100)}%</span>
-              </div>
-            ))}
-          </div>
-          <div className="flex-1" style={{ minHeight: 280 }}>
-            <ResponsiveContainer width="100%" height={280}>
-              <BarChart data={barData} layout="vertical">
-                <XAxis type="number" domain={[0, 100]} tick={{ fill: '#55556a', fontSize: 12 }} tickLine={false} axisLine={false} />
-                <YAxis type="category" dataKey="name" width={200} tick={{ fill: '#8a8a9a', fontSize: 12 }} tickLine={false} axisLine={false} />
-                <RTooltip content={<ChartTip />} />
-                <Bar dataKey="score" radius={[0, 4, 4, 0]} name="Score">
-                  {barData.map((d, i) => <Cell key={i} fill={d.fill} />)}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+      <Section title="Top Articles by Views" badge={<span className="text-xs tabular-nums" style={{ color: 'var(--sm-text-dim)' }}>{ranked.length} articles</span>}>
+        <ResponsiveContainer width="100%" height={Math.max(280, barData.length * 28)}>
+          <BarChart data={barData} layout="vertical">
+            <XAxis type="number" tick={{ fill: '#55556a', fontSize: 12 }} tickLine={false} axisLine={false} tickFormatter={fN} />
+            <YAxis type="category" dataKey="name" width={220} tick={{ fill: '#8a8a9a', fontSize: 12 }} tickLine={false} axisLine={false} />
+            <RTooltip content={<ChartTip />} />
+            <Bar dataKey="views" fill={C.blue} radius={[0, 4, 4, 0]} name="Views" />
+          </BarChart>
+        </ResponsiveContainer>
       </Section>
-      {/* Article Table */}
-      <Section title="Article Scores">
+      <Section title="Article Performance">
         <SortableTable
           columns={[
-            { key: 'rank', label: '#', align: 'center', render: (_v: any, _r: any) => { const idx = scored.indexOf(_r); return <span className="font-bold tabular-nums" style={{ color: idx < 3 ? C.amber : 'var(--sm-text-dim)' }}>{idx + 1}</span> } },
+            { key: 'rank', label: '#', align: 'center', render: (_v: any, _r: any) => { const idx = ranked.indexOf(_r); return <span className="font-bold tabular-nums" style={{ color: idx < 3 ? C.amber : 'var(--sm-text-dim)' }}>{idx + 1}</span> } },
             { key: 'title', label: 'Article', render: (v: string) => <span className="font-medium truncate block" style={{ maxWidth: 350 }}>{v}</span> },
             { key: 'author_name', label: 'Author' },
-            { key: 'score', label: 'Score', align: 'right', render: (v: number) => <span className="font-bold tabular-nums" style={{ color: v >= 70 ? C.green : v >= 50 ? C.amber : C.red }}>{v}</span> },
-            { key: 'views', label: 'Views', align: 'right', priority: 'low', render: (v: number) => <span className="font-bold tabular-nums" style={{ color: C.blue }}>{fN(v || 0)}</span> },
+            { key: 'category_name', label: 'Category', priority: 'low', render: (v: string) => v ? <span className="px-2 py-0.5 rounded-full text-xs font-semibold" style={{ background: C.blue + '12', color: C.blue }}>{v}</span> : null },
+            { key: 'views', label: 'Views', align: 'right', render: (v: number) => <span className="font-bold tabular-nums" style={{ color: C.blue }}>{fN(v || 0)}</span> },
+            { key: 'published_at', label: 'Date', align: 'right', priority: 'low', render: (v: string) => v ? <span style={{ color: 'var(--sm-text-muted)' }}>{fD(v)}</span> : null },
           ]}
-          data={scored}
+          data={ranked}
           onRowClick={onPostClick}
         />
       </Section>
@@ -930,11 +680,11 @@ export default function ExecDashboard() {
       Overview: [
         { q: 'What drove growth this period?', a: topCat ? `${topCat.name} content led with ${topCat.count} posts and ${fN(topCat.views)} views.` : 'No category data available.', color: C.green },
         { q: 'Who is outperforming baseline?', a: topWriter ? `${topWriter.name} leads with ${topWriter.posts} posts, averaging ${fN(topWriter.avgViews)} views each.` : 'No writer data.', color: C.blue },
-        { q: 'What content has long-tail value?', a: `${d.totalPosts > 0 ? Math.round(d.totalPosts * 0.35) : 0} articles still generating traffic after 30 days.`, color: C.purple },
+        { q: 'How many posts this period?', a: `${d.periodPosts} posts (${pctC(d.periodPosts, d.prevPeriodPosts)} vs prior period) totaling ${fN(d.periodViews)} views.`, color: C.purple },
       ],
       Writers: [
         { q: 'Who is outperforming baseline?', a: topWriter ? `${topWriter.name} leads the leaderboard with ${topWriter.posts} posts.` : 'No writer data.', color: C.blue },
-        { q: 'Social reliance risk?', a: `${data.writers.filter(w => trafficSplit(w.name).social > 40).length} writers above 40% social traffic threshold.`, color: C.red },
+        { q: 'How active is the team?', a: `${data.writers.length} writers contributed ${d.periodPosts} posts this period.`, color: C.purple },
       ],
       Social: [
         { q: 'Platform health?', a: `YouTube: ${fN(data.social.youtube.reduce((s: number, c: any) => s + c.subscribers, 0))} subs. X: ${fN(data.social.x.reduce((s: number, c: any) => s + c.followers, 0))} followers.`, color: C.purple },
@@ -1108,12 +858,6 @@ export default function ExecDashboard() {
               </ResponsiveContainer>
             </Section>
 
-            {/* Traffic Source + Evergreen side-by-side */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <TrafficSourceBreakdown writers={data.writers} />
-              <EvergreenIndex writers={data.writers} publishingTrend={data.publishingTrend} />
-            </div>
-
             {/* Monthly Trend */}
             {(() => {
               const monthsWithViews = data.monthlyTrend.filter(m => m.views !== null && m.views > 0)
@@ -1177,27 +921,37 @@ export default function ExecDashboard() {
                   { key: 'posts', label: 'Posts', align: 'right', render: (v: number) => <span className="font-bold tabular-nums">{v}</span> },
                   { key: 'views', label: 'Views', align: 'right', render: (v: number) => <span className="font-bold tabular-nums" style={{ color: C.blue }}>{fN(v)}</span> },
                   { key: 'avgViews', label: 'Avg Views', align: 'right', render: (v: number) => <span className="font-bold tabular-nums" style={{ color: C.purple }}>{fN(v)}</span> },
-                  { key: '_socialPct', label: 'Social %', align: 'right', priority: 'low',
-                    render: (_v: any, r: any) => {
-                      const pct = trafficSplit(r.name).social
-                      return <span className="font-bold tabular-nums" style={{ color: pct > 40 ? C.red : 'var(--sm-text)' }}>{pct}%{pct > 40 ? ' !' : ''}</span>
-                    }
-                  },
-                  { key: '_evergreenPct', label: 'Evergreen', align: 'right', priority: 'low',
-                    render: (_v: any, r: any) => <span className="font-bold tabular-nums" style={{ color: C.green }}>{evergreenPct(r.name)}%</span>
-                  },
                   { key: 'topCategories', label: 'Categories', priority: 'low',
                     render: (v: string[]) => <div className="flex gap-1 flex-wrap">{(v || []).map(c => <span key={c} className="text-xs px-2 py-0.5 rounded-full" style={{ background: C.indigo + '12', color: C.indigo }}>{c}</span>)}</div>
                   },
                 ]}
-                data={data.writers.map(w => ({ ...w, _socialPct: trafficSplit(w.name).social, _evergreenPct: evergreenPct(w.name) }))}
+                data={data.writers}
                 onRowClick={openWriter}
               />
             </Section>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <TrafficSourceBreakdown writers={data.writers} />
-              <EvergreenIndex writers={data.writers} publishingTrend={data.publishingTrend} />
-            </div>
+            {/* Writer publishing trend (real data) */}
+            {data.writerTrends && data.writerTrends.length > 0 && (
+              <Section title="Top Writers — Monthly Output" badge={<span className="text-xs tabular-nums" style={{ color: 'var(--sm-text-dim)' }}>top 5</span>}>
+                <ResponsiveContainer width="100%" height={280}>
+                  <ComposedChart data={data.writerMonths.map(m => {
+                    const row: any = { month: m }
+                    for (const wt of data.writerTrends) {
+                      row[wt.name] = wt.data.find(d => d.month === m)?.count || 0
+                    }
+                    return row
+                  })}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                    <XAxis dataKey="month" tickFormatter={fM} tick={{ fill: '#55556a', fontSize: 12 }} tickLine={false} axisLine={false} />
+                    <YAxis tick={{ fill: '#55556a', fontSize: 12 }} tickLine={false} axisLine={false} allowDecimals={false} />
+                    <RTooltip content={<ChartTip />} />
+                    <Legend iconType="circle" iconSize={8} formatter={(v: string) => <span style={{ color: 'var(--sm-text-muted)', fontSize: 13 }}>{v}</span>} />
+                    {data.writerTrends.map((wt, i) => (
+                      <Line key={wt.id} type="monotone" dataKey={wt.name} stroke={PAL[i % PAL.length]} strokeWidth={2} dot={{ r: 3 }} name={wt.name} />
+                    ))}
+                  </ComposedChart>
+                </ResponsiveContainer>
+              </Section>
+            )}
           </>}
 
           {/* ═══════ SOCIAL TAB ═══════ */}
@@ -1318,7 +1072,6 @@ export default function ExecDashboard() {
                 />
               </Section>
             )}
-            <EvergreenIndex writers={data.writers} publishingTrend={data.publishingTrend} />
           </>}
 
           {/* ═══════ CONTENT TAB ═══════ */}
@@ -1361,7 +1114,7 @@ export default function ExecDashboard() {
                 </div>
               </div>
             </Section>
-            <ContentScoreModule topContent={data.topContent} overview={data.overview} onPostClick={openPost} />
+            <TopArticlesModule topContent={data.topContent} onPostClick={openPost} />
           </>}
 
           {/* ═══════ PAYMENTS TAB ═══════ */}
@@ -2109,7 +1862,7 @@ export default function ExecDashboard() {
         open={drawerType !== null}
         onClose={closeDrawer}
         title={drawerType === 'writer' ? (drawerData?.name || 'Writer Details') : (drawerData?.title || 'Article Details')}>
-        {drawerType === 'writer' && drawerData && <WriterDrawerContent writer={drawerData} />}
+        {drawerType === 'writer' && drawerData && <WriterDrawerContent writer={drawerData} trend={data?.writerTrends?.find(wt => wt.id === drawerData.id)?.data || []} />}
         {drawerType === 'post' && drawerData && <PostDrawerContent post={drawerData} />}
       </DetailDrawer>
     </div>
