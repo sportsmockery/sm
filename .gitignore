@@ -59,3 +59,4 @@ FRONTEND_Chart_UI_Tester.py
 
 # Supabase CLI cache (project-ref, pooler-url, version pins)
 supabase/.temp/
+.mobile-source-dump/
