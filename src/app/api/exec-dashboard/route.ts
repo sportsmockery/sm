@@ -359,25 +359,26 @@ async function fetchEditorial(startDate: Date, prevStart: Date, now: Date, days:
       .replace(/&nbsp;/g, ' ')
   const getCatName = (id: number) => decodeEntities(((cMap.get(id) as any)?.name || 'Uncategorized'))
 
-  // ── Per-post comment counts ──
-  // WP REST silently strips `comment_count` from the posts response on this
-  // site (likely a filter from a Jetpack/SEO plugin), so we batch the
-  // /comments?post=ID&per_page=1 endpoint and read the X-WP-Total header.
-  // Each request is cached for 15 min so subsequent dashboard loads in the
-  // same window are free.
+  // ── Per-post comment counts (from Disqus, via sm_posts.comments_count) ──
+  // The site uses Disqus for comments, so WP's native /wp/v2/comments returns
+  // 0 (or only legacy/spam comments). The /api/cron/sync-article-comments
+  // cron pulls thread counts from the Disqus API and writes them to
+  // sm_posts.comments_count keyed by wp_id. We just read that here.
   const postCommentCount = new Map<number, number>()
-  await Promise.all(
-    period.map(async (p: any) => {
-      try {
-        const res = await fetch(`${WP_API}/comments?post=${p.id}&per_page=1`, { next: { revalidate: 900 } })
-        if (!res.ok) { postCommentCount.set(p.id, 0); return }
-        const total = parseInt(res.headers.get('X-WP-Total') || '0', 10)
-        postCommentCount.set(p.id, Number.isFinite(total) ? total : 0)
-      } catch {
-        postCommentCount.set(p.id, 0)
+  const periodWpIds = period.map((p: any) => p.id).filter((id: number) => Number.isFinite(id))
+  if (periodWpIds.length > 0) {
+    // Supabase 'in' clause is paged at 1000 ids by default — chunk for safety.
+    for (let i = 0; i < periodWpIds.length; i += 500) {
+      const chunk = periodWpIds.slice(i, i + 500)
+      const { data: commentRows } = await supabaseAdmin
+        .from('sm_posts')
+        .select('wp_id, comments_count')
+        .in('wp_id', chunk)
+      for (const row of (commentRows || [])) {
+        postCommentCount.set(Number(row.wp_id), Number(row.comments_count) || 0)
       }
-    })
-  )
+    }
+  }
 
   // ── Writer stats ──
   // Tracks per-writer aggregates from WP REST. `slugs` enables GA4 path → author
