@@ -96,6 +96,41 @@ export async function GET(request: Request) {
       articleIdFilter = ((postsInWindow.data ?? []) as Array<Record<string, unknown>>).map((p) => String(p.id))
     }
 
+    // Previous window of equal length (for the writer Trend column). Skipped
+    // when no date filter is in play — Trend has no meaning without a window.
+    let prevWriterAvg: Map<string, number> = new Map()
+    if (dateWindow) {
+      const startMs = new Date(dateWindow.startISO).getTime()
+      const endMs = new Date(dateWindow.endISO).getTime()
+      const span = endMs - startMs
+      const prevEndISO = new Date(startMs - 1).toISOString()
+      const prevStartISO = new Date(startMs - 1 - span).toISOString()
+
+      const prevPosts = await db
+        .from('sm_posts')
+        .select('id')
+        .gte('published_at', prevStartISO)
+        .lte('published_at', prevEndISO)
+      const prevIds = ((prevPosts.data ?? []) as Array<Record<string, unknown>>).map((p) => String(p.id))
+
+      if (prevIds.length > 0) {
+        const prevScores = await db
+          .from('google_article_scores')
+          .select('author_id, total')
+          .not('author_id', 'is', null)
+          .in('article_id', prevIds)
+        const prevAgg = new Map<string, { total: number; n: number }>()
+        for (const w of (prevScores.data ?? []) as Array<Record<string, unknown>>) {
+          const id = String(w.author_id)
+          const cur = prevAgg.get(id) ?? { total: 0, n: 0 }
+          cur.total += Number(w.total ?? 0)
+          cur.n += 1
+          prevAgg.set(id, cur)
+        }
+        for (const [id, a] of prevAgg) prevWriterAvg.set(id, a.total / a.n)
+      }
+    }
+
     let scoresQuery = db.from('google_article_scores').select('*').order('total', { ascending: true }).limit(500)
     let writersQuery = db.from('google_article_scores').select('author_id, total, sub, article_id').not('author_id', 'is', null)
     if (articleIdFilter) {
@@ -230,6 +265,22 @@ export async function GET(request: Request) {
       else if (scope === 'author')  authorRecCount.set(scopeId,  (authorRecCount.get(scopeId)  ?? 0) + 1)
     }
 
+    // Author-scoped recs are sparse (Datalab mostly emits article-scoped),
+    // so also derive a per-author count by summing article-scoped recs
+    // against each article's author. The leaderboard then takes max(explicit,
+    // derived) so we never undercount real author-level signals.
+    const articleAuthorMap = new Map<string, string>()
+    for (const r of scoreRows) {
+      const aid = (r.author_id as string | null) ?? null
+      if (aid) articleAuthorMap.set(String(r.article_id), aid)
+    }
+    const derivedAuthorRecCount = new Map<string, number>()
+    for (const [articleId, count] of articleRecCount) {
+      const authorId = articleAuthorMap.get(articleId)
+      if (!authorId) continue
+      derivedAuthorRecCount.set(authorId, (derivedAuthorRecCount.get(authorId) ?? 0) + count)
+    }
+
     const articles: ArticleAnalysisRow[] = scoreRows.map((r) => {
       const articleId = String(r.article_id)
       const authorId = (r.author_id as string | null) ?? null
@@ -273,12 +324,17 @@ export async function GET(request: Request) {
     }
     const writers: WriterLeaderboardRow[] = Array.from(writerAgg.entries()).map(([id, agg]) => {
       const author = authorById.get(id)
+      const currentAvg = agg.total / agg.n
+      const prevAvg = prevWriterAvg.get(id)
+      const trend = prevAvg != null && prevAvg > 0 ? round1(currentAvg - prevAvg) : 0
+      const explicitRecs = authorRecCount.get(id) ?? 0
+      const derivedRecs = derivedAuthorRecCount.get(id) ?? 0
       return {
         authorId: id,
         name: author?.name ?? id,
         avatar: author?.avatar ?? null,
         articlesAnalyzed: agg.n,
-        total: Math.round(agg.total / agg.n),
+        total: Math.round(currentAvg),
         sub: {
           searchEssentials: round1(agg.sub.searchEssentials / agg.n),
           googleNews:       round1(agg.sub.googleNews / agg.n),
@@ -287,10 +343,10 @@ export async function GET(request: Request) {
           technical:        round1(agg.sub.technical / agg.n),
           opportunity:      round1(agg.sub.opportunity / agg.n),
         },
-        recommendationCount: authorRecCount.get(id) ?? 0,
-        trend: 0,
+        recommendationCount: Math.max(explicitRecs, derivedRecs),
+        trend,
         lastRescoredAt: new Date().toISOString(),
-        status: agg.total / agg.n >= 80 ? 'green' : agg.total / agg.n >= 60 ? 'amber' : 'red',
+        status: currentAvg >= 80 ? 'green' : currentAvg >= 60 ? 'amber' : 'red',
       }
     })
 
