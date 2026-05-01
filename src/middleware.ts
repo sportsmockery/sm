@@ -178,13 +178,20 @@ export async function middleware(request: NextRequest) {
   // 4. Allow article URLs — any /{category}/{slug} pattern (2+ path segments)
   //    These are content pages that should always be accessible for SEO and sharing
   const segments = pathname.split('/').filter(Boolean)
-  if (segments.length >= 2 && !pathname.startsWith('/admin') && !pathname.startsWith('/gm') && !pathname.startsWith('/studio')) {
+  if (
+    segments.length >= 2 &&
+    !pathname.startsWith('/admin') &&
+    !pathname.startsWith('/gm') &&
+    !pathname.startsWith('/studio') &&
+    !pathname.startsWith('/training')
+  ) {
     return NextResponse.next()
   }
 
-  // 7. Admin route protection — require authentication
-  // Note: /admin/freestar was previously exempted but now requires auth like all admin pages
-  if (pathname.startsWith('/admin')) {
+  // 7. Admin + training route protection — require authentication.
+  // Role enforcement happens in the page itself (admin → requireAdmin,
+  // training → requireTrainingAccess) to mirror existing patterns.
+  if (pathname.startsWith('/admin') || pathname.startsWith('/training')) {
     const { supabase, response } = createSupabaseMiddlewareClient(request)
     const { data: { user } } = await supabase.auth.getUser()
 
