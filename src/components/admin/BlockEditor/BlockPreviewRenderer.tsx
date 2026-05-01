@@ -12,6 +12,7 @@ import { TradeScenarioCard } from '@/components/articles/TradeScenarioCard';
 import { PlayerComparison } from '@/components/articles/PlayerComparison';
 import { StatsChart } from '@/components/articles/StatsChart';
 import { DebateBlock as DebateBlockComponent } from '@/components/articles/DebateBlock';
+import TwitterEmbed from '@/components/article/TwitterEmbed';
 
 /* ─── Shared preview primitives (reusable in feed renderer) ─── */
 import {
@@ -168,11 +169,8 @@ function RenderBlock({ block }: { block: ContentBlock }) {
         if (tweetIdMatch) {
           return (
             <PreviewSection>
-              <div className="rounded-xl overflow-hidden" style={{ maxWidth: 550, margin: '0 auto' }}>
-                <blockquote className="twitter-tweet" data-dnt="true">
-                  <a href={block.data.url}>{block.data.url}</a>
-                </blockquote>
-                <script async src="https://platform.twitter.com/widgets.js" />
+              <div className="mx-auto" style={{ maxWidth: 550 }}>
+                <TwitterEmbed tweetId={tweetIdMatch[1]} />
               </div>
             </PreviewSection>
           )
@@ -180,12 +178,11 @@ function RenderBlock({ block }: { block: ContentBlock }) {
       }
       return (
         <PreviewSection>
-          <div
-            className="rounded-xl p-4 flex items-center gap-3"
-            style={{
-              backgroundColor: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.08)',
-            }}
+          <a
+            href={block.data.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-xl p-4 flex items-center gap-3 bg-[rgba(11,15,20,0.03)] dark:bg-[rgba(255,255,255,0.04)] border border-[rgba(11,15,20,0.08)] dark:border-[rgba(255,255,255,0.08)] hover:bg-[rgba(0,212,255,0.05)] transition-colors"
           >
             <div
               className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
@@ -199,9 +196,9 @@ function RenderBlock({ block }: { block: ContentBlock }) {
               <span className="text-[10px] font-bold uppercase tracking-widest block" style={{ color: BRAND.cyan }}>
                 {block.data.platform} embed
               </span>
-              <span className="text-[12px] text-slate-500 truncate block">{block.data.url}</span>
+              <span className="text-[12px] truncate block" style={{ color: 'var(--sm-text-muted, #6b7280)' }}>{block.data.url}</span>
             </div>
-          </div>
+          </a>
         </PreviewSection>
       );
 
@@ -311,7 +308,12 @@ function RenderBlock({ block }: { block: ContentBlock }) {
       if (!block.data.question) return <EmptyState label={`${block.data.variant === 'gm-pulse' ? 'GM Pulse' : 'Fan Poll'} — add a question`} accent={BRAND.cyan} />;
       return (
         <PollBlock variant={block.data.variant === 'gm-pulse' ? 'gm-decision' : 'binary'}>
-          <GMInteraction question={block.data.question} options={block.data.options} reward={block.data.reward} />
+          <GMInteraction
+            question={block.data.question}
+            options={block.data.options}
+            reward={block.data.reward}
+            showHeader={false}
+          />
         </PollBlock>
       );
 
@@ -444,7 +446,12 @@ function RenderBlock({ block }: { block: ContentBlock }) {
       if (!block.data.question) return <EmptyState label="GM Pulse — add a question" accent={BRAND.cyan} />;
       return (
         <PollBlock variant="gm-decision">
-          <GMInteraction question={block.data.question} options={block.data.options} reward={block.data.reward} />
+          <GMInteraction
+            question={block.data.question}
+            options={block.data.options}
+            reward={block.data.reward}
+            showHeader={false}
+          />
         </PollBlock>
       );
 
@@ -452,7 +459,12 @@ function RenderBlock({ block }: { block: ContentBlock }) {
       if (!block.data.question) return <EmptyState label="Fan Poll — add a question" accent={BRAND.cyan} />;
       return (
         <PollBlock variant="binary">
-          <GMInteraction question={block.data.question} options={block.data.options} reward={block.data.reward} />
+          <GMInteraction
+            question={block.data.question}
+            options={block.data.options}
+            reward={block.data.reward}
+            showHeader={false}
+          />
         </PollBlock>
       );
 

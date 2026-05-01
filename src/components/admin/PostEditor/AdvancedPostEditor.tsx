@@ -1515,6 +1515,10 @@ export default function AdvancedPostEditor({
                   initialBlocks={blockDoc?.blocks}
                   initialTemplate={blockDoc?.template}
                   onChange={(doc) => setBlockDoc(doc)}
+                  previewTitle={formData.title}
+                  previewAuthor={authors.find(a => a.id === formData.author_id)?.display_name}
+                  previewCategory={categories.find(c => c.id === formData.category_id)?.name}
+                  previewStatus={formData.status}
                 />
               )}
             </div>

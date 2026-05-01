@@ -7,9 +7,13 @@ interface GMInteractionProps {
   question: string;
   options: string[];
   reward?: number;
+  /** When false, hides the internal "GM Pulse" header (e.g. when an outer wrapper already labels it). */
+  showHeader?: boolean;
+  /** Override the header label. */
+  headerLabel?: string;
 }
 
-export function GMInteraction({ question, options, reward = 3 }: GMInteractionProps) {
+export function GMInteraction({ question, options, reward = 3, showHeader = true, headerLabel = 'GM Pulse' }: GMInteractionProps) {
   const [selected, setSelected] = useState<string | null>(null);
   const [showReward, setShowReward] = useState(false);
 
@@ -22,20 +26,18 @@ export function GMInteraction({ question, options, reward = 3 }: GMInteractionPr
 
   return (
     <div
-      className="rounded-xl p-5 my-8"
-      style={{
-        backgroundColor: 'rgba(255,255,255,0.04)',
-        border: '1px solid rgba(255,255,255,0.08)',
-      }}
+      className="rounded-xl p-5 my-8 bg-[rgba(11,15,20,0.03)] dark:bg-[rgba(255,255,255,0.04)] border border-[rgba(11,15,20,0.08)] dark:border-[rgba(255,255,255,0.08)]"
     >
-      <div className="flex items-center gap-2 mb-3">
-        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#00D4FF' }} />
-        <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#00D4FF' }}>
-          GM Pulse
-        </span>
-      </div>
+      {showHeader && (
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#00D4FF' }} />
+          <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#00D4FF' }}>
+            {headerLabel}
+          </span>
+        </div>
+      )}
 
-      <p className="text-white text-[16px] font-medium mb-4">{question}</p>
+      <p className="text-[16px] font-medium mb-4" style={{ color: 'var(--sm-text, #0B0F14)' }}>{question}</p>
 
       <div className="flex items-center gap-3 relative">
         {options.map((option) => (

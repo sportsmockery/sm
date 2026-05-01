@@ -16,6 +16,11 @@ interface BlockEditorProps {
   initialBlocks?: ContentBlock[];
   initialTemplate?: string;
   onChange?: (doc: ArticleDocument) => void;
+  /** Live values from the post form, shown in the article preview header. */
+  previewTitle?: string;
+  previewAuthor?: string;
+  previewCategory?: string;
+  previewStatus?: string;
 }
 
 // ─── Suggestion logic ───────────────────────────────────────────────────────
@@ -98,7 +103,15 @@ function stripHtml(html: string | undefined): string {
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
-export function BlockEditor({ initialBlocks, initialTemplate, onChange }: BlockEditorProps) {
+export function BlockEditor({
+  initialBlocks,
+  initialTemplate,
+  onChange,
+  previewTitle,
+  previewAuthor,
+  previewCategory,
+  previewStatus,
+}: BlockEditorProps) {
   // Auto-seed a paragraph for new posts so writers land on real content.
   // EmptyCanvas only renders if the user explicitly deletes everything.
   const [blocks, setBlocks] = useState<ContentBlock[]>(() => {
@@ -426,16 +439,16 @@ export function BlockEditor({ initialBlocks, initialTemplate, onChange }: BlockE
                 className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded"
                 style={{ backgroundColor: 'rgba(188,0,0,0.12)', color: '#BC0000' }}
               >
-                Category
+                {previewCategory?.trim() || 'Category'}
               </span>
             </div>
             <h1 className="text-[28px] sm:text-[32px] font-bold tracking-tight mb-2" style={{ color: '#0B0F14' }}>
-              Article Headline
+              {previewTitle?.trim() || 'Article Headline'}
             </h1>
             <div className="flex items-center gap-2 text-[13px] text-slate-500">
-              <span>By Author</span>
+              <span>By {previewAuthor?.trim() || 'Author'}</span>
               <span className="w-1 h-1 rounded-full bg-slate-600" />
-              <span>Draft</span>
+              <span className="capitalize">{previewStatus?.trim() || 'Draft'}</span>
             </div>
           </div>
           <div className="px-6 pb-8 sm:px-10">
