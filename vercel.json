@@ -51,6 +51,10 @@
       "schedule": "0 12 * * *"
     },
     {
+      "path": "/api/cron/seo-tasks-audit",
+      "schedule": "0 5 * * *"
+    },
+    {
       "path": "/api/cron/sync-wordpress",
       "schedule": "0 4 * * *"
     },
