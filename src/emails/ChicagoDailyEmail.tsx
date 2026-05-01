@@ -337,7 +337,7 @@ export function ChicagoDailyEmail({
             <Link href={utm(`${SITE}/untold-chicago-stories`, u)} style={{ textDecoration: 'none', display: 'block' }}>
               <Row style={{ marginBottom: '8px', padding: '12px', backgroundColor: CARD_BG, borderRadius: '10px', border: `1px solid ${BORDER}` }}>
                 <Column style={{ width: '52px', verticalAlign: 'middle' }}>
-                  <Img src={`${SITE}/downloads/untold-logo-dark.png`} alt="Untold Chicago Stories" width={40} height={40} style={{ borderRadius: '8px', display: 'block' }} />
+                  <Img src={`${SITE}/youtubelogos/untold-star-v2.png`} alt="Untold Chicago Stories" width={40} height={40} style={{ borderRadius: '8px', display: 'block' }} />
                 </Column>
                 <Column style={{ verticalAlign: 'middle', paddingLeft: '12px' }}>
                   <Text style={{ color: WHITE, fontSize: '14px', fontWeight: 600, margin: '0 0 2px 0' }}>Untold Chicago Stories</Text>
@@ -350,7 +350,7 @@ export function ChicagoDailyEmail({
             <Link href={utm(`${SITE}/pinwheels-and-ivy`, u)} style={{ textDecoration: 'none', display: 'block' }}>
               <Row style={{ marginBottom: '8px', padding: '12px', backgroundColor: CARD_BG, borderRadius: '10px', border: `1px solid ${BORDER}` }}>
                 <Column style={{ width: '52px', verticalAlign: 'middle' }}>
-                  <Img src={`${SITE}/downloads/pinwheels-ivy-logo-dark.png`} alt="Pinwheels and Ivy" width={40} height={40} style={{ borderRadius: '8px', display: 'block' }} />
+                  <Img src={`${SITE}/youtubelogos/pi-logo-v2.png`} alt="Pinwheels and Ivy" width={40} height={40} style={{ borderRadius: '8px', display: 'block' }} />
                 </Column>
                 <Column style={{ verticalAlign: 'middle', paddingLeft: '12px' }}>
                   <Text style={{ color: WHITE, fontSize: '14px', fontWeight: 600, margin: '0 0 2px 0' }}>Pinwheels &amp; Ivy</Text>
@@ -359,15 +359,15 @@ export function ChicagoDailyEmail({
               </Row>
             </Link>
 
-            {/* Southside Behavior */}
+            {/* No Strokes Golf */}
             <Link href={utm(SITE, u)} style={{ textDecoration: 'none', display: 'block' }}>
               <Row style={{ padding: '12px', backgroundColor: CARD_BG, borderRadius: '10px', border: `1px solid ${BORDER}` }}>
                 <Column style={{ width: '52px', verticalAlign: 'middle' }}>
-                  <Img src={`${SITE}/youtubelogos/ssb-logo.png`} alt="Southside Behavior" width={40} height={40} style={{ borderRadius: '10px', display: 'block' }} />
+                  <Img src={`${SITE}/youtubelogos/nsg-logo.png`} alt="No Strokes Golf" width={40} height={40} style={{ borderRadius: '8px', display: 'block' }} />
                 </Column>
                 <Column style={{ verticalAlign: 'middle', paddingLeft: '12px' }}>
-                  <Text style={{ color: WHITE, fontSize: '14px', fontWeight: 600, margin: '0 0 2px 0' }}>Southside Behavior</Text>
-                  <Text style={{ color: MUTED, fontSize: '12px', margin: 0 }}>White Sox talk, no filter</Text>
+                  <Text style={{ color: WHITE, fontSize: '14px', fontWeight: 600, margin: '0 0 2px 0' }}>No Strokes Golf</Text>
+                  <Text style={{ color: MUTED, fontSize: '12px', margin: 0 }}>Golf without the handicap</Text>
                 </Column>
               </Row>
             </Link>
