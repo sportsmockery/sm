@@ -1,10 +1,46 @@
 'use client'
 
 import React, { useMemo, useState } from 'react'
+import { Info } from 'lucide-react'
 import type { WriterLeaderboardRow } from '@/lib/google/types'
 import type { WriterEngagementRow } from './google-tab'
 
 const C = { cyan: '#00D4FF', red: '#BC0000', gold: '#D6B05E', green: '#00D4FF' }
+
+// Per-column explanations of how the score is calculated. Surfaced as
+// hover tooltips on the info icon next to each header.
+const SCORE_INFO: Record<string, string> = {
+  Articles: 'Number of articles by this writer that the Google rules engine has scored in the selected window.',
+  Google: 'Average of the writer\'s per-article Google scores (0–100). Each article is scored by the Google rules engine on Search Essentials, Google News, Trust, Spam Safety, Technical, and Opportunity.',
+  SEO: 'Average Search Essentials subscore across the writer\'s articles. Out of ~25.',
+  News: 'Average Google News subscore. Out of ~25.',
+  Trust: 'Average Trust subscore. Out of ~15.',
+  Spam: 'Average Spam Safety subscore. Out of ~15. Higher = safer (less spammy).',
+  Tech: 'Average Technical subscore. Out of ~10.',
+  Opp: 'Average Opportunity subscore. Out of ~10. Captures untapped ranking potential.',
+  Comments: 'Sum of Disqus comment counts on the writer\'s articles in the window. Synced from the Disqus API by the /api/cron/sync-article-comments job and stored in sm_posts.comments_count.',
+  Engagement: [
+    'Composite engagement score (0–100). Weighted blend of REAL signals only:',
+    '• Comments per post — 20% (5 comments/post = 100)',
+    '• Time on page — 20% (120s = 100, from GA4)',
+    '• Scroll depth — 15% (% of sessions hitting 90% scroll, from GA4)',
+    '• Headline subscore — 15%',
+    '• Trust subscore — 10%',
+    '• Spam Safety subscore — 10%',
+    '• Engaged sessions / pageviews — 10% (from GA4)',
+    'Missing signals contribute 0; nothing is fabricated.',
+  ].join('\n'),
+  Overall: [
+    'Composite overall score = positive − negative.',
+    'Positive = (avg Google × 45%) + (headline × 20%) + (engagement × 35%)',
+    'Negative = spam penalty × 50%, where spam penalty = max(0, 100 − spam score).',
+    'A high Google score with a low Spam score will still produce a low Overall — spam drags the score down even when SEO/News are strong.',
+  ].join('\n'),
+  Recs: 'Open Google recommendations for this writer\'s articles. Counts both author-scoped recs (when present) and the sum of article-scoped recs across the writer\'s articles — whichever is higher.',
+  Trend: 'Average Google score in the current window minus the average in the prior window of equal length. Positive = improving, negative = regressing. Shows 0.0 when no prior-window data exists or no date filter is set.',
+  'Last rescored': 'Most recent timestamp the Google rules engine re-scored one of this writer\'s articles.',
+  Status: 'Health dot based on the writer\'s avg Google score: green ≥80, amber ≥60, red <60.',
+}
 
 type SortKey =
   | 'total' | 'searchEssentials' | 'googleNews' | 'trust' | 'spamSafety' | 'technical' | 'opportunity'
@@ -76,21 +112,21 @@ export function WriterGoogleLeaderboard({
           <thead>
             <tr style={{ borderBottom: '1px solid var(--sm-border)' }}>
               <Th>Writer</Th>
-              <Th onClick={() => onSort('articlesAnalyzed')} active={sortKey === 'articlesAnalyzed'} dir={dir} align="right">Articles</Th>
-              <Th onClick={() => onSort('total')}            active={sortKey === 'total'}            dir={dir} align="right">Google</Th>
-              <Th onClick={() => onSort('searchEssentials')} active={sortKey === 'searchEssentials'} dir={dir} align="right">SEO</Th>
-              <Th onClick={() => onSort('googleNews')}       active={sortKey === 'googleNews'}       dir={dir} align="right">News</Th>
-              <Th onClick={() => onSort('trust')}            active={sortKey === 'trust'}            dir={dir} align="right">Trust</Th>
-              <Th onClick={() => onSort('spamSafety')}       active={sortKey === 'spamSafety'}       dir={dir} align="right">Spam</Th>
-              <Th onClick={() => onSort('technical')}        active={sortKey === 'technical'}        dir={dir} align="right">Tech</Th>
-              <Th onClick={() => onSort('opportunity')}      active={sortKey === 'opportunity'}      dir={dir} align="right">Opp</Th>
-              <Th onClick={() => onSort('comments')}         active={sortKey === 'comments'}         dir={dir} align="right">Comments</Th>
-              <Th onClick={() => onSort('engagement_score')} active={sortKey === 'engagement_score'} dir={dir} align="right">Engagement</Th>
-              <Th onClick={() => onSort('overall_score')}    active={sortKey === 'overall_score'}    dir={dir} align="right">Overall</Th>
-              <Th onClick={() => onSort('recommendationCount')} active={sortKey === 'recommendationCount'} dir={dir} align="right">Recs</Th>
-              <Th align="right">Trend</Th>
-              <Th align="right">Last rescored</Th>
-              <Th align="center">Status</Th>
+              <Th onClick={() => onSort('articlesAnalyzed')} active={sortKey === 'articlesAnalyzed'} dir={dir} align="right" infoKey="Articles">Articles</Th>
+              <Th onClick={() => onSort('total')}            active={sortKey === 'total'}            dir={dir} align="right" infoKey="Google">Google</Th>
+              <Th onClick={() => onSort('searchEssentials')} active={sortKey === 'searchEssentials'} dir={dir} align="right" infoKey="SEO">SEO</Th>
+              <Th onClick={() => onSort('googleNews')}       active={sortKey === 'googleNews'}       dir={dir} align="right" infoKey="News">News</Th>
+              <Th onClick={() => onSort('trust')}            active={sortKey === 'trust'}            dir={dir} align="right" infoKey="Trust">Trust</Th>
+              <Th onClick={() => onSort('spamSafety')}       active={sortKey === 'spamSafety'}       dir={dir} align="right" infoKey="Spam">Spam</Th>
+              <Th onClick={() => onSort('technical')}        active={sortKey === 'technical'}        dir={dir} align="right" infoKey="Tech">Tech</Th>
+              <Th onClick={() => onSort('opportunity')}      active={sortKey === 'opportunity'}      dir={dir} align="right" infoKey="Opp">Opp</Th>
+              <Th onClick={() => onSort('comments')}         active={sortKey === 'comments'}         dir={dir} align="right" infoKey="Comments">Comments</Th>
+              <Th onClick={() => onSort('engagement_score')} active={sortKey === 'engagement_score'} dir={dir} align="right" infoKey="Engagement">Engagement</Th>
+              <Th onClick={() => onSort('overall_score')}    active={sortKey === 'overall_score'}    dir={dir} align="right" infoKey="Overall">Overall</Th>
+              <Th onClick={() => onSort('recommendationCount')} active={sortKey === 'recommendationCount'} dir={dir} align="right" infoKey="Recs">Recs</Th>
+              <Th align="right" infoKey="Trend">Trend</Th>
+              <Th align="right" infoKey="Last rescored">Last rescored</Th>
+              <Th align="center" infoKey="Status">Status</Th>
             </tr>
           </thead>
           <tbody>
@@ -141,13 +177,74 @@ export function WriterGoogleLeaderboard({
   )
 }
 
-function Th({ children, onClick, active, dir, align = 'left' }: { children: React.ReactNode; onClick?: () => void; active?: boolean; dir?: 'asc' | 'desc'; align?: 'left' | 'right' | 'center' }) {
+function Th({
+  children, onClick, active, dir, align = 'left', infoKey,
+}: {
+  children: React.ReactNode
+  onClick?: () => void
+  active?: boolean
+  dir?: 'asc' | 'desc'
+  align?: 'left' | 'right' | 'center'
+  infoKey?: string
+}) {
+  const tip = infoKey ? SCORE_INFO[infoKey] : null
   return (
     <th className={`px-3 py-2.5 text-[11px] font-bold uppercase tracking-wider whitespace-nowrap ${align === 'right' ? 'text-right' : align === 'center' ? 'text-center' : 'text-left'}`}
-        style={{ color: active ? 'var(--sm-red-light)' : 'var(--sm-text-dim)', cursor: onClick ? 'pointer' : 'default' }}
-        onClick={onClick}>
-      {children}{active && (dir === 'desc' ? ' ↓' : ' ↑')}
+        style={{ color: active ? 'var(--sm-red-light)' : 'var(--sm-text-dim)' }}>
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, cursor: onClick ? 'pointer' : 'default' }} onClick={onClick}>
+        {children}
+        {active && (dir === 'desc' ? ' ↓' : ' ↑')}
+        {tip && <ScoreInfoIcon text={tip} align={align} />}
+      </span>
     </th>
+  )
+}
+
+// Info icon with a hover tooltip. Pure CSS — no portal, no state, no
+// click required. Tooltip width is capped so long explanations wrap.
+function ScoreInfoIcon({ text, align }: { text: string; align: 'left' | 'right' | 'center' }) {
+  const [open, setOpen] = useState(false)
+  const placement = align === 'right' ? 'right' : 'left'
+  return (
+    <span
+      style={{ position: 'relative', display: 'inline-flex' }}
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+      onFocus={() => setOpen(true)}
+      onBlur={() => setOpen(false)}
+      tabIndex={0}
+      aria-label="Score calculation details"
+    >
+      <Info size={12} style={{ color: 'var(--sm-text-dim)', opacity: 0.7 }} />
+      {open && (
+        <span
+          role="tooltip"
+          style={{
+            position: 'absolute',
+            top: '100%',
+            [placement]: 0,
+            marginTop: 6,
+            zIndex: 50,
+            width: 320,
+            padding: '10px 12px',
+            background: 'var(--sm-card)',
+            border: '1px solid var(--sm-border)',
+            borderRadius: 8,
+            boxShadow: '0 8px 24px rgba(0,0,0,0.35)',
+            fontSize: 11,
+            fontWeight: 400,
+            lineHeight: 1.5,
+            letterSpacing: 0,
+            textTransform: 'none',
+            color: 'var(--sm-text)',
+            whiteSpace: 'pre-line',
+            textAlign: 'left',
+          }}
+        >
+          {text}
+        </span>
+      )}
+    </span>
   )
 }
 function Td({ children, align = 'left', muted }: { children: React.ReactNode; align?: 'left' | 'right' | 'center'; muted?: boolean }) {
