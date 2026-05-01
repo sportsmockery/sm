@@ -4,8 +4,9 @@
 // If a data source is unavailable, return null/empty — never fabricate.
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { datalabAdmin } from '@/lib/supabase-datalab'
 import { aggregateTotals, querySearchAnalytics } from '@/lib/google-search-console'
-import { runGaReport, aggregateGaTotals, rowsByDimension, getGa4PropertyId } from '@/lib/google-analytics'
+import { runGaReport, aggregateGaTotals, rowsByDimension, getGa4PropertyId, type GaReportResult } from '@/lib/google-analytics'
 
 const WP_API = 'https://www.sportsmockery.com/wp-json/wp/v2'
 const WP_EXPORT = 'https://www.sportsmockery.com/wp-json/sm-export/v1'
@@ -123,7 +124,7 @@ async function wpFetchAllPosts(after: Date, before: Date): Promise<{ posts: any[
       const { data, total: t } = await wpApiFetch(
         `/posts?per_page=${PER_PAGE}&page=${page}&orderby=date&order=desc&status=publish` +
         `&after=${after.toISOString()}&before=${before.toISOString()}` +
-        `&_fields=id,date,date_gmt,slug,title,author,categories,featured_media`
+        `&_fields=id,date,date_gmt,slug,title,author,categories,featured_media,comment_count`
       )
       if (page === 1) total = t
       if (!Array.isArray(data) || data.length === 0) break
@@ -135,6 +136,143 @@ async function wpFetchAllPosts(after: Date, before: Date): Promise<{ posts: any[
     }
   }
   return { posts, total }
+}
+
+// ── Engagement scoring helpers ────────────────────────────────────────────────
+// Real-data normalization. Each component is clamped to [0, 100] and never NaN.
+function norm(value: number, max: number): number {
+  if (!Number.isFinite(value) || value <= 0 || max <= 0) return 0
+  return Math.min((value / max) * 100, 100)
+}
+function roundClamp(v: number): number {
+  if (!Number.isFinite(v)) return 0
+  return Math.max(0, Math.min(100, Math.round(v)))
+}
+function round1(v: number): number {
+  if (!Number.isFinite(v)) return 0
+  return Math.round(v * 10) / 10
+}
+
+// pagePath comes back as e.g. "/chicago-bears/some-slug/" or "/some-slug/".
+// Returns the trailing slug segment (lowercased, no query/fragment).
+function pathToSlug(path: string): string | null {
+  if (!path) return null
+  const cleaned = path.split('?')[0].split('#')[0].replace(/\/+$/, '').replace(/^\/+/, '')
+  if (!cleaned) return null
+  const parts = cleaned.split('/')
+  return parts[parts.length - 1]?.toLowerCase() || null
+}
+
+// ── GA4 per-page metrics (real data only — null if GA4 isn't connected) ──
+async function fetchGa4PerPage(startStr: string, endStr: string): Promise<Array<{ pagePath: string; pageViews: number; engagedSessions: number; userEngagementDuration: number }>> {
+  if (!getGa4PropertyId()) return []
+  const result = await runGaReport({
+    dateRanges: [{ startDate: startStr, endDate: endStr }],
+    dimensions: [{ name: 'pagePath' }],
+    metrics: [
+      { name: 'screenPageViews' },
+      { name: 'engagedSessions' },
+      { name: 'userEngagementDuration' },
+    ],
+    limit: 10000,
+  })
+  if ('error' in (result as any)) return []
+  const r = result as GaReportResult
+  const headers = r.metricHeaders.map(h => h.name)
+  const idxView = headers.indexOf('screenPageViews')
+  const idxEng = headers.indexOf('engagedSessions')
+  const idxDur = headers.indexOf('userEngagementDuration')
+  return r.rows.map(row => ({
+    pagePath: row.dimensionValues[0]?.value || '',
+    pageViews: parseFloat(row.metricValues[idxView]?.value || '0'),
+    engagedSessions: parseFloat(row.metricValues[idxEng]?.value || '0'),
+    userEngagementDuration: parseFloat(row.metricValues[idxDur]?.value || '0'),
+  }))
+}
+
+// GA4 enhanced measurement fires `scroll` at 90% page depth. eventCount per
+// pagePath ≈ readers who scrolled deep on that URL.
+async function fetchGa4ScrollEvents(startStr: string, endStr: string): Promise<Array<{ pagePath: string; eventCount: number }>> {
+  if (!getGa4PropertyId()) return []
+  // Filter dimension on eventName via dimensionFilter is supported by runReport
+  // but the helper accepts only metrics+dimensions; query both `pagePath` and
+  // `eventName`, then filter rows in JS so we don't need to extend the helper.
+  const result = await runGaReport({
+    dateRanges: [{ startDate: startStr, endDate: endStr }],
+    dimensions: [{ name: 'pagePath' }, { name: 'eventName' }],
+    metrics: [{ name: 'eventCount' }],
+    limit: 10000,
+  })
+  if ('error' in (result as any)) return []
+  const r = result as GaReportResult
+  const out: Array<{ pagePath: string; eventCount: number }> = []
+  for (const row of r.rows) {
+    if (row.dimensionValues[1]?.value !== 'scroll') continue
+    out.push({
+      pagePath: row.dimensionValues[0]?.value || '',
+      eventCount: parseFloat(row.metricValues[0]?.value || '0'),
+    })
+  }
+  return out
+}
+
+// Hub items live in DataLab Supabase. `author_name` is the gm-auth email
+// prefix (e.g. "cbur22"); the caller maps it back to a WP author via sm_authors.
+async function fetchHubItemsForPeriod(startDate: Date, endDate: Date): Promise<Array<{ author_name: string | null; created_at: string }>> {
+  try {
+    const { data } = await datalabAdmin
+      .from('hub_items')
+      .select('author_name, created_at')
+      .gte('created_at', startDate.toISOString())
+      .lte('created_at', endDate.toISOString())
+      .limit(5000)
+    return (data || []) as Array<{ author_name: string | null; created_at: string }>
+  } catch {
+    return []
+  }
+}
+
+// google_article_scores stores `author_id` as the sm_authors UUID. Resolve
+// sm_authors.id → wp_id once, then attach wpId to each score row so callers
+// can aggregate by WP author.
+async function fetchGoogleScoresForAuthors(wpIds: number[]): Promise<Array<{ wpId: number; total: number; headlineScore: number; trust: number; spamSafety: number }>> {
+  if (wpIds.length === 0) return []
+  try {
+    const { data: authorRows } = await supabaseAdmin
+      .from('sm_authors')
+      .select('id, wp_id')
+      .in('wp_id', wpIds)
+    const idToWp = new Map<string, number>()
+    for (const a of (authorRows || [])) {
+      if (a.id && a.wp_id != null) idToWp.set(String(a.id), Number(a.wp_id))
+    }
+    if (idToWp.size === 0) return []
+    const authorIds = Array.from(idToWp.keys())
+    const { data: scoreRows } = await supabaseAdmin
+      .from('google_article_scores')
+      .select('author_id, total, sub')
+      .in('author_id', authorIds)
+      .limit(20000)
+    const out: Array<{ wpId: number; total: number; headlineScore: number; trust: number; spamSafety: number }> = []
+    for (const r of (scoreRows || [])) {
+      const wpId = idToWp.get(String(r.author_id))
+      if (wpId == null) continue
+      const sub = (r.sub || {}) as Record<string, number | undefined>
+      out.push({
+        wpId,
+        total: Number(r.total || 0),
+        // headlineScore is a top-level column on ArticleScore in the engine's
+        // scoring output. In storage it's also surfaced via sub.headlineScore
+        // for some ruleset versions; fall back to 0 if absent.
+        headlineScore: Number((r as any).headline_score ?? sub.headlineScore ?? 0),
+        trust: Number(sub.trust ?? 0),
+        spamSafety: Number(sub.spamSafety ?? 0),
+      })
+    }
+    return out
+  } catch {
+    return []
+  }
 }
 
 // ── Editorial data ───────────────────────────────────────────────────────────
@@ -222,11 +360,19 @@ async function fetchEditorial(startDate: Date, prevStart: Date, now: Date, days:
   const getCatName = (id: number) => decodeEntities(((cMap.get(id) as any)?.name || 'Uncategorized'))
 
   // ── Writer stats ──
-  const wMap = new Map<number, { posts: number; categories: Set<string> }>()
+  // Tracks per-writer aggregates from WP REST. `slugs` enables GA4 path → author
+  // mapping; `comments` aggregates the WP `comment_count` field on each post.
+  const wMap = new Map<number, { posts: number; categories: Set<string>; comments: number; slugs: Set<string> }>()
+  const slugToAuthor = new Map<string, number>()
   for (const p of period) {
     const aid = p.author; if (!aid) continue
-    const e = wMap.get(aid) || { posts: 0, categories: new Set<string>() }
+    const e = wMap.get(aid) || { posts: 0, categories: new Set<string>(), comments: 0, slugs: new Set<string>() }
     e.posts++
+    e.comments += Number(p.comment_count || 0)
+    if (p.slug) {
+      e.slugs.add(p.slug)
+      slugToAuthor.set(String(p.slug), aid)
+    }
     for (const catId of (p.categories || [])) {
       e.categories.add(getCatName(catId))
     }
@@ -254,8 +400,151 @@ async function fetchEditorial(startDate: Date, prevStart: Date, now: Date, days:
     postViewsMap.set(parseInt(row.post_id), parseInt(row.views || '0'))
   }
 
+  // ── Engagement signals: GA4 per-page, hub_items, Google subscores ──
+  const periodAuthorIdList = Array.from(wMap.keys())
+  const periodSlugSet = new Set<string>()
+  for (const e of wMap.values()) for (const s of e.slugs) periodSlugSet.add(s)
+
+  const [
+    gaPageRes,
+    gaScrollRes,
+    hubRowsRes,
+    smAuthorEmailsRes,
+    googleScoreRows,
+  ] = await Promise.all([
+    fetchGa4PerPage(startStr, nowStr),
+    fetchGa4ScrollEvents(startStr, nowStr),
+    fetchHubItemsForPeriod(startDate, now),
+    periodAuthorIdList.length > 0
+      ? supabaseAdmin.from('sm_authors').select('email, wp_id').not('email', 'is', null).in('wp_id', periodAuthorIdList)
+      : Promise.resolve({ data: [] as Array<{ email: string | null; wp_id: number | null }> }),
+    fetchGoogleScoresForAuthors(periodAuthorIdList),
+  ])
+
+  // GA4 per-page → per-writer engagement
+  // Each row: { pagePath, pageViews, engagedSessions, userEngagementDuration }
+  // Map pagePath → slug (last non-empty segment) → author via slugToAuthor.
+  // Aggregate per author: total pageViews, total engagement seconds, total engaged sessions.
+  type GaWriterAgg = { pageViews: number; engagedSessions: number; engagementSeconds: number; scrollEvents: number }
+  const gaPerWriter = new Map<number, GaWriterAgg>()
+  const gaPerSlug = new Map<string, GaWriterAgg>()
+  const ensureGaWriter = (aid: number) => {
+    const cur = gaPerWriter.get(aid)
+    if (cur) return cur
+    const blank: GaWriterAgg = { pageViews: 0, engagedSessions: 0, engagementSeconds: 0, scrollEvents: 0 }
+    gaPerWriter.set(aid, blank); return blank
+  }
+  const ensureGaSlug = (slug: string) => {
+    const cur = gaPerSlug.get(slug)
+    if (cur) return cur
+    const blank: GaWriterAgg = { pageViews: 0, engagedSessions: 0, engagementSeconds: 0, scrollEvents: 0 }
+    gaPerSlug.set(slug, blank); return blank
+  }
+  for (const row of gaPageRes) {
+    const slug = pathToSlug(row.pagePath)
+    if (!slug || !periodSlugSet.has(slug)) continue
+    const aid = slugToAuthor.get(slug)
+    if (!aid) continue
+    const w = ensureGaWriter(aid)
+    w.pageViews += row.pageViews
+    w.engagedSessions += row.engagedSessions
+    w.engagementSeconds += row.userEngagementDuration
+    const s = ensureGaSlug(slug)
+    s.pageViews += row.pageViews
+    s.engagedSessions += row.engagedSessions
+    s.engagementSeconds += row.userEngagementDuration
+  }
+  for (const row of gaScrollRes) {
+    const slug = pathToSlug(row.pagePath)
+    if (!slug || !periodSlugSet.has(slug)) continue
+    const aid = slugToAuthor.get(slug)
+    if (!aid) continue
+    ensureGaWriter(aid).scrollEvents += row.eventCount
+    ensureGaSlug(slug).scrollEvents += row.eventCount
+  }
+
+  // Hub items per writer — match `hub_items.author_name` (email prefix from
+  // gm-auth) to `sm_authors.email` prefix → wp_id. Both stores live in
+  // separate Supabase projects so the join happens in JS.
+  const { data: smAuthorEmails } = smAuthorEmailsRes as { data: Array<{ email: string | null; wp_id: number | null }> | null }
+  const emailPrefixToWp = new Map<string, number>()
+  for (const a of smAuthorEmails ?? []) {
+    if (a.email && a.wp_id != null) {
+      const prefix = String(a.email).split('@')[0]?.toLowerCase()
+      if (prefix) emailPrefixToWp.set(prefix, a.wp_id)
+    }
+  }
+  const hubByWriter = new Map<number, number>()
+  for (const row of hubRowsRes) {
+    const prefix = String(row.author_name || '').toLowerCase()
+    const wpId = emailPrefixToWp.get(prefix)
+    if (wpId == null) continue
+    hubByWriter.set(wpId, (hubByWriter.get(wpId) || 0) + 1)
+  }
+
+  // Google scores per writer — average of per-article rows belonging to the writer.
+  // sm_authors.id (UUID) is the foreign key on google_article_scores.author_id, so
+  // we join via wp_id → sm_authors → score rows.
+  type GoogleAgg = { articles: number; total: number; headline: number; trust: number; spam: number }
+  const googleByWriter = new Map<number, GoogleAgg>()
+  for (const row of googleScoreRows) {
+    const aid = row.wpId
+    if (aid == null) continue
+    const cur = googleByWriter.get(aid) || { articles: 0, total: 0, headline: 0, trust: 0, spam: 0 }
+    cur.articles += 1
+    cur.total += row.total
+    cur.headline += row.headlineScore
+    cur.trust += row.trust
+    cur.spam += row.spamSafety
+    googleByWriter.set(aid, cur)
+  }
+
+  // ── Per-writer engagement & overall scores ──
+  // Real signals only (no fabricated values). Each component is normalized to
+  // 0–100; the engagement formula is documented in the breakdown payload below.
   const writers = Array.from(wMap.entries()).map(([id, s]) => {
     const views = smedAuthorViewsMap.get(id) || 0
+    const ga = gaPerWriter.get(id)
+    const google = googleByWriter.get(id)
+    const hubPosts = hubByWriter.get(id) || 0
+
+    const avgComments = s.posts > 0 ? s.comments / s.posts : 0
+    const avgTimeOnPage = ga && ga.pageViews > 0 ? ga.engagementSeconds / ga.pageViews : 0
+    // GA4 enhanced measurement fires the "scroll" event at 90% scroll depth.
+    // Treat scroll_events / page_views as the share of sessions that read deeply.
+    const scrollCompletion = ga && ga.pageViews > 0 ? Math.min(100, (ga.scrollEvents / ga.pageViews) * 100) : 0
+    const engagementRate = ga && ga.pageViews > 0 ? Math.min(100, (ga.engagedSessions / ga.pageViews) * 100) : 0
+    const avgGoogleTotal = google && google.articles > 0 ? google.total / google.articles : 0      // 0–100
+    const avgHeadline    = google && google.articles > 0 ? google.headline / google.articles : 0   // 0–15
+    const avgTrust       = google && google.articles > 0 ? google.trust / google.articles : 0      // 0–15
+    const avgSpam        = google && google.articles > 0 ? google.spam / google.articles : 0      // 0–15 (higher = safer)
+
+    const commentsScore = norm(avgComments, 5)        // 5 comments/post = 100
+    const timeScore     = norm(avgTimeOnPage, 120)    // 120s = 100
+    const scrollScore   = scrollCompletion            // already 0–100
+    const headlineScore = norm(avgHeadline, 15)       // /15 of subscore range
+    const trustScore    = norm(avgTrust, 15)
+    const spamScore     = google && google.articles > 0 ? norm(avgSpam, 15) : 0
+    const spamPenalty   = google && google.articles > 0 ? Math.max(0, 100 - spamScore) : 0
+
+    const engagement_score = roundClamp(
+      (commentsScore * 0.20) +
+      (timeScore     * 0.20) +
+      (scrollScore   * 0.15) +
+      (headlineScore * 0.15) +
+      (trustScore    * 0.10) +
+      (spamScore     * 0.10) +
+      (engagementRate * 0.10)
+    )
+
+    // Overall = positive (Google + headline + engagement) minus negative
+    // (spam_penalty + recommendation pressure). Recommendation count isn't
+    // pulled per-writer here; we derive lite pressure from inverse spamScore
+    // which already captures spam-policy risk surfaced by the rules engine.
+    const positive = (avgGoogleTotal * 0.45) + (headlineScore * 0.20) + (engagement_score * 0.35)
+    const negative = (spamPenalty * 0.50)
+    const overall_score = roundClamp(positive - negative)
+
     return {
       id,
       name: getAuthorName(id),
@@ -265,8 +554,46 @@ async function fetchEditorial(startDate: Date, prevStart: Date, now: Date, days:
       views,
       avgViews: s.posts > 0 ? Math.round(views / s.posts) : 0,
       topCategories: Array.from(s.categories).slice(0, 3),
+      // ── Engagement column ──
+      comments: s.comments,
+      avgComments: round1(avgComments),
+      hubPosts,
+      avgTimeOnPage: Math.round(avgTimeOnPage),
+      scrollCompletion: Math.round(scrollCompletion),
+      engagementRate: Math.round(engagementRate),
+      avgGoogleScore: Math.round(avgGoogleTotal),
+      googleArticles: google?.articles || 0,
+      engagement_score,
+      overall_score,
+      breakdown: {
+        comments:     { value: round1(avgComments),     score: Math.round(commentsScore), weight: 20, label: 'Comments / post' },
+        timeOnPage:   { value: Math.round(avgTimeOnPage), score: Math.round(timeScore),    weight: 20, label: 'Avg time on page (s)' },
+        scrollDepth:  { value: Math.round(scrollCompletion), score: Math.round(scrollScore), weight: 15, label: 'Scroll completion %' },
+        headline:     { value: round1(avgHeadline),     score: Math.round(headlineScore), weight: 15, label: 'Headline subscore' },
+        trust:        { value: round1(avgTrust),        score: Math.round(trustScore),    weight: 10, label: 'Trust subscore' },
+        spamSafety:   { value: round1(avgSpam),         score: Math.round(spamScore),     weight: 10, label: 'Spam safety' },
+        engagementRate: { value: Math.round(engagementRate), score: Math.round(engagementRate), weight: 10, label: 'Engaged sessions / pageviews' },
+      },
     }
   }).sort((a, b) => b.views - a.views || b.posts - a.posts)
+
+  // Per-slug engagement breakdown — surfaced in the Google tab article detail
+  // panel so writers can see WHY their score is what it is.
+  const articleEngagement: Record<string, {
+    pageViews: number; avgTimeOnPage: number; scrollCompletion: number; engagementRate: number; comments: number
+  }> = {}
+  for (const p of period) {
+    if (!p.slug) continue
+    const slug = String(p.slug)
+    const ga = gaPerSlug.get(slug)
+    articleEngagement[slug] = {
+      pageViews: ga?.pageViews || 0,
+      avgTimeOnPage: ga && ga.pageViews > 0 ? Math.round(ga.engagementSeconds / ga.pageViews) : 0,
+      scrollCompletion: ga && ga.pageViews > 0 ? Math.min(100, Math.round((ga.scrollEvents / ga.pageViews) * 100)) : 0,
+      engagementRate: ga && ga.pageViews > 0 ? Math.min(100, Math.round((ga.engagedSessions / ga.pageViews) * 100)) : 0,
+      comments: Number(p.comment_count || 0),
+    }
+  }
 
   // ── Daily publishing trend ──
   const dMap = new Map<string, { count: number; views: number }>()
@@ -414,6 +741,7 @@ async function fetchEditorial(startDate: Date, prevStart: Date, now: Date, days:
     writers,
     writerTrends,
     writerMonths: periodMonths,
+    articleEngagement,
     categories: categoryBreakdown,
     viewsDistribution,
     recentPosts,

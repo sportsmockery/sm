@@ -237,6 +237,7 @@ export async function GET(request: Request) {
       const author = authorId ? authorById.get(authorId) : null
       return {
         articleId,
+        slug: post?.slug ?? '',
         title: post?.title ?? articleId,
         author: author?.name ?? '—',
         authorId,

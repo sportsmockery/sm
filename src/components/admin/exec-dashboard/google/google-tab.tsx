@@ -16,16 +16,26 @@ import { GoogleKnowledgePanel } from './google-knowledge-panel'
 import { GoogleOperationsProofPanel } from './google-operations-proof-panel'
 import { GoogleTransparencyAssetsPanel } from './google-transparency-assets-panel'
 
+export type ArticleEngagementMap = Record<string, {
+  pageViews: number
+  avgTimeOnPage: number
+  scrollCompletion: number
+  engagementRate: number
+  comments: number
+}>
+
 export function GoogleTab({
   active,
   range,
   customStart,
   customEnd,
+  articleEngagement,
 }: {
   active: boolean
   range?: string
   customStart?: string
   customEnd?: string
+  articleEngagement?: ArticleEngagementMap
 }) {
   const { data, loading, error, source, refresh } = useGoogleTabData(active, range, customStart, customEnd)
   const [busy, setBusy] = useState<null | 'backfill' | 'tick'>(null)
@@ -126,6 +136,13 @@ export function GoogleTab({
       {/* 1. Command center overview */}
       <GoogleOverviewCards data={data} />
 
+      {/* Engagement explainer — sets context for the breakdown shown per article */}
+      <div className="rounded-md border px-4 py-3 text-[12px] leading-relaxed" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)', color: 'var(--sm-text-muted)' }}>
+        Engagement Score reflects how readers actually interact with each article — combining engagement signals
+        (comments, time on page, scroll depth, engaged sessions from GA4) with content quality (headline subscore,
+        trust, spam safety from the Google rules engine). Click any article row below to see the per-component breakdown.
+      </div>
+
       {/* 2. Score distribution */}
       <GoogleScoreDistribution data={data} />
 
@@ -133,7 +150,7 @@ export function GoogleTab({
       <WriterGoogleLeaderboard writers={data.writers} />
 
       {/* 4. Article analysis */}
-      <GoogleArticleAnalysisTable articles={data.articles} rules={data.rules} recommendations={data.recommendations} />
+      <GoogleArticleAnalysisTable articles={data.articles} rules={data.rules} recommendations={data.recommendations} engagement={articleEngagement} />
 
       {/* 5. Transparency assets (/about, author pages, contact, publisher) */}
       <GoogleTransparencyAssetsPanel data={data} />

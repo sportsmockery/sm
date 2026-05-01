@@ -7,10 +7,19 @@ const C = { cyan: '#00D4FF', red: '#BC0000', gold: '#D6B05E', green: '#00D4FF' }
 
 type SortKey = 'total' | 'searchEssentials' | 'googleNews' | 'trust' | 'spamSafety' | 'technical' | 'headlineScore' | 'recommendationCount' | 'publishedAt' | 'updatedAt'
 
+type EngagementMap = Record<string, {
+  pageViews: number
+  avgTimeOnPage: number
+  scrollCompletion: number
+  engagementRate: number
+  comments: number
+}>
+
 interface Props {
   articles: ArticleAnalysisRow[]
   rules?: RuleEvaluation[]
   recommendations?: Recommendation[]
+  engagement?: EngagementMap
 }
 
 const RULE_FAMILY_LABEL: Record<string, string> = {
@@ -31,7 +40,7 @@ const SEVERITY_LABEL: Record<string, string> = {
   info: 'Info',
 }
 
-export function GoogleArticleAnalysisTable({ articles, rules = [], recommendations = [] }: Props) {
+export function GoogleArticleAnalysisTable({ articles, rules = [], recommendations = [], engagement }: Props) {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<'all' | 'green' | 'amber' | 'red'>('all')
   const [sortKey, setSortKey] = useState<SortKey>('total')
@@ -188,7 +197,12 @@ export function GoogleArticleAnalysisTable({ articles, rules = [], recommendatio
                   {isOpen && (
                     <tr style={{ borderBottom: '1px solid var(--sm-border)', background: 'var(--sm-surface)' }}>
                       <td colSpan={17} className="px-6 py-4">
-                        <ArticleDetailPanel articleRules={articleRules} articleRecs={articleRecs} />
+                        <ArticleDetailPanel
+                          articleRules={articleRules}
+                          articleRecs={articleRecs}
+                          article={a}
+                          engagement={engagement?.[a.slug]}
+                        />
                       </td>
                     </tr>
                   )}
@@ -202,16 +216,34 @@ export function GoogleArticleAnalysisTable({ articles, rules = [], recommendatio
   )
 }
 
-function ArticleDetailPanel({ articleRules, articleRecs }: { articleRules: RuleEvaluation[]; articleRecs: Recommendation[] }) {
+function ArticleDetailPanel({
+  articleRules,
+  articleRecs,
+  article,
+  engagement,
+}: {
+  articleRules: RuleEvaluation[]
+  articleRecs: Recommendation[]
+  article: ArticleAnalysisRow
+  engagement?: { pageViews: number; avgTimeOnPage: number; scrollCompletion: number; engagementRate: number; comments: number }
+}) {
+  // Engagement panel always renders (even when no rule failures) so writers can
+  // still see WHY their content scored the way it did.
+  const breakdownPanel = <EngagementBreakdownPanel article={article} engagement={engagement} />
+
   if (articleRules.length === 0 && articleRecs.length === 0) {
     return (
-      <p className="text-sm" style={{ color: 'var(--sm-text-dim)' }}>
-        No issues — every rule passed. Nothing to fix on this article.
-      </p>
+      <div className="flex flex-col gap-4">
+        <p className="text-sm" style={{ color: 'var(--sm-text-dim)' }}>
+          No issues — every rule passed. Nothing to fix on this article.
+        </p>
+        {breakdownPanel}
+      </div>
     )
   }
 
   return (
+    <div className="flex flex-col gap-4">
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Rule failures (what's wrong) */}
       <div>
@@ -265,7 +297,96 @@ function ArticleDetailPanel({ articleRules, articleRecs }: { articleRules: RuleE
         </ul>
       </div>
     </div>
+    {breakdownPanel}
+    </div>
   )
+}
+
+// Per-article engagement breakdown. Real signals only — fields without data
+// (e.g. when GA4 hasn't reported yet) render as "—" instead of fake zeros.
+function EngagementBreakdownPanel({
+  article,
+  engagement,
+}: {
+  article: ArticleAnalysisRow
+  engagement?: { pageViews: number; avgTimeOnPage: number; scrollCompletion: number; engagementRate: number; comments: number }
+}) {
+  const headlineMax = 15
+  const trustMax = 15
+  const spamMax = 15
+  const headlineNorm = clamp((article.headlineScore / headlineMax) * 100)
+  const trustNorm    = clamp((article.sub.trust / trustMax) * 100)
+  const spamNorm     = clamp((article.sub.spamSafety / spamMax) * 100)
+
+  const e = engagement
+  const hasGa = !!e && e.pageViews > 0
+  const commentsNorm = e ? clamp((e.comments / 5) * 100) : 0     // 5 comments = 100
+  const timeNorm     = hasGa ? clamp((e!.avgTimeOnPage / 120) * 100) : 0
+  const scrollNorm   = hasGa ? clamp(e!.scrollCompletion) : 0
+  const engRateNorm  = hasGa ? clamp(e!.engagementRate) : 0
+
+  // Same weights as the writer-level engagement_score (server) so the per-article
+  // number lines up with the per-writer number on the leaderboard.
+  const finalScore = Math.round(
+    (commentsNorm   * 0.20) +
+    (timeNorm       * 0.20) +
+    (scrollNorm     * 0.15) +
+    (headlineNorm   * 0.15) +
+    (trustNorm      * 0.10) +
+    (spamNorm       * 0.10) +
+    (engRateNorm    * 0.10)
+  )
+
+  const fmt = (v: number, suffix = '') => Number.isFinite(v) && v > 0 ? `${v}${suffix}` : (v === 0 && hasGa ? `0${suffix}` : '—')
+  const fmtComments = (v: number) => Number.isFinite(v) && v > 0 ? String(v) : (e ? '0' : '—')
+
+  return (
+    <div className="rounded-xl border p-4" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
+      <div className="flex items-center justify-between mb-3">
+        <h4 className="text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--sm-text-dim)' }}>
+          Engagement Breakdown
+        </h4>
+        <span className="text-xs" style={{ color: 'var(--sm-text-dim)' }}>
+          Engagement Score: <span className="font-bold tabular-nums" style={{ color: 'var(--sm-text)' }}>{finalScore}</span>
+        </span>
+      </div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+        <Metric label="Comments" value={fmtComments(e?.comments ?? 0)} score={commentsNorm} weight="20%" />
+        <Metric label="Time on Page" value={fmt(e?.avgTimeOnPage ?? 0, 's')} score={timeNorm} weight="20%" />
+        <Metric label="Scroll Depth" value={fmt(e?.scrollCompletion ?? 0, '%')} score={scrollNorm} weight="15%" />
+        <Metric label="Engaged Sessions" value={fmt(e?.engagementRate ?? 0, '%')} score={engRateNorm} weight="10%" />
+        <Metric label="Headline Subscore" value={`${article.headlineScore} / ${headlineMax}`} score={headlineNorm} weight="15%" />
+        <Metric label="Trust Subscore" value={`${article.sub.trust} / ${trustMax}`} score={trustNorm} weight="10%" />
+        <Metric label="Spam Safety" value={`${article.sub.spamSafety} / ${spamMax}`} score={spamNorm} weight="10%" />
+        <Metric label="Page Views" value={fmt(e?.pageViews ?? 0)} score={null} weight="—" />
+      </div>
+      {!hasGa && (
+        <p className="text-[11px] mt-3" style={{ color: 'var(--sm-text-dim)' }}>
+          GA4 hasn&apos;t reported time-on-page or scroll for this article in the selected window — engagement signals are derived from comments + Google subscores only.
+        </p>
+      )}
+    </div>
+  )
+}
+
+function Metric({ label, value, score, weight }: { label: string; value: string | number; score: number | null; weight: string }) {
+  return (
+    <div className="rounded-md border p-2.5" style={{ background: 'var(--sm-surface)', borderColor: 'var(--sm-border)' }}>
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] uppercase tracking-wider" style={{ color: 'var(--sm-text-dim)' }}>{label}</span>
+        <span className="text-[10px] tabular-nums" style={{ color: 'var(--sm-text-dim)' }}>{weight}</span>
+      </div>
+      <div className="flex items-baseline justify-between mt-1.5">
+        <span className="text-sm font-semibold tabular-nums" style={{ color: 'var(--sm-text)' }}>{value}</span>
+        {score !== null && <span className="text-xs tabular-nums" style={{ color: '#00D4FF' }}>{Math.round(score)}</span>}
+      </div>
+    </div>
+  )
+}
+
+function clamp(v: number): number {
+  if (!Number.isFinite(v) || v < 0) return 0
+  return v > 100 ? 100 : v
 }
 
 function Pill({ tone, children }: { tone: 'red' | 'gold' | 'cyan' | 'muted'; children: React.ReactNode }) {

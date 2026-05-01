@@ -251,7 +251,7 @@ function mkArticle(
   category: string, topic: string, recs: number, headline: number,
 ): ArticleAnalysisRow {
   return {
-    articleId: id, title, author: w.name, authorId: w.authorId,
+    articleId: id, slug: id, title, author: w.name, authorId: w.authorId,
     publishedAt: ISO(Math.floor(Math.random() * 60 * 24 * 7)),
     updatedAt:   ISO(Math.floor(Math.random() * 60 * 24)),
     lastRescoredAt: ISO(Math.floor(Math.random() * 240)),

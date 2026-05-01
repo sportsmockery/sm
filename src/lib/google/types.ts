@@ -242,6 +242,7 @@ export interface AuditLogEvent {
 // ── UI-shaped aggregates ────────────────────────────────────────────────────
 export interface ArticleAnalysisRow {
   articleId: string
+  slug: string
   title: string
   author: string
   authorId: string | null
