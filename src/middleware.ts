@@ -133,6 +133,15 @@ export async function middleware(request: NextRequest) {
   // the new sitemap stack ships on cutover day, not before. The legacy static
   // /sitemap.xml continues serving from public/ until then.
 
+  // Rule 0: trailing-slash → no-slash (308). Skip the homepage and any path
+  // that already looks like a static asset (contains a dot). 308 because it
+  // preserves method on POST/PUT/etc., which a 301 does not guarantee.
+  if (pathname !== '/' && pathname.endsWith('/') && !pathname.includes('.')) {
+    const url = request.nextUrl.clone()
+    url.pathname = pathname.replace(/\/+$/, '')
+    return NextResponse.redirect(url, 308)
+  }
+
   // Rule 1: /author/<numeric-id> → /author/<slug> (301)
   const numericAuthorMatch = pathname.match(/^\/author\/(\d+)\/?$/)
   if (numericAuthorMatch) {

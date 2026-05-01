@@ -93,6 +93,19 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
   const description = post.seo_description || post.excerpt || ''
   const canonical = canonicalUrl(`/${category}/${slug}`)
 
+  // Resolve the human author byline so we can emit
+  // <meta property="article:author"> via openGraph.authors. Falls back to
+  // the brand byline if the post is unattributed.
+  let authorName = 'Sports Mockery Staff'
+  if (post.author_id) {
+    const { data: author } = await supabaseAdmin
+      .from('sm_authors')
+      .select('display_name')
+      .eq('id', post.author_id)
+      .single()
+    if (author?.display_name) authorName = author.display_name
+  }
+
   return {
     title,
     description,
@@ -103,6 +116,7 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
       type: 'article',
       publishedTime: post.published_at,
       modifiedTime: post.updated_at || post.published_at,
+      authors: [authorName],
       url: canonical,
       images: post.featured_image
         ? [

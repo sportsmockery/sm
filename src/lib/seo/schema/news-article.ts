@@ -69,10 +69,23 @@ export function organizationJsonLd() {
       width: 1200,
       height: 630,
     },
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: 'Chicago',
+      addressRegion: 'IL',
+      addressCountry: 'US',
+    },
+    areaServed: {
+      '@type': 'City',
+      name: 'Chicago',
+    },
     sameAs: [
       'https://twitter.com/sportsmockery',
+      'https://x.com/sportsmockery',
       'https://www.facebook.com/sportsmockery',
+      'https://www.instagram.com/sportsmockery',
       'https://www.youtube.com/@sportsmockery',
+      'https://www.tiktok.com/@sportsmockery',
     ],
     description:
       "Chicago's premier sports coverage — Bears, Bulls, Cubs, White Sox, and Blackhawks",

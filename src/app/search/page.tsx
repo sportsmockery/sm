@@ -26,6 +26,9 @@ export async function generateMetadata({ searchParams }: SearchPageProps): Promi
     description: q
       ? `Search results for "${q}" on SportsMockery - Chicago sports news and analysis`
       : 'Search SportsMockery for the latest Chicago Bears, Bulls, Cubs, White Sox, and Blackhawks news',
+    // Search-result pages are low-value for indexing (thin, near-duplicate
+    // across queries). Keep them noindex per the auto-SEO playbook (#43).
+    robots: { index: false, follow: true },
   }
 }
 

@@ -123,10 +123,11 @@ export default function RootLayout({
         )}
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="alternate" type="application/rss+xml" title="Sports Mockery RSS" href="https://sportsmockery.com/api/rss" />
-        <link rel="dns-prefetch" href="https://izwhcuccuwvlqqhpprbb.supabase.co" />
-        <link rel="preconnect" href="https://izwhcuccuwvlqqhpprbb.supabase.co" />
-        <link rel="dns-prefetch" href="https://a.espncdn.com" />
+        <link rel="preconnect" href="https://izwhcuccuwvlqqhpprbb.supabase.co" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://a.espncdn.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://cdn.espn.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://www.google-analytics.com" crossOrigin="anonymous" />
         {/* Organization + WebSite JSON-LD */}
         <JsonLd data={organizationJsonLd()} />
         <JsonLd

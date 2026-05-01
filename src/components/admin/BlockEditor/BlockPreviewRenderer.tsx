@@ -4,6 +4,7 @@ import React from 'react';
 import Image from 'next/image';
 import type { ContentBlock } from './types';
 import { SENTIMENT_CONFIGS } from './types';
+import { rewriteRenderHtml } from '@/lib/seo/render-block-rewrites';
 
 /* ─── Shared article components ─── */
 import { ScoutInsight } from '@/components/articles/ScoutInsight';
@@ -39,7 +40,7 @@ interface BlockPreviewRendererProps {
   blocks: ContentBlock[];
 }
 
-function RenderBlock({ block }: { block: ContentBlock }) {
+function RenderBlock({ block, priorityImageId }: { block: ContentBlock; priorityImageId?: string }) {
   switch (block.type) {
     /* ─── Content ─── */
     case 'paragraph':
@@ -93,7 +94,15 @@ function RenderBlock({ block }: { block: ContentBlock }) {
         <PreviewSection>
           <figure>
             <div className="relative w-full aspect-video rounded-xl overflow-hidden">
-              <Image src={block.data.src} alt={block.data.alt} fill className="object-cover" sizes="720px" />
+              <Image
+                src={block.data.src}
+                alt={block.data.alt}
+                fill
+                className="object-cover"
+                sizes="720px"
+                priority={block.id === priorityImageId}
+                loading={block.id === priorityImageId ? 'eager' : 'lazy'}
+              />
             </div>
             {block.data.caption && (
               <figcaption className="text-[13px] text-slate-400 mt-2 text-center">{block.data.caption}</figcaption>
@@ -559,12 +568,55 @@ function RenderBlock({ block }: { block: ContentBlock }) {
   }
 }
 
+/**
+ * Apply the render-time mixed-content sweep to every block that carries
+ * HTML or text data. Cheap, idempotent, runs once per render. Skipping
+ * unknown shapes is safe — only fields named html / text / insight are
+ * rewritten so blocks like image (src) are untouched.
+ */
+function rewriteBlocksForRender(blocks: ContentBlock[]): ContentBlock[] {
+  return blocks.map((block) => {
+    const data = block.data as Record<string, unknown>
+    let nextData = data
+    let changed = false
+    if (typeof data.html === 'string') {
+      const next = rewriteRenderHtml(data.html)
+      if (next !== data.html) {
+        nextData = { ...nextData, html: next }
+        changed = true
+      }
+    }
+    if (typeof data.text === 'string') {
+      const next = rewriteRenderHtml(data.text)
+      if (next !== data.text) {
+        nextData = { ...nextData, text: next }
+        changed = true
+      }
+    }
+    if (typeof data.insight === 'string') {
+      const next = rewriteRenderHtml(data.insight)
+      if (next !== data.insight) {
+        nextData = { ...nextData, insight: next }
+        changed = true
+      }
+    }
+    return changed ? ({ ...block, data: nextData } as ContentBlock) : block
+  })
+}
+
 export function BlockPreviewRenderer({ blocks }: BlockPreviewRendererProps) {
+  const safeBlocks = rewriteBlocksForRender(blocks)
+  // Below-the-fold images default to next/image lazy. The first inline
+  // image gets priority so LCP candidates inside the article render eagerly
+  // (the featured image above the article body is preloaded separately).
+  const firstImageId = safeBlocks.find(
+    (b) => b.type === 'image' && (b.data as { src?: string }).src
+  )?.id
   return (
     <article>
       <ArticleBody>
-        {blocks.map((block) => (
-          <RenderBlock key={block.id} block={block} />
+        {safeBlocks.map((block) => (
+          <RenderBlock key={block.id} block={block} priorityImageId={firstImageId} />
         ))}
       </ArticleBody>
     </article>
