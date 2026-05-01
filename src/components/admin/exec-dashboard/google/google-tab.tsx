@@ -158,7 +158,12 @@ export function GoogleTab({
       <GoogleScoreDistribution data={data} />
 
       {/* 3. Writer leaderboard */}
-      <WriterGoogleLeaderboard writers={data.writers} writerEngagement={writerEngagement} />
+      <WriterGoogleLeaderboard
+        writers={data.writers}
+        writerEngagement={writerEngagement}
+        recommendations={data.recommendations}
+        articles={data.articles}
+      />
 
       {/* 4. Article analysis */}
       <GoogleArticleAnalysisTable articles={data.articles} rules={data.rules} recommendations={data.recommendations} engagement={articleEngagement} />
