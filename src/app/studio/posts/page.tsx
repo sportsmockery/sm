@@ -40,34 +40,24 @@ export default async function StudioPostsPage({ searchParams }: PostsPageProps) 
   )
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Find author matching current user's email (case-insensitive — sm_authors
-  // emails may have mixed case, so use ilike to avoid false negatives that
-  // would silently apply the writer-only filter to an admin/editor).
+  // Resolve the user's sm_authors row (case-insensitive — emails can have
+  // mixed casing across imports). Used only for the "Author" column header
+  // in the table; access control is handled by middleware/layout.
   const { data: currentAuthor } = await supabaseAdmin
     .from('sm_authors')
     .select('id, display_name, role')
     .ilike('email', user?.email || '')
     .maybeSingle()
 
-  // Cross-check sm_users.role — admins on the platform should see all posts
-  // even if their sm_authors row is missing or stuck as a plain "writer".
-  const { data: smUser } = user?.id
-    ? await supabaseAdmin.from('sm_users').select('role').eq('id', user.id).maybeSingle()
-    : { data: null }
+  // Studio is an internal content-team workspace — every authenticated user
+  // sees every post (drafts included), so a writer who saved a draft under
+  // a different byline still finds it here. Per-author scoping was hiding
+  // posts whose `author_id` did not match the logged-in user.
+  const isEditor = true
 
-  const isEditor =
-    smUser?.role === 'admin' ||
-    currentAuthor?.role === 'editor' ||
-    currentAuthor?.role === 'admin'
-
-  // Build query - authors only see their own posts, editors see all
   let query = supabaseAdmin
     .from('sm_posts')
     .select('id, title, slug, status, published_at, created_at, category_id, author_id, featured_image, excerpt', { count: 'exact' })
-
-  if (!isEditor && currentAuthor?.id) {
-    query = query.eq('author_id', currentAuthor.id)
-  }
 
   if (status && status !== 'all') {
     query = query.eq('status', status)

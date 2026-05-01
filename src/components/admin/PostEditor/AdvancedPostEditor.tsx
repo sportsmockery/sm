@@ -1227,7 +1227,7 @@ export default function AdvancedPostEditor({
           <button
             type="button"
             onClick={() => setShowPreview(true)}
-            disabled={!formData.title || !formData.content}
+            disabled={!formData.title || (!formData.content && !(blockDoc?.blocks?.length))}
             className="h-8 rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-3 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors disabled:opacity-50 flex items-center gap-1.5"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
