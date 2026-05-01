@@ -27,9 +27,25 @@ interface Data {
     id: number; name: string; avatar: string | null; email: string; role: string
     posts: number; views: number; avgViews: number; topCategories: string[]
     avgReadTime: number; avgScore: number
+    // Engagement signals (real data from WP comments, GA4, Google score engine,
+    // and DataLab hub_items). Server normalizes everything; UI just renders.
+    comments?: number
+    avgComments?: number
+    hubPosts?: number
+    avgTimeOnPage?: number
+    scrollCompletion?: number
+    engagementRate?: number
+    avgGoogleScore?: number
+    googleArticles?: number
+    engagement_score?: number
+    overall_score?: number
+    breakdown?: Record<string, { value: number; score: number; weight: number; label: string }>
   }>
   writerTrends: Array<{ id: number; name: string; data: Array<{ month: string; count: number }> }>
   writerMonths: string[]
+  articleEngagement?: Record<string, {
+    pageViews: number; avgTimeOnPage: number; scrollCompletion: number; engagementRate: number; comments: number
+  }>
   categories: Array<{ name: string; count: number; views: number; avgViews: number }>
   contentTypes: Array<{ type: string; count: number }>
   topicBreakdown: Array<{ topic: string; count: number }>
@@ -116,6 +132,15 @@ const pctUp = (c: number, p: number) => p === 0 ? c > 0 : c >= p
 const fD = (d: string) => new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 const fM = (m: string) => { const [y, mo] = m.split('-'); return new Date(+y, +mo - 1).toLocaleDateString('en-US', { month: 'short', year: '2-digit' }) }
 const tAgo = (t: number) => { const s = Math.floor((Date.now() - t) / 1000); return s < 60 ? 'just now' : s < 3600 ? Math.floor(s / 60) + 'm ago' : s < 86400 ? Math.floor(s / 3600) + 'h ago' : Math.floor(s / 86400) + 'd ago' }
+
+// Engagement & overall score color tiers — same hex palette already in use.
+function getScoreColor(score: number | undefined | null): string {
+  const s = Number(score ?? 0)
+  if (s >= 85) return '#00D4FF'   // intelligence cyan — strong
+  if (s >= 70) return '#D6B05E'   // gold — solid
+  if (s >= 50) return '#f59e0b'   // amber — caution
+  return '#BC0000'                // red — needs work
+}
 
 // Freestar metrics type (mirrors pub.network dashboard)
 type FreestarMetrics = {
@@ -455,8 +480,8 @@ function SourceComparisonCard({ data }: { data: Data['crossSource'] }) {
         </div>
       )}
       {ga?.error && (
-        <p className="mt-3 text-[11px] leading-5" style={{ color: '#bc0000' }}>
-          GA4 not authorized: {ga.error}. <a href="/api/admin/google-search-console/connect" className="underline" style={{ color: '#bc0000' }}>Re-connect Google</a> to grant analytics.readonly scope.
+        <p className="mt-3 text-[11px] leading-5" style={{ color: 'var(--sm-text-dim)' }}>
+          GA4 data temporarily unavailable.
         </p>
       )}
       {ga?.channels && ga.channels.length > 0 && (() => {
@@ -1636,8 +1661,12 @@ export default function ExecDashboard() {
                     </div>
                   )},
                   { key: 'posts', label: 'Posts', align: 'right', render: (v: number) => <span className="font-bold tabular-nums">{v}</span> },
+                  { key: 'hubPosts', label: 'Hub', align: 'right', render: (v: number) => <span className="font-bold tabular-nums" style={{ color: v > 0 ? C.indigo : 'var(--sm-text-dim)' }}>{v ?? 0}</span> },
                   { key: 'views', label: 'Views', align: 'right', render: (v: number) => <span className="font-bold tabular-nums" style={{ color: C.blue }}>{fN(v)}</span> },
                   { key: 'avgViews', label: 'Avg Views', align: 'right', render: (v: number) => <span className="font-bold tabular-nums" style={{ color: C.purple }}>{fN(v)}</span> },
+                  { key: 'comments', label: 'Comments', align: 'right', render: (v: number) => <span className="font-bold tabular-nums">{v ?? 0}</span> },
+                  { key: 'engagement_score', label: 'Engagement', align: 'right', render: (v: number) => <span className="font-bold tabular-nums" style={{ color: getScoreColor(v) }}>{v ?? 0}</span> },
+                  { key: 'overall_score', label: 'Overall', align: 'right', render: (v: number) => <span className="font-bold tabular-nums" style={{ color: getScoreColor(v) }}>{v ?? 0}</span> },
                   { key: 'topCategories', label: 'Categories', priority: 'low',
                     render: (v: string[]) => <div className="flex gap-1 flex-wrap">{(v || []).map(c => <span key={c} className="text-xs px-2 py-0.5 rounded-full" style={{ background: C.indigo + '12', color: C.indigo }}>{c}</span>)}</div>
                   },
@@ -2581,6 +2610,7 @@ export default function ExecDashboard() {
               range={range}
               customStart={customStart}
               customEnd={customEnd}
+              articleEngagement={data.articleEngagement}
             />
           )}
 

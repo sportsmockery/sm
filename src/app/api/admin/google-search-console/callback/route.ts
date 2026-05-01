@@ -6,14 +6,23 @@ import {
   GSC_SCOPE,
   getGscPropertyId,
   getGscRedirectUri,
+  isOauthOwner,
 } from '@/lib/google-search-console'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   const auth = await requireAdmin(request)
-  if (auth.error) {
+  if (!auth.user) {
     return NextResponse.json({ error: auth.error }, { status: auth.status })
+  }
+
+  // Defense in depth: also gate the callback by the owner allowlist so a
+  // crafted redirect can't write a non-owner token.
+  if (!isOauthOwner(auth.user.email)) {
+    return NextResponse.redirect(
+      new URL('/admin/exec-dashboard?gsc=error&reason=not_owner', request.url)
+    )
   }
 
   const code = request.nextUrl.searchParams.get('code')
@@ -87,6 +96,18 @@ export async function GET(request: NextRequest) {
     } catch {
       email = null
     }
+  }
+
+  // Final guard: the Google account picked at the consent screen must also be
+  // on the owner allowlist. Otherwise we'd write a foreign Google token into
+  // the shared row and break the dashboard for everyone.
+  if (!isOauthOwner(email)) {
+    return NextResponse.redirect(
+      new URL(
+        `/admin/exec-dashboard?gsc=error&reason=wrong_google_account&email=${encodeURIComponent(email || 'unknown')}`,
+        request.url
+      )
+    )
   }
 
   const property = getGscPropertyId()

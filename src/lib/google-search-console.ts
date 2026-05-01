@@ -15,6 +15,25 @@ export const GSC_PROVIDER = 'google_search_console'
 // authorized — re-connect Google".
 export const GSC_SCOPE = 'openid email https://www.googleapis.com/auth/webmasters.readonly https://www.googleapis.com/auth/analytics.readonly'
 
+// Owner allowlist for the connect/callback flow. The stored token in
+// admin_oauth_tokens is shared across ALL admin viewers (intentionally, so
+// every admin sees data without re-authorizing) — but only these emails
+// can write/overwrite it. Prevents a second admin from accidentally
+// re-connecting with their own Google account and breaking everyone else's
+// dashboard. Override via OAUTH_OWNER_EMAILS=foo@x.com,bar@y.com.
+export function getOauthOwnerAllowlist(): string[] {
+  const fromEnv = process.env.OAUTH_OWNER_EMAILS
+  if (fromEnv) {
+    return fromEnv.split(',').map(s => s.trim().toLowerCase()).filter(Boolean)
+  }
+  return ['cbur22@gmail.com']
+}
+
+export function isOauthOwner(email: string | null | undefined): boolean {
+  if (!email) return false
+  return getOauthOwnerAllowlist().includes(email.toLowerCase())
+}
+
 export type GscTokenRow = {
   id: number
   provider: string
