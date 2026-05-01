@@ -12,6 +12,7 @@ import {
   ReferenceLine,
 } from 'recharts'
 import { GoogleTab } from '@/components/admin/exec-dashboard/google/google-tab'
+import { SeoTasksTab } from '@/components/admin/exec-dashboard/seo-tasks/seo-tasks-tab'
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -60,7 +61,7 @@ interface Data {
 // ═══════════════════════════════════════════════════════════════════════════════
 // CONSTANTS & UTILS
 // ═══════════════════════════════════════════════════════════════════════════════
-const TABS = ['Overview', 'Writers', 'Social', 'SEO', 'Content', 'Payments', 'Freestar', 'Google'] as const
+const TABS = ['Overview', 'Writers', 'Social', 'SEO', 'Content', 'Payments', 'Freestar', 'Google', 'SEO Tasks'] as const
 const RANGES = [
   { key: 'today', label: 'Today' },
   { key: 'yesterday', label: 'Yesterday' },
@@ -2416,6 +2417,11 @@ export default function ExecDashboard() {
               customStart={customStart}
               customEnd={customEnd}
             />
+          )}
+
+          {/* ═══════ SEO TASKS TAB ═══════ */}
+          {tab === 'SEO Tasks' && (
+            <SeoTasksTab active={tab === 'SEO Tasks'} />
           )}
         </div>
       )}
