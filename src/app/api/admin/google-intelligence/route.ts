@@ -27,30 +27,38 @@ function resolveDateRange(searchParams: URLSearchParams): { startISO: string; en
   if (!range || range === 'all-time') return null
 
   const now = new Date()
+  // Range boundaries are computed in Central Time so "this-month" doesn't roll
+  // over at 7pm CT (when Vercel's UTC clock crosses midnight). chi has the same
+  // wall-clock components as Chicago — use only its component getters, not its
+  // underlying UTC value. Mirrors src/app/api/exec-dashboard/route.ts.
+  const chi = new Date(now.toLocaleString('en-US', { timeZone: 'America/Chicago' }))
+  const cy = chi.getFullYear()
+  const cm = chi.getMonth()
+  const cd = chi.getDate()
+  const cw = chi.getDay()
   let start: Date
   let end: Date
   if (range === 'today') {
-    start = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    start = new Date(cy, cm, cd)
     end = now
   } else if (range === 'yesterday') {
-    start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1)
-    end = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    start = new Date(cy, cm, cd - 1)
+    end = new Date(cy, cm, cd)
   } else if (range === 'this-week') {
-    const day = now.getDay()
-    start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - day)
+    start = new Date(cy, cm, cd - cw)
     end = now
   } else if (range === 'this-month') {
-    start = new Date(now.getFullYear(), now.getMonth(), 1)
+    start = new Date(cy, cm, 1)
     end = now
   } else if (range === 'last-month') {
-    start = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-    end = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59)
+    start = new Date(cy, cm - 1, 1)
+    end = new Date(cy, cm, 0, 23, 59, 59)
   } else if (range === 'ytd') {
-    start = new Date(now.getFullYear(), 0, 1)
+    start = new Date(cy, 0, 1)
     end = now
   } else if (range === 'last-year') {
-    start = new Date(now.getFullYear() - 1, 0, 1)
-    end = new Date(now.getFullYear() - 1, 11, 31, 23, 59, 59)
+    start = new Date(cy - 1, 0, 1)
+    end = new Date(cy - 1, 11, 31, 23, 59, 59)
   } else if (range === 'custom') {
     const startStr = searchParams.get('start')
     const endStr = searchParams.get('end')
