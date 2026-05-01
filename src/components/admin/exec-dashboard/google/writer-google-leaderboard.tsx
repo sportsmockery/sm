@@ -215,7 +215,7 @@ function ScoreInfoIcon({ text, align }: { text: string; align: 'left' | 'right' 
       tabIndex={0}
       aria-label="Score calculation details"
     >
-      <Info size={12} style={{ color: 'var(--sm-text-dim)', opacity: 0.7 }} />
+      <Info size={14} strokeWidth={2.25} style={{ color: '#00D4FF' }} />
       {open && (
         <span
           role="tooltip"
