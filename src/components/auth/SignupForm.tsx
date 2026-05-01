@@ -59,6 +59,12 @@ export default function SignupForm() {
       return
     }
 
+    fetch('/api/newsletter/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    }).catch(() => {})
+
     setSuccess(true)
     setLoading(false)
   }
@@ -77,6 +83,9 @@ export default function SignupForm() {
         <h3 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--sm-text)', marginBottom: '8px' }}>Check your email</h3>
         <p style={{ fontSize: '14px', color: 'var(--sm-text-muted)' }}>
           We&apos;ve sent a confirmation link to <strong>{email}</strong>. Click the link to activate your account.
+        </p>
+        <p style={{ fontSize: '13px', color: 'var(--sm-text-muted)', marginTop: '12px' }}>
+          You&apos;re also subscribed to the SM Edge Daily — Chicago sports delivered every morning at 6 AM CT.
         </p>
         <Link
           href="/login"

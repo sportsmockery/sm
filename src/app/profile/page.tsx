@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import AchievementBadge from '@/components/AchievementBadge'
@@ -50,7 +51,13 @@ const readingHistory = [
 export default function ProfilePage() {
   const { user, loading, isAuthenticated, refreshUser } = useAuth()
   const { theme, setTheme } = useTheme()
+  const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (loading) return
+    if (!isAuthenticated) router.replace('/login?next=/profile')
+  }, [loading, isAuthenticated, router])
 
   const [isEditingName, setIsEditingName] = useState(false)
   const [editedName, setEditedName] = useState('')
@@ -65,7 +72,7 @@ export default function ProfilePage() {
   })
 
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
-    favorites: true, account: false,
+    favorites: true, account: true,
   })
 
   useEffect(() => {
@@ -128,7 +135,7 @@ export default function ProfilePage() {
   const displayAvatar = avatarPreview || user?.avatar
   const isOwnProfile = isAuthenticated
 
-  if (loading) {
+  if (loading || !isAuthenticated) {
     return (
       <div className="sm-hero-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ width: 48, height: 48, border: '3px solid var(--sm-border)', borderTopColor: '#bc0000', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
