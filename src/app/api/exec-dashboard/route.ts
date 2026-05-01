@@ -4,6 +4,7 @@
 // If a data source is unavailable, return null/empty — never fabricate.
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { aggregateTotals, querySearchAnalytics } from '@/lib/google-search-console'
 
 const WP_API = 'https://www.sportsmockery.com/wp-json/wp/v2'
 const WP_EXPORT = 'https://www.sportsmockery.com/wp-json/sm-export/v1'
@@ -86,13 +87,15 @@ export async function GET(request: Request) {
   const prevStart = new Date(startDate.getTime() - days * 86400000)
 
   try {
-    const [editorial, social, seo, paymentSync] = await Promise.all([
+    const prevEnd = new Date(startDate.getTime() - 1)
+    const [editorial, social, seo, paymentSync, crossSource] = await Promise.all([
       fetchEditorial(startDate, prevStart, endDate, days),
       fetchSocial(),
       fetchSEO(endDate, now),
       fetchPaymentSyncStatus(),
+      fetchCrossSource(startDate, endDate, prevStart, prevEnd, now),
     ])
-    return NextResponse.json({ ...editorial, social, seo, paymentSync, range, days, timestamp: Date.now() })
+    return NextResponse.json({ ...editorial, social, seo, paymentSync, crossSource, range, days, timestamp: Date.now() })
   } catch (error) {
     console.error('Exec dashboard error:', error)
     return NextResponse.json({ error: 'Failed to fetch' }, { status: 500 })
@@ -543,6 +546,114 @@ async function fetchSEO(endDate: Date, now: Date) {
   } catch (e) {
     console.error('[Exec] SEMRush error:', e)
     return null
+  }
+}
+
+// ── Cross-source comparison: WP SMED vs GSC vs SEMrush ──────────────────────
+// Real, side-by-side numbers for the selected period and the prior period of
+// equal length, so ExecIQ (and the Overview UI) can see *where* the trend lives
+// — owned/social vs Google search vs modeled organic. Different scopes, on
+// purpose: SMED = all traffic, GSC = Google search clicks, SEMrush = US-only
+// modeled organic snapshot.
+async function fetchCrossSource(
+  startDate: Date,
+  endDate: Date,
+  prevStart: Date,
+  prevEnd: Date,
+  now: Date
+) {
+  const isoDay = (d: Date) => d.toISOString().slice(0, 10)
+  const startStr = isoDay(startDate)
+  const endStr = isoDay(endDate)
+  const prevStartStr = isoDay(prevStart)
+  const prevEndStr = isoDay(prevEnd)
+
+  const semrushKey = process.env.SEMRUSH_API_KEY
+  const semrushUrl = (snapshot: string | null) => {
+    const dd = snapshot ? `&display_date=${snapshot}` : ''
+    return `${SEMRUSH_API}/?type=domain_rank&key=${semrushKey}` +
+      `&export_columns=Db,Dn,Rk,Or,Ot,Oc,Ad,At,Ac&domain=sportsmockery.com&database=us${dd}`
+  }
+  const semrushSnapshot = (when: Date): { displayDate: string | null; label: string } => {
+    const isCurrent = when.getFullYear() === now.getFullYear() && when.getMonth() === now.getMonth()
+    const label = when.toLocaleString('en-US', { month: 'long', year: 'numeric' })
+    if (isCurrent) return { displayDate: null, label: `${label} (live)` }
+    const yyyy = when.getFullYear()
+    const mm = String(when.getMonth() + 1).padStart(2, '0')
+    return { displayDate: `${yyyy}${mm}15`, label }
+  }
+  const sCurr = semrushSnapshot(endDate)
+  const sPrev = semrushSnapshot(prevEnd)
+
+  // Run all 6 fetches in parallel; each branch falls back to null on failure.
+  const [
+    smedCurrRes,
+    smedPrevRes,
+    gscCurrRes,
+    gscPrevRes,
+    semrushCurrRes,
+    semrushPrevRes,
+  ] = await Promise.allSettled([
+    fetch(`${WP_SMED}/views/overview?start=${startStr}&end=${endStr}`, { next: { revalidate: 900 } }).then(r => r.ok ? r.json() : null),
+    fetch(`${WP_SMED}/views/overview?start=${prevStartStr}&end=${prevEndStr}`, { next: { revalidate: 900 } }).then(r => r.ok ? r.json() : null),
+    querySearchAnalytics({ startDate: startStr, endDate: endStr, dimensions: [], rowLimit: 1 }),
+    querySearchAnalytics({ startDate: prevStartStr, endDate: prevEndStr, dimensions: [], rowLimit: 1 }),
+    semrushKey ? fetch(semrushUrl(sCurr.displayDate), { next: { revalidate: 3600 } }).then(r => r.ok ? r.text() : null) : Promise.resolve(null),
+    semrushKey ? fetch(semrushUrl(sPrev.displayDate), { next: { revalidate: 3600 } }).then(r => r.ok ? r.text() : null) : Promise.resolve(null),
+  ])
+
+  const smedViews = (res: PromiseSettledResult<any>): number | null => {
+    if (res.status !== 'fulfilled' || !res.value) return null
+    const v = res.value.total_views
+    return v != null ? parseInt(v) : null
+  }
+  const gscTotals = (res: PromiseSettledResult<any>) => {
+    if (res.status !== 'fulfilled') return { error: (res.reason as Error)?.message || 'gsc fetch failed' }
+    return aggregateTotals(res.value)
+  }
+  const semrushParse = (res: PromiseSettledResult<any>) => {
+    if (res.status !== 'fulfilled' || !res.value) return null
+    const text = res.value as string
+    if (text.startsWith('ERROR')) return null
+    const rows = parseSemrushCSV(text)
+    if (!rows.length) return null
+    const r = rows[0]
+    return {
+      organicTraffic: parseInt(r['Organic Traffic'] || '0'),
+      organicKeywords: parseInt(r['Organic Keywords'] || '0'),
+      rank: parseInt(r['Rank'] || '0'),
+    }
+  }
+
+  const gscCurr = gscTotals(gscCurrRes) as any
+  const gscPrev = gscTotals(gscPrevRes) as any
+  const gscConnected = !gscCurr.error && !gscPrev.error
+
+  return {
+    period: { label: 'current', start: startStr, end: endStr },
+    previous: { label: 'previous', start: prevStartStr, end: prevEndStr },
+    sources: {
+      wpSmed: {
+        label: 'WP SMED page views',
+        scope: 'all traffic, all sources',
+        current: smedViews(smedCurrRes),
+        previous: smedViews(smedPrevRes),
+      },
+      gsc: gscConnected ? {
+        label: 'Google Search Console',
+        scope: 'Google organic search clicks only',
+        current: { clicks: gscCurr.clicks, impressions: gscCurr.impressions, ctr: gscCurr.ctr, position: gscCurr.position },
+        previous: { clicks: gscPrev.clicks, impressions: gscPrev.impressions, ctr: gscPrev.ctr, position: gscPrev.position },
+      } : { label: 'Google Search Console', error: gscCurr.error || gscPrev.error || 'not connected' },
+      semrush: {
+        label: 'SEMrush organic',
+        scope: 'modeled US organic search, monthly snapshot',
+        currentMonth: sCurr.label,
+        previousMonth: sPrev.label,
+        current: semrushParse(semrushCurrRes),
+        previous: semrushParse(semrushPrevRes),
+      },
+    },
   }
 }
 

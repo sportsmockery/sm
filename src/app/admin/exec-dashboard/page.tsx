@@ -55,6 +55,28 @@ interface Data {
     formulas: Array<{ id: string; name: string; desc: string; formula: string; effectiveDate: string }>
     history: any[]
   }
+  crossSource?: {
+    period: { label: string; start: string; end: string }
+    previous: { label: string; start: string; end: string }
+    sources: {
+      wpSmed?: { label: string; scope: string; current: number | null; previous: number | null }
+      gsc?: {
+        label: string
+        scope?: string
+        error?: string
+        current?: { clicks: number; impressions: number; ctr: number; position: number }
+        previous?: { clicks: number; impressions: number; ctr: number; position: number }
+      }
+      semrush?: {
+        label: string
+        scope?: string
+        currentMonth: string
+        previousMonth: string
+        current: { organicTraffic: number; organicKeywords: number; rank: number } | null
+        previous: { organicTraffic: number; organicKeywords: number; rank: number } | null
+      }
+    }
+  } | null
   range: string; days: number; timestamp: number
 }
 
@@ -329,6 +351,94 @@ function Section({ title, badge, children, actions }: { title: string; badge?: R
       </div>
       <div className="p-4">{children}</div>
     </div>
+  )
+}
+
+// Cross-source comparison card — WP SMED (all traffic) vs GSC (Google search
+// clicks) vs SEMrush (modeled organic). Different scopes on purpose: divergence
+// between them tells you where the trend lives.
+function SourceComparisonCard({ data }: { data: Data['crossSource'] }) {
+  if (!data) return null
+  const fmt = (n: number | null | undefined) => n == null ? '—' : n.toLocaleString('en-US')
+  const delta = (curr: number | null | undefined, prev: number | null | undefined) => {
+    if (curr == null || prev == null || prev === 0) return { text: '—', color: 'var(--sm-text-dim)' }
+    const d = ((curr - prev) / prev) * 100
+    const text = `${d >= 0 ? '+' : ''}${d.toFixed(1)}%`
+    const color = d >= 0 ? '#10b981' : '#bc0000'
+    return { text, color }
+  }
+
+  const wp = data.sources.wpSmed
+  const gsc = data.sources.gsc
+  const sem = data.sources.semrush
+
+  const rows: Array<{ label: string; scope: string; current: number | null; previous: number | null }> = []
+  if (wp) rows.push({ label: 'WP SMED — page views', scope: wp.scope, current: wp.current, previous: wp.previous })
+  if (gsc && !gsc.error && gsc.current && gsc.previous) {
+    rows.push({ label: 'GSC — clicks', scope: gsc.scope || 'Google search clicks', current: gsc.current.clicks, previous: gsc.previous.clicks })
+    rows.push({ label: 'GSC — impressions', scope: 'Google SERP impressions', current: gsc.current.impressions, previous: gsc.previous.impressions })
+  }
+  if (sem?.current && sem?.previous) {
+    rows.push({ label: 'SEMrush — organic traffic*', scope: sem.scope || 'modeled US organic', current: sem.current.organicTraffic, previous: sem.previous.organicTraffic })
+    rows.push({ label: 'SEMrush — organic keywords', scope: 'ranking US keywords', current: sem.current.organicKeywords, previous: sem.previous.organicKeywords })
+  }
+
+  return (
+    <Section
+      title="Source comparison"
+      badge={
+        <span className="text-xs" style={{ color: 'var(--sm-text-dim)' }}>
+          {data.period.start} → {data.period.end} vs {data.previous.start} → {data.previous.end}
+        </span>
+      }
+    >
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr style={{ borderBottom: '1px solid var(--sm-border)' }}>
+              <th className="text-left py-2 pr-4 font-semibold" style={{ color: 'var(--sm-text-dim)' }}>Source</th>
+              <th className="text-right py-2 px-3 font-semibold tabular-nums" style={{ color: 'var(--sm-text-dim)' }}>Current</th>
+              <th className="text-right py-2 px-3 font-semibold tabular-nums" style={{ color: 'var(--sm-text-dim)' }}>Previous</th>
+              <th className="text-right py-2 pl-3 font-semibold tabular-nums" style={{ color: 'var(--sm-text-dim)' }}>Δ</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.length === 0 && (
+              <tr>
+                <td colSpan={4} className="py-4 text-center" style={{ color: 'var(--sm-text-dim)' }}>
+                  No source data available. {gsc?.error ? `GSC: ${gsc.error}.` : ''}
+                </td>
+              </tr>
+            )}
+            {rows.map(row => {
+              const d = delta(row.current, row.previous)
+              return (
+                <tr key={row.label} style={{ borderBottom: '1px solid var(--sm-border)' }}>
+                  <td className="py-2.5 pr-4">
+                    <div className="font-medium" style={{ color: 'var(--sm-text)' }}>{row.label}</div>
+                    <div className="text-[11px]" style={{ color: 'var(--sm-text-dim)' }}>{row.scope}</div>
+                  </td>
+                  <td className="py-2.5 px-3 text-right tabular-nums" style={{ color: 'var(--sm-text)' }}>{fmt(row.current)}</td>
+                  <td className="py-2.5 px-3 text-right tabular-nums" style={{ color: 'var(--sm-text-muted)' }}>{fmt(row.previous)}</td>
+                  <td className="py-2.5 pl-3 text-right tabular-nums font-semibold" style={{ color: d.color }}>{d.text}</td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+      {gsc?.current && (
+        <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-xs" style={{ color: 'var(--sm-text-dim)' }}>
+          <span>GSC CTR: <span style={{ color: 'var(--sm-text)' }}>{(gsc.current.ctr * 100).toFixed(2)}%</span> (prev {(gsc.previous!.ctr * 100).toFixed(2)}%)</span>
+          <span>GSC avg position: <span style={{ color: 'var(--sm-text)' }}>{gsc.current.position.toFixed(1)}</span> (prev {gsc.previous!.position.toFixed(1)})</span>
+        </div>
+      )}
+      {sem && (
+        <p className="mt-3 text-[11px] leading-5" style={{ color: 'var(--sm-text-dim)' }}>
+          * SEMrush is a monthly snapshot — current = <strong>{sem.currentMonth}</strong>, previous = <strong>{sem.previousMonth}</strong>. Modeled, not measured. Trust GSC for absolute Google trend; SEMrush for keyword footprint and rank movement only.
+        </p>
+      )}
+    </Section>
   )
 }
 
@@ -1273,6 +1383,9 @@ export default function ExecDashboard() {
                 </p>
               ) : null}
             </Section>
+
+            {/* Source comparison — WP SMED vs GSC vs SEMrush */}
+            <SourceComparisonCard data={data.crossSource} />
 
             {/* ExecIQ History (collapsed by default) */}
             <div className="rounded-lg border" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>

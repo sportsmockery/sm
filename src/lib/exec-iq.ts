@@ -35,6 +35,7 @@ PRINCIPLES
 - Mix wins (what's working — do more), risks (something dropping — fix it), and opportunities (untapped angle).
 - Voice: peer-to-peer, direct, terse. No executive-summary boilerplate.
 - If the data is sparse or inconclusive, say so in fewer tips rather than fabricating signal.
+- When the \`crossSource\` block is present, compare WP SMED (all traffic) vs GSC (Google search clicks) vs SEMrush (modeled organic) — divergence tells you *where* the trend lives. Example: SMED -6% but GSC -20% means owned/social is masking a sharp Google search drop; call that out specifically rather than reporting only the SMED number.
 
 THE "action" FIELD IS THE PRODUCT — make it operational, not advisory:
 - 3–6 numbered steps (1., 2., 3. …), each on its own line, each starting with a verb.
@@ -112,6 +113,34 @@ export function distillDashboard(d: any) {
       }
     : null
 
+  // Cross-source comparison: WP SMED (all traffic) vs GSC (Google search clicks)
+  // vs SEMrush (modeled US organic). Different scopes — useful precisely
+  // because divergence between them tells Claude *where* the trend lives.
+  const cs = d.crossSource
+  const crossSource = cs ? {
+    period: cs.period,
+    previous: cs.previous,
+    wpSmed: cs.sources?.wpSmed
+      ? { current: cs.sources.wpSmed.current, previous: cs.sources.wpSmed.previous, scope: cs.sources.wpSmed.scope }
+      : null,
+    gsc: cs.sources?.gsc && !cs.sources.gsc.error
+      ? {
+          current: cs.sources.gsc.current,
+          previous: cs.sources.gsc.previous,
+          scope: cs.sources.gsc.scope,
+        }
+      : null,
+    semrush: cs.sources?.semrush
+      ? {
+          currentMonth: cs.sources.semrush.currentMonth,
+          previousMonth: cs.sources.semrush.previousMonth,
+          current: cs.sources.semrush.current,
+          previous: cs.sources.semrush.previous,
+          scope: cs.sources.semrush.scope,
+        }
+      : null,
+  } : null
+
   return {
     range: d.range,
     days: d.days,
@@ -124,6 +153,7 @@ export function distillDashboard(d: any) {
       velocity: ov.velocity,
       totalAuthors: ov.totalAuthors,
     },
+    crossSource,
     topWriters: writers,
     topContent,
     categories,
