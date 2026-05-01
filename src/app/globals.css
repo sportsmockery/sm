@@ -5750,3 +5750,74 @@ a.glass-card-sm:active,
     overflow-x: hidden;
   }
 }
+
+/* ============================================================
+   AUTH SHELL — /login premium redesign
+   Restrained motion, prefers-reduced-motion respected.
+   ============================================================ */
+
+.auth-shell {
+  --auth-ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes authEnterUp {
+  from { opacity: 0; transform: translate3d(0, 18px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes authPanelIn {
+  from { opacity: 0; transform: translate3d(0, 24px, 0) scale(0.985); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes authFormSwap {
+  from { opacity: 0; transform: translate3d(0, 10px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes authChipIn {
+  from { opacity: 0; transform: translate3d(0, 10px, 0) scale(0.98); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes authOrbA {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50%      { transform: translate3d(0, 14px, 0); }
+}
+
+@keyframes authOrbB {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50%      { transform: translate3d(10px, -12px, 0); }
+}
+
+.auth-enter-up        { animation: authEnterUp 700ms var(--auth-ease) both; }
+.auth-enter-up-delay  { animation: authEnterUp 840ms var(--auth-ease) 80ms both; }
+.auth-panel-in        { animation: authPanelIn 820ms var(--auth-ease) both; }
+.auth-form-swap       { animation: authFormSwap 280ms var(--auth-ease) both; }
+.auth-card-in         { animation: authEnterUp 680ms var(--auth-ease) both; }
+.auth-chip-in         { animation: authChipIn 580ms var(--auth-ease) both; }
+.auth-orb-1           { animation: authOrbA 12s ease-in-out infinite; }
+.auth-orb-2           { animation: authOrbB 15s ease-in-out infinite; }
+
+.auth-tab:focus-visible {
+  outline: 2px solid #bc0000;
+  outline-offset: 2px;
+}
+
+@media (max-width: 1023px) {
+  .auth-shell { min-height: 100dvh; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-enter-up,
+  .auth-enter-up-delay,
+  .auth-panel-in,
+  .auth-form-swap,
+  .auth-card-in,
+  .auth-chip-in,
+  .auth-orb-1,
+  .auth-orb-2 {
+    animation: none !important;
+    transform: none !important;
+  }
+}
