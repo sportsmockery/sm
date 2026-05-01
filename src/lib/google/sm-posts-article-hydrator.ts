@@ -268,8 +268,18 @@ export class SmPostsArticleHydrator implements ArticleHydrator {
     // carry an explicit one. Matches the live URL pattern on sportsmockery.com
     // so writers don't have to set this per article — the rule passes for free
     // and the suggestion stops nagging across the leaderboard.
+    //
+    // Defensive guards (so this doesn't generate dead URLs at cutover):
+    //   • Only emit when the post is published (the Next.js article route
+    //     refuses non-published — a derived canonical for a draft would 404)
+    //   • Only emit when both category.slug and post.slug are present
+    //   • Skip 'uncategorized' — the live site doesn't surface it as a
+    //     navigable category, so canonical-izing to it could create a dead
+    //     page even though the route technically resolves
+    const isPublished = post.status === 'published'
+    const hasUsableCategory = !!category?.slug && category.slug !== 'uncategorized'
     const derivedCanonical =
-      category?.slug && post.slug
+      isPublished && hasUsableCategory && post.slug
         ? `https://sportsmockery.com/${category.slug}/${post.slug}/`
         : null
     const canonical = post.canonical_url ?? derivedCanonical
