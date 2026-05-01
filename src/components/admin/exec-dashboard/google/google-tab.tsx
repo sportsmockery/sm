@@ -49,7 +49,7 @@ export function GoogleTab({
   writerEngagement?: WriterEngagementRow[]
 }) {
   const { data, loading, error, source, refresh } = useGoogleTabData(active, range, customStart, customEnd)
-  const [busy, setBusy] = useState<null | 'backfill' | 'tick'>(null)
+  const [busy, setBusy] = useState<null | 'backfill' | 'tick' | 'rescore'>(null)
   const [opMessage, setOpMessage] = useState<string | null>(null)
 
   const callApi = async (path: string): Promise<Record<string, unknown>> => {
@@ -90,6 +90,34 @@ export function GoogleTab({
     }
   }
 
+  // Force a true rescore of every recent article. Re-enqueues regardless of
+  // whether they already have a current score (onlyMissing=false), then
+  // processes the queue. Use after a rules engine change so existing scores
+  // pick up the new behavior — without this, backfill silently skips
+  // already-scored articles and the refresh button looks broken.
+  const runForceRescore = async () => {
+    setBusy('rescore'); setOpMessage('Re-scoring all articles…')
+    try {
+      const fill = await callApi('/api/admin/google-intelligence/backfill?limit=500&onlyMissing=false')
+      const enqueued = fill.enqueued ?? 0
+      setOpMessage(`Enqueued ${enqueued} articles. Draining…`)
+      // Drain in 4 sequential ticks of 100 each (cron-equivalent throughput
+      // without exceeding the 60s function budget per call).
+      let totalProcessed = 0
+      for (let i = 0; i < 5; i++) {
+        const t = await callApi('/api/admin/google-intelligence/tick?maxBatches=4&batchSize=25').catch(e => ({ processed: 0, error: String(e) } as any))
+        totalProcessed += (t.processed ?? 0)
+        if ((t.processed ?? 0) === 0) break
+      }
+      setOpMessage(`Re-scored ${totalProcessed} of ${enqueued}. Remaining will drain via the 5-minute cron. Refreshing view…`)
+      refresh()
+    } catch (e) {
+      setOpMessage(`Force re-score failed: ${e instanceof Error ? e.message : String(e)}`)
+    } finally {
+      setBusy(null)
+    }
+  }
+
   if (!active) return null
 
   if (loading && !data) {
@@ -117,6 +145,36 @@ export function GoogleTab({
 
   return (
     <div className="flex flex-col gap-4">
+      {/* Always-visible toolbar — re-score, refresh, status. */}
+      <div className="flex items-center justify-between gap-3 flex-wrap rounded-md border px-3 py-2" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
+        <div className="text-[11px]" style={{ color: 'var(--sm-text-dim)' }}>
+          Article scores update automatically every 5 min via cron. Use <strong>Re-score articles</strong> to force a refresh after a rules engine change.
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          {opMessage && (
+            <span className="text-[11px]" style={{ color: 'var(--sm-text-muted)' }}>{opMessage}</span>
+          )}
+          <button
+            onClick={runForceRescore}
+            disabled={busy !== null}
+            className="px-3 py-1.5 rounded text-[11px] font-bold uppercase tracking-wide disabled:opacity-40"
+            style={{ background: '#BC0000', color: '#FAFAFB' }}
+            title="Re-enqueues every recent article and runs the worker to apply the latest rules engine"
+          >
+            {busy === 'rescore' ? 'Re-scoring…' : 'Re-score articles'}
+          </button>
+          <button
+            onClick={refresh}
+            disabled={busy !== null}
+            className="px-3 py-1.5 rounded text-[11px] font-bold uppercase tracking-wide disabled:opacity-40"
+            style={{ background: 'var(--sm-surface)', color: 'var(--sm-text)', border: '1px solid var(--sm-border)' }}
+            title="Re-fetch the dashboard view (does not re-score)"
+          >
+            Refresh view
+          </button>
+        </div>
+      </div>
+
       {source !== 'db' && (
         <div className="rounded-md border px-3 py-3 text-[12px] flex flex-col gap-2" style={{ background: 'rgba(214,176,94,0.08)', borderColor: 'rgba(214,176,94,0.4)', color: '#D6B05E' }}>
           <div>
