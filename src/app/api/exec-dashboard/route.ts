@@ -92,7 +92,7 @@ export async function GET(request: Request) {
       fetchEditorial(startDate, prevStart, endDate, days),
       fetchSocial(),
       fetchSEO(endDate, now),
-      fetchPaymentSyncStatus(),
+      fetchPaymentSyncStatus(startDate, endDate),
       fetchCrossSource(startDate, endDate, prevStart, prevEnd, now),
     ])
     return NextResponse.json({ ...editorial, social, seo, paymentSync, crossSource, range, days, timestamp: Date.now() })
@@ -190,6 +190,23 @@ async function fetchEditorial(startDate: Date, prevStart: Date, now: Date, days:
   // Build lookup maps
   const aMap = new Map(authors.map((a: any) => [a.id, a]))
   const cMap = new Map(categories.map((c: any) => [c.id, c]))
+
+  // Enrich aMap with Supabase sm_authors for any WP author IDs the WP /sm-export/v1/authors
+  // endpoint didn't return. Some WP users (e.g. wp_id 20979) exist in sm_authors but are
+  // missing from the export, which previously surfaced as "Author 20979" in the dashboard.
+  const periodAuthorIds = Array.from(new Set(period.map((p: any) => p.author).filter(Boolean))) as number[]
+  const missingWpIds = periodAuthorIds.filter((id) => !aMap.has(id))
+  if (missingWpIds.length > 0) {
+    const { data: supaAuthors } = await supabaseAdmin
+      .from('sm_authors')
+      .select('wp_id, display_name, avatar_url')
+      .in('wp_id', missingWpIds)
+    for (const a of supaAuthors ?? []) {
+      if (a.wp_id != null && !aMap.has(a.wp_id)) {
+        aMap.set(a.wp_id, { id: a.wp_id, display_name: a.display_name, avatar_url: a.avatar_url })
+      }
+    }
+  }
 
   const getAuthorName = (id: number) => (aMap.get(id) as any)?.display_name || (aMap.get(id) as any)?.name || `Author ${id}`
   const getAuthorAvatar = (id: number) => (aMap.get(id) as any)?.avatar_url || null
@@ -658,7 +675,12 @@ async function fetchCrossSource(
 }
 
 // ── Payment sync status + data ───────────────────────────────────────────────
-async function fetchPaymentSyncStatus() {
+//
+// Period boundaries come from the GET handler (already resolved in Chicago time
+// via `chi` so "this-month" doesn't roll over at 7pm CT when Vercel's UTC clock
+// crosses midnight). Honor the user's selected date filter (this-month,
+// last-month, custom, etc.) instead of always pinning to the current month.
+async function fetchPaymentSyncStatus(periodStartDate: Date, periodEndDate: Date) {
   try {
     // Fetch latest sync status
     const { data: syncData } = await supabaseAdmin
@@ -668,10 +690,13 @@ async function fetchPaymentSyncStatus() {
       .limit(1)
       .single()
 
-    // Fetch current period payments
-    const now = new Date()
-    const periodStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
-    const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString().split('T')[0]
+    // Period strings match what the sync cron writes (first-of-month → first-of-next-month).
+    // Anchor to the start of the period's calendar month so short ranges (e.g. "today",
+    // "this-week") still resolve to the writer_payments row that covers them.
+    const periodStart = new Date(periodStartDate.getFullYear(), periodStartDate.getMonth(), 1)
+      .toISOString().split('T')[0]
+    const periodEnd = new Date(periodStartDate.getFullYear(), periodStartDate.getMonth() + 1, 1)
+      .toISOString().split('T')[0]
 
     const { data: payments } = await supabaseAdmin
       .from('writer_payments')
