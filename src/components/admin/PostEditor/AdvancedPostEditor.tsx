@@ -14,6 +14,7 @@ import { BlockEditor } from '@/components/admin/BlockEditor'
 import type { ArticleDocument } from '@/components/admin/BlockEditor'
 import { isBlockContent, parseDocument, serializeDocument, blocksToHtml } from '@/components/admin/BlockEditor/serializer'
 import { BlockPreviewRenderer } from '@/components/admin/BlockEditor/BlockPreviewRenderer'
+import PublishChecklist from '@/components/editor/publish-checklist'
 
 interface Category {
   id: string
@@ -1648,8 +1649,18 @@ export default function AdvancedPostEditor({
             rightSidebarCollapsed ? 'w-0 lg:w-0' : 'w-72'
           } hidden lg:block`}
         >
-          <div className="h-full overflow-y-auto p-4">
-            <h3 className="mb-4 text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">Post Settings</h3>
+          <div className="h-full overflow-y-auto p-4 space-y-4">
+            <PublishChecklist
+              postId={post?.id}
+              title={formData.title}
+              slug={formData.slug}
+              document={blockDoc}
+              categoryId={formData.category_id || null}
+              featuredImageUrl={formData.featured_image || null}
+              metaDescription={formData.seo_description || null}
+            />
+
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">Post Settings</h3>
 
             <div className="space-y-4">
               {/* Schedule (only shown when status is scheduled) */}

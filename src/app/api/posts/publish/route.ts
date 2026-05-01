@@ -49,17 +49,26 @@ export async function POST(request: NextRequest) {
 
     // Audit row regardless of outcome — editorial QA queries this table to
     // see how often hard blocks fire and which rules drive the most stops.
-    await supabaseAdmin.from('sm_posts_publish_audits').insert({
-      post_id: postId,
-      user_id: user.id,
-      passed: failed.length === 0,
-      failed_rules: failed.map((c) => ({
-        rule: c.rule,
-        what_failed: c.what_failed ?? null,
-      })),
-      word_count: response.word_count,
-      enforce_mode: enforce,
-    })
+    // Non-fatal: if the migration hasn't been applied yet we still want the
+    // gate to function. We log and move on.
+    try {
+      const { error: auditErr } = await supabaseAdmin
+        .from('sm_posts_publish_audits')
+        .insert({
+          post_id: postId,
+          user_id: user.id,
+          passed: failed.length === 0,
+          failed_rules: failed.map((c) => ({
+            rule: c.rule,
+            what_failed: c.what_failed ?? null,
+          })),
+          word_count: response.word_count,
+          enforce_mode: enforce,
+        })
+      if (auditErr) console.warn('[posts/publish] audit insert failed:', auditErr.message)
+    } catch (auditEx) {
+      console.warn('[posts/publish] audit insert threw:', auditEx)
+    }
 
     if (failed.length > 0 && enforce) {
       return NextResponse.json(
