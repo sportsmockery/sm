@@ -40,14 +40,25 @@ export default async function StudioPostsPage({ searchParams }: PostsPageProps) 
   )
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Find author matching current user's email and check role
+  // Find author matching current user's email (case-insensitive — sm_authors
+  // emails may have mixed case, so use ilike to avoid false negatives that
+  // would silently apply the writer-only filter to an admin/editor).
   const { data: currentAuthor } = await supabaseAdmin
     .from('sm_authors')
     .select('id, display_name, role')
-    .eq('email', user?.email || '')
-    .single()
+    .ilike('email', user?.email || '')
+    .maybeSingle()
 
-  const isEditor = currentAuthor?.role === 'editor' || currentAuthor?.role === 'admin'
+  // Cross-check sm_users.role — admins on the platform should see all posts
+  // even if their sm_authors row is missing or stuck as a plain "writer".
+  const { data: smUser } = user?.id
+    ? await supabaseAdmin.from('sm_users').select('role').eq('id', user.id).maybeSingle()
+    : { data: null }
+
+  const isEditor =
+    smUser?.role === 'admin' ||
+    currentAuthor?.role === 'editor' ||
+    currentAuthor?.role === 'admin'
 
   // Build query - authors only see their own posts, editors see all
   let query = supabaseAdmin

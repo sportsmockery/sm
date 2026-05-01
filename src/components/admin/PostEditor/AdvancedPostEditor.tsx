@@ -13,6 +13,7 @@ import StoryUniversePanel from './StoryUniversePanel'
 import { BlockEditor } from '@/components/admin/BlockEditor'
 import type { ArticleDocument } from '@/components/admin/BlockEditor'
 import { isBlockContent, parseDocument, serializeDocument, blocksToHtml } from '@/components/admin/BlockEditor/serializer'
+import { BlockPreviewRenderer } from '@/components/admin/BlockEditor/BlockPreviewRenderer'
 
 interface Category {
   id: string
@@ -2305,10 +2306,16 @@ export default function AdvancedPostEditor({
               )}
 
               {/* Content */}
-              <div
-                className="prose prose-lg max-w-none dark:prose-invert prose-headings:font-bold prose-p:text-gray-700 dark:prose-p:text-gray-300"
-                dangerouslySetInnerHTML={{ __html: formData.content || '<p class="text-gray-400">No content yet...</p>' }}
-              />
+              {editorMode === 'blocks' && blockDoc && blockDoc.blocks.length > 0 ? (
+                <div className="article-block-content">
+                  <BlockPreviewRenderer blocks={blockDoc.blocks} />
+                </div>
+              ) : (
+                <div
+                  className="prose prose-lg max-w-none dark:prose-invert prose-headings:font-bold prose-p:text-gray-700 dark:prose-p:text-gray-300"
+                  dangerouslySetInnerHTML={{ __html: formData.content || '<p class="text-gray-400">No content yet...</p>' }}
+                />
+              )}
             </div>
           </div>
         </div>

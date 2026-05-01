@@ -393,8 +393,10 @@ export function createBlock(type: BlockType): ContentBlock {
     }),
     'mock-draft': () => ({ id, type: 'mock-draft', data: { picks: [] } }),
     'sentiment-meter': () => ({ id, type: 'sentiment-meter', data: { mode: 'rumor' as const, level: 2 } }),
-    // Fan Interaction
-    'interaction': () => ({ id, type: 'interaction', data: { variant: 'gm-pulse' as const, question: '', options: ['YES', 'NO'], reward: 3 } }),
+    // Fan Interaction — default to Fan Poll (most common) with a starter
+    // question so the live preview is never empty after insertion. Writers
+    // can edit or switch to GM Pulse from the panel.
+    'interaction': () => ({ id, type: 'interaction', data: { variant: 'poll' as const, question: 'Is this an overreaction?', options: ['YES', 'NO'], reward: 3 } }),
     'debate': () => ({ id, type: 'debate', data: { proArgument: '', conArgument: '', reward: 3 } }),
     'hot-take': () => ({ id, type: 'hot-take', data: { text: '' } }),
     'update': () => ({ id, type: 'update', data: { timestamp: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'America/Chicago' }) + ' CT', text: '' } }),

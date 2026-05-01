@@ -4,6 +4,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { format } from 'date-fns'
+import { isBlockContent, parseDocument } from '@/components/admin/BlockEditor/serializer'
+import { ArticleBlockContent } from '@/components/articles/ArticleBlockContent'
 
 export const metadata: Metadata = {
   title: 'Sports Mockery | View Post',
@@ -38,6 +40,9 @@ export default async function AdminPostDetailPage({ params }: PostDetailPageProp
 
   const category = categoryResult.data
   const author = authorResult.data
+
+  const postContent = post.content || ''
+  const blockDocument = isBlockContent(postContent) ? parseDocument(postContent) : null
 
   return (
     <div>
@@ -98,10 +103,14 @@ export default async function AdminPostDetailPage({ params }: PostDetailPageProp
 
           <div className="rounded-lg border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
             <h2 className="mb-4 font-semibold text-zinc-900 dark:text-zinc-100">Content</h2>
-            <div
-              className="prose prose-sm max-w-none dark:prose-invert"
-              dangerouslySetInnerHTML={{ __html: post.content || '<p>No content</p>' }}
-            />
+            {blockDocument ? (
+              <ArticleBlockContent document={blockDocument} />
+            ) : (
+              <div
+                className="prose prose-sm max-w-none dark:prose-invert"
+                dangerouslySetInnerHTML={{ __html: post.content || '<p>No content</p>' }}
+              />
+            )}
           </div>
         </div>
 
