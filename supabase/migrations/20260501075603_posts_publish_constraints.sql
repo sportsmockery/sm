@@ -14,9 +14,11 @@ CREATE UNIQUE INDEX IF NOT EXISTS sm_posts_slug_published_unique
 -- We log every attempt so editorial can review which rules fire most often
 -- and tune the soft / hard mode per rule. NOT a foreign key on user_id —
 -- mirrors the auth.users → sm_users mapping the rest of the codebase uses.
+-- post_id type matches sm_posts.id (bigint/integer in this schema). user_id
+-- stays uuid since it points at auth.users / sm_users.
 CREATE TABLE IF NOT EXISTS public.sm_posts_publish_audits (
   id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  post_id       uuid NOT NULL REFERENCES public.sm_posts(id) ON DELETE CASCADE,
+  post_id       bigint NOT NULL REFERENCES public.sm_posts(id) ON DELETE CASCADE,
   user_id       uuid NOT NULL,
   attempted_at  timestamptz NOT NULL DEFAULT now(),
   passed        boolean NOT NULL,
@@ -50,12 +52,12 @@ CREATE POLICY "Admins read publish audits"
 -- authors to the brand "Sports Mockery" account before flipping NOT NULL.
 DO $$
 DECLARE
-  brand_id uuid;
+  brand_id bigint;
 BEGIN
   SELECT id INTO brand_id
   FROM public.sm_authors
   WHERE display_name ILIKE '%Sports Mockery%'
-  ORDER BY created_at NULLS LAST
+  ORDER BY id ASC
   LIMIT 1;
 
   IF brand_id IS NOT NULL THEN
