@@ -31,37 +31,46 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const range = searchParams.get('range') || 'this-month'
   const now = new Date()
+  // Range boundaries are computed in Central Time so "this-month" doesn't roll over
+  // at 7pm CT (when Vercel's UTC clock crosses midnight). chi has the same
+  // wall-clock components as Chicago — use only its component getters, not its
+  // underlying UTC value.
+  const chi = new Date(now.toLocaleString('en-US', { timeZone: 'America/Chicago' }))
+  const cy = chi.getFullYear()
+  const cm = chi.getMonth()
+  const cd = chi.getDate()
+  const cw = chi.getDay()
   let startDate: Date
   let endDate: Date = now
   switch (range) {
     case 'today':
-      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      startDate = new Date(cy, cm, cd)
       break
     case 'yesterday':
-      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1)
-      endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      startDate = new Date(cy, cm, cd - 1)
+      endDate = new Date(cy, cm, cd)
       break
     case 'this-week':
-      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay())
+      startDate = new Date(cy, cm, cd - cw)
       break
     case 'this-month':
-      startDate = new Date(now.getFullYear(), now.getMonth(), 1)
+      startDate = new Date(cy, cm, 1)
       break
     case 'last-month':
-      startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-      endDate = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999)
+      startDate = new Date(cy, cm - 1, 1)
+      endDate = new Date(cy, cm, 0, 23, 59, 59, 999)
       break
     case 'ytd':
-      startDate = new Date(now.getFullYear(), 0, 1)
+      startDate = new Date(cy, 0, 1)
       break
     case 'last-year':
-      startDate = new Date(now.getFullYear() - 1, 0, 1)
-      endDate = new Date(now.getFullYear() - 1, 11, 31, 23, 59, 59, 999)
+      startDate = new Date(cy - 1, 0, 1)
+      endDate = new Date(cy - 1, 11, 31, 23, 59, 59, 999)
       break
     case 'custom': {
       const cs = searchParams.get('start')
       const ce = searchParams.get('end')
-      startDate = cs ? new Date(cs) : new Date(now.getFullYear(), now.getMonth(), 1)
+      startDate = cs ? new Date(cs) : new Date(cy, cm, 1)
       endDate = ce ? new Date(ce) : now
       break
     }
@@ -71,7 +80,7 @@ export async function GET(request: Request) {
     case '90d': startDate = new Date(now.getTime() - 90 * 86400000); break
     case '1y': startDate = new Date(now.getTime() - 365 * 86400000); break
     default:
-      startDate = new Date(now.getFullYear(), now.getMonth(), 1)
+      startDate = new Date(cy, cm, 1)
   }
   const days = Math.max(1, Math.round((endDate.getTime() - startDate.getTime()) / 86400000))
   const prevStart = new Date(startDate.getTime() - days * 86400000)
@@ -181,7 +190,15 @@ async function fetchEditorial(startDate: Date, prevStart: Date, now: Date, days:
 
   const getAuthorName = (id: number) => (aMap.get(id) as any)?.display_name || (aMap.get(id) as any)?.name || `Author ${id}`
   const getAuthorAvatar = (id: number) => (aMap.get(id) as any)?.avatar_url || null
-  const getCatName = (id: number) => (cMap.get(id) as any)?.name || 'Uncategorized'
+  const decodeEntities = (s: string) =>
+    s
+      .replace(/&amp;/g, '&')
+      .replace(/&#0?39;/g, "'")
+      .replace(/&quot;/g, '"')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&nbsp;/g, ' ')
+  const getCatName = (id: number) => decodeEntities(((cMap.get(id) as any)?.name || 'Uncategorized'))
 
   // ── Writer stats ──
   const wMap = new Map<number, { posts: number; categories: Set<string> }>()
@@ -307,7 +324,7 @@ async function fetchEditorial(startDate: Date, prevStart: Date, now: Date, days:
   // ── Enrich posts with views ──
   const enrichPost = (p: any) => ({
     id: p.id,
-    title: typeof p.title === 'object' ? p.title.rendered : p.title,
+    title: decodeEntities(typeof p.title === 'object' ? p.title.rendered : (p.title || '')),
     slug: p.slug,
     published_at: p.date_gmt || p.date,
     author_name: getAuthorName(p.author),
