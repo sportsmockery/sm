@@ -4,12 +4,14 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import RichTextEditor, { RichTextEditorRef } from '@/components/admin/PostEditor/RichTextEditor'
 import { CategorySelect, AuthorSelect } from '@/components/admin/PostEditor/SearchableSelect'
 import StoryUniversePanel from '@/components/admin/PostEditor/StoryUniversePanel'
 import { ChartBuilderModal, ChartConfig, AISuggestion, ChartType } from '@/components/admin/ChartBuilder'
 import { PostIQChartGenerator } from '@/components/postiq'
 import { MIN_WORDS, ARTICLE_TYPES, type ArticleType } from '@/lib/articles/blocks'
+import { BlockEditor } from '@/components/admin/BlockEditor'
+import type { ArticleDocument } from '@/components/admin/BlockEditor'
+import { isBlockContent, parseDocument, serializeDocument, blocksToHtml } from '@/components/admin/BlockEditor/serializer'
 
 interface Category {
   id: string
@@ -75,7 +77,6 @@ export default function StudioPostEditor({
   const [seoExpanded, setSeoExpanded] = useState(false)
   const [uploadingImage, setUploadingImage] = useState(false)
   const [slugEditable, setSlugEditable] = useState(false)
-  const contentEditorRef = useRef<RichTextEditorRef>(null)
 
   // Push notification states
   const [sendPushNotification, setSendPushNotification] = useState(false)
@@ -129,8 +130,6 @@ export default function StudioPostEditor({
   const [chartAiSuggestion, setChartAiSuggestion] = useState<AISuggestion | null>(null)
   const [selectedParagraph, setSelectedParagraph] = useState<number>(1)
   const [paragraphOptions, setParagraphOptions] = useState<string[]>([])
-  const [highlightMode, setHighlightMode] = useState(false)
-  const [highlightedText, setHighlightedText] = useState('')
 
   const [formData, setFormData] = useState({
     title: post?.title || '',
@@ -147,6 +146,12 @@ export default function StudioPostEditor({
     scheduled_at: post?.scheduled_at || null,
     article_type: ((post as any)?.article_type as ArticleType) || ('news' as ArticleType),
   })
+
+  // Block-driven content document. Initialized from the post if it was
+  // saved in block form; otherwise null and the editor seeds a paragraph.
+  const [blockDoc, setBlockDoc] = useState<ArticleDocument | null>(
+    post?.content && isBlockContent(post.content) ? parseDocument(post.content) : null
+  )
 
   // Soft word-count gate (PR-8 first 2 weeks; flip to hard once data supports it).
   // Below-min publishes are allowed but flagged via published_under_min for
@@ -400,8 +405,9 @@ export default function StudioPostEditor({
     setSaving(true)
     setError('')
 
-    // Track the content that may be modified by auto-insert features
-    let contentToSave = formData.content
+    // Block-driven posts serialize the document; auto-insert features below
+    // operate on the HTML mirror in formData.content (same as admin).
+    let contentToSave = blockDoc ? serializeDocument(blockDoc) : formData.content
 
     try {
       // Auto-insert chart if enabled and publishing
@@ -642,37 +648,6 @@ export default function StudioPostEditor({
     }
   }
 
-  // Handle highlight mode for chart data selection
-  const handleHighlightData = () => {
-    setHighlightMode(true)
-    setHighlightedText('')
-  }
-
-  // Process highlighted text and regenerate chart
-  const handleUseHighlightedData = async () => {
-    if (!highlightedText.trim()) {
-      alert('Please select some text in your article first')
-      return
-    }
-    setHighlightMode(false)
-    await openChartModal(highlightedText)
-  }
-
-  // Cancel highlight mode
-  const cancelHighlightMode = () => {
-    setHighlightMode(false)
-    setHighlightedText('')
-  }
-
-  // Handle text selection in content editor during highlight mode
-  const handleContentSelection = () => {
-    if (!highlightMode) return
-    const selection = window.getSelection()
-    if (selection && selection.toString().trim()) {
-      setHighlightedText(selection.toString())
-    }
-  }
-
   // Handle chart insertion from ChartBuilderModal
   const handleChartInsert = async (config: ChartConfig) => {
     try {
@@ -909,12 +884,6 @@ export default function StudioPostEditor({
               type="text"
               value={formData.title}
               onChange={(e) => updateField('title', e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Tab' && !e.shiftKey) {
-                  e.preventDefault()
-                  contentEditorRef.current?.focus()
-                }
-              }}
               placeholder="Article title..."
               tabIndex={1}
               className="mb-2 w-full border-0 bg-transparent p-0 text-3xl font-bold text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-0"
@@ -959,29 +928,21 @@ export default function StudioPostEditor({
               </div>
             )}
 
-            {/* Content Editor - extends to fill space */}
-            <div
-              className={`mb-6 overflow-hidden rounded-lg border ${
-                highlightMode
-                  ? 'border-purple-500 ring-2 ring-purple-500/20'
-                  : 'border-[var(--border-default)]'
-              }`}
-              style={{ backgroundColor: 'var(--bg-card)' }}
-              onMouseUp={handleContentSelection}
-            >
-              {highlightMode && (
-                <div className="bg-purple-500/10 border-b border-purple-500/30 px-4 py-2 text-sm text-purple-600 flex items-center gap-2">
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  Select the text containing data you want to chart
-                </div>
-              )}
-              <RichTextEditor
-                ref={contentEditorRef}
-                content={formData.content}
-                onChange={(content) => updateField('content', content)}
-                placeholder="Start writing your article..."
+            {/* Block-driven content editor — same surface as /admin/posts */}
+            <div className="mb-6">
+              <BlockEditor
+                initialBlocks={blockDoc?.blocks}
+                initialTemplate={blockDoc?.template}
+                onChange={(doc) => {
+                  setBlockDoc(doc)
+                  // Mirror block content into formData.content as plain HTML so
+                  // existing word-count, AI, and SEO flows keep working.
+                  setFormData((prev) => ({ ...prev, content: blocksToHtml(doc.blocks) }))
+                }}
+                previewTitle={formData.title}
+                previewAuthor={authors.find((a) => a.id === formData.author_id)?.display_name}
+                previewCategory={categories.find((c) => c.id === formData.category_id)?.name}
+                previewStatus={formData.status}
               />
             </div>
 
@@ -1687,34 +1648,6 @@ export default function StudioPostEditor({
         </div>
       )}
 
-      {/* Highlight Mode Floating Toolbar */}
-      {highlightMode && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[70] flex items-center gap-3 rounded-full bg-purple-600 px-6 py-3 shadow-2xl">
-          <svg className="h-5 w-5 text-white animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-          </svg>
-          <span className="text-white font-medium">
-            {highlightedText ? `Selected: "${highlightedText.slice(0, 30)}${highlightedText.length > 30 ? '...' : ''}"` : 'Select data in your article...'}
-          </span>
-          {highlightedText && (
-            <button
-              onClick={handleUseHighlightedData}
-              className="ml-2 rounded-full bg-white px-4 py-1.5 text-sm font-semibold text-purple-600 hover:bg-purple-50 transition-colors"
-            >
-              Use This Data
-            </button>
-          )}
-          <button
-            onClick={cancelHighlightMode}
-            className="ml-2 rounded-full p-1.5 text-white/70 hover:text-white hover:bg-white/10 transition-colors"
-          >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-      )}
-
       {/* Chart Builder Modal with Live Preview */}
       {showChartModal && (
         <ChartBuilderModal
@@ -1725,7 +1658,6 @@ export default function StudioPostEditor({
             setChartAiSuggestion(null)
           }}
           onInsert={handleChartInsert}
-          onHighlightData={handleHighlightData}
           initialConfig={initialChartConfig || undefined}
           aiSuggestion={chartAiSuggestion}
           isLoading={chartLoading}
@@ -1734,7 +1666,7 @@ export default function StudioPostEditor({
       )}
 
       {/* PostIQ Real-Time Chart Generator - detects chartable data as you type */}
-      {!showChartModal && !highlightMode && (
+      {!showChartModal && (
         <PostIQChartGenerator
           content={formData.content}
           title={formData.title}
