@@ -264,6 +264,16 @@ export class SmPostsArticleHydrator implements ArticleHydrator {
     const extracted = extractBody(post.content)
     const team = category?.slug ? (TEAM_BY_CATEGORY_SLUG[category.slug] ?? null) : null
 
+    // Auto-derive the canonical from category + slug when the post doesn't
+    // carry an explicit one. Matches the live URL pattern on sportsmockery.com
+    // so writers don't have to set this per article — the rule passes for free
+    // and the suggestion stops nagging across the leaderboard.
+    const derivedCanonical =
+      category?.slug && post.slug
+        ? `https://sportsmockery.com/${category.slug}/${post.slug}/`
+        : null
+    const canonical = post.canonical_url ?? derivedCanonical
+
     const articleInput: ArticleInput = {
       id: String(post.id),
       title: post.title ?? '',
@@ -272,7 +282,7 @@ export class SmPostsArticleHydrator implements ArticleHydrator {
       tags: tagNames,
       metaTitle: post.seo_title ?? null,
       metaDescription: post.seo_description ?? post.excerpt ?? null,
-      canonical: post.canonical_url ?? null,
+      canonical,
       robots: post.robots ?? null,
       publishedAt: post.published_at,
       updatedAt: post.updated_at,
