@@ -31,6 +31,7 @@ import ArticleContentWithEmbeds from '@/components/article/ArticleContentWithEmb
 import SocialShareBar from '@/components/SocialShareBar'
 import { ArticleBlockContent } from '@/components/articles/ArticleBlockContent'
 import { isBlockContent, parseDocument } from '@/components/admin/BlockEditor/serializer'
+import { canonicalUrl, JsonLd, breadcrumbJsonLd } from '@/lib/seo'
 
 interface ArticlePageProps {
   params: Promise<{
@@ -50,7 +51,7 @@ async function getPost(slug: string) {
   try {
     const { data: post, error } = await supabaseAdmin
       .from('sm_posts')
-      .select('id, title, content, excerpt, featured_image, published_at, updated_at, seo_title, seo_description, author_id, category_id, views, comments_count, toc')
+      .select('id, title, content, excerpt, featured_image, image_variants, published_at, updated_at, seo_title, seo_description, author_id, category_id, views, comments_count, toc')
       .eq('slug', slug)
       .eq('status', 'published')
       .single()
@@ -90,17 +91,19 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
 
   const title = post.seo_title || post.title
   const description = post.seo_description || post.excerpt || ''
+  const canonical = canonicalUrl(`/${category}/${slug}`)
 
   return {
     title,
     description,
+    alternates: { canonical },
     openGraph: {
       title,
       description,
       type: 'article',
       publishedTime: post.published_at,
       modifiedTime: post.updated_at || post.published_at,
-      url: `https://sportsmockery.com/${category}/${slug}`,
+      url: canonical,
       images: post.featured_image
         ? [
             {
@@ -323,12 +326,22 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
       <ReadingProgressBar />
 
       {/* JSON-LD Structured Data */}
+      {post.image_variants?.['16x9']?.url && (
+        <link
+          rel="preload"
+          as="image"
+          href={post.image_variants['16x9'].url}
+          // @ts-expect-error fetchpriority is valid HTML
+          fetchpriority="high"
+        />
+      )}
       <ArticleSchema
         article={{
           title: post.title,
           excerpt: post.excerpt,
           content: post.content,
           featured_image: post.featured_image,
+          image_variants: post.image_variants,
           published_at: post.published_at,
           updated_at: post.updated_at,
           slug: slug,
@@ -342,7 +355,13 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
             slug: categoryData?.slug || category,
           },
         }}
-        url={articleUrl}
+      />
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: 'Home', url: '/' },
+          { name: categoryData?.name || category, url: `/${categoryData?.slug || category}` },
+          { name: post.title, url: `/${categoryData?.slug || category}/${slug}` },
+        ])}
       />
 
       {/* 2030 Hero Header */}

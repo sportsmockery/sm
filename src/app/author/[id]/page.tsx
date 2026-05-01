@@ -46,6 +46,7 @@ export async function generateMetadata({ params }: AuthorPageProps): Promise<Met
   return {
     title: `${author.display_name} | SportsMockery`,
     description: author.bio || `Articles by ${author.display_name} on SportsMockery - Chicago's premier sports news and commentary`,
+    alternates: { canonical: `/author/${author.id}` },
     openGraph: {
       title: `${author.display_name} | SportsMockery`,
       description: author.bio || `Articles by ${author.display_name}`,

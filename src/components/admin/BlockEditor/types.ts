@@ -15,6 +15,14 @@ export type BlockType =
   | 'quote'
   | 'social-embed'
   | 'divider'
+  // Editorial structure (human-written — used for HCU compliance)
+  | 'tldr'
+  | 'key-facts'
+  | 'why-it-matters'
+  | 'whats-next'
+  // Scout AI-generated (visibly labeled — never article body)
+  | 'scout-summary'
+  | 'scout-recap'
   // Analysis
   | 'scout-insight'
   | 'stats-chart'
@@ -76,6 +84,44 @@ export interface SocialEmbedBlock extends BlockBase {
 export interface DividerBlock extends BlockBase {
   type: 'divider';
   data: Record<string, never>;
+}
+
+// ─── Editorial Structure Blocks (human-written) ───
+
+export interface TldrBlock extends BlockBase {
+  type: 'tldr';
+  data: { html: string };
+}
+
+export interface KeyFactsBlock extends BlockBase {
+  type: 'key-facts';
+  data: { html: string };
+}
+
+export interface WhyItMattersBlock extends BlockBase {
+  type: 'why-it-matters';
+  data: { html: string };
+}
+
+export interface WhatsNextBlock extends BlockBase {
+  type: 'whats-next';
+  data: { html: string };
+}
+
+// ─── Scout AI Blocks (visibly labeled — never article body) ───
+//
+// Scout is an in-house AI tool. It produces ONLY the summary blurb at the
+// top of an article and the recap at the end. The article body is always
+// human-written by the bylined staff writer (see /editorial-standards).
+
+export interface ScoutSummaryBlock extends BlockBase {
+  type: 'scout-summary';
+  data: { html: string };
+}
+
+export interface ScoutRecapBlock extends BlockBase {
+  type: 'scout-recap';
+  data: { html: string };
 }
 
 // ─── Analysis Blocks ───
@@ -213,6 +259,12 @@ export type ContentBlock =
   | QuoteBlock
   | SocialEmbedBlock
   | DividerBlock
+  | TldrBlock
+  | KeyFactsBlock
+  | WhyItMattersBlock
+  | WhatsNextBlock
+  | ScoutSummaryBlock
+  | ScoutRecapBlock
   | ScoutInsightBlock
   | StatsChartBlock
   | PlayerComparisonBlock
@@ -266,6 +318,22 @@ export const BLOCK_CATEGORIES: BlockCategory[] = [
     ],
   },
   {
+    label: 'Editorial Structure',
+    blocks: [
+      { type: 'tldr', label: 'TL;DR', icon: 'AlignLeft', description: 'Quick summary callout (top of article)' },
+      { type: 'key-facts', label: 'Key Facts', icon: 'List', description: 'Bullet-point fact list' },
+      { type: 'why-it-matters', label: 'Why It Matters', icon: 'AlertCircle', description: 'Significance / context callout' },
+      { type: 'whats-next', label: "What's Next", icon: 'ArrowRight', description: 'Next steps / what to watch for' },
+    ],
+  },
+  {
+    label: 'Scout AI',
+    blocks: [
+      { type: 'scout-summary', label: 'Scout Summary', icon: 'Sparkles', description: 'AI-generated summary blurb (visibly labeled)' },
+      { type: 'scout-recap', label: 'Scout Recap', icon: 'Sparkles', description: 'AI-generated end-of-article recap (visibly labeled)' },
+    ],
+  },
+  {
     label: 'Analysis',
     blocks: [
       { type: 'scout-insight', label: 'Scout Insight', icon: 'Sparkles', description: 'Scout AI analysis block' },
@@ -300,6 +368,14 @@ export function createBlock(type: BlockType): ContentBlock {
     'quote': () => ({ id, type: 'quote', data: { text: '', speaker: '', team: '' } }),
     'social-embed': () => ({ id, type: 'social-embed', data: { url: '', platform: 'twitter' as const } }),
     'divider': () => ({ id, type: 'divider', data: {} }),
+    // Editorial structure
+    'tldr': () => ({ id, type: 'tldr', data: { html: '' } }),
+    'key-facts': () => ({ id, type: 'key-facts', data: { html: '' } }),
+    'why-it-matters': () => ({ id, type: 'why-it-matters', data: { html: '' } }),
+    'whats-next': () => ({ id, type: 'whats-next', data: { html: '' } }),
+    // Scout AI (writer adds when Scout has produced content)
+    'scout-summary': () => ({ id, type: 'scout-summary', data: { html: '' } }),
+    'scout-recap': () => ({ id, type: 'scout-recap', data: { html: '' } }),
     // Analysis
     'scout-insight': () => ({ id, type: 'scout-insight', data: { insight: '', confidence: 'high', autoGenerate: true } }),
     'stats-chart': () => ({ id, type: 'stats-chart', data: { title: '', chartType: 'bar', color: '#00D4FF', dataPoints: [] } }),

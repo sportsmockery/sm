@@ -1,5 +1,35 @@
+import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SEO redirect rules (priority order — handled at the top of middleware()):
+//   1. /author/[id] (numeric)        → 301 → /author/[slug]              (PR-4 — LIVE)
+//   2. /author/[slug]/ (trailing /)  → 301 → /author/[slug] (no slash)   (PR-4 — LIVE)
+//   3. /sitemap.xml                  → 301 → /sitemap_index.xml          (DEFERRED to cutover day)
+//   4. (post-launch) www.* host      → 301 → apex                        (Vercel handles, NOT here)
+// All redirects use NextResponse.redirect(url, 301) — explicit 301, never 308.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const _supabaseSeoUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const _supabaseSeoKey =
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+const _supabaseForRedirects =
+  _supabaseSeoUrl && _supabaseSeoKey ? createClient(_supabaseSeoUrl, _supabaseSeoKey) : null
+
+async function lookupAuthorSlug(id: string): Promise<string | null> {
+  if (!_supabaseForRedirects) return null
+  try {
+    const { data } = await _supabaseForRedirects
+      .from('sm_authors')
+      .select('slug')
+      .eq('id', id)
+      .maybeSingle()
+    return (data?.slug as string | null) ?? null
+  } catch {
+    return null
+  }
+}
 
 // Routes that don't require authentication
 const publicRoutes = [
@@ -97,6 +127,31 @@ export async function middleware(request: NextRequest) {
     url.pathname = pathname === '/' ? '/masters' : `/masters${pathname}`
     return NextResponse.rewrite(url)
   }
+
+  // ─── SEO redirect rules (run BEFORE the static-asset bypass below) ────────
+  // Rule 3 (/sitemap.xml → /sitemap_index.xml) is intentionally NOT enabled —
+  // the new sitemap stack ships on cutover day, not before. The legacy static
+  // /sitemap.xml continues serving from public/ until then.
+
+  // Rule 1: /author/<numeric-id> → /author/<slug> (301)
+  const numericAuthorMatch = pathname.match(/^\/author\/(\d+)\/?$/)
+  if (numericAuthorMatch) {
+    const slug = await lookupAuthorSlug(numericAuthorMatch[1])
+    if (slug) {
+      return NextResponse.redirect(new URL(`/author/${slug}`, request.url), 301)
+    }
+    // No slug found — fall through to the page component, which will notFound()
+  }
+
+  // Rule 2: /author/<slug>/ trailing slash → /author/<slug> (301)
+  const trailingSlashAuthor = pathname.match(/^\/author\/([^\/]+)\/$/)
+  if (trailingSlashAuthor && !/^\d+$/.test(trailingSlashAuthor[1])) {
+    return NextResponse.redirect(
+      new URL(`/author/${trailingSlashAuthor[1]}`, request.url),
+      301
+    )
+  }
+  // ──────────────────────────────────────────────────────────────────────────
 
   const isStaticAsset = pathname.startsWith('/_next') || pathname.startsWith('/static') || pathname.includes('.')
   const isApiPath = pathname.startsWith('/api')

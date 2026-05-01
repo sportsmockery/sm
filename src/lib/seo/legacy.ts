@@ -1,14 +1,6 @@
 import type { Metadata } from 'next'
+import { SITE_NAME, SITE_URL } from './constants'
 
-// ── Site-wide SEO constants ──────────────────────────────────────────────────
-export const SITE_NAME = 'Sports Mockery'
-export const SITE_URL = 'https://sportsmockery.com'
-export const SITE_DESCRIPTION =
-  "Your #1 source for Chicago Bears news, analysis, and rumors. Plus complete coverage of Bulls, Cubs, White Sox, and Blackhawks."
-export const DEFAULT_OG_IMAGE = '/og-image.png'
-export const TWITTER_HANDLE = '@sportsmockery'
-
-// ── Team display names ───────────────────────────────────────────────────────
 const TEAM_META: Record<string, { name: string; fullName: string; sport: string }> = {
   'chicago-bears': { name: 'Bears', fullName: 'Chicago Bears', sport: 'NFL' },
   'chicago-bulls': { name: 'Bulls', fullName: 'Chicago Bulls', sport: 'NBA' },
@@ -17,12 +9,6 @@ const TEAM_META: Record<string, { name: string; fullName: string; sport: string 
   'chicago-blackhawks': { name: 'Blackhawks', fullName: 'Chicago Blackhawks', sport: 'NHL' },
 }
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
-/**
- * Smart-truncate a description string for meta tags.
- * Breaks at the last word boundary before maxLen, appends ellipsis if needed.
- */
 export function truncateDescription(text: string, maxLen = 160): string {
   if (!text) return ''
   const clean = text.replace(/\s+/g, ' ').trim()
@@ -32,13 +18,7 @@ export function truncateDescription(text: string, maxLen = 160): string {
   return (lastSpace > 0 ? truncated.slice(0, lastSpace) : truncated) + '...'
 }
 
-/**
- * Generate consistent metadata for team hub pages and sub-pages.
- */
-export function generateTeamMetadata(
-  teamSlug: string,
-  subPage?: string,
-): Metadata {
+export function generateTeamMetadata(teamSlug: string, subPage?: string): Metadata {
   const team = TEAM_META[teamSlug]
   if (!team) {
     return { title: 'Chicago Sports | Sports Mockery' }
@@ -68,9 +48,6 @@ export function generateTeamMetadata(
   }
 }
 
-/**
- * Generate consistent metadata for article/post pages.
- */
 export function generateArticleMetadata(post: {
   title: string
   seo_title?: string | null

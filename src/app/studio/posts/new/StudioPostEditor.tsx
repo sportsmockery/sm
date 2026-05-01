@@ -9,6 +9,7 @@ import { CategorySelect, AuthorSelect } from '@/components/admin/PostEditor/Sear
 import StoryUniversePanel from '@/components/admin/PostEditor/StoryUniversePanel'
 import { ChartBuilderModal, ChartConfig, AISuggestion, ChartType } from '@/components/admin/ChartBuilder'
 import { PostIQChartGenerator } from '@/components/postiq'
+import { MIN_WORDS, ARTICLE_TYPES, type ArticleType } from '@/lib/articles/blocks'
 
 interface Category {
   id: string
@@ -144,7 +145,14 @@ export default function StudioPostEditor({
     seo_description: post?.seo_description || '',
     seo_keywords: post?.seo_keywords || '',
     scheduled_at: post?.scheduled_at || null,
+    article_type: ((post as any)?.article_type as ArticleType) || ('news' as ArticleType),
   })
+
+  // Soft word-count gate (PR-8 first 2 weeks; flip to hard once data supports it).
+  // Below-min publishes are allowed but flagged via published_under_min for
+  // editorial review of override frequency.
+  const articleType = (formData.article_type || 'news') as ArticleType
+  const minWords = MIN_WORDS[articleType] ?? MIN_WORDS.news
 
   // Category name to URL prefix mapping
   const categorySlugMap: Record<string, string> = {
@@ -478,6 +486,9 @@ export default function StudioPostEditor({
           force_hero_featured: forceHeroFeatured,
           is_story_universe: isStoryUniverse,
           story_universe_related_ids: isStoryUniverse ? storyUniverseRelatedIds : [],
+          word_count: wordCount,
+          published_under_min:
+            formData.status === 'published' && wordCount < minWords,
         }),
       })
 
@@ -759,7 +770,26 @@ export default function StudioPostEditor({
 
         {/* Right: Word count + Status + Save */}
         <div className="flex items-center gap-3">
-          <span className="hidden sm:inline text-xs text-[var(--text-muted)]">{wordCount} words</span>
+          <span
+            className="hidden sm:inline text-xs"
+            style={{ color: wordCount >= minWords ? '#16A34A' : '#BC0000' }}
+            title={`${articleType} minimum: ${minWords} words`}
+          >
+            {wordCount} / {minWords} {wordCount >= minWords ? '✓' : '(below min)'}
+          </span>
+
+          <select
+            value={articleType}
+            onChange={(e) => updateField('article_type', e.target.value)}
+            className="h-8 rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-2 text-xs text-[var(--text-primary)] focus:border-[var(--accent-red)] focus:outline-none"
+            title="Article type sets the per-type word-count minimum"
+          >
+            {ARTICLE_TYPES.map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </select>
 
           <select
             value={formData.status}

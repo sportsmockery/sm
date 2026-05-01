@@ -11,6 +11,8 @@
     "scout:evals": "npx ts-node scripts/run_scout_evals.ts",
     "deploy": "./scripts/safe-deploy.sh",
     "build-deploy": "./scripts/build-deploy.sh",
+    "test:seo": "playwright test --config=playwright.seo.config.ts",
+    "seo:audit": "tsx scripts/seo-audit.ts",
     "prepare": "git config core.hooksPath .githooks || true",
     "figma:fetch": "npx tsx scripts/figma/fetch-file.ts",
     "figma:pages": "npx tsx scripts/figma/extract-pages.ts",

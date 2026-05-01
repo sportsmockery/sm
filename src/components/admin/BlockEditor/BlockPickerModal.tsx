@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   X, Search, Plus, Type, Heading, ImageIcon, Play, Quote, Share2, Minus,
   Sparkles, BarChart, Users, ArrowRightLeft, List, Thermometer,
-  Vote, Swords, Flame, Bell,
+  Vote, Swords, Flame, Bell, AlignLeft, AlertCircle, ArrowRight,
 } from 'lucide-react';
 import { BLOCK_CATEGORIES, type BlockType } from './types';
 
@@ -415,6 +415,14 @@ const PREVIEW_MAP: Record<BlockType, React.ReactNode> = {
   quote: <PreviewQuote />,
   'social-embed': <PreviewSocialEmbed />,
   divider: <PreviewDivider />,
+  // Editorial structure (text callouts — reuse paragraph preview)
+  tldr: <PreviewParagraph />,
+  'key-facts': <PreviewParagraph />,
+  'why-it-matters': <PreviewParagraph />,
+  'whats-next': <PreviewParagraph />,
+  // Scout AI (visibly labeled — reuse Scout insight preview)
+  'scout-summary': <PreviewScoutInsight />,
+  'scout-recap': <PreviewScoutInsight />,
   'scout-insight': <PreviewScoutInsight />,
   'stats-chart': <PreviewChart />,
   'player-comparison': <PreviewPlayerComparison />,
@@ -436,7 +444,7 @@ const PREVIEW_MAP: Record<BlockType, React.ReactNode> = {
 const ICON_MAP: Record<string, React.ComponentType<{ size?: number; style?: React.CSSProperties; className?: string }>> = {
   Type, Heading, Image: ImageIcon, Play, Minus, Quote, Share2,
   Sparkles, BarChart, Users, ArrowRightLeft, List, Thermometer,
-  Vote, Swords, Flame, Bell,
+  Vote, Swords, Flame, Bell, AlignLeft, AlertCircle, ArrowRight,
 };
 
 const RED_BLOCKS: BlockType[] = ['sentiment-meter', 'hot-take', 'update', 'debate'];

@@ -30,6 +30,7 @@ async function fetchScoutCommentary(teamSlug?: string) {
 export const metadata = {
   title: 'Owner & GM Report Cards | Sports Mockery',
   description: 'Data-backed grades on every Chicago ownership group — Spending, Results, Fan Sentiment, and Loyalty Tax.',
+  alternates: { canonical: '/owner' },
 }
 
 export default async function OwnerPage() {

@@ -1,3 +1,5 @@
+import { JsonLd, newsArticleJsonLd, type ImageVariant } from '@/lib/seo'
+
 interface ArticleSchemaProps {
   article: {
     title: string
@@ -7,6 +9,7 @@ interface ArticleSchemaProps {
     published_at: string
     updated_at?: string
     slug: string
+    image_variants?: Record<string, ImageVariant> | null
     author: {
       name: string
       slug: string
@@ -17,45 +20,22 @@ interface ArticleSchemaProps {
       slug: string
     }
   }
-  url: string
 }
 
-export default function ArticleSchema({ article, url }: ArticleSchemaProps) {
-  const schema = {
-    '@context': 'https://schema.org',
-    '@type': 'NewsArticle',
+export default function ArticleSchema({ article }: ArticleSchemaProps) {
+  const data = newsArticleJsonLd({
+    slug: article.slug,
+    categorySlug: article.category.slug,
     headline: article.title,
     description: article.excerpt || '',
-    image: article.featured_image
-      ? [article.featured_image]
-      : ['https://sportsmockery.com/default-og-image.jpg'],
     datePublished: article.published_at,
     dateModified: article.updated_at || article.published_at,
-    author: {
-      '@type': 'Person',
-      name: article.author.name,
-      url: `https://sportsmockery.com/author/${article.author.slug}`,
-    },
-    publisher: {
-      '@type': 'Organization',
-      name: 'SportsMockery.com',
-      logo: {
-        '@type': 'ImageObject',
-        url: 'https://sportsmockery.com/logo.png',
-      },
-    },
-    mainEntityOfPage: {
-      '@type': 'WebPage',
-      '@id': url,
-    },
+    authorSlug: article.author.slug,
+    authorName: article.author.name,
+    imageUrl: article.featured_image || 'https://sportsmockery.com/og-image.png',
+    imageVariants: article.image_variants,
     articleSection: article.category.name,
-    url: url,
-  }
+  })
 
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-    />
-  )
+  return <JsonLd data={data} />
 }

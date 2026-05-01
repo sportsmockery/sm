@@ -13,11 +13,36 @@ export const SIZE_VARIANTS: ImageSizeVariant[] = [
   { name: 'thumbnail', maxWidth: 400, quality: 75 },
 ]
 
+/**
+ * Aspect-ratio variants required by Top Stories — Google needs all 3 in NewsArticle.image[].
+ * Each uses fit:cover so the subject is preserved at the requested aspect.
+ */
+export interface AspectVariant {
+  key: '16x9' | '4x3' | '1x1'
+  width: number
+  height: number
+  quality: number
+}
+
+export const ASPECT_VARIANTS: AspectVariant[] = [
+  { key: '16x9', width: 1200, height: 675, quality: 80 },
+  { key: '4x3', width: 1200, height: 900, quality: 80 },
+  { key: '1x1', width: 1200, height: 1200, quality: 80 },
+]
+
 export interface OptimizedImageResult {
   buffer: Buffer
   width: number
   height: number
   format: string
+  size: number
+}
+
+export interface AspectVariantResult {
+  buffer: Buffer
+  width: number
+  height: number
+  format: 'webp'
   size: number
 }
 
@@ -29,6 +54,7 @@ export interface BlurPlaceholderResult {
 
 export interface FullOptimizationResult {
   variants: Record<string, OptimizedImageResult>
+  aspects: Record<AspectVariant['key'], AspectVariantResult>
   blur: BlurPlaceholderResult
   originalWidth: number
   originalHeight: number
@@ -89,25 +115,58 @@ export async function generateBlurPlaceholder(
 }
 
 /**
- * Runs the full optimization pipeline: produces all size variants + blur placeholder.
+ * Produces a single aspect-ratio variant (cover-fit) as WebP.
+ */
+export async function optimizeAspectVariant(
+  inputBuffer: Buffer,
+  width: number,
+  height: number,
+  quality = 80
+): Promise<AspectVariantResult> {
+  const buffer = await sharp(inputBuffer)
+    .rotate()
+    .withMetadata({ orientation: undefined })
+    .resize(width, height, { fit: 'cover', position: 'attention' })
+    .webp({ quality })
+    .toBuffer()
+
+  return {
+    buffer,
+    width,
+    height,
+    format: 'webp',
+    size: buffer.byteLength,
+  }
+}
+
+/**
+ * Runs the full optimization pipeline: size variants, aspect-ratio variants, and blur placeholder.
  */
 export async function processImage(inputBuffer: Buffer): Promise<FullOptimizationResult> {
   const originalMeta = await sharp(inputBuffer).metadata()
   const originalWidth = originalMeta.width || 0
   const originalHeight = originalMeta.height || 0
 
-  // Generate all size variants in parallel
-  const variantEntries = await Promise.all(
-    SIZE_VARIANTS.map(async (v) => {
-      const result = await optimizeImage(inputBuffer, v.maxWidth, v.quality)
-      return [v.name, result] as [string, OptimizedImageResult]
-    })
-  )
+  const [variantEntries, aspectEntries, blur] = await Promise.all([
+    Promise.all(
+      SIZE_VARIANTS.map(async (v) => {
+        const result = await optimizeImage(inputBuffer, v.maxWidth, v.quality)
+        return [v.name, result] as [string, OptimizedImageResult]
+      })
+    ),
+    Promise.all(
+      ASPECT_VARIANTS.map(async (a) => {
+        const result = await optimizeAspectVariant(inputBuffer, a.width, a.height, a.quality)
+        return [a.key, result] as [AspectVariant['key'], AspectVariantResult]
+      })
+    ),
+    generateBlurPlaceholder(inputBuffer),
+  ])
 
   const variants = Object.fromEntries(variantEntries)
-  const blur = await generateBlurPlaceholder(inputBuffer)
+  const aspects = Object.fromEntries(aspectEntries) as Record<AspectVariant['key'], AspectVariantResult>
 
-  return { variants, blur, originalWidth, originalHeight }
+  return { variants, aspects, blur, originalWidth, originalHeight }
 }
 
 /**

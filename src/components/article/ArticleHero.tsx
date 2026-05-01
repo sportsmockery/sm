@@ -6,6 +6,7 @@ import ReadingTime from './ReadingTime'
 interface ArticleHeroProps {
   title: string
   featuredImage?: string
+  imageVariants?: Record<string, { url: string; width: number; height: number }> | null
   category: {
     name: string
     slug: string
@@ -23,19 +24,21 @@ interface ArticleHeroProps {
 export default function ArticleHero({
   title,
   featuredImage,
+  imageVariants,
   category,
   author,
   publishedAt,
   content,
   className = '',
 }: ArticleHeroProps) {
+  const heroSrc = imageVariants?.['16x9']?.url ?? featuredImage
   return (
     <header className={`relative ${className}`}>
       {/* Full-width featured image */}
       <div className="relative h-[50vh] min-h-[400px] w-full lg:h-[60vh]">
-        {featuredImage ? (
+        {heroSrc ? (
           <Image
-            src={featuredImage}
+            src={heroSrc}
             alt={title}
             fill
             className="object-cover"

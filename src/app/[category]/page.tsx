@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { canonicalUrl } from '@/lib/seo'
 import CategoryFilters from '@/components/category/CategoryFilters'
 import CategoryFeatured from '@/components/category/CategoryFeatured'
 import CategoryGrid from '@/components/category/CategoryGrid'
@@ -50,15 +51,17 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
 
   const description = categoryDescriptions[categorySlug] ||
     `Latest ${category.name} news, rumors, and analysis from Sports Mockery.`
+  const canonical = canonicalUrl(`/${category.slug}`)
 
   return {
     title: `${category.name} News & Rumors | Sports Mockery`,
     description,
+    alternates: { canonical },
     openGraph: {
       title: `${category.name} News & Rumors | Sports Mockery`,
       description,
       type: 'website',
-      url: `https://sportsmockery.com/${category.slug}`,
+      url: canonical,
       siteName: 'SportsMockery.com',
     },
     twitter: {

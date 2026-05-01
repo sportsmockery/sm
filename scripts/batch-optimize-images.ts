@@ -140,7 +140,7 @@ async function processPost(post: PostRow, dryRun: boolean): Promise<string> {
     const inputBuffer = await fetchImageBuffer(featured_image)
     const result = await processImage(inputBuffer)
 
-    // Upload variants to Supabase Storage
+    // Upload size variants to Supabase Storage
     const timestamp = Date.now()
     const urlHash = hashUrl(featured_image)
     const uploads: Record<string, string> = {}
@@ -165,6 +165,34 @@ async function processPost(post: PostRow, dryRun: boolean): Promise<string> {
         .getPublicUrl(storagePath)
 
       uploads[variantName] = urlData.publicUrl
+    }
+
+    // Upload aspect-ratio variants and assemble image_variants JSONB for sm_posts
+    const imageVariants: Record<string, { url: string; width: number; height: number }> = {}
+    for (const [aspectKey, variant] of Object.entries(result.aspects)) {
+      const storagePath = `${urlHash}/aspect-${aspectKey}_${timestamp}.webp`
+
+      const { error: uploadError } = await supabase.storage
+        .from(STORAGE_BUCKET)
+        .upload(storagePath, variant.buffer, {
+          contentType: 'image/webp',
+          upsert: true,
+        })
+
+      if (uploadError) {
+        console.error(`    Aspect upload error for ${aspectKey}:`, uploadError.message)
+        continue
+      }
+
+      const { data: urlData } = supabase.storage
+        .from(STORAGE_BUCKET)
+        .getPublicUrl(storagePath)
+
+      imageVariants[aspectKey] = {
+        url: urlData.publicUrl,
+        width: variant.width,
+        height: variant.height,
+      }
     }
 
     // Record in image_optimizations table
@@ -192,6 +220,7 @@ async function processPost(post: PostRow, dryRun: boolean): Promise<string> {
         optimized_image_url: uploads.hero || uploads.medium || null,
         image_blur_hash: result.blur.base64,
         image_optimized_at: new Date().toISOString(),
+        image_variants: Object.keys(imageVariants).length > 0 ? imageVariants : null,
       })
       .eq('id', id)
 

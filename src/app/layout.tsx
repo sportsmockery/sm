@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Space_Grotesk } from "next/font/google";
+import { JsonLd, organizationJsonLd, SITE_URL, SITE_NAME, WEBSITE_NODE_ID } from "@/lib/seo";
 import "./globals.css";
 import "@/styles/homepage.css";
 import "@/styles/homepage-v2.css";
@@ -104,6 +106,8 @@ export const metadata: Metadata = {
   },
 };
 
+const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -112,6 +116,11 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth dark" data-theme="dark" style={{ colorScheme: 'dark' }} suppressHydrationWarning>
       <head>
+        {GTM_ID && (
+          <Script id="gtm-init" strategy="afterInteractive">
+            {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${GTM_ID}');`}
+          </Script>
+        )}
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="alternate" type="application/rss+xml" title="Sports Mockery RSS" href="https://sportsmockery.com/api/rss" />
         <link rel="dns-prefetch" href="https://izwhcuccuwvlqqhpprbb.supabase.co" />
@@ -119,41 +128,19 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://a.espncdn.com" />
         <link rel="preconnect" href="https://a.espncdn.com" crossOrigin="anonymous" />
         {/* Organization + WebSite JSON-LD */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "NewsMediaOrganization",
-              "name": "Sports Mockery",
-              "url": "https://sportsmockery.com",
-              "logo": {
-                "@type": "ImageObject",
-                "url": "https://sportsmockery.com/logo.png"
-              },
-              "sameAs": [
-                "https://twitter.com/sportsmockery",
-                "https://www.youtube.com/@sportsmockery",
-                "https://www.facebook.com/sportsmockery"
-              ],
-              "description": "Chicago's premier sports coverage — Bears, Bulls, Cubs, White Sox, and Blackhawks"
-            }),
-          }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "WebSite",
-              "name": "Sports Mockery",
-              "url": "https://sportsmockery.com",
-              "potentialAction": {
-                "@type": "SearchAction",
-                "target": "https://sportsmockery.com/search?q={search_term_string}",
-                "query-input": "required name=search_term_string"
-              }
-            }),
+        <JsonLd data={organizationJsonLd()} />
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "@id": WEBSITE_NODE_ID,
+            name: SITE_NAME,
+            url: SITE_URL,
+            potentialAction: {
+              "@type": "SearchAction",
+              target: `${SITE_URL}/search?q={search_term_string}`,
+              "query-input": "required name=search_term_string",
+            },
           }}
         />
       </head>
@@ -162,6 +149,16 @@ export default function RootLayout({
         style={{ backgroundColor: 'var(--sm-dark)', color: 'var(--sm-text)' }}
         suppressHydrationWarning
       >
+        {GTM_ID && (
+          <noscript>
+            <iframe
+              src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
+              height="0"
+              width="0"
+              style={{ display: 'none', visibility: 'hidden' }}
+            />
+          </noscript>
+        )}
         <ThemeProvider>
           <AuthProvider>
             <SubscriptionProvider>

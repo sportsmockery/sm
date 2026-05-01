@@ -207,11 +207,28 @@ log_ok "Pushed to remote"
 echo ""
 
 # ─────────────────────────────────────────────
+# STEP 5b: SEO canonical regression gate (post-deploy URL check)
+# Skipped here intentionally — the test hits a live URL, so it runs AFTER deploy
+# in STEP 7 below as a smoke check, not as a pre-deploy block on local commits.
+# ─────────────────────────────────────────────
+
+# ─────────────────────────────────────────────
 # STEP 6: Deploy to Vercel
 # ─────────────────────────────────────────────
 log_info "Deploying to Vercel (production)..."
 echo ""
 vercel --prod --archive=tgz "$@"
+
+# ─────────────────────────────────────────────
+# STEP 7: SEO smoke test (live URL canonical check)
+# ─────────────────────────────────────────────
+echo ""
+log_info "Running SEO canonical smoke test against live deploy..."
+if SEO_TEST_URL="https://test.sportsmockery.com" npm run test:seo --silent; then
+    log_ok "Canonicals pass — apex host on every sampled URL"
+else
+    log_warn "Canonical regression detected — review before announcing release"
+fi
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

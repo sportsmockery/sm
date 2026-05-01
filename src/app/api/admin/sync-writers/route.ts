@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { revalidateTag } from 'next/cache'
 import { supabaseAdmin } from '@/lib/supabase-server'
 
 const WP_BASE_URL = 'https://www.sportsmockery.com/wp-json/sm-export/v1'
@@ -70,6 +71,10 @@ export async function POST() {
 
         if (!error) newCount++
       }
+    }
+
+    if (newCount > 0 || updatedCount > 0) {
+      revalidateTag('authors', 'default')
     }
 
     return NextResponse.json({

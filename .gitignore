@@ -54,4 +54,8 @@ FRONTEND_Chart_UI_Tester.py
 
 # IDE and tools
 .claude/worktrees/
+.claude/scheduled_tasks.lock
 .vscode/
+
+# Supabase CLI cache (project-ref, pooler-url, version pins)
+supabase/.temp/

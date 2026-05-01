@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import type { ContentBlock, BlockType, ArticleDocument } from './types';
 import { createBlock, migrateBlock } from './types';
+import { buildDefaultArticleDocument } from '@/lib/articles/blocks';
 import { BlockInserter } from './BlockInserter';
 import { BlockPanel } from './BlockEditorPanels';
 import { BlockPreviewRenderer } from './BlockPreviewRenderer';
@@ -105,6 +106,11 @@ export function BlockEditor({ initialBlocks, initialTemplate, onChange }: BlockE
       .filter((b) => b.type !== 'reaction-stream')
       .map(migrateBlock);
     if (seeded.length > 0) return seeded;
+    // Editorial scaffold for new posts (gated — flip in Vercel env to disable
+    // without redeploying if the seeded template ever breaks the editor).
+    if (process.env.NEXT_PUBLIC_SEED_DEFAULT_BLOCKS === 'true') {
+      return buildDefaultArticleDocument().blocks;
+    }
     return [createBlock('paragraph')];
   });
 
