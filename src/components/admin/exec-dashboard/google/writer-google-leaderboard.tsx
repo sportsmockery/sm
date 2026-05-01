@@ -1,21 +1,64 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import type { WriterLeaderboardRow } from '@/lib/google/types'
+import type { WriterEngagementRow } from './google-tab'
 
 const C = { cyan: '#00D4FF', red: '#BC0000', gold: '#D6B05E', green: '#00D4FF' }
 
-type SortKey = 'total' | 'searchEssentials' | 'googleNews' | 'trust' | 'spamSafety' | 'technical' | 'opportunity' | 'recommendationCount' | 'articlesAnalyzed'
+type SortKey =
+  | 'total' | 'searchEssentials' | 'googleNews' | 'trust' | 'spamSafety' | 'technical' | 'opportunity'
+  | 'recommendationCount' | 'articlesAnalyzed' | 'engagement_score' | 'overall_score' | 'comments'
 
-export function WriterGoogleLeaderboard({ writers }: { writers: WriterLeaderboardRow[] }) {
-  const [sortKey, setSortKey] = useState<SortKey>('total')
+type EnrichedRow = WriterLeaderboardRow & {
+  engagement_score?: number
+  overall_score?: number
+  comments?: number
+}
+
+function normalizeName(s: string): string {
+  return s.toLowerCase().replace(/[^a-z0-9]/g, '')
+}
+
+export function WriterGoogleLeaderboard({
+  writers,
+  writerEngagement,
+}: {
+  writers: WriterLeaderboardRow[]
+  writerEngagement?: WriterEngagementRow[]
+}) {
+  const [sortKey, setSortKey] = useState<SortKey>('overall_score')
   const [dir, setDir] = useState<'asc' | 'desc'>('desc')
 
-  const sorted = [...writers].sort((a, b) => {
-    const av = pick(a, sortKey)
-    const bv = pick(b, sortKey)
-    return dir === 'desc' ? bv - av : av - bv
-  })
+  // Merge by normalized display name. The exec-dashboard writers are keyed by
+  // WP author IDs while google-intelligence writers use sm_authors UUIDs, so
+  // a name-based join is the only reliable bridge between the two systems.
+  const enriched: EnrichedRow[] = useMemo(() => {
+    const byName = new Map<string, WriterEngagementRow>()
+    for (const e of writerEngagement || []) {
+      if (!e.name) continue
+      byName.set(normalizeName(e.name), e)
+    }
+    return writers.map(w => {
+      const e = byName.get(normalizeName(w.name))
+      return {
+        ...w,
+        engagement_score: e?.engagement_score,
+        overall_score: e?.overall_score,
+        comments: e?.comments,
+      }
+    })
+  }, [writers, writerEngagement])
+
+  const sorted = useMemo(() => {
+    const arr = [...enriched]
+    arr.sort((a, b) => {
+      const av = pick(a, sortKey)
+      const bv = pick(b, sortKey)
+      return dir === 'desc' ? bv - av : av - bv
+    })
+    return arr
+  }, [enriched, sortKey, dir])
 
   const onSort = (k: SortKey) => {
     if (k === sortKey) setDir(d => d === 'desc' ? 'asc' : 'desc')
@@ -41,6 +84,9 @@ export function WriterGoogleLeaderboard({ writers }: { writers: WriterLeaderboar
               <Th onClick={() => onSort('spamSafety')}       active={sortKey === 'spamSafety'}       dir={dir} align="right">Spam</Th>
               <Th onClick={() => onSort('technical')}        active={sortKey === 'technical'}        dir={dir} align="right">Tech</Th>
               <Th onClick={() => onSort('opportunity')}      active={sortKey === 'opportunity'}      dir={dir} align="right">Opp</Th>
+              <Th onClick={() => onSort('comments')}         active={sortKey === 'comments'}         dir={dir} align="right">Comments</Th>
+              <Th onClick={() => onSort('engagement_score')} active={sortKey === 'engagement_score'} dir={dir} align="right">Engagement</Th>
+              <Th onClick={() => onSort('overall_score')}    active={sortKey === 'overall_score'}    dir={dir} align="right">Overall</Th>
               <Th onClick={() => onSort('recommendationCount')} active={sortKey === 'recommendationCount'} dir={dir} align="right">Recs</Th>
               <Th align="right">Trend</Th>
               <Th align="right">Last rescored</Th>
@@ -63,6 +109,17 @@ export function WriterGoogleLeaderboard({ writers }: { writers: WriterLeaderboar
                 <Td align="right" muted>{w.sub.spamSafety}</Td>
                 <Td align="right" muted>{w.sub.technical}</Td>
                 <Td align="right" muted>{w.sub.opportunity}</Td>
+                <Td align="right" muted>{w.comments != null ? w.comments : '—'}</Td>
+                <Td align="right">
+                  {w.engagement_score != null
+                    ? <strong style={{ color: scoreTone(w.engagement_score) }}>{w.engagement_score}</strong>
+                    : <span style={{ color: 'var(--sm-text-dim)' }}>—</span>}
+                </Td>
+                <Td align="right">
+                  {w.overall_score != null
+                    ? <strong style={{ color: scoreTone(w.overall_score) }}>{w.overall_score}</strong>
+                    : <span style={{ color: 'var(--sm-text-dim)' }}>—</span>}
+                </Td>
                 <Td align="right">
                   <span className="text-sm font-bold tabular-nums" style={{ color: w.recommendationCount > 5 ? C.red : 'var(--sm-text)' }}>
                     {w.recommendationCount}
@@ -100,9 +157,10 @@ function StatusDot({ status }: { status: 'green' | 'amber' | 'red' }) {
   const m = { green: C.green, amber: C.gold, red: C.red }
   return <span className="inline-block w-2 h-2 rounded-full" style={{ background: m[status] }} />
 }
-function pick(w: WriterLeaderboardRow, k: SortKey): number {
-  if (k === 'total' || k === 'recommendationCount' || k === 'articlesAnalyzed') return (w as any)[k]
-  return (w.sub as any)[k]
+function pick(w: EnrichedRow, k: SortKey): number {
+  if (k === 'total' || k === 'recommendationCount' || k === 'articlesAnalyzed') return (w as any)[k] ?? 0
+  if (k === 'engagement_score' || k === 'overall_score' || k === 'comments') return (w as any)[k] ?? -1
+  return (w.sub as any)[k] ?? 0
 }
 function scoreTone(v: number): string {
   if (v >= 80) return '#00D4FF'

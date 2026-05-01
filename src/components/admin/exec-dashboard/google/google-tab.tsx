@@ -24,18 +24,29 @@ export type ArticleEngagementMap = Record<string, {
   comments: number
 }>
 
+export type WriterEngagementRow = {
+  id: number | string
+  name?: string
+  engagement_score?: number
+  overall_score?: number
+  comments?: number
+  hubPosts?: number
+}
+
 export function GoogleTab({
   active,
   range,
   customStart,
   customEnd,
   articleEngagement,
+  writerEngagement,
 }: {
   active: boolean
   range?: string
   customStart?: string
   customEnd?: string
   articleEngagement?: ArticleEngagementMap
+  writerEngagement?: WriterEngagementRow[]
 }) {
   const { data, loading, error, source, refresh } = useGoogleTabData(active, range, customStart, customEnd)
   const [busy, setBusy] = useState<null | 'backfill' | 'tick'>(null)
@@ -147,7 +158,7 @@ export function GoogleTab({
       <GoogleScoreDistribution data={data} />
 
       {/* 3. Writer leaderboard */}
-      <WriterGoogleLeaderboard writers={data.writers} />
+      <WriterGoogleLeaderboard writers={data.writers} writerEngagement={writerEngagement} />
 
       {/* 4. Article analysis */}
       <GoogleArticleAnalysisTable articles={data.articles} rules={data.rules} recommendations={data.recommendations} engagement={articleEngagement} />

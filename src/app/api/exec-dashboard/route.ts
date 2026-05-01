@@ -359,16 +359,36 @@ async function fetchEditorial(startDate: Date, prevStart: Date, now: Date, days:
       .replace(/&nbsp;/g, ' ')
   const getCatName = (id: number) => decodeEntities(((cMap.get(id) as any)?.name || 'Uncategorized'))
 
+  // ── Per-post comment counts ──
+  // WP REST silently strips `comment_count` from the posts response on this
+  // site (likely a filter from a Jetpack/SEO plugin), so we batch the
+  // /comments?post=ID&per_page=1 endpoint and read the X-WP-Total header.
+  // Each request is cached for 15 min so subsequent dashboard loads in the
+  // same window are free.
+  const postCommentCount = new Map<number, number>()
+  await Promise.all(
+    period.map(async (p: any) => {
+      try {
+        const res = await fetch(`${WP_API}/comments?post=${p.id}&per_page=1`, { next: { revalidate: 900 } })
+        if (!res.ok) { postCommentCount.set(p.id, 0); return }
+        const total = parseInt(res.headers.get('X-WP-Total') || '0', 10)
+        postCommentCount.set(p.id, Number.isFinite(total) ? total : 0)
+      } catch {
+        postCommentCount.set(p.id, 0)
+      }
+    })
+  )
+
   // ── Writer stats ──
   // Tracks per-writer aggregates from WP REST. `slugs` enables GA4 path → author
-  // mapping; `comments` aggregates the WP `comment_count` field on each post.
+  // mapping; `comments` aggregates the per-post comment counts fetched above.
   const wMap = new Map<number, { posts: number; categories: Set<string>; comments: number; slugs: Set<string> }>()
   const slugToAuthor = new Map<string, number>()
   for (const p of period) {
     const aid = p.author; if (!aid) continue
     const e = wMap.get(aid) || { posts: 0, categories: new Set<string>(), comments: 0, slugs: new Set<string>() }
     e.posts++
-    e.comments += Number(p.comment_count || 0)
+    e.comments += postCommentCount.get(p.id) ?? 0
     if (p.slug) {
       e.slugs.add(p.slug)
       slugToAuthor.set(String(p.slug), aid)
@@ -591,7 +611,7 @@ async function fetchEditorial(startDate: Date, prevStart: Date, now: Date, days:
       avgTimeOnPage: ga && ga.pageViews > 0 ? Math.round(ga.engagementSeconds / ga.pageViews) : 0,
       scrollCompletion: ga && ga.pageViews > 0 ? Math.min(100, Math.round((ga.scrollEvents / ga.pageViews) * 100)) : 0,
       engagementRate: ga && ga.pageViews > 0 ? Math.min(100, Math.round((ga.engagedSessions / ga.pageViews) * 100)) : 0,
-      comments: Number(p.comment_count || 0),
+      comments: postCommentCount.get(p.id) ?? 0,
     }
   }
 

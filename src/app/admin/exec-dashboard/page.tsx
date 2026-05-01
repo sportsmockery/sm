@@ -2611,6 +2611,7 @@ export default function ExecDashboard() {
               customStart={customStart}
               customEnd={customEnd}
               articleEngagement={data.articleEngagement}
+              writerEngagement={data.writers}
             />
           )}
 
