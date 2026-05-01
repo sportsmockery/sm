@@ -60,6 +60,14 @@ interface Data {
     previous: { label: string; start: string; end: string }
     sources: {
       wpSmed?: { label: string; scope: string; current: number | null; previous: number | null }
+      ga4?: {
+        label: string
+        scope?: string
+        error?: string
+        current?: { pageViews: number; sessions: number; activeUsers: number; engagedSessions: number; averageSessionDuration: number; bounceRate: number }
+        previous?: { pageViews: number; sessions: number; activeUsers: number; engagedSessions: number; averageSessionDuration: number; bounceRate: number }
+        channels?: Array<{ key: string; sessions: number; pageViews: number; activeUsers: number }> | null
+      }
       gsc?: {
         label: string
         scope?: string
@@ -369,11 +377,17 @@ function SourceComparisonCard({ data }: { data: Data['crossSource'] }) {
   }
 
   const wp = data.sources.wpSmed
+  const ga = data.sources.ga4
   const gsc = data.sources.gsc
   const sem = data.sources.semrush
 
   const rows: Array<{ label: string; scope: string; current: number | null; previous: number | null }> = []
   if (wp) rows.push({ label: 'WP SMED — page views', scope: wp.scope, current: wp.current, previous: wp.previous })
+  if (ga && !ga.error && ga.current && ga.previous) {
+    rows.push({ label: 'GA4 — page views', scope: ga.scope || 'browser-side, all traffic', current: ga.current.pageViews, previous: ga.previous.pageViews })
+    rows.push({ label: 'GA4 — sessions', scope: 'browser-side sessions', current: ga.current.sessions, previous: ga.previous.sessions })
+    rows.push({ label: 'GA4 — active users', scope: 'unique browser-side users', current: ga.current.activeUsers, previous: ga.previous.activeUsers })
+  }
   if (gsc && !gsc.error && gsc.current && gsc.previous) {
     rows.push({ label: 'GSC — clicks', scope: gsc.scope || 'Google search clicks', current: gsc.current.clicks, previous: gsc.previous.clicks })
     rows.push({ label: 'GSC — impressions', scope: 'Google SERP impressions', current: gsc.current.impressions, previous: gsc.previous.impressions })
@@ -433,6 +447,44 @@ function SourceComparisonCard({ data }: { data: Data['crossSource'] }) {
           <span>GSC avg position: <span style={{ color: 'var(--sm-text)' }}>{gsc.current.position.toFixed(1)}</span> (prev {gsc.previous!.position.toFixed(1)})</span>
         </div>
       )}
+      {ga?.current && (
+        <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-xs" style={{ color: 'var(--sm-text-dim)' }}>
+          <span>GA4 engagement rate: <span style={{ color: 'var(--sm-text)' }}>{((ga.current.engagedSessions / Math.max(1, ga.current.sessions)) * 100).toFixed(1)}%</span></span>
+          <span>GA4 avg session: <span style={{ color: 'var(--sm-text)' }}>{Math.round(ga.current.averageSessionDuration)}s</span></span>
+          <span>GA4 bounce rate: <span style={{ color: 'var(--sm-text)' }}>{(ga.current.bounceRate * 100).toFixed(1)}%</span></span>
+        </div>
+      )}
+      {ga?.error && (
+        <p className="mt-3 text-[11px] leading-5" style={{ color: '#bc0000' }}>
+          GA4 not authorized: {ga.error}. <a href="/api/admin/google-search-console/connect" className="underline" style={{ color: '#bc0000' }}>Re-connect Google</a> to grant analytics.readonly scope.
+        </p>
+      )}
+      {ga?.channels && ga.channels.length > 0 && (() => {
+        const totalSessions = ga.channels!.reduce((s, c) => s + c.sessions, 0) || 1
+        return (
+          <div className="mt-4 pt-3" style={{ borderTop: '1px solid var(--sm-border)' }}>
+            <p className="text-[11px] font-bold uppercase tracking-wide mb-2" style={{ color: 'var(--sm-text-dim)' }}>
+              GA4 channel mix (current period)
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+              {ga.channels!
+                .sort((a, b) => b.sessions - a.sessions)
+                .slice(0, 8)
+                .map(c => {
+                  const pct = (c.sessions / totalSessions) * 100
+                  return (
+                    <div key={c.key} className="rounded p-2" style={{ background: 'var(--sm-surface)' }}>
+                      <div className="text-[11px] font-medium" style={{ color: 'var(--sm-text)' }}>{c.key || 'Unassigned'}</div>
+                      <div className="text-[11px] tabular-nums" style={{ color: 'var(--sm-text-muted)' }}>
+                        {fmt(c.sessions)} sessions · {pct.toFixed(1)}%
+                      </div>
+                    </div>
+                  )
+                })}
+            </div>
+          </div>
+        )
+      })()}
       {sem && (
         <p className="mt-3 text-[11px] leading-5" style={{ color: 'var(--sm-text-dim)' }}>
           * SEMrush is a monthly snapshot — current = <strong>{sem.currentMonth}</strong>, previous = <strong>{sem.previousMonth}</strong>. Modeled, not measured. Trust GSC for absolute Google trend; SEMrush for keyword footprint and rank movement only.

@@ -35,7 +35,7 @@ PRINCIPLES
 - Mix wins (what's working — do more), risks (something dropping — fix it), and opportunities (untapped angle).
 - Voice: peer-to-peer, direct, terse. No executive-summary boilerplate.
 - If the data is sparse or inconclusive, say so in fewer tips rather than fabricating signal.
-- When the \`crossSource\` block is present, compare WP SMED (all traffic) vs GSC (Google search clicks) vs SEMrush (modeled organic) — divergence tells you *where* the trend lives. Example: SMED -6% but GSC -20% means owned/social is masking a sharp Google search drop; call that out specifically rather than reporting only the SMED number.
+- When the \`crossSource\` block is present, compare WP SMED (all traffic, server-side) vs GA4 (browser-side, all traffic + channel mix) vs GSC (Google search clicks) vs SEMrush (modeled organic) — divergence tells you *where* the trend lives. Example: SMED -6% but GSC -20% means owned/social is masking a sharp Google search drop; call that out specifically rather than reporting only the SMED number. If \`ga4.channelMix\` is present, use it to cite the actual share of traffic from Organic Search vs Direct vs Social vs Referral.
 
 THE "action" FIELD IS THE PRODUCT — make it operational, not advisory:
 - 3–6 numbered steps (1., 2., 3. …), each on its own line, each starting with a verb.
@@ -113,7 +113,8 @@ export function distillDashboard(d: any) {
       }
     : null
 
-  // Cross-source comparison: WP SMED (all traffic) vs GSC (Google search clicks)
+  // Cross-source comparison: WP SMED (all traffic, server-side) vs GA4
+  // (browser-side, all traffic + channel mix) vs GSC (Google search clicks)
   // vs SEMrush (modeled US organic). Different scopes — useful precisely
   // because divergence between them tells Claude *where* the trend lives.
   const cs = d.crossSource
@@ -122,6 +123,14 @@ export function distillDashboard(d: any) {
     previous: cs.previous,
     wpSmed: cs.sources?.wpSmed
       ? { current: cs.sources.wpSmed.current, previous: cs.sources.wpSmed.previous, scope: cs.sources.wpSmed.scope }
+      : null,
+    ga4: cs.sources?.ga4 && !cs.sources.ga4.error
+      ? {
+          current: cs.sources.ga4.current,
+          previous: cs.sources.ga4.previous,
+          channelMix: cs.sources.ga4.channels,
+          scope: cs.sources.ga4.scope,
+        }
       : null,
     gsc: cs.sources?.gsc && !cs.sources.gsc.error
       ? {

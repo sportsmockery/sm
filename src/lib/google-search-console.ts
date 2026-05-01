@@ -8,7 +8,12 @@
 import { supabaseAdmin } from './supabase-server'
 
 export const GSC_PROVIDER = 'google_search_console'
-export const GSC_SCOPE = 'openid email https://www.googleapis.com/auth/webmasters.readonly'
+// Scope covers BOTH Search Console and GA4 Data API — same OAuth client, same
+// token row in admin_oauth_tokens. After widening this, the user must re-click
+// "Connect Google" once so the new token includes analytics.readonly. Until
+// then, GA calls return 403 and the cross-source card just shows "GA: not
+// authorized — re-connect Google".
+export const GSC_SCOPE = 'openid email https://www.googleapis.com/auth/webmasters.readonly https://www.googleapis.com/auth/analytics.readonly'
 
 export type GscTokenRow = {
   id: number

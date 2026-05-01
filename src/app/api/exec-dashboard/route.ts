@@ -5,6 +5,7 @@
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { aggregateTotals, querySearchAnalytics } from '@/lib/google-search-console'
+import { runGaReport, aggregateGaTotals, rowsByDimension, getGa4PropertyId } from '@/lib/google-analytics'
 
 const WP_API = 'https://www.sportsmockery.com/wp-json/wp/v2'
 const WP_EXPORT = 'https://www.sportsmockery.com/wp-json/sm-export/v1'
@@ -566,12 +567,15 @@ async function fetchSEO(endDate: Date, now: Date) {
   }
 }
 
-// ── Cross-source comparison: WP SMED vs GSC vs SEMrush ──────────────────────
+// ── Cross-source comparison: WP SMED vs GA4 vs GSC vs SEMrush ───────────────
 // Real, side-by-side numbers for the selected period and the prior period of
 // equal length, so ExecIQ (and the Overview UI) can see *where* the trend lives
 // — owned/social vs Google search vs modeled organic. Different scopes, on
-// purpose: SMED = all traffic, GSC = Google search clicks, SEMrush = US-only
-// modeled organic snapshot.
+// purpose:
+//   SMED    = WP plugin page views (all traffic, all sources, server-side count)
+//   GA4     = browser-side analytics (sessions, pageviews, channel mix)
+//   GSC     = Google organic search clicks only (real, no model)
+//   SEMrush = US-only modeled organic, monthly snapshot
 async function fetchCrossSource(
   startDate: Date,
   endDate: Date,
@@ -602,7 +606,17 @@ async function fetchCrossSource(
   const sCurr = semrushSnapshot(endDate)
   const sPrev = semrushSnapshot(prevEnd)
 
-  // Run all 6 fetches in parallel; each branch falls back to null on failure.
+  const ga4Property = getGa4PropertyId()
+  const gaTotalsMetrics = [
+    { name: 'screenPageViews' },
+    { name: 'sessions' },
+    { name: 'activeUsers' },
+    { name: 'engagedSessions' },
+    { name: 'averageSessionDuration' },
+    { name: 'bounceRate' },
+  ]
+
+  // Run all fetches in parallel; each branch falls back to null on failure.
   const [
     smedCurrRes,
     smedPrevRes,
@@ -610,6 +624,9 @@ async function fetchCrossSource(
     gscPrevRes,
     semrushCurrRes,
     semrushPrevRes,
+    gaCurrRes,
+    gaPrevRes,
+    gaChannelsRes,
   ] = await Promise.allSettled([
     fetch(`${WP_SMED}/views/overview?start=${startStr}&end=${endStr}`, { next: { revalidate: 900 } }).then(r => r.ok ? r.json() : null),
     fetch(`${WP_SMED}/views/overview?start=${prevStartStr}&end=${prevEndStr}`, { next: { revalidate: 900 } }).then(r => r.ok ? r.json() : null),
@@ -617,6 +634,20 @@ async function fetchCrossSource(
     querySearchAnalytics({ startDate: prevStartStr, endDate: prevEndStr, dimensions: [], rowLimit: 1 }),
     semrushKey ? fetch(semrushUrl(sCurr.displayDate), { next: { revalidate: 3600 } }).then(r => r.ok ? r.text() : null) : Promise.resolve(null),
     semrushKey ? fetch(semrushUrl(sPrev.displayDate), { next: { revalidate: 3600 } }).then(r => r.ok ? r.text() : null) : Promise.resolve(null),
+    ga4Property
+      ? runGaReport({ dateRanges: [{ startDate: startStr, endDate: endStr }], metrics: gaTotalsMetrics, limit: 1 })
+      : Promise.resolve({ error: 'GA4_PROPERTY_ID not set' }),
+    ga4Property
+      ? runGaReport({ dateRanges: [{ startDate: prevStartStr, endDate: prevEndStr }], metrics: gaTotalsMetrics, limit: 1 })
+      : Promise.resolve({ error: 'GA4_PROPERTY_ID not set' }),
+    ga4Property
+      ? runGaReport({
+          dateRanges: [{ startDate: startStr, endDate: endStr }],
+          dimensions: [{ name: 'sessionDefaultChannelGroup' }],
+          metrics: [{ name: 'sessions' }, { name: 'screenPageViews' }, { name: 'activeUsers' }],
+          limit: 25,
+        })
+      : Promise.resolve({ error: 'GA4_PROPERTY_ID not set' }),
   ])
 
   const smedViews = (res: PromiseSettledResult<any>): number | null => {
@@ -641,10 +672,29 @@ async function fetchCrossSource(
       rank: parseInt(r['Rank'] || '0'),
     }
   }
+  const gaParse = (res: PromiseSettledResult<any>) => {
+    if (res.status !== 'fulfilled') return { error: (res.reason as Error)?.message || 'ga fetch failed' }
+    if ('error' in res.value) return { error: res.value.error as string }
+    return { totals: aggregateGaTotals(res.value) }
+  }
 
   const gscCurr = gscTotals(gscCurrRes) as any
   const gscPrev = gscTotals(gscPrevRes) as any
   const gscConnected = !gscCurr.error && !gscPrev.error
+
+  const gaCurr = gaParse(gaCurrRes)
+  const gaPrev = gaParse(gaPrevRes)
+  const gaConnected = !gaCurr.error && !gaPrev.error
+
+  let gaChannels: Array<{ key: string; sessions: number; pageViews: number; activeUsers: number }> | null = null
+  if (gaChannelsRes.status === 'fulfilled' && !('error' in (gaChannelsRes.value as any))) {
+    gaChannels = rowsByDimension(gaChannelsRes.value as any).map(r => ({
+      key: r.key,
+      sessions: r.sessions,
+      pageViews: r.pageViews,
+      activeUsers: r.activeUsers,
+    }))
+  }
 
   return {
     period: { label: 'current', start: startStr, end: endStr },
@@ -652,10 +702,17 @@ async function fetchCrossSource(
     sources: {
       wpSmed: {
         label: 'WP SMED page views',
-        scope: 'all traffic, all sources',
+        scope: 'all traffic, all sources (server-side count)',
         current: smedViews(smedCurrRes),
         previous: smedViews(smedPrevRes),
       },
+      ga4: gaConnected ? {
+        label: 'Google Analytics 4',
+        scope: 'browser-side, all traffic',
+        current: (gaCurr as any).totals,
+        previous: (gaPrev as any).totals,
+        channels: gaChannels,
+      } : { label: 'Google Analytics 4', error: (gaCurr as any).error || (gaPrev as any).error || 'not connected' },
       gsc: gscConnected ? {
         label: 'Google Search Console',
         scope: 'Google organic search clicks only',
