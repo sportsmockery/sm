@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getTeamSeasonOverview, getTeamKeyPlayers, getTeamTrends } from '@/lib/team-sidebar-data'
 import { fetchTeamRecord } from '@/lib/team-config'
+import { datalabAdmin } from '@/lib/supabase-datalab'
 
 const VALID_TEAMS = ['bears', 'bulls', 'cubs', 'blackhawks', 'whitesox'] as const
 
@@ -31,9 +32,45 @@ export async function GET(request: NextRequest) {
       } catch (e: any) {
         recordError = e?.message || String(e)
       }
+
+      // Direct probe — bypass fetchTeamRecord entirely so we can see the
+      // raw supabase-js response (data, error, status) for the very query
+      // that's silently returning null.
+      const directProbeResults: Record<string, unknown> = {}
+      try {
+        const bearsProbe: any = await datalabAdmin
+          .from('bears_season_record')
+          .select('*')
+          .eq('season', 2025)
+          .single()
+        directProbeResults.bears_season_record_2025 = {
+          data: bearsProbe.data,
+          error: bearsProbe.error,
+          status: bearsProbe.status,
+          statusText: bearsProbe.statusText,
+        }
+      } catch (e: any) {
+        directProbeResults.bears_season_record_2025 = { thrown: e?.message || String(e) }
+      }
+      try {
+        const bullsProbe: any = await datalabAdmin
+          .from('bulls_seasons')
+          .select('*')
+          .eq('season', 2026)
+          .single()
+        directProbeResults.bulls_seasons_2026 = {
+          data: bullsProbe.data ? { wins: bullsProbe.data.wins, losses: bullsProbe.data.losses } : null,
+          error: bullsProbe.error,
+          status: bullsProbe.status,
+        }
+      } catch (e: any) {
+        directProbeResults.bulls_seasons_2026 = { thrown: e?.message || String(e) }
+      }
+
       debugInfo = {
         rawRecord,
         recordError,
+        directProbe: directProbeResults,
         env: {
           hasDatalabUrl: !!process.env.DATALAB_SUPABASE_URL,
           hasDatalabAnon: !!process.env.DATALAB_SUPABASE_ANON_KEY,
