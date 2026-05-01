@@ -47,6 +47,10 @@ export function blocksToHtml(blocks: ContentBlock[]): string {
           : '';
       case 'video':
         return block.data.url ? `<div class="video-embed"><iframe src="${block.data.url}" allowfullscreen></iframe></div>` : '';
+      case 'analysis':
+        return block.data.html
+          ? `<aside class="sm-analysis" data-sm-section="analysis">${block.data.html}</aside>`
+          : '';
       case 'scout-insight':
         return block.data.insight ? `<blockquote class="scout-insight"><p>${block.data.insight}</p></blockquote>` : '';
       case 'hot-take':

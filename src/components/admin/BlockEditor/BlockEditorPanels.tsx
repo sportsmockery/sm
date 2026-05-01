@@ -918,6 +918,57 @@ export function DividerPanel({ block, onDelete, onMoveUp, onMoveDown }: BlockPan
   );
 }
 
+// ─── Editorial Structure Panels (shared shape: { html: string }) ───
+// Reused for tldr, key-facts, why-it-matters, whats-next, and analysis.
+const EDITORIAL_LABELS: Record<string, { label: string; accent?: string; placeholder: string }> = {
+  'tldr': {
+    label: 'TL;DR',
+    accent: '#00D4FF',
+    placeholder: 'One-paragraph summary…',
+  },
+  'key-facts': {
+    label: 'Key Facts',
+    accent: '#00D4FF',
+    placeholder: 'A bullet list of the load-bearing facts…',
+  },
+  'why-it-matters': {
+    label: 'Why It Matters',
+    accent: '#BC0000',
+    placeholder: 'Why this matters to readers / the team…',
+  },
+  'whats-next': {
+    label: "What's Next",
+    accent: '#00D4FF',
+    placeholder: 'What to watch for next — game, deadline, decision point…',
+  },
+  'analysis': {
+    label: 'Analysis',
+    accent: '#BC0000',
+    placeholder: 'Your original take — what does this mean? Why does it matter?',
+  },
+}
+
+export function EditorialPanel({ block, onChange, onDelete, onMoveUp, onMoveDown }: BlockPanelProps) {
+  const meta = EDITORIAL_LABELS[block.type as string]
+  if (!meta) return null
+  const data = block.data as { html?: string }
+  return (
+    <BlockShell
+      label={meta.label}
+      accent={meta.accent}
+      onDelete={onDelete}
+      onMoveUp={onMoveUp}
+      onMoveDown={onMoveDown}
+    >
+      <RichTextArea
+        value={data.html || ''}
+        onChange={(html) => onChange({ ...block, data: { ...data, html } } as typeof block)}
+        placeholder={meta.placeholder}
+      />
+    </BlockShell>
+  )
+}
+
 // Panel router — maps block type to edit panel
 export function BlockPanel(props: BlockPanelProps) {
   const panels: Record<string, React.FC<BlockPanelProps>> = {
@@ -929,6 +980,12 @@ export function BlockPanel(props: BlockPanelProps) {
     'quote': QuotePanel,
     'social-embed': SocialEmbedPanel,
     'divider': DividerPanel,
+    // Editorial structure (all share { html: string } shape)
+    'tldr': EditorialPanel,
+    'key-facts': EditorialPanel,
+    'why-it-matters': EditorialPanel,
+    'whats-next': EditorialPanel,
+    'analysis': EditorialPanel,
     // Analysis
     'scout-insight': ScoutInsightPanel,
     'stats-chart': StatsChartPanel,

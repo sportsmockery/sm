@@ -400,6 +400,29 @@ function RenderBlock({ block }: { block: ContentBlock }) {
         </section>
       );
 
+    case 'analysis':
+      if (!block.data.html) {
+        return <EmptyState label="Analysis — your original take" accent={BRAND.red} />;
+      }
+      return (
+        <aside
+          aria-label="Original analysis"
+          data-sm-section="analysis"
+          className="rounded-md border-l-4 p-4 my-6 bg-[rgba(11,15,20,0.03)] dark:bg-[rgba(255,255,255,0.04)]"
+          style={{ borderLeftColor: BRAND.red }}
+        >
+          <p className="text-[11px] uppercase tracking-wider font-bold mb-2" style={{ color: BRAND.red }}>
+            Analysis
+          </p>
+          <div
+            className="text-[16px] leading-relaxed"
+            style={{ color: 'var(--sm-text, #0B0F14)' }}
+            dangerouslySetInnerHTML={{ __html: block.data.html }}
+            suppressHydrationWarning
+          />
+        </aside>
+      );
+
     /* ─── Scout AI (visibly labeled — never article body) ─── */
     case 'scout-summary':
       if (!block.data.html) {

@@ -420,6 +420,7 @@ const PREVIEW_MAP: Record<BlockType, React.ReactNode> = {
   'key-facts': <PreviewParagraph />,
   'why-it-matters': <PreviewParagraph />,
   'whats-next': <PreviewParagraph />,
+  'analysis': <PreviewParagraph />,
   // Scout AI (visibly labeled — reuse Scout insight preview)
   'scout-summary': <PreviewScoutInsight />,
   'scout-recap': <PreviewScoutInsight />,

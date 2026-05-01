@@ -20,6 +20,7 @@ export type BlockType =
   | 'key-facts'
   | 'why-it-matters'
   | 'whats-next'
+  | 'analysis'
   // Scout AI-generated (visibly labeled — never article body)
   | 'scout-summary'
   | 'scout-recap'
@@ -105,6 +106,17 @@ export interface WhyItMattersBlock extends BlockBase {
 
 export interface WhatsNextBlock extends BlockBase {
   type: 'whats-next';
+  data: { html: string };
+}
+
+/**
+ * Analysis block — writer's original take, displayed as a styled callout
+ * (left red border, light grey background, "Analysis" eyebrow). Counts
+ * toward body word count. Satisfies publish rule #20 path B when body has
+ * ≥80 words inside.
+ */
+export interface AnalysisBlockType extends BlockBase {
+  type: 'analysis';
   data: { html: string };
 }
 
@@ -263,6 +275,7 @@ export type ContentBlock =
   | KeyFactsBlock
   | WhyItMattersBlock
   | WhatsNextBlock
+  | AnalysisBlockType
   | ScoutSummaryBlock
   | ScoutRecapBlock
   | ScoutInsightBlock
@@ -324,6 +337,7 @@ export const BLOCK_CATEGORIES: BlockCategory[] = [
       { type: 'key-facts', label: 'Key Facts', icon: 'List', description: 'Bullet-point fact list' },
       { type: 'why-it-matters', label: 'Why It Matters', icon: 'AlertCircle', description: 'Significance / context callout' },
       { type: 'whats-next', label: "What's Next", icon: 'ArrowRight', description: 'Next steps / what to watch for' },
+      { type: 'analysis', label: 'Analysis', icon: 'PenLine', description: 'Original writer analysis callout' },
     ],
   },
   {
@@ -373,6 +387,7 @@ export function createBlock(type: BlockType): ContentBlock {
     'key-facts': () => ({ id, type: 'key-facts', data: { html: '' } }),
     'why-it-matters': () => ({ id, type: 'why-it-matters', data: { html: '' } }),
     'whats-next': () => ({ id, type: 'whats-next', data: { html: '' } }),
+    'analysis': () => ({ id, type: 'analysis', data: { html: '' } }),
     // Scout AI (writer adds when Scout has produced content)
     'scout-summary': () => ({ id, type: 'scout-summary', data: { html: '' } }),
     'scout-recap': () => ({ id, type: 'scout-recap', data: { html: '' } }),
