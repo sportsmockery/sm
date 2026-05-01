@@ -79,14 +79,17 @@ export async function buildArticleEntries(): Promise<SitemapEntry[]> {
 export async function buildCategoryEntries(): Promise<SitemapEntry[]> {
   const { data, error } = await supabaseAdmin
     .from('sm_categories')
-    .select('slug, updated_at')
-  if (error || !data) return []
+    .select('slug')
+  if (error || !data) {
+    if (error) console.warn('[sitemap-builders] categories query failed:', error.message)
+    return []
+  }
   return data
     .filter((c) => typeof c.slug === 'string' && c.slug.length > 0)
     .map((c) => ({
       loc: `${SITE_BASE}/${c.slug}`,
-      lastmod: c.updated_at ? new Date(c.updated_at).toISOString() : undefined,
-      changefreq: 'daily',
+      lastmod: new Date().toISOString(),
+      changefreq: 'daily' as const,
       priority: 0.8,
     }))
 }
