@@ -13,6 +13,8 @@ type Task = {
   evidence_kind: string | null
   evidence_match: string | null
   tip_number: string | null
+  last_check_result: { ok?: boolean; regression?: boolean; status_code?: number | null; notes?: string; checked_at?: string } | null
+  auto_marked_done: boolean | null
 }
 
 type ProbeResult = {
@@ -147,7 +149,7 @@ export async function POST(request: NextRequest) {
 
   let query = supabaseAdmin
     .from('sm_seo_tasks')
-    .select('id, status, auto_check, evidence_url, evidence_kind, evidence_match, tip_number')
+    .select('id, status, auto_check, evidence_url, evidence_kind, evidence_match, tip_number, last_check_result, auto_marked_done')
     .eq('auto_check', true)
 
   if (onlyId) query = query.eq('id', onlyId)
@@ -164,15 +166,27 @@ export async function POST(request: NextRequest) {
     status_code: number | null
     notes: string
     auto_marked_done: boolean
+    regression: boolean
     prev_status: string
+    new_status: string
   }> = []
 
   // Probe in parallel (small N — fine to fan out)
   const probes = await Promise.all(tasks.map(async t => ({ task: t, probe: await runProbe(t) })))
 
   for (const { task, probe } of probes) {
+    const prevOk = task.last_check_result?.ok === true
+    const wasAutoMarked = task.auto_marked_done === true
+
+    // Regression: previously passing + currently failing + status was 'done' (auto-marked)
+    // Only auto-reopen tasks that were auto-marked done — don't override manual completions.
+    const isRegression = prevOk && !probe.ok && task.status === 'done' && wasAutoMarked
+
     const eligibleForAutoMark = probe.ok && (task.status === 'pending' || task.status === 'in_progress')
-    const newStatus = eligibleForAutoMark ? 'done' : task.status
+
+    let newStatus = task.status
+    if (eligibleForAutoMark) newStatus = 'done'
+    if (isRegression) newStatus = 'in_progress'
 
     // Update the task with last_checked_at + last_check_result, and possibly status
     const update: Record<string, unknown> = {
@@ -182,6 +196,7 @@ export async function POST(request: NextRequest) {
         status_code: probe.status_code,
         notes: probe.notes,
         checked_at: checkedAt,
+        regression: isRegression || undefined,
       },
     }
     if (eligibleForAutoMark) {
@@ -189,6 +204,10 @@ export async function POST(request: NextRequest) {
       update.completed_at = checkedAt
       update.auto_marked_done = true
       // Don't set completed_by — it's a uuid FK to auth.users; null indicates auto-mark
+    } else if (isRegression) {
+      update.status = 'in_progress'
+      update.completed_at = null
+      update.auto_marked_done = false
     }
 
     const { error: updErr } = await supabaseAdmin
@@ -203,7 +222,9 @@ export async function POST(request: NextRequest) {
         status_code: probe.status_code,
         notes: `Probe ran but update failed: ${updErr.message}`,
         auto_marked_done: false,
+        regression: false,
         prev_status: task.status,
+        new_status: task.status,
       })
       continue
     }
@@ -216,8 +237,8 @@ export async function POST(request: NextRequest) {
         checked_at: checkedAt,
         ok: probe.ok,
         status_code: probe.status_code,
-        notes: probe.notes,
-        raw: probe.raw,
+        notes: isRegression ? `[REGRESSION] ${probe.notes}` : probe.notes,
+        raw: { ...probe.raw, regression: isRegression || undefined },
         auto_marked_done: eligibleForAutoMark,
       })
 
@@ -227,10 +248,10 @@ export async function POST(request: NextRequest) {
       status_code: probe.status_code,
       notes: probe.notes,
       auto_marked_done: eligibleForAutoMark,
+      regression: isRegression,
       prev_status: task.status,
+      new_status: newStatus,
     })
-
-    void newStatus // (unused — kept for clarity)
   }
 
   const summary = {
@@ -239,6 +260,7 @@ export async function POST(request: NextRequest) {
     passed: results.filter(r => r.ok).length,
     failed: results.filter(r => !r.ok).length,
     auto_marked_done: results.filter(r => r.auto_marked_done).length,
+    regressions: results.filter(r => r.regression).length,
   }
 
   return NextResponse.json({ summary, results, mode: isCron ? 'cron' : 'manual' })
