@@ -6,12 +6,69 @@ import type { HubSlug, TeamSlug, HubItemStatus } from '@/types/hub'
 
 export const dynamic = 'force-dynamic'
 
+// Whitelisted slug values — must mirror src/types/hub.ts. Inlined so the route
+// can validate query parameters without dragging the (large) type module into
+// the request path. If you add a new team or hub, update both places.
+const VALID_TEAM_SLUGS: ReadonlySet<TeamSlug> = new Set([
+  'chicago-bears',
+  'chicago-bulls',
+  'chicago-blackhawks',
+  'chicago-cubs',
+  'chicago-white-sox',
+])
+const VALID_HUB_SLUGS: ReadonlySet<HubSlug> = new Set([
+  'trade-rumors',
+  'draft-tracker',
+  'cap-tracker',
+  'depth-chart',
+  'game-center',
+])
+const VALID_STATUSES: ReadonlySet<HubItemStatus> = new Set(['draft', 'published'])
+
 export async function GET(request: NextRequest) {
   try {
     const params = request.nextUrl.searchParams
-    const teamSlug = (params.get('team_slug') || 'chicago-bears') as TeamSlug
-    const hubSlug = params.get('hub_slug') as HubSlug | null
-    const status = params.get('status') as HubItemStatus | null
+    const rawTeam = params.get('team_slug') || 'chicago-bears'
+    const rawHub = params.get('hub_slug')
+    const rawStatus = params.get('status')
+
+    // Validate team_slug — reject anything that isn't a known team. Returning
+    // 261 unrelated rows for a typo'd team was actively misleading.
+    if (!VALID_TEAM_SLUGS.has(rawTeam as TeamSlug)) {
+      return NextResponse.json(
+        { error: `Invalid team_slug "${rawTeam}". Must be one of: ${Array.from(VALID_TEAM_SLUGS).join(', ')}` },
+        { status: 400 },
+      )
+    }
+    const teamSlug = rawTeam as TeamSlug
+
+    // hub_slug is optional but, if supplied, must be a known hub.
+    let hubSlug: HubSlug | null = null
+    if (rawHub) {
+      if (!VALID_HUB_SLUGS.has(rawHub as HubSlug)) {
+        return NextResponse.json(
+          { error: `Invalid hub_slug "${rawHub}". Must be one of: ${Array.from(VALID_HUB_SLUGS).join(', ')}` },
+          { status: 400 },
+        )
+      }
+      hubSlug = rawHub as HubSlug
+    }
+
+    // status is optional. "all" is treated as no-filter so admin clients that
+    // forward their UI tab name straight to the API don't accidentally narrow
+    // to a non-existent enum value. Bug 2026-05-02: passing ?status=all
+    // previously evaluated as .eq('status','all') and returned zero rows,
+    // making the All tab silently empty for any client that did pass it.
+    let status: HubItemStatus | null = null
+    if (rawStatus && rawStatus !== 'all') {
+      if (!VALID_STATUSES.has(rawStatus as HubItemStatus)) {
+        return NextResponse.json(
+          { error: `Invalid status "${rawStatus}". Must be one of: ${Array.from(VALID_STATUSES).join(', ')} or omit/all.` },
+          { status: 400 },
+        )
+      }
+      status = rawStatus as HubItemStatus
+    }
 
     let query = datalabAdmin
       .from('hub_items')
