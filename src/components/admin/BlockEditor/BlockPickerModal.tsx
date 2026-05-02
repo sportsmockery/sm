@@ -407,6 +407,22 @@ function PreviewUpdate() {
   );
 }
 
+function PreviewFAQ() {
+  return (
+    <div className="flex flex-col gap-1.5 rounded-md border border-white/15 bg-white/5 p-2">
+      <div className="flex items-center gap-1">
+        <span className="text-[8px] font-bold uppercase tracking-widest text-white/70">FAQ</span>
+      </div>
+      <div className="flex flex-col gap-1">
+        <div className="h-1 w-[85%] rounded-full bg-white/55" />
+        <div className="h-1 w-[60%] rounded-full bg-white/30" />
+        <div className="h-1 w-[78%] rounded-full bg-white/55" />
+        <div className="h-1 w-[50%] rounded-full bg-white/30" />
+      </div>
+    </div>
+  );
+}
+
 const PREVIEW_MAP: Record<BlockType, React.ReactNode> = {
   paragraph: <PreviewParagraph />,
   heading: <PreviewHeading />,
@@ -421,6 +437,7 @@ const PREVIEW_MAP: Record<BlockType, React.ReactNode> = {
   'why-it-matters': <PreviewParagraph />,
   'whats-next': <PreviewParagraph />,
   'analysis': <PreviewParagraph />,
+  faq: <PreviewFAQ />,
   // Scout AI (visibly labeled — reuse Scout insight preview)
   'scout-summary': <PreviewScoutInsight />,
   'scout-recap': <PreviewScoutInsight />,
