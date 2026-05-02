@@ -2,10 +2,20 @@ import { MetadataRoute } from 'next'
 
 const BASE_URL = 'https://sportsmockery.com'
 
+const isProduction =
+  process.env.VERCEL_ENV === 'production' &&
+  !(process.env.VERCEL_URL?.includes('test.') ?? false)
+
 /**
  * Generate dynamic robots.txt
  */
 export default function robots(): MetadataRoute.Robots {
+  if (!isProduction) {
+    return {
+      rules: [{ userAgent: '*', disallow: '/' }],
+    }
+  }
+
   return {
     rules: [
       {
