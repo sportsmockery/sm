@@ -870,6 +870,21 @@ export default function StudioPostEditor({
           </aside>
         )}
 
+        {/* Second Left Sidebar — Publish Checklist */}
+        <aside className="hidden lg:flex flex-shrink-0 w-72 border-r border-[var(--border-default)] bg-[var(--bg-secondary)] flex-col">
+          <div className="h-full overflow-y-auto p-4">
+            <PublishChecklist
+              postId={post?.id}
+              title={formData.title}
+              slug={formData.slug}
+              document={blockDoc}
+              categoryId={formData.category_id || null}
+              featuredImageUrl={formData.featured_image || null}
+              metaDescription={formData.seo_description || null}
+            />
+          </div>
+        </aside>
+
         {/* Main Editor Column */}
         <main className="flex-1 overflow-y-auto">
           <div className={`mx-auto px-6 py-6 ${leftSidebarCollapsed ? 'max-w-5xl' : 'max-w-4xl'}`}>
@@ -1044,16 +1059,6 @@ export default function StudioPostEditor({
           } hidden lg:block`}
         >
           <div className="h-full overflow-y-auto p-4 space-y-4">
-            <PublishChecklist
-              postId={post?.id}
-              title={formData.title}
-              slug={formData.slug}
-              document={blockDoc}
-              categoryId={formData.category_id || null}
-              featuredImageUrl={formData.featured_image || null}
-              metaDescription={formData.seo_description || null}
-            />
-
             <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">Settings</h3>
 
             <div className="space-y-4">

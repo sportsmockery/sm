@@ -1423,6 +1423,21 @@ export default function AdvancedPostEditor({
           </aside>
         )}
 
+        {/* Second Left Sidebar — Publish Checklist */}
+        <aside className="hidden lg:flex flex-shrink-0 w-72 border-r border-[var(--border-default)] bg-[var(--bg-secondary)] flex-col">
+          <div className="h-full overflow-y-auto p-4">
+            <PublishChecklist
+              postId={post?.id}
+              title={formData.title}
+              slug={formData.slug}
+              document={blockDoc}
+              categoryId={formData.category_id || null}
+              featuredImageUrl={formData.featured_image || null}
+              metaDescription={formData.seo_description || null}
+            />
+          </div>
+        </aside>
+
         {/* Main Editor Column - 76% width centered with 12% padding each side */}
         <main className="flex-1 overflow-y-auto" style={{ paddingTop: 0, marginTop: 0 }}>
           <div className="mx-auto px-6" style={{ width: '76%', minWidth: 0, paddingTop: 15 }}>
@@ -1650,16 +1665,6 @@ export default function AdvancedPostEditor({
           } hidden lg:block`}
         >
           <div className="h-full overflow-y-auto p-4 space-y-4">
-            <PublishChecklist
-              postId={post?.id}
-              title={formData.title}
-              slug={formData.slug}
-              document={blockDoc}
-              categoryId={formData.category_id || null}
-              featuredImageUrl={formData.featured_image || null}
-              metaDescription={formData.seo_description || null}
-            />
-
             <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--text-muted)]">Post Settings</h3>
 
             <div className="space-y-4">
