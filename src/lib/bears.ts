@@ -3,6 +3,7 @@
  * Provides Bears season data, player info, and trending topics
  */
 
+import { unstable_cache } from 'next/cache'
 import { supabaseAdmin, POST_SUMMARY_SELECT, TEAM_CATEGORY_SLUGS } from './db'
 import {
   BearsSeasonOverview,
@@ -243,15 +244,22 @@ export async function getBearsTrends(): Promise<BearsTrend[]> {
 
 /**
  * Get Bears category IDs for queries
+ *
+ * SEO Tip #27 — category IDs are effectively immutable post-launch. Cache
+ * them across requests instead of round-tripping Supabase on every page.
  */
-async function getBearsCategoryIds(): Promise<number[]> {
-  const { data: categories } = await supabaseAdmin
-    .from('sm_categories')
-    .select('id')
-    .in('slug', TEAM_CATEGORY_SLUGS.bears)
+const getBearsCategoryIds = unstable_cache(
+  async (): Promise<number[]> => {
+    const { data: categories } = await supabaseAdmin
+      .from('sm_categories')
+      .select('id')
+      .in('slug', TEAM_CATEGORY_SLUGS.bears)
 
-  return categories?.map(c => c.id) || []
-}
+    return categories?.map(c => c.id) || []
+  },
+  ['bears-category-ids'],
+  { revalidate: 86400, tags: ['categories'] }
+)
 
 /**
  * Get latest Bears posts
