@@ -120,7 +120,7 @@ export default function OptimizedImage({
     imageProps.priority = rest.priority
   }
 
-  return <Image {...imageProps} />
+  return <Image {...imageProps} alt={imageProps.alt} />
 }
 
 export { VARIANT_CONFIG, type ImageVariant }

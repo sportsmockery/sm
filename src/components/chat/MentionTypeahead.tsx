@@ -69,7 +69,7 @@ export default function MentionTypeahead({
           >
             <div className="mention-typeahead__avatar">
               {user.avatar_url ? (
-                <Image src={user.avatar_url} alt="" fill style={{ objectFit: 'cover' }} />
+                <Image src={user.avatar_url} alt={user.display_name} fill style={{ objectFit: 'cover' }} />
               ) : (
                 <span>{user.display_name.charAt(0).toUpperCase()}</span>
               )}

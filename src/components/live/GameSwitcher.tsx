@@ -52,8 +52,8 @@ export default function GameSwitcher({ currentGameId }: GameSwitcherProps) {
               >
                 {/* Logos */}
                 <div className="flex items-center -space-x-1">
-                  <Image src={game.away_logo_url} alt="" width={20} height={20} className="object-contain rounded-full" unoptimized />
-                  <Image src={game.home_logo_url} alt="" width={20} height={20} className="object-contain rounded-full" unoptimized />
+                  <Image src={game.away_logo_url} alt={game.away_team_abbr} width={20} height={20} className="object-contain rounded-full" unoptimized />
+                  <Image src={game.home_logo_url} alt={game.home_team_abbr} width={20} height={20} className="object-contain rounded-full" unoptimized />
                 </div>
                 {/* Score / abbr */}
                 <span className="hidden sm:inline font-medium">

@@ -372,7 +372,7 @@ function RightRail() {
                 flexShrink: 0,
               }}>
                 {user.avatar ? (
-                  <Image src={user.avatar} alt="" width={24} height={24} unoptimized style={{ borderRadius: '50%', objectFit: 'cover' }} />
+                  <Image src={user.avatar} alt={user.name || 'User avatar'} width={24} height={24} unoptimized style={{ borderRadius: '50%', objectFit: 'cover' }} />
                 ) : (
                   <span style={{ fontSize: 12, fontWeight: 700, color: '#FAFAFB' }}>
                     {(user.name || user.email)?.charAt(0).toUpperCase() || 'U'}
