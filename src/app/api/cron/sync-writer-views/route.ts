@@ -52,8 +52,14 @@ export async function GET(request: Request) {
     }> = data.writers || []
 
     if (writers.length === 0) {
-      syncStatus = 'partial'
-      errorMessage = 'No writers returned from WP API — period may have no published posts yet'
+      // Empty WP authors-with-views response is normal early in a new month
+      // (before any posts have been published). Fixed-salary writers, if any,
+      // are still upserted below from formulaMap. Do NOT flag this as 'partial' —
+      // partial is reserved for genuine per-row upsert errors (see step 4).
+      console.warn(
+        `[sync-writer-views] WP API returned 0 writers for period ${startStr}..${endStr}. ` +
+        `This is normal early in a new month. Fixed-salary writers (if any) will still sync.`
+      )
     }
 
     // 2. Fetch active payment formulas from Supabase
@@ -169,6 +175,9 @@ export async function GET(request: Request) {
         totalViewsSynced += row.total_views
       }
     }
+
+    // Defensive: never log an error_message when status is 'success'.
+    if (syncStatus === 'success') errorMessage = null
 
     // 5. Log the sync
     await supabaseAdmin.from('writer_payment_syncs').insert({
