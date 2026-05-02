@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
+import { unstable_cache } from 'next/cache'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import OptimizedImage from '@/components/ui/OptimizedImage'
 import { format } from 'date-fns'
@@ -11,55 +12,80 @@ import { isBlockContent, parseDocument } from '@/components/admin/BlockEditor/se
 import { JsonLd } from '@/lib/seo/jsonld'
 import { faqPageJsonLd } from '@/lib/seo/schema/faq-page'
 
+// SEO Tip #27 — TTFB: published article pages are content-stable for tens of
+// minutes at a time. ISR + per-key unstable_cache wrappers around Supabase
+// reads turn repeated visits into a static-html cache hit and a memoized
+// fetch instead of a fresh round-trip per request. Editors invalidate via
+// revalidateTag('article:<slug>') / 'category:*' on publish (existing pattern).
+export const revalidate = 600
+
 interface ArticlePageProps {
   params: Promise<{ slug: string }>
 }
 
-async function getPost(slug: string) {
-  try {
-    const { data: post, error } = await supabaseAdmin
-      .from('sm_posts')
-      .select('id, title, content, excerpt, featured_image, published_at, updated_at, seo_title, seo_description, author_id, category_id, views')
-      .eq('slug', slug)
-      .eq('status', 'published')
+const getPost = unstable_cache(
+  async (slug: string) => {
+    try {
+      const { data: post, error } = await supabaseAdmin
+        .from('sm_posts')
+        .select(
+          'id, title, content, excerpt, featured_image, published_at, updated_at, seo_title, seo_description, author_id, category_id, views'
+        )
+        .eq('slug', slug)
+        .eq('status', 'published')
+        .single()
+
+      if (error || !post || !post.published_at) return null
+      return post
+    } catch {
+      return null
+    }
+  },
+  ['article-by-slug'],
+  { revalidate: 600, tags: ['articles'] }
+)
+
+const getCategory = unstable_cache(
+  async (categoryId: number) => {
+    const { data } = await supabaseAdmin
+      .from('sm_categories')
+      .select('id, name, slug')
+      .eq('id', categoryId)
       .single()
+    return data
+  },
+  ['article-category'],
+  { revalidate: 3600, tags: ['categories'] }
+)
 
-    if (error || !post || !post.published_at) return null
-    return post
-  } catch {
-    return null
-  }
-}
+const getRelated = unstable_cache(
+  async (categoryId: number, excludeId: number) => {
+    const { data } = await supabaseAdmin
+      .from('sm_posts')
+      .select('id, title, slug, featured_image, published_at')
+      .eq('category_id', categoryId)
+      .eq('status', 'published')
+      .neq('id', excludeId)
+      .order('published_at', { ascending: false })
+      .limit(3)
+    return data || []
+  },
+  ['article-related'],
+  { revalidate: 600, tags: ['articles'] }
+)
 
-async function getCategory(categoryId: number) {
-  const { data } = await supabaseAdmin
-    .from('sm_categories')
-    .select('id, name, slug')
-    .eq('id', categoryId)
-    .single()
-  return data
-}
-
-async function getRelated(categoryId: number, excludeId: number) {
-  const { data } = await supabaseAdmin
-    .from('sm_posts')
-    .select('id, title, slug, featured_image, published_at')
-    .eq('category_id', categoryId)
-    .eq('status', 'published')
-    .neq('id', excludeId)
-    .order('published_at', { ascending: false })
-    .limit(3)
-  return data || []
-}
-
-async function getAuthor(authorId: number) {
-  const { data } = await supabaseAdmin
-    .from('sm_authors')
-    .select('id, name, bio, avatar_url')
-    .eq('id', authorId)
-    .single()
-  return data
-}
+const getAuthor = unstable_cache(
+  async (authorId: number) => {
+    const { data } = await supabaseAdmin
+      .from('sm_authors')
+      .select('id, name, bio, avatar_url')
+      .eq('id', authorId)
+      .single()
+    return data
+  },
+  ['article-author'],
+  { revalidate: 3600, tags: ['authors'] }
+)
 
 export async function generateMetadata({ params }: ArticlePageProps): Promise<Metadata> {
   const { slug } = await params
