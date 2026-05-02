@@ -11,6 +11,14 @@ import { NextResponse, type NextRequest } from 'next/server'
 // All redirects use NextResponse.redirect(url, 301) — explicit 301, never 308.
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Tip #33 — paths classified gone_410 in audit/redirect-map-{date}.csv.
+//   /tag/<slug>(/...)         WP tag archives — 6k+ entries, mostly noise
+//   /app-pages(/...)          orphan WP container pages
+//   /cart-2, /checkout, /apply, /advertise — WP-era commerce/marketing
+//   /chat-*-rumors            rumor catch-all stubs collapsed into hubs
+const LEGACY_GONE_410 =
+  /^\/(?:tag\/[^/]+|app-pages(?:\/.*)?|cart-2|checkout|apply|advertise)\/?$/
+
 const _supabaseSeoUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const _supabaseSeoKey =
   process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -139,6 +147,13 @@ export async function middleware(request: NextRequest) {
     const url = request.nextUrl.clone()
     url.pathname = pathname.replace(/\/+$/, '')
     return NextResponse.redirect(url, 308)
+  }
+
+  // Tip #33 — WP legacy patterns we explicitly do not migrate. Returning
+  // 410 Gone tells search engines the URL is permanently removed, which
+  // de-indexes faster than a soft 404 and preserves crawl budget.
+  if (LEGACY_GONE_410.test(pathname)) {
+    return new NextResponse(null, { status: 410 })
   }
 
   // Rule 1: /author/<numeric-id> → /author/<slug> (301)
