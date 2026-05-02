@@ -35,6 +35,16 @@ jobs:
           STAGING_HOST: https://test.sportsmockery.com
         run: npx tsx scripts/seo-audit.ts || true
 
+      - name: Slug parity diff (WP vs Next sitemaps) — Tip #12
+        env:
+          WP_INDEX: https://www.sportsmockery.com/sitemap_index.xml
+          NEXT_INDEX: https://test.sportsmockery.com/sitemap_index.xml
+          # Pre-launch the test host has not yet caught up to WP's full
+          # post backlog. Threshold is generous; tighten after launch
+          # once redirects + slug migration land.
+          WP_ONLY_THRESHOLD: '40000'
+        run: npx tsx scripts/slug-parity.ts
+
       - name: Build URL list for broken-link check
         run: |
           mkdir -p audit

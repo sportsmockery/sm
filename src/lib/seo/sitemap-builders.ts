@@ -10,11 +10,11 @@ export interface SitemapEntry {
 }
 
 /**
- * Cap article rows per sitemap. Google's sitemap protocol allows up to
- * 50,000 URLs and 50MB per file. We stay well under both — large enough
- * to fit our backlog in a single articles.xml without pagination.
+ * Per-chunk URL cap. Sitemap protocol allows 50,000 URLs / 50MB; we
+ * stay well under so each chunk fits comfortably below CDN response
+ * limits and stays fast to build.
  */
-const ARTICLE_LIMIT = 5000
+export const ARTICLE_CHUNK_SIZE = 5000
 
 /** Wrap a list of entries in valid <urlset> XML. */
 export function buildUrlsetXml(entries: SitemapEntry[]): string {
@@ -54,14 +54,36 @@ export function buildSitemapIndexXml(
 
 /* ---------------- builders ---------------- */
 
-/** Article URLs — published posts only, gated on status='published'. */
-export async function buildArticleEntries(): Promise<SitemapEntry[]> {
+/**
+ * Count of published articles. Used by the index route to decide how
+ * many paginated articles.xml chunks to enumerate.
+ */
+export async function countPublishedArticles(): Promise<number> {
+  const { count, error } = await supabaseAdmin
+    .from('sm_posts')
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'published')
+  if (error || count == null) return 0
+  return count
+}
+
+/**
+ * Article URLs — published posts only, paginated.
+ *
+ * `page` is 1-indexed to match the `?page=N` query convention. Each
+ * page returns up to ARTICLE_CHUNK_SIZE rows ordered by published_at
+ * desc (stable: newest first). Out-of-range pages return [].
+ */
+export async function buildArticleEntries(page: number = 1): Promise<SitemapEntry[]> {
+  const safePage = Math.max(1, Math.floor(page))
+  const from = (safePage - 1) * ARTICLE_CHUNK_SIZE
+  const to = from + ARTICLE_CHUNK_SIZE - 1
   const { data, error } = await supabaseAdmin
     .from('sm_posts')
     .select('slug, published_at, updated_at, category:sm_categories(slug)')
     .eq('status', 'published')
     .order('published_at', { ascending: false })
-    .limit(ARTICLE_LIMIT)
+    .range(from, to)
   if (error || !data) return []
   return data.map((post) => {
     const categorySlug = (post.category as { slug?: string } | null)?.slug || 'news'
