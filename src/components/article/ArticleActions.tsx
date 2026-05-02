@@ -109,16 +109,19 @@ export default function ArticleActions({
   ]
 
   const actionBtnStyle: React.CSSProperties = {
-    display: 'flex',
+    display: 'inline-flex',
     flexDirection: 'column',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: '4px',
     background: 'none',
     border: 'none',
     cursor: 'pointer',
     color: 'var(--sm-text-muted)',
     transition: 'color 0.2s ease',
-    padding: '4px',
+    minWidth: '44px',
+    minHeight: '44px',
+    padding: '4px 8px',
   }
 
   const labelStyle: React.CSSProperties = {
@@ -278,7 +281,11 @@ export default function ArticleActions({
                       background: reaction === r.emoji ? 'var(--sm-surface)' : 'transparent',
                       border: 'none',
                       borderRadius: '50%',
-                      padding: '4px',
+                      minWidth: '44px',
+                      minHeight: '44px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                       fontSize: '24px',
                       cursor: 'pointer',
                       transition: 'transform 0.15s ease',

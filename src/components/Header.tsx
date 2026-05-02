@@ -195,7 +195,7 @@ export default function Header() {
                 />
                 <button
                   type="submit"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-[#8B0000] transition-colors"
+                  className="touch-target-expand absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-[#8B0000] transition-colors"
                   aria-label="Search"
                 >
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -207,7 +207,7 @@ export default function Header() {
 
             {/* User icon placeholder */}
             <button
-              className="hidden md:flex items-center justify-center w-10 h-10 rounded-full transition-colors"
+              className="hidden md:flex items-center justify-center w-11 h-11 rounded-full transition-colors"
               style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}
               aria-label="User account"
             >
@@ -219,7 +219,7 @@ export default function Header() {
             {/* Mobile Menu Button */}
             <button
               type="button"
-              className="lg:hidden flex items-center justify-center w-10 h-10 rounded-full"
+              className="lg:hidden flex items-center justify-center w-11 h-11 rounded-full"
               style={{ backgroundColor: 'var(--sm-surface)', color: 'var(--sm-text-muted)' }}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle menu"
@@ -253,7 +253,7 @@ export default function Header() {
                 />
                 <button
                   type="submit"
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-[#8B0000]"
+                  className="touch-target-expand absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-[#8B0000]"
                   aria-label="Search"
                 >
                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">

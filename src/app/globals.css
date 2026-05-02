@@ -6564,3 +6564,34 @@ a.tap-target {
     line-height: 1.05 !important;
   }
 }
+
+/* ========== TIP #32 — Mobile-first touch targets (WCAG 2.5.5 / 2.5.8) ==========
+ * .touch-target-44 — guarantees a 44×44 CSS-pixel minimum hit area.
+ *   Use on icon-only buttons, anchor-wrapped icons, nav chevrons, etc.
+ * .touch-target-expand — keeps the visible element at its dense size but
+ *   expands the tappable area to ≥44×44 via an absolutely-positioned
+ *   ::before overlay. Use when 44×44 visible padding would break layout
+ *   (e.g. tightly grouped social-share rows). The element is set to
+ *   position: relative; sibling targets should sit ≥8px apart so overlays
+ *   do not steal each other's clicks (pair with `gap-2` or wider in flex
+ *   containers).
+ * Opt out (e.g. inline link inside a paragraph) with
+ *   data-allow-small-target="true".
+ */
+.touch-target-44 {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.touch-target-expand {
+  position: relative;
+}
+.touch-target-expand::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  pointer-events: auto;
+}

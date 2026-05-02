@@ -95,7 +95,7 @@ export default function Footer() {
                 href="https://twitter.com/sportsmockery"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center w-10 h-10 rounded-full bg-[var(--sm-card)] text-[var(--sm-text-muted)] hover:bg-[#8B0000] hover:text-white transition-all"
+                className="flex items-center justify-center w-11 h-11 rounded-full bg-[var(--sm-card)] text-[var(--sm-text-muted)] hover:bg-[#8B0000] hover:text-white transition-all"
                 aria-label="Twitter"
               >
                 <TwitterIcon />
@@ -104,7 +104,7 @@ export default function Footer() {
                 href="https://facebook.com/sportsmockery"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center w-10 h-10 rounded-full bg-[var(--sm-card)] text-[var(--sm-text-muted)] hover:bg-[#8B0000] hover:text-white transition-all"
+                className="flex items-center justify-center w-11 h-11 rounded-full bg-[var(--sm-card)] text-[var(--sm-text-muted)] hover:bg-[#8B0000] hover:text-white transition-all"
                 aria-label="Facebook"
               >
                 <FacebookIcon />
@@ -113,7 +113,7 @@ export default function Footer() {
                 href="https://instagram.com/sportsmockery"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center w-10 h-10 rounded-full bg-[var(--sm-card)] text-[var(--sm-text-muted)] hover:bg-[#8B0000] hover:text-white transition-all"
+                className="flex items-center justify-center w-11 h-11 rounded-full bg-[var(--sm-card)] text-[var(--sm-text-muted)] hover:bg-[#8B0000] hover:text-white transition-all"
                 aria-label="Instagram"
               >
                 <InstagramIcon />
@@ -122,7 +122,7 @@ export default function Footer() {
                 href="https://youtube.com/@sportsmockery"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center w-10 h-10 rounded-full bg-[var(--sm-card)] text-[var(--sm-text-muted)] hover:bg-[#8B0000] hover:text-white transition-all"
+                className="flex items-center justify-center w-11 h-11 rounded-full bg-[var(--sm-card)] text-[var(--sm-text-muted)] hover:bg-[#8B0000] hover:text-white transition-all"
                 aria-label="YouTube"
               >
                 <YouTubeIcon />

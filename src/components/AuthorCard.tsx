@@ -70,7 +70,7 @@ export default function AuthorCard({
                 href={`https://twitter.com/${twitter}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-zinc-400 transition-all hover:bg-white/20 hover:text-white"
+                className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-zinc-400 transition-all hover:bg-white/20 hover:text-white"
                 aria-label="Twitter"
               >
                 <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
@@ -83,7 +83,7 @@ export default function AuthorCard({
                 href={`https://instagram.com/${instagram}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-zinc-400 transition-all hover:bg-white/20 hover:text-white"
+                className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-zinc-400 transition-all hover:bg-white/20 hover:text-white"
                 aria-label="Instagram"
               >
                 <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">

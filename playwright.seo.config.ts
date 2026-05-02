@@ -1,7 +1,9 @@
 import { defineConfig } from '@playwright/test'
 
 export default defineConfig({
-  testDir: './tests/seo',
+  // Cover both SEO assertions and a11y/touch-target audits.
+  testDir: './tests',
+  testMatch: ['seo/**/*.spec.ts', 'a11y/**/*.spec.ts'],
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 1,

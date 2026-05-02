@@ -4906,10 +4906,10 @@ html .storyline-card {
 /* Close button */
 .scout-concierge-close {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 28px;
-  height: 28px;
+  top: 8px;
+  right: 8px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
