@@ -176,15 +176,16 @@ export default function TeamHubLayout({
         />
       </div>
 
-      {/* ===== STICKY SUBNAV ===== */}
+      {/* ===== STICKY SUBNAV =====
+          Sticks flush to the viewport top once the team header scrolls away —
+          covers the global nav so no content shows in the gap above. Solid
+          background (not translucent) so nothing bleeds through. */}
       <div
         style={{
           position: 'sticky',
-          top: 'var(--sm-nav-height, 72px)',
-          zIndex: 40,
-          background: 'rgba(11,15,20,0.92)',
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
+          top: 0,
+          zIndex: 60,
+          background: '#0B0F14',
           borderTop: '1px solid #00D4FF',
           borderBottom: '1px solid #00D4FF',
           boxShadow: isSticky ? '0 4px 12px rgba(0,0,0,0.4)' : 'none',
