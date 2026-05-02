@@ -173,7 +173,9 @@ export function GameDayHero({ games: initialGames, logo }: GameDayHeroProps) {
 
         {/* CTA */}
         <div className="mt-8">
-          <HeroCta href={game.href}>{isLive ? "Open Game Center" : "Go to Team Hub"}</HeroCta>
+          <HeroCta href={isLive ? "/live" : game.href}>
+            {isLive ? "Open Game Center" : "Go to Team Hub"}
+          </HeroCta>
         </div>
 
         {/* Dot indicators — only when multiple games */}
