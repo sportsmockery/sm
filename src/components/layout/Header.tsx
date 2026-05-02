@@ -29,32 +29,51 @@ const teamLinks = [
   { name: 'Blackhawks', href: '/chicago-blackhawks' },
 ]
 
-// Hardcoded top-level directories under src/app/. Used to distinguish
-// /[category]/[slug] article URLs from non-article 2-segment routes
-// (e.g. /admin/users, /chicago-bears/roster, /author/jane).
-// Keep in sync when adding a new top-level route. Lowercase, no slash.
-const HARDCODED_TOP_LEVEL = new Set([
+// Hardcoded top-level directories under src/app/ that own their own 2-segment
+// routes (e.g. /admin/users, /author/jane). When the first segment is one of
+// these AND the URL has 2 segments, it's NOT an article.
+// (Team-hub slugs are intentionally NOT in this set — see TEAM_HUB_SLUGS below.)
+const NON_ARTICLE_TOP_LEVEL = new Set([
   'about', 'admin', 'api', 'apply', 'ar', 'ar2', 'ar3', 'audio',
   'author', 'authors', 'bears', 'bears-film-room', 'chat',
-  'chicago-bears', 'chicago-bears-player', 'chicago-bears1',
-  'chicago-blackhawks', 'chicago-bulls', 'chicago-cubs',
-  'chicago-white-sox', 'collectibles', 'contact', 'datahub', 'designs',
+  'chicago-bears-player', 'chicago-bears1',
+  'collectibles', 'contact', 'datahub', 'designs',
   'edge', 'editorial-standards', 'fan-chat', 'fan-zone', 'feed',
   'forgot-password', 'game-center', 'gm', 'governance', 'home', 'home1',
   'home2', 'leaderboard', 'leaderboards', 'live', 'login', 'masters',
   'metaverse', 'mock-draft', 'my-gm-score', 'newsletter', 'notifications',
   'owner', 'pinwheels-and-ivy', 'players', 'polls', 'predictions',
   'pricing', 'privacy', 'profile', 'reset-password', 'river', 'scout-ai',
-  'search', 'signup', 'southside-behavior', 'studio', 'subscription',
-  'tag', 'teams', 'terms', 'testing', 'training',
+  'search', 'signup', 'sitemaps', 'southside-behavior', 'studio',
+  'subscription', 'tag', 'teams', 'terms', 'testing', 'training',
   'untold-chicago-stories', 'vision-theater',
+])
+
+// Team-hub slugs are special: they have hardcoded subroutes (roster, schedule,
+// etc.) but ALSO serve articles at /<team>/<article-slug> via the dynamic
+// [category]/[slug] fallback. So a URL like /chicago-bears/some-headline IS
+// an article, but /chicago-bears/roster is NOT.
+const TEAM_HUB_SLUGS = new Set([
+  'chicago-bears', 'chicago-bulls', 'chicago-cubs',
+  'chicago-blackhawks', 'chicago-white-sox',
+])
+
+const TEAM_SUBROUTES = new Set([
+  'cap-tracker', 'depth-chart', 'draft-tracker', 'game-center', 'live',
+  'news', 'players', 'roster', 'schedule', 'scores', 'stats', 'trade-rumors',
 ])
 
 function isArticleRoute(pathname: string | null): boolean {
   if (!pathname) return false
   const segments = pathname.split('/').filter(Boolean)
   if (segments.length !== 2) return false
-  return !HARDCODED_TOP_LEVEL.has(segments[0])
+  const [first, second] = segments
+  // Team-hub URL — article unless second segment is a known subroute.
+  if (TEAM_HUB_SLUGS.has(first)) {
+    return !TEAM_SUBROUTES.has(second)
+  }
+  // Otherwise: article unless first segment is a non-article hardcoded dir.
+  return !NON_ARTICLE_TOP_LEVEL.has(first)
 }
 
 export default function Header() {
@@ -134,7 +153,8 @@ export default function Header() {
   // mounts its own ArticleProgressHeader for reader-mode chrome.
   // Articles live at /[category]/[slug] (exactly 2 path segments where the
   // first is NOT a hardcoded top-level directory). When you add a new
-  // top-level route to src/app/, add its segment to HARDCODED_TOP_LEVEL.
+  // top-level route to src/app/, add its segment to NON_ARTICLE_TOP_LEVEL
+  // (or TEAM_SUBROUTES if it's a new sub-page under a team hub).
   if (isArticleRoute(pathname)) {
     return null
   }
