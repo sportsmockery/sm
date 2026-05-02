@@ -62,7 +62,7 @@ export interface HeadingBlock extends BlockBase {
 
 export interface ImageBlock extends BlockBase {
   type: 'image';
-  data: { src: string; alt: string; caption?: string };
+  data: { src: string; alt: string; caption?: string; width?: number; height?: number };
 }
 
 export interface VideoBlock extends BlockBase {

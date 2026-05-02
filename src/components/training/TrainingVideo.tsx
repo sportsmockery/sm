@@ -77,6 +77,8 @@ function BrandedPlaceholder({
         <img
           src={posterAttempt}
           alt=""
+          width={640}
+          height={360}
           className="absolute inset-0 h-full w-full object-cover opacity-50"
           onError={onPosterError}
         />

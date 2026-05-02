@@ -22,6 +22,20 @@ interface AdRendererProps {
   className?: string
 }
 
+/** Minimum heights (px) per placement to reserve space and prevent CLS. */
+const AD_MIN_HEIGHTS: Record<string, number> = {
+  AFTER_FEATURED_IMAGE: 90,
+  IN_CONTENT_PARAGRAPH_3: 100,
+  IN_CONTENT_PARAGRAPH_5: 100,
+  IN_CONTENT_PARAGRAPH_8: 100,
+  HOMEPAGE_HERO: 90,
+  HOMEPAGE_FEATURED: 90,
+  HOMEPAGE_LATEST: 90,
+  SIDEBAR: 250,
+  FOOTER: 90,
+  MOBILE_STICKY: 60,
+}
+
 /**
  * Ad Renderer Component
  *
@@ -106,7 +120,10 @@ export default function AdRenderer({ placement, className = '' }: AdRendererProp
   if (visibleAds.length === 0) return null
 
   return (
-    <div className={`ad-container ad-container--${placement.toLowerCase()} ${className}`}>
+    <div
+      className={`ad-container ad-container--${placement.toLowerCase()} ${className}`}
+      style={{ minHeight: AD_MIN_HEIGHTS[placement] ?? 100 }}
+    >
       {visibleAds.map((ad) => (
         <div key={ad.id} className="ad-slot" data-ad-id={ad.id}>
           {/* Custom CSS */}

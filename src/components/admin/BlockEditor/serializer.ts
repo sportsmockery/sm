@@ -43,10 +43,10 @@ export function blocksToHtml(blocks: ContentBlock[]): string {
         return `<h${block.data.level}>${block.data.text}</h${block.data.level}>`;
       case 'image':
         return block.data.src
-          ? `<figure><img src="${block.data.src}" alt="${block.data.alt}" />${block.data.caption ? `<figcaption>${block.data.caption}</figcaption>` : ''}</figure>`
+          ? `<figure><img src="${block.data.src}" alt="${block.data.alt || ''}" width="${block.data.width || 800}" height="${block.data.height || 450}" loading="lazy" />${block.data.caption ? `<figcaption>${block.data.caption}</figcaption>` : ''}</figure>`
           : '';
       case 'video':
-        return block.data.url ? `<div class="video-embed"><iframe src="${block.data.url}" allowfullscreen></iframe></div>` : '';
+        return block.data.url ? `<div class="video-embed" style="position:relative;aspect-ratio:16/9;width:100%"><iframe src="${block.data.url}" style="position:absolute;inset:0;width:100%;height:100%" allowfullscreen loading="lazy"></iframe></div>` : '';
       case 'analysis':
         return block.data.html
           ? `<aside class="sm-analysis" data-sm-section="analysis">${block.data.html}</aside>`
