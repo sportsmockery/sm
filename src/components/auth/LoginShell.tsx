@@ -1094,13 +1094,26 @@ export default function LoginShell({
                 </h2>
               </div>
 
-              {/* Product preview reel — Daily brief (red), Scout AI (cyan), GM Trade Sim (gold) */}
+              {/* Product preview — primary (Daily brief, red) on top, Scout (cyan) + GM (gold) below */}
               <div className="reel-stage mt-7" aria-hidden="true">
-                <div className="reel-track">
-                  {liveReel.map((item, index) => (
+                <article
+                  className={`reel-card reel-card-1 reel-accent-${liveReel[0].accent}`}
+                >
+                  <div className="reel-card-inner">
+                    <div className="reel-card-head">
+                      <span className="reel-label">{liveReel[0].eyebrow}</span>
+                      <span className="reel-eyebrow-meta">{liveReel[0].eyebrowMeta}</span>
+                    </div>
+                    <h3 className="reel-title">{liveReel[0].title}</h3>
+                    <p className="reel-meta">{liveReel[0].meta}</p>
+                  </div>
+                </article>
+
+                <div className="reel-sub-row">
+                  {[liveReel[1], liveReel[2]].map((item, i) => (
                     <article
                       key={item.title}
-                      className={`reel-card reel-card-${index + 1} reel-accent-${item.accent}`}
+                      className={`reel-card reel-card-${i + 2} reel-accent-${item.accent}`}
                     >
                       <div className="reel-card-inner">
                         <div className="reel-card-head">

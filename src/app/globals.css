@@ -5996,12 +5996,7 @@ a.glass-card-sm:active,
 
 @keyframes reelPrimaryFloat {
   0%, 100% { transform: translate3d(0, 0, 0); }
-  50%      { transform: translate3d(0, -6px, 0); }
-}
-
-@keyframes reelSecondaryFloat {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(0.92); }
-  50%      { transform: translate3d(0, -3px, 0) scale(0.925); }
+  50%      { transform: translate3d(0, -4px, 0); }
 }
 
 .motion-hero       { animation: heroFadeUp 900ms var(--auth-ease) both; }
@@ -6011,15 +6006,18 @@ a.glass-card-sm:active,
 
 .reel-stage {
   position: relative;
-  height: 460px;
-  overflow: hidden;
   border-radius: 24px;
   background: var(--sm-surface);
   border: 1px solid var(--sm-border);
   isolation: isolate;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow: hidden;
 }
 
-/* Single brand accent in the upper-right — replaces the muddy fade mask */
+/* Single brand accent in the upper-right — atmospheric, no fade mask */
 .reel-stage::before {
   content: "";
   position: absolute;
@@ -6034,7 +6032,7 @@ a.glass-card-sm:active,
   z-index: 0;
 }
 
-/* Far-back depth accent in the opposite corner */
+/* Far-back cyan accent in the opposite corner for cool/warm balance */
 .reel-stage::after {
   content: "";
   position: absolute;
@@ -6049,53 +6047,32 @@ a.glass-card-sm:active,
   z-index: 0;
 }
 
-.reel-track {
+.reel-card {
   position: relative;
-  height: 100%;
-  padding: 28px;
+  z-index: 1;
 }
 
-.reel-card {
-  position: absolute;
+/* PRIMARY — full-width hero, subtle breathing on the inner element so siblings don't shift */
+.reel-card-1 .reel-card-inner {
+  animation: reelPrimaryFloat 8s ease-in-out infinite;
   will-change: transform;
 }
 
-/* PRIMARY — dominant editorial card, full opacity, subtle breathing */
-.reel-card-1 {
-  left: 28px;
-  right: 28px;
-  top: 56px;
-  z-index: 3;
-  animation: reelPrimaryFloat 8s ease-in-out infinite;
-}
-
-/* SECONDARY — peeks behind primary to provide depth */
-.reel-card-2 {
-  left: 96px;
-  right: -36px;
-  top: 244px;
-  z-index: 2;
-  opacity: 0.62;
-  transform: scale(0.92);
-  animation: reelSecondaryFloat 12s ease-in-out infinite;
-}
-
-/* TERTIARY — subtle far-back layer, almost a hint of stack */
-.reel-card-3 {
-  left: 156px;
-  right: -78px;
-  top: 350px;
+/* Sub-row holds the two compact feature cards (Scout AI + GM Trade Sim) */
+.reel-sub-row {
+  position: relative;
   z-index: 1;
-  opacity: 0.28;
-  transform: scale(0.84);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
 }
 
 .reel-card-inner {
   position: relative;
-  border-radius: 18px;
+  border-radius: 16px;
   border: 1px solid var(--sm-border);
   background: var(--sm-card-hover);
-  padding: 22px 24px;
+  padding: 18px 20px;
   overflow: hidden;
 }
 
@@ -6114,38 +6091,39 @@ a.glass-card-sm:active,
 .reel-accent-cyan  { --reel-accent: #00D4FF; }
 .reel-accent-gold  { --reel-accent: #D6B05E; }
 
-/* Primary card surface — crisper, more contrast against the stage */
+/* PRIMARY — larger padding, taller hero feel, real elevation */
 .reel-card-1 .reel-card-inner {
+  padding: 24px 26px;
+  border-radius: 18px;
   box-shadow:
-    0 30px 60px -20px rgba(0, 0, 0, 0.55),
-    0 8px 24px -8px rgba(0, 0, 0, 0.28);
+    0 30px 60px -24px rgba(0, 0, 0, 0.50),
+    0 8px 24px -10px rgba(0, 0, 0, 0.25);
 }
 
-.reel-card-2 .reel-card-inner {
-  box-shadow: 0 16px 30px -16px rgba(0, 0, 0, 0.40);
-}
-
+/* SUB-ROW cards — compact, supporting */
+.reel-card-2 .reel-card-inner,
 .reel-card-3 .reel-card-inner {
-  box-shadow: 0 10px 20px -12px rgba(0, 0, 0, 0.30);
+  box-shadow: 0 12px 24px -14px rgba(0, 0, 0, 0.35);
 }
 
 .reel-card-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
+  min-height: 14px;
 }
 
 .reel-label {
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 700;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--reel-accent, #bc0000);
 }
 
 .reel-eyebrow-meta {
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 500;
   letter-spacing: 0.04em;
   color: var(--sm-text-muted);
@@ -6153,20 +6131,33 @@ a.glass-card-sm:active,
 }
 
 .reel-title {
-  margin-top: 14px;
-  max-width: 22ch;
-  font-size: clamp(1.15rem, 0.95rem + 0.7vw, 1.55rem);
-  line-height: 1.18;
-  letter-spacing: -0.025em;
+  margin-top: 10px;
+  font-size: 0.96rem;
+  line-height: 1.32;
+  letter-spacing: -0.015em;
   font-weight: 600;
   color: var(--sm-text);
 }
 
+/* Primary card title is the hero typography of the right column */
+.reel-card-1 .reel-title {
+  margin-top: 12px;
+  max-width: 26ch;
+  font-size: clamp(1.2rem, 0.95rem + 0.7vw, 1.5rem);
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+
 .reel-meta {
+  margin-top: 8px;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--sm-text-muted);
+}
+
+.reel-card-1 .reel-meta {
   margin-top: 10px;
   font-size: 0.875rem;
-  line-height: 1.55;
-  color: var(--sm-text-muted);
 }
 
 /* Static team chip row — replaces the marquee ticker for a more premium feel */
@@ -6201,22 +6192,20 @@ a.glass-card-sm:active,
 
 @media (max-width: 1023px) {
   .reel-stage {
-    height: 380px;
     border-radius: 20px;
+    padding: 16px;
+    gap: 12px;
   }
-  .reel-track { padding: 16px; }
-  .reel-card-1 { left: 16px; right: 16px; top: 24px; }
-  .reel-card-2 { left: 56px; right: -24px; top: 184px; }
-  .reel-card-3 { left: 96px; right: -52px; top: 264px; }
   .reel-card-inner {
-    padding: 18px 20px;
+    padding: 16px 18px;
+    border-radius: 14px;
+  }
+  .reel-card-1 .reel-card-inner {
+    padding: 20px 22px;
     border-radius: 16px;
   }
-  .reel-title {
-    max-width: 22ch;
-    font-size: 1.05rem;
-  }
-  .reel-meta { font-size: 0.825rem; }
+  .reel-card-1 .reel-title { font-size: 1.1rem; }
+  .reel-sub-row { grid-template-columns: 1fr; }
   .reel-chip { font-size: 12px; padding: 5px 10px; }
 }
 
