@@ -378,27 +378,27 @@ export function getBearsStorylineLinks(): Array<{
   return [
     {
       title: 'Caleb Williams Watch',
-      slug: '/bears/caleb-williams',
+      slug: '/chicago-bears/caleb-williams',
       description: 'Track the rookie QB development',
     },
     {
       title: 'Coaching Staff',
-      slug: '/bears/coaching',
+      slug: '/chicago-bears/coaching',
       description: 'Matt Eberflus and staff updates',
     },
     {
       title: 'Draft Central',
-      slug: '/bears/draft',
+      slug: '/chicago-bears/draft',
       description: '2025 NFL Draft coverage',
     },
     {
       title: 'Stadium News',
-      slug: '/bears/stadium',
+      slug: '/chicago-bears/stadium',
       description: 'Soldier Field and Arlington Heights updates',
     },
     {
       title: 'Injury Report',
-      slug: '/bears/injuries',
+      slug: '/chicago-bears/injuries',
       description: 'Latest injury updates',
     },
   ]

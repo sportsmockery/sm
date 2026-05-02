@@ -177,7 +177,7 @@ export default async function BearsTradeRumorsPage() {
             {transformedPosts.map((post, index) => {
               const href = post.categorySlug
                 ? `/${post.categorySlug}/${post.slug}`
-                : `/bears/${post.slug}`
+                : `/chicago-bears/${post.slug}`
 
               return (
                 <Link key={post.id} href={href} style={{ textDecoration: 'none', display: 'block' }}>

@@ -285,7 +285,7 @@ export default function BearsStickyBar({ className = '', isArticlePage }: BearsS
 
             {/* Get Alerts - White button with team color text */}
             <Link
-              href="/bears/subscribe"
+              href="/chicago-bears"
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all bg-white hover:bg-gray-100"
               style={{ color: bearsInfo.secondaryColor }}
             >
