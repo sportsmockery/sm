@@ -126,7 +126,6 @@ export default function TeamHubLayout({
 }: TeamHubLayoutProps) {
   const pathname = usePathname()
   const [isSticky, setIsSticky] = useState(false)
-  const navRef = useRef<HTMLDivElement>(null)
   const headerRef = useRef<HTMLDivElement>(null)
   const tabs = team.league === 'NFL' ? NFL_TABS : TEAM_TABS
   const basePath = `/${team.slug}`
@@ -156,9 +155,9 @@ export default function TeamHubLayout({
   }, [])
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0B0F14', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ minHeight: '100vh', background: '#0B0F14', position: 'relative' }}>
       {/* ===== Animated Chicago Stars Background ===== */}
-      <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
+      <div style={{ position: 'absolute', inset: 0, zIndex: 0, overflow: 'hidden', pointerEvents: 'none' }}>
         <HeroStatsOrbs />
       </div>
 
@@ -179,17 +178,17 @@ export default function TeamHubLayout({
 
       {/* ===== STICKY SUBNAV ===== */}
       <div
-        ref={navRef}
-        className={isSticky ? 'sticky' : ''}
         style={{
-          ...(isSticky ? { top: 'var(--sm-nav-height, 72px)', zIndex: 40, boxShadow: '0 4px 12px rgba(0,0,0,0.3)' } : {}),
-          background: 'rgba(11,15,20,0.85)',
+          position: 'sticky',
+          top: 'var(--sm-nav-height, 72px)',
+          zIndex: 40,
+          background: 'rgba(11,15,20,0.92)',
           backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
           borderTop: '1px solid #00D4FF',
           borderBottom: '1px solid #00D4FF',
+          boxShadow: isSticky ? '0 4px 12px rgba(0,0,0,0.4)' : 'none',
           transition: 'box-shadow 0.2s ease',
-          position: 'relative',
-          zIndex: 1,
         }}
       >
         <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '0 24px' }}>
