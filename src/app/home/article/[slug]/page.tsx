@@ -8,6 +8,8 @@ import { format } from 'date-fns'
 import { calculateReadTime, sanitizeWordPressContent } from '@/lib/content-utils'
 import { ArticleBlockContent } from '@/components/articles/ArticleBlockContent'
 import { isBlockContent, parseDocument } from '@/components/admin/BlockEditor/serializer'
+import { JsonLd } from '@/lib/seo/jsonld'
+import { faqPageJsonLd } from '@/lib/seo/schema/faq-page'
 
 interface ArticlePageProps {
   params: Promise<{ slug: string }>
@@ -97,8 +99,22 @@ export default async function HomeArticlePage({ params }: ArticlePageProps) {
   const readTime = calculateReadTime(post.content || '')
   const publishDate = format(new Date(post.published_at), 'MMMM d, yyyy')
 
+  // Extract FAQ items from block content for FAQPage JSON-LD
+  const blockDoc = isBlockContent(post.content || '') ? parseDocument(post.content || '') : null
+  const faqItems = blockDoc
+    ? blockDoc.blocks
+        .filter((b) => b.type === 'faq')
+        .flatMap((b) => (b.data as { items: { question: string; answer: string }[] }).items)
+        .filter((i) => i.question && i.answer)
+    : []
+
   return (
     <>
+      {/* FAQPage JSON-LD — only when ≥3 Q&A pairs (Google threshold) */}
+      {faqItems.length >= 3 && (
+        <JsonLd data={faqPageJsonLd(`/home/article/${slug}`, faqItems)} />
+      )}
+
       {/* Hero space for nav */}
       <div style={{ paddingTop: 120 }} />
 

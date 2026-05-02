@@ -432,6 +432,45 @@ function RenderBlock({ block, priorityImageId }: { block: ContentBlock; priority
         </aside>
       );
 
+    case 'faq': {
+      const faqItems = (block.data as { items: { question: string; answer: string }[] }).items.filter(
+        (i) => i.question && i.answer
+      );
+      if (faqItems.length === 0) return <EmptyState label="FAQ — add Q&A pairs" accent={BRAND.red} />;
+      return (
+        <section className="my-6">
+          <h3
+            className="text-[14px] uppercase tracking-wider font-bold mb-3"
+            style={{ color: BRAND.red }}
+          >
+            Frequently Asked Questions
+          </h3>
+          <div className="space-y-2">
+            {faqItems.map((item, i) => (
+              <details
+                key={i}
+                className="rounded-lg border overflow-hidden"
+                style={{ borderColor: 'rgba(0,0,0,0.08)', backgroundColor: 'rgba(0,0,0,0.02)' }}
+              >
+                <summary
+                  className="px-4 py-3 cursor-pointer text-[16px] font-medium select-none"
+                  style={{ color: 'var(--sm-text, #0B0F14)' }}
+                >
+                  {item.question}
+                </summary>
+                <div
+                  className="px-4 pb-3 text-[15px] leading-relaxed"
+                  style={{ color: 'var(--sm-text-muted, #374151)' }}
+                  dangerouslySetInnerHTML={{ __html: item.answer }}
+                  suppressHydrationWarning
+                />
+              </details>
+            ))}
+          </div>
+        </section>
+      );
+    }
+
     /* ─── Scout AI (visibly labeled — never article body) ─── */
     case 'scout-summary':
       if (!block.data.html) {

@@ -21,6 +21,7 @@ export type BlockType =
   | 'why-it-matters'
   | 'whats-next'
   | 'analysis'
+  | 'faq'
   // Scout AI-generated (visibly labeled — never article body)
   | 'scout-summary'
   | 'scout-recap'
@@ -107,6 +108,13 @@ export interface WhyItMattersBlock extends BlockBase {
 export interface WhatsNextBlock extends BlockBase {
   type: 'whats-next';
   data: { html: string };
+}
+
+export interface FAQBlock extends BlockBase {
+  type: 'faq';
+  data: {
+    items: { question: string; answer: string }[];
+  };
 }
 
 /**
@@ -276,6 +284,7 @@ export type ContentBlock =
   | WhyItMattersBlock
   | WhatsNextBlock
   | AnalysisBlockType
+  | FAQBlock
   | ScoutSummaryBlock
   | ScoutRecapBlock
   | ScoutInsightBlock
@@ -338,6 +347,7 @@ export const BLOCK_CATEGORIES: BlockCategory[] = [
       { type: 'why-it-matters', label: 'Why It Matters', icon: 'AlertCircle', description: 'Significance / context callout' },
       { type: 'whats-next', label: "What's Next", icon: 'ArrowRight', description: 'Next steps / what to watch for' },
       { type: 'analysis', label: 'Analysis', icon: 'PenLine', description: 'Original writer analysis callout' },
+      { type: 'faq', label: 'FAQ', icon: 'HelpCircle', description: 'Q&A pairs (renders FAQPage schema when ≥3)' },
     ],
   },
   {
@@ -388,6 +398,7 @@ export function createBlock(type: BlockType): ContentBlock {
     'why-it-matters': () => ({ id, type: 'why-it-matters', data: { html: '' } }),
     'whats-next': () => ({ id, type: 'whats-next', data: { html: '' } }),
     'analysis': () => ({ id, type: 'analysis', data: { html: '' } }),
+    'faq': () => ({ id, type: 'faq', data: { items: [{ question: '', answer: '' }] } }),
     // Scout AI (writer adds when Scout has produced content)
     'scout-summary': () => ({ id, type: 'scout-summary', data: { html: '' } }),
     'scout-recap': () => ({ id, type: 'scout-recap', data: { html: '' } }),
