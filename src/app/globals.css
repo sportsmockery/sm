@@ -6004,11 +6004,6 @@ a.glass-card-sm:active,
   50%      { transform: translate3d(0, -3px, 0) scale(0.925); }
 }
 
-@keyframes tickerSlide {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
 .motion-hero       { animation: heroFadeUp 900ms var(--auth-ease) both; }
 .motion-hero-delay { animation: heroFadeUp 1100ms var(--auth-ease) 120ms both; }
 .motion-form       { animation: formFadeUp 800ms var(--auth-ease-soft) both; }
@@ -6096,11 +6091,28 @@ a.glass-card-sm:active,
 }
 
 .reel-card-inner {
+  position: relative;
   border-radius: 18px;
   border: 1px solid var(--sm-border);
   background: var(--sm-card-hover);
-  padding: 24px;
+  padding: 22px 24px;
+  overflow: hidden;
 }
+
+/* 3px brand accent stripe on the left edge of each product card */
+.reel-card-inner::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--reel-accent, #bc0000);
+}
+
+.reel-accent-red   { --reel-accent: #BC0000; }
+.reel-accent-cyan  { --reel-accent: #00D4FF; }
+.reel-accent-gold  { --reel-accent: #D6B05E; }
 
 /* Primary card surface — crisper, more contrast against the stage */
 .reel-card-1 .reel-card-inner {
@@ -6117,75 +6129,95 @@ a.glass-card-sm:active,
   box-shadow: 0 10px 20px -12px rgba(0, 0, 0, 0.30);
 }
 
+.reel-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .reel-label {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #bc0000;
+  color: var(--reel-accent, #bc0000);
+}
+
+.reel-eyebrow-meta {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--sm-text-muted);
+  white-space: nowrap;
 }
 
 .reel-title {
-  margin-top: 12px;
-  max-width: 17ch;
-  font-size: clamp(1.25rem, 1.05rem + 0.7vw, 1.7rem);
-  line-height: 1.05;
-  letter-spacing: -0.04em;
+  margin-top: 14px;
+  max-width: 22ch;
+  font-size: clamp(1.15rem, 0.95rem + 0.7vw, 1.55rem);
+  line-height: 1.18;
+  letter-spacing: -0.025em;
   font-weight: 600;
   color: var(--sm-text);
 }
 
 .reel-meta {
   margin-top: 10px;
-  font-size: 0.95rem;
+  font-size: 0.875rem;
   line-height: 1.55;
   color: var(--sm-text-muted);
 }
 
-.reel-ticker-wrap {
-  overflow: hidden;
-  border-top: 1px solid var(--sm-border);
-  padding-top: 18px;
-}
-
-.reel-ticker {
+/* Static team chip row — replaces the marquee ticker for a more premium feel */
+.reel-team-chips {
   display: flex;
-  gap: 32px;
-  width: max-content;
-  animation: tickerSlide 22s linear infinite;
-  will-change: transform;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
-.reel-ticker span {
-  white-space: nowrap;
-  font-size: 0.95rem;
-  color: var(--sm-text-muted);
-}
-
-.reel-ticker span:first-child {
-  color: var(--sm-text);
+.reel-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--sm-border);
+  background: var(--sm-card);
+  font-size: 12.5px;
   font-weight: 500;
+  color: var(--sm-text);
+  letter-spacing: 0.005em;
+  white-space: nowrap;
+}
+
+.reel-chip-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--chip-dot, #bc0000);
+  flex-shrink: 0;
 }
 
 @media (max-width: 1023px) {
   .reel-stage {
-    height: 360px;
+    height: 380px;
     border-radius: 20px;
   }
   .reel-track { padding: 16px; }
-  .reel-card-1 { left: 16px; right: 16px; top: 28px; }
-  .reel-card-2 { left: 64px; right: -28px; top: 176px; }
-  .reel-card-3 { left: 108px; right: -56px; top: 252px; }
+  .reel-card-1 { left: 16px; right: 16px; top: 24px; }
+  .reel-card-2 { left: 56px; right: -24px; top: 184px; }
+  .reel-card-3 { left: 96px; right: -52px; top: 264px; }
   .reel-card-inner {
-    padding: 18px;
+    padding: 18px 20px;
     border-radius: 16px;
   }
   .reel-title {
-    max-width: 20ch;
-    font-size: 1.15rem;
+    max-width: 22ch;
+    font-size: 1.05rem;
   }
-  .reel-meta,
-  .reel-ticker span { font-size: 0.875rem; }
+  .reel-meta { font-size: 0.825rem; }
+  .reel-chip { font-size: 12px; padding: 5px 10px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

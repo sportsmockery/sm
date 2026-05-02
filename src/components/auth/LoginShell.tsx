@@ -11,34 +11,38 @@ interface LoginShellProps {
   defaultTab?: 'signup' | 'signin'
 }
 
+// Product preview cards — primary (red brand) > secondary (cyan intel) > tertiary (gold premium).
+// Order matters: index 0 → reel-card-1 (dominant), index 1 → -2, index 2 → -3.
 const reel = [
   {
-    label: 'Breaking',
-    title: 'Bears, Bulls, Cubs, Sox, and Hawks coverage that moves faster.',
-    meta: 'News, rumors, and analysis',
+    accent: 'red' as const,
+    eyebrow: 'Daily 6 AM Brief',
+    eyebrowMeta: 'Today · Bears',
+    title: 'Caleb Williams just had his sharpest half of the season.',
+    meta: 'Free morning email · 5-min read',
   },
   {
-    label: 'Daily 6 AM',
-    title: 'The top Chicago sports stories delivered before your day starts.',
-    meta: 'Free email briefing',
+    accent: 'cyan' as const,
+    eyebrow: 'Scout AI',
+    eyebrowMeta: 'Bulls · Live',
+    title: "Why Chicago's offensive efficiency quietly jumped 18% in November.",
+    meta: 'Ask anything about your teams',
   },
   {
-    label: 'Personalized',
-    title:
-      'A cleaner fan experience shaped around the teams you actually follow.',
-    meta: 'Built for Chicago fans',
+    accent: 'gold' as const,
+    eyebrow: 'GM Trade Simulator',
+    eyebrowMeta: 'Grade A · 91',
+    title: 'Bulls send DeMar to Phoenix — model rates the deal Top 5%.',
+    meta: 'Grade your own trade',
   },
 ]
 
-const tickerItems = [
-  'Bears',
-  'Bulls',
-  'Cubs',
-  'White Sox',
-  'Blackhawks',
-  'Rumors',
-  'Analysis',
-  'Daily 6 AM Email',
+const teamChips: Array<{ name: string; dot: string }> = [
+  { name: 'Bears', dot: '#C83803' },
+  { name: 'Bulls', dot: '#CE1141' },
+  { name: 'Cubs', dot: '#0E3386' },
+  { name: 'White Sox', dot: '#9CA3AF' },
+  { name: 'Blackhawks', dot: '#00833E' },
 ]
 
 export default function LoginShell({
@@ -210,16 +214,15 @@ export default function LoginShell({
                   letterSpacing: '-0.06em',
                 }}
               >
-                Get Chicago sports faster.
+                Chicago sports, sharper.
               </h1>
 
               <p
-                className="mt-4 max-w-md text-base leading-8"
+                className="mt-4 max-w-md text-[15px] leading-7"
                 style={{ color: 'var(--sm-text-muted)' }}
               >
-                Start with your email for faster access to breaking news,
-                rumors, analysis, and the free daily 6 AM Chicago sports
-                email.
+                The free daily 6 AM brief, Scout AI, and the GM trade simulator
+                — built for Bears, Bulls, Cubs, White Sox, and Blackhawks fans.
               </p>
 
               {/* Auth surface — flat, integrated, no heavy panel */}
@@ -434,7 +437,7 @@ export default function LoginShell({
                                   lineHeight: 1.35,
                                 }}
                               >
-                                Send me the free daily 6 AM Chicago sports email
+                                Send me the free daily 6 AM Chicago sports brief
                               </span>
                               <span
                                 style={{
@@ -445,7 +448,7 @@ export default function LoginShell({
                                   lineHeight: 1.45,
                                 }}
                               >
-                                Top stories, rumors, and analysis. Unsubscribe anytime.
+                                The day's top Chicago stories. No spam. Unsubscribe anytime.
                               </span>
                             </span>
                           </label>
@@ -494,7 +497,7 @@ export default function LoginShell({
                                 lineHeight: 1.45,
                               }}
                             >
-                              Email first. Finish setup after you start.
+                              Free forever. No credit card.
                             </p>
                           </div>
                           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
@@ -515,8 +518,7 @@ export default function LoginShell({
                                 lineHeight: 1.45,
                               }}
                             >
-                              Built around Bears, Bulls, Cubs, White Sox, and
-                              Blackhawks coverage.
+                              Daily 6 AM brief · Scout AI · GM trade grading
                             </p>
                           </div>
                         </div>
@@ -1035,38 +1037,33 @@ export default function LoginShell({
                   className="text-[11px] font-semibold uppercase"
                   style={{ color: 'var(--sm-text-muted)', letterSpacing: '0.18em' }}
                 >
-                  Why fans sign up
+                  Inside SM Edge
                 </p>
                 <h2
-                  className="mt-3 text-balance text-2xl font-semibold leading-[1.1] sm:text-[28px] xl:text-[34px]"
+                  className="mt-3 text-balance text-2xl font-semibold leading-[1.1] sm:text-[28px] xl:text-[32px]"
                   style={{
                     color: 'var(--sm-text)',
                     letterSpacing: '-0.025em',
                     maxWidth: '22ch',
                   }}
                 >
-                  The fastest way into Chicago sports.
+                  Sports intelligence, built for Chicago.
                 </h2>
               </div>
 
-              <p
-                className="motion-hero-delay mt-3 max-w-xl text-[15px] leading-7"
-                style={{ color: 'var(--sm-text-muted)' }}
-              >
-                Sports Mockery gives Chicago fans a faster path into breaking
-                news, rumors, analysis, and a better daily habit.
-              </p>
-
-              {/* Editorial reel — one dominant card, secondary support, subtle depth */}
-              <div className="reel-stage mt-8" aria-hidden="true">
+              {/* Product preview reel — Daily brief (red), Scout AI (cyan), GM Trade Sim (gold) */}
+              <div className="reel-stage mt-7" aria-hidden="true">
                 <div className="reel-track">
                   {reel.map((item, index) => (
                     <article
                       key={item.title}
-                      className={`reel-card reel-card-${index + 1}`}
+                      className={`reel-card reel-card-${index + 1} reel-accent-${item.accent}`}
                     >
                       <div className="reel-card-inner">
-                        <p className="reel-label">{item.label}</p>
+                        <div className="reel-card-head">
+                          <span className="reel-label">{item.eyebrow}</span>
+                          <span className="reel-eyebrow-meta">{item.eyebrowMeta}</span>
+                        </div>
                         <h3 className="reel-title">{item.title}</h3>
                         <p className="reel-meta">{item.meta}</p>
                       </div>
@@ -1075,13 +1072,18 @@ export default function LoginShell({
                 </div>
               </div>
 
-              {/* Slow ticker */}
-              <div className="reel-ticker-wrap mt-10" aria-hidden="true">
-                <div className="reel-ticker">
-                  {[...tickerItems, ...tickerItems].map((item, i) => (
-                    <span key={`${item}-${i}`}>{item}</span>
-                  ))}
-                </div>
+              {/* Team chip row — replaces the marquee ticker, more premium and Chicago-anchored */}
+              <div className="reel-team-chips mt-7" aria-hidden="true">
+                {teamChips.map((team) => (
+                  <span
+                    key={team.name}
+                    className="reel-chip"
+                    style={{ ['--chip-dot' as string]: team.dot }}
+                  >
+                    <span className="reel-chip-dot" />
+                    {team.name}
+                  </span>
+                ))}
               </div>
             </div>
           </div>
