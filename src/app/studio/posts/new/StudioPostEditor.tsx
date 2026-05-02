@@ -773,8 +773,8 @@ export default function StudioPostEditor({
             className="h-8 rounded-lg border border-[var(--border-default)] bg-[var(--bg-tertiary)] px-2 text-sm text-[var(--text-primary)] focus:border-[var(--accent-red)] focus:outline-none"
           >
             <option value="draft">Draft</option>
-            <option value="published">Published</option>
-            <option value="scheduled">Scheduled</option>
+            <option value="published">Publish</option>
+            <option value="scheduled">Schedule</option>
           </select>
 
           <button
@@ -798,7 +798,15 @@ export default function StudioPostEditor({
               color: '#FAFAFB',
             }}
           >
-            {saving ? 'Saving...' : isEditing ? 'Update' : 'Publish'}
+            {saving
+              ? 'Saving...'
+              : post?.status === 'published'
+                ? 'Update'
+                : formData.status === 'published'
+                  ? 'Publish'
+                  : formData.status === 'scheduled'
+                    ? 'Schedule'
+                    : 'Save'}
           </button>
         </div>
       </header>
