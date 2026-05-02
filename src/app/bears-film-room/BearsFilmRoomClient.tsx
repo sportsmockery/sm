@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import type { ShowVideo } from '@/lib/youtubeTypes';
 import { formatDate, truncate } from '@/lib/formatters';
 import OptimizedImage from '@/components/ui/OptimizedImage';
+import { YouTubeEmbed } from '@/components/media/youtube-embed';
 
 type Props = {
   latestVideo: ShowVideo | null;
@@ -66,12 +67,12 @@ export function BearsFilmRoomClient({ latestVideo, previousVideos }: Props) {
 
           <div className="sm-hero-video" style={{ alignSelf: 'center' }}>
             <div className="sm-video-wrapper">
-              <iframe
-                src={`https://www.youtube.com/embed/${activeVideoId}`}
+              <YouTubeEmbed
+                videoId={activeVideoId}
                 title={latestVideo.title}
-                frameBorder={0}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
+                description={latestVideo.description}
+                publishedAt={latestVideo.publishedAt}
+                thumbnailUrl={latestVideo.thumbnailUrl}
               />
             </div>
           </div>
