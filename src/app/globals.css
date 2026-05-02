@@ -5994,33 +5994,14 @@ a.glass-card-sm:active,
   50%      { box-shadow: 0 0 40px rgba(188, 0, 0, 0.32); }
 }
 
-@keyframes reelCardA {
-  0%   { transform: translate3d(0, 18px, 0) scale(0.985); opacity: 0; }
-  12%  { transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
-  38%  { transform: translate3d(0, -10px, 0) scale(1.008); opacity: 1; }
-  68%  { transform: translate3d(0, -28px, 0) scale(1); opacity: 0.96; }
-  100% { transform: translate3d(0, -56px, 0) scale(0.986); opacity: 0; }
+@keyframes reelPrimaryFloat {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50%      { transform: translate3d(0, -6px, 0); }
 }
 
-@keyframes reelCardB {
-  0%   { transform: translate3d(0, 26px, 0) scale(0.988); opacity: 0; }
-  18%  { transform: translate3d(0, 8px, 0) scale(1); opacity: 0.9; }
-  46%  { transform: translate3d(0, -8px, 0) scale(1.01); opacity: 1; }
-  76%  { transform: translate3d(0, -26px, 0) scale(1); opacity: 0.95; }
-  100% { transform: translate3d(0, -48px, 0) scale(0.988); opacity: 0; }
-}
-
-@keyframes reelCardC {
-  0%   { transform: translate3d(0, 34px, 0) scale(0.99); opacity: 0; }
-  24%  { transform: translate3d(0, 12px, 0) scale(1); opacity: 0.82; }
-  54%  { transform: translate3d(0, -6px, 0) scale(1.008); opacity: 0.98; }
-  82%  { transform: translate3d(0, -20px, 0) scale(1); opacity: 0.92; }
-  100% { transform: translate3d(0, -38px, 0) scale(0.99); opacity: 0; }
-}
-
-@keyframes stageGlowShift {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.45; }
-  50%      { transform: translate3d(8px, -10px, 0) scale(1.04); opacity: 0.7; }
+@keyframes reelSecondaryFloat {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(0.92); }
+  50%      { transform: translate3d(0, -3px, 0) scale(0.925); }
 }
 
 @keyframes tickerSlide {
@@ -6035,42 +6016,40 @@ a.glass-card-sm:active,
 
 .reel-stage {
   position: relative;
-  height: 440px;
+  height: 460px;
   overflow: hidden;
-  border-radius: 28px;
-  background:
-    radial-gradient(circle at 85% 18%, rgba(188, 0, 0, 0.10), transparent 26%),
-    linear-gradient(180deg, var(--sm-card), var(--sm-surface));
+  border-radius: 24px;
+  background: var(--sm-surface);
   border: 1px solid var(--sm-border);
   isolation: isolate;
 }
 
+/* Single brand accent in the upper-right — replaces the muddy fade mask */
 .reel-stage::before {
   content: "";
   position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to bottom,
-    var(--sm-surface) 0%,
-    transparent 16%,
-    transparent 84%,
-    var(--sm-surface) 100%
-  );
+  right: -12%;
+  top: -14%;
+  width: 360px;
+  height: 360px;
+  border-radius: 999px;
+  background: radial-gradient(circle at center, rgba(188, 0, 0, 0.14), transparent 60%);
+  filter: blur(36px);
   pointer-events: none;
-  z-index: 5;
+  z-index: 0;
 }
 
+/* Far-back depth accent in the opposite corner */
 .reel-stage::after {
   content: "";
   position: absolute;
-  right: 10%;
-  top: 14%;
-  width: 240px;
-  height: 240px;
+  left: -10%;
+  bottom: -16%;
+  width: 280px;
+  height: 280px;
   border-radius: 999px;
-  background: rgba(188, 0, 0, 0.08);
+  background: radial-gradient(circle at center, rgba(0, 212, 255, 0.06), transparent 65%);
   filter: blur(48px);
-  animation: stageGlowShift 10s ease-in-out infinite;
   pointer-events: none;
   z-index: 0;
 }
@@ -6078,43 +6057,64 @@ a.glass-card-sm:active,
 .reel-track {
   position: relative;
   height: 100%;
-  padding: 22px;
+  padding: 28px;
 }
 
 .reel-card {
   position: absolute;
-  left: 22px;
-  right: 22px;
-  will-change: transform, opacity;
+  will-change: transform;
 }
 
+/* PRIMARY — dominant editorial card, full opacity, subtle breathing */
 .reel-card-1 {
-  top: 30px;
+  left: 28px;
+  right: 28px;
+  top: 56px;
   z-index: 3;
-  animation: reelCardA 10s var(--auth-ease) infinite;
+  animation: reelPrimaryFloat 8s ease-in-out infinite;
 }
 
+/* SECONDARY — peeks behind primary to provide depth */
 .reel-card-2 {
-  top: 148px;
+  left: 96px;
+  right: -36px;
+  top: 244px;
   z-index: 2;
-  animation: reelCardB 10s var(--auth-ease) infinite;
-  animation-delay: 1.4s;
+  opacity: 0.62;
+  transform: scale(0.92);
+  animation: reelSecondaryFloat 12s ease-in-out infinite;
 }
 
+/* TERTIARY — subtle far-back layer, almost a hint of stack */
 .reel-card-3 {
-  top: 266px;
+  left: 156px;
+  right: -78px;
+  top: 350px;
   z-index: 1;
-  animation: reelCardC 10s var(--auth-ease) infinite;
-  animation-delay: 2.8s;
+  opacity: 0.28;
+  transform: scale(0.84);
 }
 
 .reel-card-inner {
-  border-radius: 22px;
+  border-radius: 18px;
   border: 1px solid var(--sm-border);
-  background: linear-gradient(180deg, var(--sm-card), var(--sm-surface));
-  backdrop-filter: blur(18px);
+  background: var(--sm-card-hover);
   padding: 24px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+}
+
+/* Primary card surface — crisper, more contrast against the stage */
+.reel-card-1 .reel-card-inner {
+  box-shadow:
+    0 30px 60px -20px rgba(0, 0, 0, 0.55),
+    0 8px 24px -8px rgba(0, 0, 0, 0.28);
+}
+
+.reel-card-2 .reel-card-inner {
+  box-shadow: 0 16px 30px -16px rgba(0, 0, 0, 0.40);
+}
+
+.reel-card-3 .reel-card-inner {
+  box-shadow: 0 10px 20px -12px rgba(0, 0, 0, 0.30);
 }
 
 .reel-label {
@@ -6169,17 +6169,16 @@ a.glass-card-sm:active,
 
 @media (max-width: 1023px) {
   .reel-stage {
-    height: 320px;
-    border-radius: 22px;
+    height: 360px;
+    border-radius: 20px;
   }
   .reel-track { padding: 16px; }
-  .reel-card { left: 16px; right: 16px; }
-  .reel-card-1 { top: 18px; }
-  .reel-card-2 { top: 104px; }
-  .reel-card-3 { top: 190px; }
+  .reel-card-1 { left: 16px; right: 16px; top: 28px; }
+  .reel-card-2 { left: 64px; right: -28px; top: 176px; }
+  .reel-card-3 { left: 108px; right: -56px; top: 252px; }
   .reel-card-inner {
     padding: 18px;
-    border-radius: 18px;
+    border-radius: 16px;
   }
   .reel-title {
     max-width: 20ch;

@@ -59,3 +59,8 @@ FRONTEND_Chart_UI_Tester.py
 
 # Supabase CLI cache (project-ref, pooler-url, version pins)
 supabase/.temp/
+.env*.local
+
+# Local-only env backups dropped into docs/
+docs/env*.bak
+docs/.env*

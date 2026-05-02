@@ -222,15 +222,13 @@ export default function LoginShell({
                 email.
               </p>
 
-              {/* Auth card — small, restrained, NOT a giant outer panel */}
+              {/* Auth surface — flat, integrated, no heavy panel */}
               <div
-                className="mt-8 p-4 sm:p-5"
+                className="mt-7 p-4 sm:p-5"
                 style={{
                   border: '1px solid var(--sm-border)',
                   background: 'var(--sm-card)',
-                  borderRadius: '24px',
-                  boxShadow: '0 10px 30px rgba(0,0,0,0.14)',
-                  backdropFilter: 'blur(18px)',
+                  borderRadius: '20px',
                 }}
               >
                 {/* Tabs */}
@@ -401,15 +399,15 @@ export default function LoginShell({
                           style={{
                             border: '1px solid var(--sm-border)',
                             background: 'var(--sm-surface)',
-                            borderRadius: '16px',
-                            padding: '12px 14px',
+                            borderRadius: '12px',
+                            padding: '9px 12px',
                           }}
                         >
                           <label
                             style={{
                               display: 'flex',
                               alignItems: 'flex-start',
-                              gap: '12px',
+                              gap: '10px',
                               cursor: 'pointer',
                             }}
                           >
@@ -419,7 +417,7 @@ export default function LoginShell({
                               checked={dailyEmail}
                               onChange={(e) => setDailyEmail(e.target.checked)}
                               style={{
-                                marginTop: 4,
+                                marginTop: 3,
                                 width: 16,
                                 height: 16,
                                 accentColor: '#bc0000',
@@ -430,25 +428,24 @@ export default function LoginShell({
                               <span
                                 style={{
                                   display: 'block',
-                                  fontSize: '14px',
+                                  fontSize: '13.5px',
                                   fontWeight: 500,
                                   color: 'var(--sm-text)',
-                                  lineHeight: 1.4,
+                                  lineHeight: 1.35,
                                 }}
                               >
-                                Sign me up for the free daily 6 AM Chicago sports email
+                                Send me the free daily 6 AM Chicago sports email
                               </span>
                               <span
                                 style={{
                                   display: 'block',
-                                  marginTop: 4,
-                                  fontSize: '12px',
+                                  marginTop: 2,
+                                  fontSize: '11.5px',
                                   color: 'var(--sm-text-muted)',
-                                  lineHeight: 1.55,
+                                  lineHeight: 1.45,
                                 }}
                               >
-                                Top stories, rumors, and analysis delivered each
-                                morning. You can unsubscribe anytime.
+                                Top stories, rumors, and analysis. Unsubscribe anytime.
                               </span>
                             </span>
                           </label>
@@ -473,50 +470,49 @@ export default function LoginShell({
 
                         <div
                           style={{
-                            borderTop: '1px solid var(--sm-border)',
-                            paddingTop: 14,
+                            paddingTop: 2,
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: 10,
+                            gap: 6,
                           }}
                         >
-                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
                             <Check
                               style={{
-                                width: 16,
-                                height: 16,
+                                width: 14,
+                                height: 14,
                                 color: '#bc0000',
-                                marginTop: 2,
+                                marginTop: 3,
                                 flexShrink: 0,
                               }}
                               strokeWidth={2.5}
                             />
                             <p
                               style={{
-                                fontSize: 14,
+                                fontSize: 13,
                                 color: 'var(--sm-text-muted)',
-                                lineHeight: 1.5,
+                                lineHeight: 1.45,
                               }}
                             >
                               Email first. Finish setup after you start.
                             </p>
                           </div>
-                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
                             <Check
                               style={{
-                                width: 16,
-                                height: 16,
+                                width: 14,
+                                height: 14,
                                 color: '#bc0000',
-                                marginTop: 2,
+                                marginTop: 3,
                                 flexShrink: 0,
                               }}
                               strokeWidth={2.5}
                             />
                             <p
                               style={{
-                                fontSize: 14,
+                                fontSize: 13,
                                 color: 'var(--sm-text-muted)',
-                                lineHeight: 1.5,
+                                lineHeight: 1.45,
                               }}
                             >
                               Built around Bears, Bulls, Cubs, White Sox, and
@@ -1042,11 +1038,11 @@ export default function LoginShell({
                   Why fans sign up
                 </p>
                 <h2
-                  className="mt-3 text-balance text-4xl font-bold leading-[0.92] sm:text-5xl xl:text-6xl"
+                  className="mt-3 text-balance text-2xl font-semibold leading-[1.1] sm:text-[28px] xl:text-[34px]"
                   style={{
                     color: 'var(--sm-text)',
-                    letterSpacing: '-0.065em',
-                    maxWidth: '11.5ch',
+                    letterSpacing: '-0.025em',
+                    maxWidth: '22ch',
                   }}
                 >
                   The fastest way into Chicago sports.
@@ -1054,17 +1050,15 @@ export default function LoginShell({
               </div>
 
               <p
-                className="motion-hero-delay mt-5 max-w-2xl text-base leading-8 sm:text-lg"
+                className="motion-hero-delay mt-3 max-w-xl text-[15px] leading-7"
                 style={{ color: 'var(--sm-text-muted)' }}
               >
                 Sports Mockery gives Chicago fans a faster path into breaking
-                news, rumors, analysis, and a better daily habit. Start free,
-                get the morning email, and make the experience more relevant
-                from day one.
+                news, rumors, analysis, and a better daily habit.
               </p>
 
-              {/* Editorial reel — staged story */}
-              <div className="reel-stage mt-10" aria-hidden="true">
+              {/* Editorial reel — one dominant card, secondary support, subtle depth */}
+              <div className="reel-stage mt-8" aria-hidden="true">
                 <div className="reel-track">
                   {reel.map((item, index) => (
                     <article
