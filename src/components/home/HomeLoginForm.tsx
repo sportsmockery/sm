@@ -5,7 +5,12 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { getIntendedOrFallback } from '@/lib/redirects'
-import SkipLoginModal from '@/components/home/SkipLoginModal'
+import dynamic from 'next/dynamic'
+
+// SEO Tip #24 — defer the skip-login modal; it only mounts when the user clicks it.
+const SkipLoginModal = dynamic(() => import('@/components/home/SkipLoginModal'), {
+  ssr: false,
+})
 
 interface HomeLoginFormProps {
   redirectTo?: string
@@ -179,7 +184,9 @@ export default function HomeLoginForm({ redirectTo = '/admin' }: HomeLoginFormPr
         Skip Login
       </button>
 
-      <SkipLoginModal open={showSkipModal} onClose={() => setShowSkipModal(false)} />
+      {showSkipModal && (
+        <SkipLoginModal open={showSkipModal} onClose={() => setShowSkipModal(false)} />
+      )}
     </form>
   )
 }

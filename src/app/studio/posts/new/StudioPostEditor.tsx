@@ -6,7 +6,14 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { CategorySelect, AuthorSelect } from '@/components/admin/PostEditor/SearchableSelect'
 import StoryUniversePanel from '@/components/admin/PostEditor/StoryUniversePanel'
-import { ChartBuilderModal, ChartConfig, AISuggestion, ChartType } from '@/components/admin/ChartBuilder'
+import dynamic from 'next/dynamic'
+import type { ChartConfig, AISuggestion, ChartType } from '@/components/admin/ChartBuilder'
+
+// SEO Tip #24 — defer ChartBuilder (echarts + framer-motion) until the writer opens it.
+const ChartBuilderModal = dynamic(
+  () => import('@/components/admin/ChartBuilder').then((m) => m.ChartBuilderModal),
+  { ssr: false }
+)
 import { PostIQChartGenerator } from '@/components/postiq'
 import { MIN_WORDS, ARTICLE_TYPES, type ArticleType } from '@/lib/articles/blocks'
 import { BlockEditor } from '@/components/admin/BlockEditor'

@@ -7,7 +7,14 @@ import Link from 'next/link'
 import RichTextEditor, { RichTextEditorRef } from './RichTextEditor'
 import { CategorySelect, AuthorSelect } from './SearchableSelect'
 import TagInput from './TagInput'
-import { ChartBuilderModal, ChartConfig, AISuggestion, ChartType } from '@/components/admin/ChartBuilder'
+import dynamic from 'next/dynamic'
+import type { ChartConfig, AISuggestion, ChartType } from '@/components/admin/ChartBuilder'
+
+// SEO Tip #24 — defer ChartBuilder (echarts + framer-motion) until the writer opens it.
+const ChartBuilderModal = dynamic(
+  () => import('@/components/admin/ChartBuilder').then((m) => m.ChartBuilderModal),
+  { ssr: false }
+)
 import { PostIQChartGenerator } from '@/components/postiq'
 import StoryUniversePanel from './StoryUniversePanel'
 import { BlockEditor } from '@/components/admin/BlockEditor'

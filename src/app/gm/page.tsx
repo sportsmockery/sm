@@ -14,7 +14,14 @@ import { OpponentRosterPanel } from '@/components/gm/OpponentRosterPanel'
 import { OpponentTeamPicker } from '@/components/gm/OpponentTeamPicker'
 import { TradeHistory } from '@/components/gm/TradeHistory'
 import { TeamFitOverlay } from '@/components/gm/TeamFitOverlay'
-import { PreferencesModal, GMPreferences } from '@/components/gm/PreferencesModal'
+import dynamic from 'next/dynamic'
+import type { GMPreferences } from '@/components/gm/PreferencesModal'
+
+// SEO Tip #24 — defer the preferences modal until the user opens it.
+const PreferencesModal = dynamic(
+  () => import('@/components/gm/PreferencesModal').then((m) => m.PreferencesModal),
+  { ssr: false }
+)
 import { TradeModePicker } from '@/components/gm/TradeModePicker'
 import { SimulationTrigger } from '@/components/gm/SimulationTrigger'
 import { SimulationResults } from '@/components/gm/SimulationResults'
@@ -2281,12 +2288,14 @@ export default function GMPage() {
         onClose={() => { setShowFitOverlay(false); setFitPlayer(null) }}
       />
 
-      <PreferencesModal
-        show={showPreferencesModal}
-        onClose={() => setShowPreferencesModal(false)}
-        preferences={preferences}
-        onSave={setPreferences}
-      />
+      {showPreferencesModal && (
+        <PreferencesModal
+          show={showPreferencesModal}
+          onClose={() => setShowPreferencesModal(false)}
+          preferences={preferences}
+          onSave={setPreferences}
+        />
+      )}
 
       {/* Season Simulation Results Modal */}
       <AnimatePresence>
