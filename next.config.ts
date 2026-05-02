@@ -131,7 +131,16 @@ const nextConfig: NextConfig = {
     ]
   },
 
-  // Headers for caching and security
+  // Headers for caching, security, and Early Hints (SEO Tip #29)
+  //
+  // Font preloading:
+  //   next/font/google (Space Grotesk) auto-emits a Link: rel=preload header
+  //   for the self-hosted WOFF2 at /_next/static/media/<hash>.woff2.
+  //   Vercel promotes Link headers into HTTP 103 Early Hints at the edge,
+  //   so the browser begins downloading the font before the HTML arrives.
+  //
+  //   CSS bundles are also content-hashed; a static Link preload is infeasible
+  //   and would break on every build. Next.js handles CSS preloading in <head>.
   async headers() {
     return [
       {
@@ -164,8 +173,33 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        // SEO Tip #29 — Early Hints: preconnect to critical third-party origins
+        // so the browser resolves DNS + TLS before the main response arrives.
+        // Vercel promotes these Link headers into 103 Early Hints at the edge.
+        source: '/:path((?:chicago-bears|chicago-bulls|chicago-cubs|chicago-blackhawks|chicago-white-sox|$).*)',
+        headers: [
+          {
+            key: 'Link',
+            value: [
+              '<https://izwhcuccuwvlqqhpprbb.supabase.co>; rel=preconnect',
+              '<https://a.espncdn.com>; rel=preconnect; crossorigin',
+            ].join(', '),
+          },
+        ],
+      },
+      {
         // Cache static assets
         source: '/images/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        // Cache self-hosted next/font files (Space Grotesk WOFF2)
+        source: '/_next/static/media/(.*)',
         headers: [
           {
             key: 'Cache-Control',
