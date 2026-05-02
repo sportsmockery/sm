@@ -75,7 +75,7 @@ function StudioSidebarContent({ pathname, onLinkClick }: { pathname: string; onL
         <div className="absolute inset-0 flex items-center justify-center z-10 px-3">
           <Link href="/" title="Back to homepage" onClick={onLinkClick}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/edge-logo-blue.png" alt="Edge" style={{ height: 40, width: 'auto' }} className="opacity-90 hover:opacity-100 transition-opacity" />
+            <img src="/edge-logo-blue.png" alt="Edge" width={107} height={40} style={{ height: 40, width: 'auto' }} className="opacity-90 hover:opacity-100 transition-opacity" />
           </Link>
         </div>
         <style>{`@keyframes studioTelemetry { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }`}</style>

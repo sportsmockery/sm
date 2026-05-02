@@ -156,6 +156,32 @@ function grepHardcodedHosts(): void {
   }
 }
 
+/**
+ * CLS guard: every JSX <img in src/ must have width+height attributes.
+ */
+function grepImgMissingDimensions(): void {
+  log(`3.5/4 Scanning JSX <img> tags for missing width/height…`)
+  try {
+    const out = execSync(
+      `grep -rn --include='*.tsx' --include='*.jsx' '<img' src/ || true`,
+      { cwd: repoRoot, encoding: 'utf8' }
+    )
+    const lines = out.split('\n').filter(Boolean)
+    for (const line of lines) {
+      if (/eslint-disable|RegExp|\.match\(|\.test\(|\.replace\(|`<img/.test(line)) continue
+      if (!/<img\s/.test(line)) continue
+      const hasWidth = /\bwidth[={]/.test(line)
+      const hasHeight = /\bheight[={]/.test(line)
+      if (!hasWidth || !hasHeight) {
+        const fileLine = line.split(':').slice(0, 2).join(':')
+        issues.push({ url: fileLine, problem: '<img> missing explicit width/height (CLS risk)' })
+      }
+    }
+  } catch {
+    // grep returns 1 when no match
+  }
+}
+
 async function main() {
   const urls = await gatherSitemapUrls()
   log(`2/4 Sampling first ${Math.min(urls.length, SAMPLE_LIMIT)} URLs for canonical/title/schema…`)
@@ -167,6 +193,7 @@ async function main() {
   }
 
   grepHardcodedHosts()
+  grepImgMissingDimensions()
 
   log(`4/4 Writing audit/report.md`)
   const auditDir = resolve(repoRoot, 'audit')
@@ -203,9 +230,10 @@ async function main() {
   writeFileSync(resolve(auditDir, 'report.md'), lines.join('\n') + '\n')
   log(`Done. ${issues.length} issue(s). See audit/report.md`)
 
-  // Exit non-zero on hardcoded host leaks (build gate). Other issues are warnings.
+  // Exit non-zero on hardcoded host leaks or CLS violations (build gate).
   const hostLeaks = issues.filter((i) => i.problem.startsWith('hardcoded'))
-  if (hostLeaks.length > 0) process.exit(1)
+  const clsViolations = issues.filter((i) => i.problem.includes('CLS risk'))
+  if (hostLeaks.length > 0 || clsViolations.length > 0) process.exit(1)
 }
 
 main().catch((err) => {

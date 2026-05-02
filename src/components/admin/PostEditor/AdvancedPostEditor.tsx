@@ -1140,7 +1140,7 @@ export default function AdvancedPostEditor({
         <div className="absolute left-4 top-0 bottom-0 flex items-center z-10">
           <Link href="/" title="Back to homepage">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/edge-logo-blue.png" alt="Edge" style={{ height: 58, width: 'auto' }} className="opacity-90 hover:opacity-100 transition-opacity" />
+            <img src="/edge-logo-blue.png" alt="Edge" width={155} height={58} style={{ height: 58, width: 'auto' }} className="opacity-90 hover:opacity-100 transition-opacity" />
           </Link>
         </div>
         <style>{`
