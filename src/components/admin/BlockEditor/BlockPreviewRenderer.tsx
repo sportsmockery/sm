@@ -14,6 +14,7 @@ import { PlayerComparison } from '@/components/articles/PlayerComparison';
 import { StatsChart } from '@/components/articles/StatsChart';
 import { DebateBlock as DebateBlockComponent } from '@/components/articles/DebateBlock';
 import TwitterEmbed from '@/components/article/TwitterEmbed';
+import { YouTubeEmbed } from '@/components/media/youtube-embed';
 
 /* ─── Shared preview primitives (reusable in feed renderer) ─── */
 import {
@@ -113,6 +114,21 @@ function RenderBlock({ block, priorityImageId }: { block: ContentBlock; priority
 
     case 'video':
       if (!block.data.url) return <EmptyState label="Video — add an embed URL in the editor" />;
+      {
+        const ytMatch = block.data.url.match(/(?:watch\?v=|youtu\.be\/|embed\/)([a-zA-Z0-9_-]+)/);
+        if (ytMatch?.[1]) {
+          return (
+            <PreviewSection>
+              <figure>
+                <YouTubeEmbed videoId={ytMatch[1]} className="rounded-xl overflow-hidden" />
+                {block.data.caption && (
+                  <figcaption className="text-[13px] text-slate-400 mt-2 text-center">{block.data.caption}</figcaption>
+                )}
+              </figure>
+            </PreviewSection>
+          );
+        }
+      }
       return (
         <PreviewSection>
           <figure>
@@ -160,15 +176,7 @@ function RenderBlock({ block, priorityImageId }: { block: ContentBlock; priority
         if (videoId) {
           return (
             <PreviewSection>
-              <div className="relative w-full rounded-xl overflow-hidden" style={{ aspectRatio: '16/9' }}>
-                <iframe
-                  src={`https://www.youtube.com/embed/${videoId}`}
-                  className="absolute inset-0 w-full h-full"
-                  allowFullScreen
-                  title="YouTube video"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                />
-              </div>
+              <YouTubeEmbed videoId={videoId} className="rounded-xl overflow-hidden" />
             </PreviewSection>
           )
         }
