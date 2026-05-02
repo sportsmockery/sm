@@ -2,258 +2,1093 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
-import { Check } from 'lucide-react'
-import LoginForm from '@/components/auth/LoginForm'
-import SignupForm from '@/components/auth/SignupForm'
-
-const benefits = [
-  'Get to Bears, Bulls, Cubs, Sox and Hawks coverage faster — every day.',
-  'Personalize the feed around the Chicago teams you actually follow.',
-  'Unlock daily rumors, analysis, and the free 6 AM Chicago sports email.',
-]
-
-const tags = ['Bears', 'Bulls', 'Cubs', 'White Sox', 'Blackhawks', 'Rumors', 'Analysis', 'Daily Email']
+import { useRouter } from 'next/navigation'
+import { ArrowRight, Check, Mail, Sparkles } from 'lucide-react'
+import { useAuth } from '@/hooks/useAuth'
 
 interface LoginShellProps {
   redirectTo?: string
   defaultTab?: 'signup' | 'signin'
 }
 
-export default function LoginShell({ redirectTo = '/admin', defaultTab = 'signup' }: LoginShellProps) {
+const reel = [
+  {
+    label: 'Breaking',
+    title: 'Bears, Bulls, Cubs, Sox, and Hawks coverage that moves faster.',
+    meta: 'News, rumors, and analysis',
+  },
+  {
+    label: 'Daily 6 AM',
+    title: 'The top Chicago sports stories delivered before your day starts.',
+    meta: 'Free email briefing',
+  },
+  {
+    label: 'Personalized',
+    title:
+      'A cleaner fan experience shaped around the teams you actually follow.',
+    meta: 'Built for Chicago fans',
+  },
+]
+
+const tickerItems = [
+  'Bears',
+  'Bulls',
+  'Cubs',
+  'White Sox',
+  'Blackhawks',
+  'Rumors',
+  'Analysis',
+  'Daily 6 AM Email',
+]
+
+export default function LoginShell({
+  redirectTo = '/admin',
+  defaultTab = 'signup',
+}: LoginShellProps) {
+  const router = useRouter()
+  const { signUp, signIn } = useAuth()
+
   const [tab, setTab] = useState<'signup' | 'signin'>(defaultTab)
+
+  // ========== Signup state (email-first 2-step) ==========
+  // Step 1 captures email + daily-email opt-in.
+  // Step 2 captures name + password + terms (existing Supabase signUp() requires these).
+  const [signupStep, setSignupStep] = useState<1 | 2>(1)
+  const [email, setEmail] = useState('')
+  const [dailyEmail, setDailyEmail] = useState(true) // CHECKED BY DEFAULT
+  const [fullName, setFullName] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [acceptTerms, setAcceptTerms] = useState(false)
+  const [showSignupPassword, setShowSignupPassword] = useState(false)
+  const [signupError, setSignupError] = useState('')
+  const [signupSuccess, setSignupSuccess] = useState(false)
+  const [signupLoading, setSignupLoading] = useState(false)
+
+  // ========== Signin state ==========
+  const [signinEmail, setSigninEmail] = useState('')
+  const [signinPassword, setSigninPassword] = useState('')
+  const [rememberMe, setRememberMe] = useState(false)
+  const [showSigninPassword, setShowSigninPassword] = useState(false)
+  const [signinError, setSigninError] = useState('')
+  const [signinLoading, setSigninLoading] = useState(false)
+
+  const passwordStrength = (() => {
+    let s = 0
+    if (password.length >= 8) s++
+    if (password.match(/[a-z]/)) s++
+    if (password.match(/[A-Z]/)) s++
+    if (password.match(/[0-9]/)) s++
+    if (password.match(/[^a-zA-Z0-9]/)) s++
+    return s
+  })()
+  const strengthLabels = ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong']
+  const strengthColors = ['#BC0000', '#BC0000', '#eab308', '#84cc16', '#00D4FF']
+
+  const isValidEmail = (value: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())
+
+  // Step 1 submit — advances to step 2; doesn't call Supabase yet.
+  const handleStep1 = (e: React.FormEvent) => {
+    e.preventDefault()
+    setSignupError('')
+    if (!isValidEmail(email)) {
+      setSignupError('Please enter a valid email address')
+      return
+    }
+    setSignupStep(2)
+  }
+
+  // Step 2 submit — full account creation via existing Supabase auth, then
+  // newsletter subscribe gated on the daily-email checkbox from step 1.
+  const handleSignupComplete = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSignupError('')
+
+    if (password !== confirmPassword) {
+      setSignupError('Passwords do not match')
+      return
+    }
+    if (password.length < 8) {
+      setSignupError('Password must be at least 8 characters')
+      return
+    }
+    if (!acceptTerms) {
+      setSignupError('You must accept the terms and conditions')
+      return
+    }
+
+    setSignupLoading(true)
+
+    const { error } = await signUp(email, password, { full_name: fullName })
+    if (error) {
+      setSignupError(error)
+      setSignupLoading(false)
+      return
+    }
+
+    // Newsletter subscribe — fire only if user kept the daily email checked.
+    // Backend integration point: /api/newsletter/subscribe upserts into
+    // sm_newsletter_subscribers + email_subscribers (chicago_daily list).
+    if (dailyEmail) {
+      fetch('/api/newsletter/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      }).catch(() => {})
+    }
+
+    setSignupSuccess(true)
+    setSignupLoading(false)
+  }
+
+  const handleSignin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSigninError('')
+    setSigninLoading(true)
+    const { error } = await signIn(signinEmail, signinPassword, rememberMe)
+    if (error) {
+      setSigninError(error)
+      setSigninLoading(false)
+      return
+    }
+    router.push(redirectTo)
+    router.refresh()
+  }
 
   return (
     <main
-      className="auth-shell relative min-h-screen flex-1 overflow-hidden"
+      className="auth-shell auth-motion-root relative min-h-screen flex-1 overflow-hidden"
       style={{ background: 'var(--sm-surface)', color: 'var(--sm-text)' }}
     >
-      {/* Ambient background — single soft red wash on the editorial side */}
+      {/* Ambient background — restrained, no boxed framing */}
       <div className="pointer-events-none absolute inset-0">
         <div
-          className="absolute inset-y-0 left-0 w-1/2"
-          style={{ background: 'linear-gradient(135deg, rgba(188,0,0,0.06), transparent 55%)' }}
+          className="absolute inset-y-0 left-0 w-24"
+          style={{
+            background:
+              'linear-gradient(to right, rgba(188,0,0,0.06), transparent)',
+          }}
+        />
+        <div
+          className="absolute h-80 w-80 rounded-full"
+          style={{
+            right: '8%',
+            top: '10%',
+            background: 'rgba(188,0,0,0.05)',
+            filter: 'blur(96px)',
+          }}
         />
       </div>
 
-      <section className="relative flex min-h-screen items-stretch px-3 py-3 sm:px-5 sm:py-5 lg:px-8 lg:py-8 xl:px-10 xl:py-10">
-        <div
-          className="auth-panel-in relative grid w-full grid-cols-1 overflow-hidden lg:grid-cols-[1.1fr_0.9fr]"
-          style={{
-            border: '1px solid var(--sm-border)',
-            background: 'var(--sm-card)',
-            borderRadius: '28px',
-            boxShadow: '0 20px 50px -20px rgba(0,0,0,0.45), 0 4px 16px rgba(0,0,0,0.10)',
-          }}
-        >
-          {/* ===== Editorial column ===== */}
-          <div
-            className="order-2 flex flex-col justify-between border-t p-6 sm:p-8 xl:p-12 lg:order-1 lg:border-r lg:border-t-0"
-            style={{ borderColor: 'var(--sm-border)' }}
-          >
-            <div>
-              {/* Small logo */}
-              <div className="auth-enter-up mb-8">
-                <Link href="/" aria-label="Sports Mockery home" className="inline-flex shrink-0 items-center">
-                  <Image
-                    src="/logos/SM_Full_v2.png"
-                    alt="Sports Mockery"
-                    width={120}
-                    height={30}
-                    className="dark:hidden"
-                    priority
-                  />
-                  <Image
-                    src="/logos/v2_SM_Whole.png"
-                    alt="Sports Mockery"
-                    width={120}
-                    height={30}
-                    className="hidden dark:block"
-                    priority
-                  />
-                </Link>
-              </div>
-
-              {/* One eyebrow only */}
-              <span
-                className="auth-enter-up inline-flex w-fit items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase"
+      <section className="relative px-5 pt-6 pb-10 sm:px-8 sm:pt-8 lg:px-10 lg:pt-8 xl:px-14">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[430px_minmax(0,1fr)] lg:gap-16 xl:grid-cols-[460px_minmax(0,1fr)]">
+          {/* =========================================================
+               AUTH COLUMN (mobile order 1, desktop left)
+             ========================================================= */}
+          <div className="order-1 motion-form">
+            <div className="max-w-[460px]">
+              {/* Eyebrow */}
+              <div
+                className="mb-5 inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold uppercase"
                 style={{
                   border: '1px solid rgba(188,0,0,0.25)',
                   background: 'rgba(188,0,0,0.08)',
                   color: '#bc0000',
-                  letterSpacing: '0.16em',
+                  letterSpacing: '0.18em',
                 }}
               >
+                <Sparkles className="h-3.5 w-3.5" />
                 Built for Chicago fans
-              </span>
+              </div>
 
+              {/* Headline */}
               <h1
-                className="auth-enter-up mt-5 max-w-[18ch] text-balance text-[34px] font-bold leading-[1.02] sm:text-5xl xl:text-[58px]"
-                style={{ color: 'var(--sm-text)', letterSpacing: '-0.045em' }}
+                className="text-4xl font-bold leading-[0.94] sm:text-5xl"
+                style={{
+                  color: 'var(--sm-text)',
+                  letterSpacing: '-0.06em',
+                }}
               >
-                Get to the stories that matter before everyone else.
+                Get Chicago sports faster.
               </h1>
 
               <p
-                className="auth-enter-up-delay mt-5 max-w-xl text-base leading-7 sm:text-[17px] sm:leading-8"
+                className="mt-4 max-w-md text-base leading-8"
                 style={{ color: 'var(--sm-text-muted)' }}
               >
-                Sports Mockery is the membership wall for fan-powered Chicago coverage —
-                rumors, analysis, and the daily 6 AM email, built around the teams you follow.
+                Start with your email for faster access to breaking news,
+                rumors, analysis, and the free daily 6 AM Chicago sports
+                email.
               </p>
 
-              {/* 3 concise benefit rows */}
-              <ul
-                className="mt-9 space-y-0 border-b"
-                style={{ borderColor: 'var(--sm-border)' }}
+              {/* Auth card — small, restrained, NOT a giant outer panel */}
+              <div
+                className="mt-8 p-4 sm:p-5"
+                style={{
+                  border: '1px solid var(--sm-border)',
+                  background: 'var(--sm-card)',
+                  borderRadius: '24px',
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.14)',
+                  backdropFilter: 'blur(18px)',
+                }}
               >
-                {benefits.map((item, index) => (
-                  <li
-                    key={item}
-                    className="auth-card-in flex items-start gap-3 border-t py-4"
-                    style={{
-                      borderColor: 'var(--sm-border)',
-                      animationDelay: `${index * 70 + 90}ms`,
-                    }}
-                  >
-                    <span
-                      className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
-                      style={{ background: 'rgba(188,0,0,0.12)', color: '#bc0000' }}
-                      aria-hidden
-                    >
-                      <Check className="h-3.5 w-3.5" strokeWidth={2.5} />
-                    </span>
-                    <p className="text-[15px] leading-7" style={{ color: 'var(--sm-text)' }}>
-                      {item}
-                    </p>
-                  </li>
-                ))}
-              </ul>
+                {/* Tabs */}
+                <div
+                  role="tablist"
+                  aria-label="Account access"
+                  className="mb-5 grid grid-cols-2 gap-1 p-1"
+                  style={{
+                    background: 'var(--sm-surface)',
+                    borderRadius: '16px',
+                  }}
+                >
+                  {(['signup', 'signin'] as const).map((value) => {
+                    const isActive = tab === value
+                    return (
+                      <button
+                        key={value}
+                        role="tab"
+                        type="button"
+                        aria-selected={isActive}
+                        aria-controls={`auth-panel-${value}`}
+                        id={`auth-tab-${value}`}
+                        onClick={() => setTab(value)}
+                        className="auth-tab h-11 text-sm font-semibold transition-colors"
+                        style={{
+                          background: isActive ? 'var(--sm-card)' : 'transparent',
+                          color: isActive ? 'var(--sm-text)' : 'var(--sm-text-muted)',
+                          border: isActive
+                            ? '1px solid var(--sm-border)'
+                            : '1px solid transparent',
+                          borderRadius: '12px',
+                          boxShadow: isActive
+                            ? '0 1px 3px rgba(0,0,0,0.18), 0 1px 2px rgba(0,0,0,0.10)'
+                            : 'none',
+                        }}
+                      >
+                        {value === 'signup' ? 'Create account' : 'Sign in'}
+                      </button>
+                    )
+                  })}
+                </div>
 
-              {/* Compact tag grid */}
-              <div className="mt-8 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                {tags.map((item, index) => (
+                {/* SIGNUP TAB */}
+                {tab === 'signup' && (
                   <div
-                    key={item}
-                    className="auth-chip-in text-center text-xs font-medium sm:text-[13px]"
-                    style={{
-                      border: '1px solid var(--sm-border)',
-                      background: 'var(--sm-surface)',
-                      color: 'var(--sm-text-muted)',
-                      borderRadius: 'var(--sm-radius-md)',
-                      padding: '10px 8px',
-                      animationDelay: `${index * 50 + 180}ms`,
-                    }}
+                    role="tabpanel"
+                    id="auth-panel-signup"
+                    aria-labelledby="auth-tab-signup"
+                    className="auth-form-swap"
                   >
-                    {item}
-                  </div>
-                ))}
-              </div>
-            </div>
+                    {signupSuccess ? (
+                      <div style={{ textAlign: 'center', padding: '8px 0' }}>
+                        <div
+                          style={{
+                            width: 64,
+                            height: 64,
+                            borderRadius: '50%',
+                            margin: '0 auto 16px',
+                            background: 'rgba(0,212,255,0.1)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <Check
+                            style={{ width: 32, height: 32, color: '#00D4FF' }}
+                            strokeWidth={2.5}
+                          />
+                        </div>
+                        <h3
+                          style={{
+                            fontSize: '18px',
+                            fontWeight: 600,
+                            color: 'var(--sm-text)',
+                            marginBottom: '8px',
+                          }}
+                        >
+                          Check your email
+                        </h3>
+                        <p
+                          style={{
+                            fontSize: '14px',
+                            color: 'var(--sm-text-muted)',
+                            lineHeight: 1.55,
+                          }}
+                        >
+                          We&apos;ve sent a confirmation link to{' '}
+                          <strong>{email}</strong>. Click the link to activate
+                          your account.
+                        </p>
+                        {dailyEmail && (
+                          <p
+                            style={{
+                              fontSize: '13px',
+                              color: 'var(--sm-text-muted)',
+                              marginTop: '12px',
+                            }}
+                          >
+                            You&apos;re also subscribed to the SM Edge Daily —
+                            Chicago sports delivered every morning at 6 AM CT.
+                          </p>
+                        )}
+                      </div>
+                    ) : signupStep === 1 ? (
+                      // ===== STEP 1: EMAIL + DAILY EMAIL CHECKBOX =====
+                      <form
+                        onSubmit={handleStep1}
+                        style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+                      >
+                        {signupError && (
+                          <div
+                            style={{
+                              borderRadius: 'var(--sm-radius-md)',
+                              background: 'rgba(188,0,0,0.1)',
+                              border: '1px solid rgba(188,0,0,0.2)',
+                              padding: '12px 14px',
+                              fontSize: '14px',
+                              color: '#ff6666',
+                            }}
+                          >
+                            {signupError}
+                          </div>
+                        )}
 
-            {/* Footer line */}
-            <div
-              className="mt-10 flex flex-wrap items-center gap-x-3 gap-y-1 border-t pt-6 text-xs sm:text-[13px]"
-              style={{ borderColor: 'var(--sm-border)', color: 'var(--sm-text-muted)' }}
-            >
-              <span className="font-medium" style={{ color: 'var(--sm-text)' }}>
-                Chicago&apos;s home for fan-powered coverage
-              </span>
-              <span className="hidden h-1 w-1 rounded-full sm:inline-block" style={{ background: 'var(--sm-border)' }} />
-              <span>News</span>
-              <span className="hidden h-1 w-1 rounded-full sm:inline-block" style={{ background: 'var(--sm-border)' }} />
-              <span>Rumors</span>
-              <span className="hidden h-1 w-1 rounded-full sm:inline-block" style={{ background: 'var(--sm-border)' }} />
-              <span>Analysis</span>
+                        <div>
+                          <label
+                            htmlFor="email-first"
+                            style={{
+                              display: 'block',
+                              fontSize: '14px',
+                              fontWeight: 500,
+                              color: 'var(--sm-text)',
+                              marginBottom: '6px',
+                            }}
+                          >
+                            Email address
+                          </label>
+                          <div style={{ position: 'relative' }}>
+                            <Mail
+                              aria-hidden="true"
+                              style={{
+                                position: 'absolute',
+                                left: 16,
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                width: 16,
+                                height: 16,
+                                color: 'var(--sm-text-muted)',
+                                pointerEvents: 'none',
+                              }}
+                            />
+                            <input
+                              id="email-first"
+                              type="email"
+                              value={email}
+                              onChange={(e) => setEmail(e.target.value)}
+                              required
+                              autoComplete="email"
+                              placeholder="you@example.com"
+                              className="sm-input"
+                              style={{ paddingLeft: 44, height: 48 }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Daily email checkbox — checked by default */}
+                        <div
+                          style={{
+                            border: '1px solid var(--sm-border)',
+                            background: 'var(--sm-surface)',
+                            borderRadius: '16px',
+                            padding: '12px 14px',
+                          }}
+                        >
+                          <label
+                            style={{
+                              display: 'flex',
+                              alignItems: 'flex-start',
+                              gap: '12px',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            <input
+                              id="daily-email"
+                              type="checkbox"
+                              checked={dailyEmail}
+                              onChange={(e) => setDailyEmail(e.target.checked)}
+                              style={{
+                                marginTop: 4,
+                                width: 16,
+                                height: 16,
+                                accentColor: '#bc0000',
+                                flexShrink: 0,
+                              }}
+                            />
+                            <span style={{ display: 'block' }}>
+                              <span
+                                style={{
+                                  display: 'block',
+                                  fontSize: '14px',
+                                  fontWeight: 500,
+                                  color: 'var(--sm-text)',
+                                  lineHeight: 1.4,
+                                }}
+                              >
+                                Sign me up for the free daily 6 AM Chicago sports email
+                              </span>
+                              <span
+                                style={{
+                                  display: 'block',
+                                  marginTop: 4,
+                                  fontSize: '12px',
+                                  color: 'var(--sm-text-muted)',
+                                  lineHeight: 1.55,
+                                }}
+                              >
+                                Top stories, rumors, and analysis delivered each
+                                morning. You can unsubscribe anytime.
+                              </span>
+                            </span>
+                          </label>
+                        </div>
+
+                        <button
+                          type="submit"
+                          className="motion-cta btn-primary btn-full"
+                          style={{
+                            height: 48,
+                            borderRadius: '16px',
+                            fontSize: 14,
+                            padding: '0 20px',
+                          }}
+                        >
+                          Create free account
+                          <ArrowRight
+                            aria-hidden="true"
+                            style={{ width: 16, height: 16, marginLeft: 4 }}
+                          />
+                        </button>
+
+                        <div
+                          style={{
+                            borderTop: '1px solid var(--sm-border)',
+                            paddingTop: 14,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 10,
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                            <Check
+                              style={{
+                                width: 16,
+                                height: 16,
+                                color: '#bc0000',
+                                marginTop: 2,
+                                flexShrink: 0,
+                              }}
+                              strokeWidth={2.5}
+                            />
+                            <p
+                              style={{
+                                fontSize: 14,
+                                color: 'var(--sm-text-muted)',
+                                lineHeight: 1.5,
+                              }}
+                            >
+                              Email first. Finish setup after you start.
+                            </p>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                            <Check
+                              style={{
+                                width: 16,
+                                height: 16,
+                                color: '#bc0000',
+                                marginTop: 2,
+                                flexShrink: 0,
+                              }}
+                              strokeWidth={2.5}
+                            />
+                            <p
+                              style={{
+                                fontSize: 14,
+                                color: 'var(--sm-text-muted)',
+                                lineHeight: 1.5,
+                              }}
+                            >
+                              Built around Bears, Bulls, Cubs, White Sox, and
+                              Blackhawks coverage.
+                            </p>
+                          </div>
+                        </div>
+
+                        <p
+                          style={{
+                            fontSize: 12,
+                            color: 'var(--sm-text-muted)',
+                            lineHeight: 1.55,
+                          }}
+                        >
+                          By continuing, you agree to the{' '}
+                          <Link
+                            href="/terms"
+                            style={{ fontWeight: 500, color: '#bc0000', textDecoration: 'none' }}
+                          >
+                            Terms of Service
+                          </Link>{' '}
+                          and{' '}
+                          <Link
+                            href="/privacy"
+                            style={{ fontWeight: 500, color: '#bc0000', textDecoration: 'none' }}
+                          >
+                            Privacy Policy
+                          </Link>
+                          .
+                        </p>
+                      </form>
+                    ) : (
+                      // ===== STEP 2: NAME + PASSWORD + TERMS =====
+                      <form
+                        onSubmit={handleSignupComplete}
+                        style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
+                      >
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: 8,
+                          }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSignupError('')
+                              setSignupStep(1)
+                            }}
+                            style={{
+                              fontSize: 13,
+                              fontWeight: 500,
+                              color: 'var(--sm-text-muted)',
+                              background: 'transparent',
+                              border: 'none',
+                              cursor: 'pointer',
+                              padding: 0,
+                            }}
+                          >
+                            ← Back
+                          </button>
+                          <span
+                            style={{
+                              fontSize: 12,
+                              color: 'var(--sm-text-muted)',
+                              maxWidth: '60%',
+                              textAlign: 'right',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                            }}
+                            title={email}
+                          >
+                            {email}
+                          </span>
+                        </div>
+
+                        {signupError && (
+                          <div
+                            style={{
+                              borderRadius: 'var(--sm-radius-md)',
+                              background: 'rgba(188,0,0,0.1)',
+                              border: '1px solid rgba(188,0,0,0.2)',
+                              padding: '12px 14px',
+                              fontSize: '14px',
+                              color: '#ff6666',
+                            }}
+                          >
+                            {signupError}
+                          </div>
+                        )}
+
+                        <div>
+                          <label
+                            htmlFor="fullName"
+                            style={{
+                              display: 'block',
+                              fontSize: '14px',
+                              fontWeight: 500,
+                              color: 'var(--sm-text)',
+                              marginBottom: '6px',
+                            }}
+                          >
+                            Full name
+                          </label>
+                          <input
+                            id="fullName"
+                            type="text"
+                            value={fullName}
+                            onChange={(e) => setFullName(e.target.value)}
+                            required
+                            autoComplete="name"
+                            className="sm-input"
+                            placeholder="John Doe"
+                            style={{ height: 48 }}
+                          />
+                        </div>
+
+                        <div>
+                          <label
+                            htmlFor="password"
+                            style={{
+                              display: 'block',
+                              fontSize: '14px',
+                              fontWeight: 500,
+                              color: 'var(--sm-text)',
+                              marginBottom: '6px',
+                            }}
+                          >
+                            Password
+                          </label>
+                          <div style={{ position: 'relative' }}>
+                            <input
+                              id="password"
+                              type={showSignupPassword ? 'text' : 'password'}
+                              value={password}
+                              onChange={(e) => setPassword(e.target.value)}
+                              required
+                              autoComplete="new-password"
+                              className="sm-input"
+                              placeholder="At least 8 characters"
+                              style={{ paddingRight: 48, height: 48 }}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowSignupPassword((v) => !v)}
+                              aria-label={showSignupPassword ? 'Hide password' : 'Show password'}
+                              aria-pressed={showSignupPassword}
+                              style={{
+                                position: 'absolute',
+                                right: 4,
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                color: 'var(--sm-text-muted)',
+                                borderRadius: 8,
+                                minWidth: 44,
+                                minHeight: 44,
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                              }}
+                            >
+                              {showSignupPassword ? (
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8} aria-hidden="true">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 3l18 18M10.584 10.587a2 2 0 002.828 2.83m-3.97-3.97A9.96 9.96 0 002.458 12c1.274 4.057 5.064 7 9.542 7 1.943 0 3.74-.555 5.255-1.515M21.542 12c-.41-1.31-1.082-2.515-1.96-3.55M16.5 16.5L21 21" />
+                                </svg>
+                              ) : (
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8} aria-hidden="true">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                  <circle cx="12" cy="12" r="3" />
+                                </svg>
+                              )}
+                            </button>
+                          </div>
+                          {password && (
+                            <div aria-live="polite" style={{ marginTop: 8 }}>
+                              <div
+                                role="progressbar"
+                                aria-valuemin={0}
+                                aria-valuemax={5}
+                                aria-valuenow={passwordStrength}
+                                style={{ display: 'flex', gap: 4 }}
+                              >
+                                {[0, 1, 2, 3, 4].map((i) => (
+                                  <div
+                                    key={i}
+                                    style={{
+                                      height: 6,
+                                      flex: 1,
+                                      borderRadius: 9999,
+                                      background:
+                                        i < passwordStrength
+                                          ? strengthColors[passwordStrength - 1]
+                                          : 'var(--sm-surface)',
+                                    }}
+                                  />
+                                ))}
+                              </div>
+                              <p
+                                style={{
+                                  marginTop: 4,
+                                  fontSize: 12,
+                                  color: 'var(--sm-text-dim)',
+                                }}
+                              >
+                                Password strength:{' '}
+                                {strengthLabels[passwordStrength - 1] || 'Too weak'}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+
+                        <div>
+                          <label
+                            htmlFor="confirmPassword"
+                            style={{
+                              display: 'block',
+                              fontSize: '14px',
+                              fontWeight: 500,
+                              color: 'var(--sm-text)',
+                              marginBottom: '6px',
+                            }}
+                          >
+                            Confirm password
+                          </label>
+                          <input
+                            id="confirmPassword"
+                            type="password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            required
+                            autoComplete="new-password"
+                            className="sm-input"
+                            placeholder="********"
+                            style={{ height: 48 }}
+                          />
+                          {confirmPassword && password !== confirmPassword && (
+                            <p style={{ marginTop: 4, fontSize: 12, color: '#BC0000' }}>
+                              Passwords do not match
+                            </p>
+                          )}
+                        </div>
+
+                        <label
+                          style={{
+                            display: 'flex',
+                            alignItems: 'flex-start',
+                            gap: 10,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={acceptTerms}
+                            onChange={(e) => setAcceptTerms(e.target.checked)}
+                            style={{
+                              marginTop: 4,
+                              width: 16,
+                              height: 16,
+                              accentColor: '#bc0000',
+                            }}
+                          />
+                          <span style={{ fontSize: 13, color: 'var(--sm-text-muted)', lineHeight: 1.5 }}>
+                            I agree to the{' '}
+                            <Link href="/terms" style={{ fontWeight: 500, color: '#bc0000', textDecoration: 'none' }}>
+                              Terms of Service
+                            </Link>{' '}
+                            and{' '}
+                            <Link href="/privacy" style={{ fontWeight: 500, color: '#bc0000', textDecoration: 'none' }}>
+                              Privacy Policy
+                            </Link>
+                            .
+                          </span>
+                        </label>
+
+                        <button
+                          type="submit"
+                          disabled={signupLoading}
+                          className="btn-primary btn-full"
+                          style={{
+                            height: 48,
+                            borderRadius: '16px',
+                            fontSize: 14,
+                            padding: '0 20px',
+                            ...(signupLoading
+                              ? { opacity: 0.6, cursor: 'not-allowed' }
+                              : {}),
+                          }}
+                        >
+                          {signupLoading ? (
+                            <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <svg
+                                style={{
+                                  width: 18,
+                                  height: 18,
+                                  animation: 'spin 1s linear infinite',
+                                }}
+                                fill="none"
+                                viewBox="0 0 24 24"
+                              >
+                                <circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                <path style={{ opacity: 0.75 }} fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                              </svg>
+                              Creating account...
+                            </span>
+                          ) : (
+                            <>
+                              Create account
+                              <ArrowRight aria-hidden="true" style={{ width: 16, height: 16, marginLeft: 4 }} />
+                            </>
+                          )}
+                        </button>
+                      </form>
+                    )}
+                  </div>
+                )}
+
+                {/* SIGNIN TAB */}
+                {tab === 'signin' && (
+                  <div
+                    role="tabpanel"
+                    id="auth-panel-signin"
+                    aria-labelledby="auth-tab-signin"
+                    className="auth-form-swap"
+                  >
+                    <form
+                      onSubmit={handleSignin}
+                      style={{ display: 'flex', flexDirection: 'column', gap: 16 }}
+                    >
+                      {signinError && (
+                        <div
+                          style={{
+                            borderRadius: 'var(--sm-radius-md)',
+                            background: 'rgba(188,0,0,0.1)',
+                            border: '1px solid rgba(188,0,0,0.2)',
+                            padding: '12px 14px',
+                            fontSize: 14,
+                            color: '#ff6666',
+                          }}
+                        >
+                          {signinError}
+                        </div>
+                      )}
+
+                      <div>
+                        <label
+                          htmlFor="signin-email"
+                          style={{
+                            display: 'block',
+                            fontSize: 14,
+                            fontWeight: 500,
+                            color: 'var(--sm-text)',
+                            marginBottom: 6,
+                          }}
+                        >
+                          Email address
+                        </label>
+                        <input
+                          id="signin-email"
+                          type="email"
+                          value={signinEmail}
+                          onChange={(e) => setSigninEmail(e.target.value)}
+                          required
+                          autoComplete="email"
+                          placeholder="you@example.com"
+                          className="sm-input"
+                          style={{ height: 48 }}
+                        />
+                      </div>
+
+                      <div>
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            marginBottom: 6,
+                          }}
+                        >
+                          <label
+                            htmlFor="signin-password"
+                            style={{
+                              fontSize: 14,
+                              fontWeight: 500,
+                              color: 'var(--sm-text)',
+                            }}
+                          >
+                            Password
+                          </label>
+                          <Link
+                            href="/forgot-password"
+                            style={{
+                              fontSize: 12,
+                              fontWeight: 500,
+                              color: '#bc0000',
+                              textDecoration: 'none',
+                            }}
+                          >
+                            Forgot password?
+                          </Link>
+                        </div>
+                        <div style={{ position: 'relative' }}>
+                          <input
+                            id="signin-password"
+                            type={showSigninPassword ? 'text' : 'password'}
+                            value={signinPassword}
+                            onChange={(e) => setSigninPassword(e.target.value)}
+                            required
+                            autoComplete="current-password"
+                            placeholder="Enter your password"
+                            className="sm-input"
+                            style={{ paddingRight: 48, height: 48 }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowSigninPassword((v) => !v)}
+                            aria-label={showSigninPassword ? 'Hide password' : 'Show password'}
+                            aria-pressed={showSigninPassword}
+                            style={{
+                              position: 'absolute',
+                              right: 4,
+                              top: '50%',
+                              transform: 'translateY(-50%)',
+                              background: 'none',
+                              border: 'none',
+                              cursor: 'pointer',
+                              color: 'var(--sm-text-muted)',
+                              borderRadius: 8,
+                              minWidth: 44,
+                              minHeight: 44,
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            {showSigninPassword ? (
+                              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8} aria-hidden="true">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 3l18 18M10.584 10.587a2 2 0 002.828 2.83m-3.97-3.97A9.96 9.96 0 002.458 12c1.274 4.057 5.064 7 9.542 7 1.943 0 3.74-.555 5.255-1.515M21.542 12c-.41-1.31-1.082-2.515-1.96-3.55M16.5 16.5L21 21" />
+                              </svg>
+                            ) : (
+                              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.8} aria-hidden="true">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                <circle cx="12" cy="12" r="3" />
+                              </svg>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+
+                      <label
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 8,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={rememberMe}
+                          onChange={(e) => setRememberMe(e.target.checked)}
+                          style={{ width: 16, height: 16, accentColor: '#bc0000' }}
+                        />
+                        <span style={{ fontSize: 14, color: 'var(--sm-text-muted)' }}>
+                          Remember me
+                        </span>
+                      </label>
+
+                      <button
+                        type="submit"
+                        disabled={signinLoading}
+                        className="btn-primary btn-full"
+                        style={{
+                          height: 48,
+                          borderRadius: '16px',
+                          fontSize: 14,
+                          padding: '0 20px',
+                          ...(signinLoading ? { opacity: 0.6, cursor: 'not-allowed' } : {}),
+                        }}
+                      >
+                        {signinLoading ? (
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <svg
+                              style={{ width: 18, height: 18, animation: 'spin 1s linear infinite' }}
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                              <path style={{ opacity: 0.75 }} fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                            </svg>
+                            Signing in...
+                          </span>
+                        ) : (
+                          <>
+                            Sign in
+                            <ArrowRight aria-hidden="true" style={{ width: 16, height: 16, marginLeft: 4 }} />
+                          </>
+                        )}
+                      </button>
+                    </form>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* ===== Auth column ===== */}
-          <div
-            className="order-1 flex flex-col justify-center p-6 sm:p-8 xl:p-12 lg:order-2"
-            style={{ background: 'var(--sm-surface)' }}
-          >
-            <div className="mx-auto w-full max-w-md">
-              <div className="mb-6">
+          {/* =========================================================
+               MARKETING + REEL COLUMN (mobile order 2, desktop right)
+             ========================================================= */}
+          <div className="order-2 flex items-start">
+            <div className="w-full max-w-4xl pt-1">
+              <div className="motion-hero">
                 <p
                   className="text-[11px] font-semibold uppercase"
                   style={{ color: 'var(--sm-text-muted)', letterSpacing: '0.18em' }}
                 >
-                  Account access
+                  Why fans sign up
                 </p>
                 <h2
-                  className="mt-2 text-[28px] font-bold sm:text-3xl"
-                  style={{ color: 'var(--sm-text)', letterSpacing: '-0.035em', lineHeight: 1.1 }}
+                  className="mt-3 text-balance text-4xl font-bold leading-[0.92] sm:text-5xl xl:text-6xl"
+                  style={{
+                    color: 'var(--sm-text)',
+                    letterSpacing: '-0.065em',
+                    maxWidth: '11.5ch',
+                  }}
                 >
-                  {tab === 'signup' ? 'Create your account' : 'Welcome back'}
+                  The fastest way into Chicago sports.
                 </h2>
-                <p className="mt-3 text-sm leading-6" style={{ color: 'var(--sm-text-muted)' }}>
-                  {tab === 'signup'
-                    ? 'Free. ~30 seconds. Includes the daily 6 AM Chicago sports email.'
-                    : 'Sign in to get back to your saved teams, takes, and personalized feed.'}
-                </p>
               </div>
 
-              {/* Segmented tabs */}
-              <div
-                role="tablist"
-                aria-label="Account access"
-                className="mb-6 grid grid-cols-2 gap-1 p-1"
-                style={{
-                  border: '1px solid var(--sm-border)',
-                  background: 'var(--sm-card)',
-                  borderRadius: 'var(--sm-radius-md)',
-                }}
+              <p
+                className="motion-hero-delay mt-5 max-w-2xl text-base leading-8 sm:text-lg"
+                style={{ color: 'var(--sm-text-muted)' }}
               >
-                {(['signup', 'signin'] as const).map((value) => {
-                  const isActive = tab === value
-                  return (
-                    <button
-                      key={value}
-                      role="tab"
-                      aria-selected={isActive}
-                      aria-controls={`auth-panel-${value}`}
-                      id={`auth-tab-${value}`}
-                      type="button"
-                      onClick={() => setTab(value)}
-                      className="auth-tab h-11 rounded-[12px] text-sm font-semibold transition-colors"
-                      style={{
-                        background: isActive ? 'var(--sm-surface)' : 'transparent',
-                        color: isActive ? 'var(--sm-text)' : 'var(--sm-text-muted)',
-                        boxShadow: isActive
-                          ? '0 1px 3px rgba(0,0,0,0.18), 0 1px 2px rgba(0,0,0,0.10)'
-                          : 'none',
-                        border: isActive ? '1px solid var(--sm-border)' : '1px solid transparent',
-                      }}
+                Sports Mockery gives Chicago fans a faster path into breaking
+                news, rumors, analysis, and a better daily habit. Start free,
+                get the morning email, and make the experience more relevant
+                from day one.
+              </p>
+
+              {/* Editorial reel — staged story */}
+              <div className="reel-stage mt-10" aria-hidden="true">
+                <div className="reel-track">
+                  {reel.map((item, index) => (
+                    <article
+                      key={item.title}
+                      className={`reel-card reel-card-${index + 1}`}
                     >
-                      {value === 'signup' ? 'Create account' : 'Sign in'}
-                    </button>
-                  )
-                })}
+                      <div className="reel-card-inner">
+                        <p className="reel-label">{item.label}</p>
+                        <h3 className="reel-title">{item.title}</h3>
+                        <p className="reel-meta">{item.meta}</p>
+                      </div>
+                    </article>
+                  ))}
+                </div>
               </div>
 
-              {/* Active form — auth logic untouched */}
-              {tab === 'signup' ? (
-                <div
-                  key="signup"
-                  role="tabpanel"
-                  id="auth-panel-signup"
-                  aria-labelledby="auth-tab-signup"
-                  className="auth-form-swap"
-                >
-                  <SignupForm />
+              {/* Slow ticker */}
+              <div className="reel-ticker-wrap mt-10" aria-hidden="true">
+                <div className="reel-ticker">
+                  {[...tickerItems, ...tickerItems].map((item, i) => (
+                    <span key={`${item}-${i}`}>{item}</span>
+                  ))}
                 </div>
-              ) : (
-                <div
-                  key="signin"
-                  role="tabpanel"
-                  id="auth-panel-signin"
-                  aria-labelledby="auth-tab-signin"
-                  className="auth-form-swap"
-                >
-                  <LoginForm redirectTo={redirectTo} />
-                </div>
-              )}
+              </div>
             </div>
           </div>
         </div>
