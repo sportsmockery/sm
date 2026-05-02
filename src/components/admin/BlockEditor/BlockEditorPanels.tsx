@@ -919,6 +919,56 @@ export function DividerPanel({ block, onDelete, onMoveUp, onMoveDown }: BlockPan
   );
 }
 
+// ─── FAQ Block Panel ───
+
+export function FAQPanel({ block, onChange, onDelete, onMoveUp, onMoveDown }: BlockPanelProps) {
+  if (block.type !== 'faq') return null;
+  const items = (block.data as { items: { question: string; answer: string }[] }).items;
+
+  const updateItem = (idx: number, updates: Partial<{ question: string; answer: string }>) => {
+    const next = [...items];
+    next[idx] = { ...next[idx], ...updates };
+    onChange({ ...block, data: { items: next } } as typeof block);
+  };
+  const addItem = () => {
+    onChange({ ...block, data: { items: [...items, { question: '', answer: '' }] } } as typeof block);
+  };
+  const removeItem = (idx: number) => {
+    onChange({ ...block, data: { items: items.filter((_, i) => i !== idx) } } as typeof block);
+  };
+
+  return (
+    <BlockShell label="FAQ" accent="#BC0000" onDelete={onDelete} onMoveUp={onMoveUp} onMoveDown={onMoveDown}>
+      {items.map((item, idx) => (
+        <div
+          key={idx}
+          className="mb-3 rounded-lg p-3"
+          style={{ border: '1px solid rgba(0,0,0,0.08)', backgroundColor: 'rgba(0,0,0,0.02)' }}
+        >
+          <div className="flex items-start justify-between gap-2 mb-2">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Q{idx + 1}</span>
+            {items.length > 1 && (
+              <button type="button" onClick={() => removeItem(idx)} className="text-slate-400 hover:text-[#BC0000]">
+                <Trash2 size={12} />
+              </button>
+            )}
+          </div>
+          <Field label="Question">
+            <TextInput value={item.question} onChange={(q) => updateItem(idx, { question: q })} placeholder="What is...?" />
+          </Field>
+          <Field label="Answer">
+            <TextArea value={item.answer} onChange={(a) => updateItem(idx, { answer: a })} placeholder="The answer..." rows={2} />
+          </Field>
+        </div>
+      ))}
+      <button type="button" onClick={addItem} className="text-xs text-[#00D4FF] hover:underline">+ Add question</button>
+      {items.filter(i => i.question && i.answer).length < 3 && (
+        <p className="text-[10px] text-slate-400 mt-2">Add at least 3 Q&A pairs to enable FAQPage schema.</p>
+      )}
+    </BlockShell>
+  );
+}
+
 // ─── Editorial Structure Panels (shared shape: { html: string }) ───
 // Reused for tldr, key-facts, why-it-matters, whats-next, and analysis.
 const EDITORIAL_LABELS: Record<string, { label: string; accent?: string; placeholder: string }> = {
@@ -987,6 +1037,7 @@ export function BlockPanel(props: BlockPanelProps) {
     'why-it-matters': EditorialPanel,
     'whats-next': EditorialPanel,
     'analysis': EditorialPanel,
+    'faq': FAQPanel,
     // Analysis
     'scout-insight': ScoutInsightPanel,
     'stats-chart': StatsChartPanel,
