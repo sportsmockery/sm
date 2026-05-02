@@ -11,7 +11,7 @@ import NextPrevArticle from '@/components/article/NextPrevArticle'
 import ArticleTags from '@/components/article/ArticleTags'
 import ArticleViewTracker from '@/components/ArticleViewTracker'
 import { ViewCounterCompact, CommentCountCompact } from '@/components/ViewCounter'
-import ReadingProgressBar from '@/components/article/ReadingProgressBar'
+import { ArticleProgressHeader } from '@/components/article/ArticleProgressHeader'
 import ArticleActions from '@/components/article/ArticleActions'
 import ArticleSchema from '@/components/article/ArticleSchema'
 import CommentSection from '@/components/article/CommentSection'
@@ -336,8 +336,13 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
       {/* Track page view */}
       <ArticleViewTracker postId={post.id} />
 
-      {/* Reading Progress Bar */}
-      <ReadingProgressBar />
+      {/* Immersive reader header — back, fading title, brand-red progress bar.
+          Pairs with the global Header's article-route guard (returns null on
+          this URL pattern) so the chrome doesn't double up. */}
+      <ArticleProgressHeader
+        title={post.title}
+        backHref={`/${categoryData?.slug || category}`}
+      />
 
       {/* JSON-LD Structured Data */}
       {post.image_variants?.['16x9']?.url && (
@@ -378,8 +383,10 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
         ])}
       />
 
-      {/* 2030 Hero Header */}
-      <header className="article-header-2030" style={{ paddingTop: 'calc(var(--sm-nav-height, 72px) + 16px)', paddingBottom: 32, minHeight: 0, position: 'relative', background: 'var(--sm-dark)' }}>
+      {/* 2030 Hero Header — top padding clears the ArticleProgressHeader
+          (56px + safe-area) instead of the global nav, since the global nav
+          is suppressed on article routes. */}
+      <header className="article-header-2030" style={{ paddingTop: 'calc(56px + env(safe-area-inset-top, 0px) + 16px)', paddingBottom: 32, minHeight: 0, position: 'relative', background: 'var(--sm-dark)' }}>
         <div style={{ position: 'relative', zIndex: 1, maxWidth: 1236, margin: '0 auto', padding: '0 24px' }}>
           {/* Featured image with headline overlay */}
           {post.featured_image ? (

@@ -375,6 +375,7 @@ export default function VisionTheaterClient({ data }: { data: VisionTheaterData 
     >
       {/* ========== HERO SECTION ========== */}
       <section
+        className="vt-hero-mobile"
         style={{
           position: 'relative',
           minHeight: '50vh',

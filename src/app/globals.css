@@ -1096,6 +1096,99 @@ main {
   margin-bottom: 8px;
 }
 
+/* ========== ARTICLE READER — MOBILE TYPOGRAPHY (Pillar 4) ==========
+   Tightens reading rhythm on phones: larger body, calmer line-height,
+   subtle negative tracking. Theme-aware. Desktop styles above are untouched. */
+@media (max-width: 768px) {
+  .article-body {
+    font-size: 17px;
+    line-height: 1.65;
+    letter-spacing: -0.011em;
+    color: var(--color-text-primary);
+    overflow-wrap: break-word;
+    -webkit-hyphens: auto;
+            hyphens: auto;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .article-body p {
+    margin-bottom: 24px;
+    color: var(--color-text-primary);
+  }
+
+  /* Drop-cap-like emphasis for the first paragraph (subtle, not flashy). */
+  .article-body > p:first-of-type {
+    font-size: 18px;
+    line-height: 1.6;
+  }
+
+  .article-body blockquote {
+    border-left: 3px solid #BC0000;
+    padding: 14px 18px;
+    margin: 28px 0;
+    font-style: italic;
+    color: var(--color-text-primary);
+    background: rgba(11, 15, 20, 0.04);
+    border-radius: 0 12px 12px 0;
+  }
+  [data-theme="dark"] .article-body blockquote,
+  .dark .article-body blockquote {
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--color-text-primary);
+  }
+
+  .article-body h2 {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.018em;
+    margin: 36px 0 14px;
+  }
+
+  .article-body h3 {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.012em;
+    margin: 28px 0 12px;
+  }
+
+  .article-body ul,
+  .article-body ol {
+    margin: 0 0 24px 22px;
+    padding: 0;
+  }
+
+  .article-body li {
+    margin-bottom: 10px;
+    line-height: 1.6;
+  }
+
+  .article-body a {
+    color: #BC0000;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+
+  .article-body code {
+    font-size: 0.92em;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(11, 15, 20, 0.06);
+  }
+  [data-theme="dark"] .article-body code,
+  .dark .article-body code {
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  /* Reserve top space for the immersive ArticleProgressHeader (h-14 + safe-area). */
+  .article-reader-mode {
+    padding-top: calc(56px + env(safe-area-inset-top));
+  }
+}
+
 /* Shortcode icons */
 .shortcode-icon {
   display: inline-block;
@@ -1428,6 +1521,61 @@ main {
   background: linear-gradient(90deg, var(--sm-surface) 0%, var(--sm-card-hover) 40%, var(--sm-surface) 80%);
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* ========== LIQUID SKELETON (Pillar 3) ==========
+   Frosted glass placeholder with a translating gradient sweep — feels like
+   the UI is rendering, not stalling. Distinct from `.skeleton` because it
+   animates `transform`, not `background-position`. */
+@keyframes liquid-shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.liquid-skeleton {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+[data-theme="light"] .liquid-skeleton,
+.light .liquid-skeleton {
+  background: rgba(11, 15, 20, 0.04);
+  border-color: rgba(11, 15, 20, 0.08);
+}
+
+.liquid-skeleton-sweep {
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.10) 50%,
+    transparent 100%
+  );
+  animation: liquid-shimmer 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  pointer-events: none;
+}
+[data-theme="light"] .liquid-skeleton-sweep,
+.light .liquid-skeleton-sweep {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(11, 15, 20, 0.06) 50%,
+    transparent 100%
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .liquid-skeleton-sweep {
+    animation: none !important;
+    transform: none !important;
+    /* Keep a subtle static highlight so users still see "placeholder" intent */
+    opacity: 0.6;
+  }
 }
 
 /* ========== TACTILE PRESS SCALE ========== */
@@ -5819,5 +5967,367 @@ a.glass-card-sm:active,
   .auth-orb-2 {
     animation: none !important;
     transform: none !important;
+  }
+}
+
+/* ==========================================================================
+   MOBILE REFINEMENT UTILITIES (2026-05-02)
+   Shared, additive utilities for mobile UX. Brand-neutral.
+   ========================================================================== */
+
+.tap-target,
+button.tap-target,
+a.tap-target {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.tap-target-loose { position: relative; }
+.tap-target-loose::before { content: ''; position: absolute; inset: -10px; }
+
+.safe-top    { padding-top:    env(safe-area-inset-top); }
+.safe-right  { padding-right:  env(safe-area-inset-right); }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+.safe-left   { padding-left:   env(safe-area-inset-left); }
+.safe-x {
+  padding-left:  env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+.scroll-snap-x {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.scroll-snap-x::-webkit-scrollbar { display: none; }
+.scroll-snap-x > * { scroll-snap-align: start; flex-shrink: 0; }
+
+.touch-press {
+  transition: transform 120ms ease, background-color 120ms ease;
+}
+.touch-press:active { transform: scale(0.985); }
+
+@media (max-width: 640px) {
+  .sm-input,
+  input[type="text"].sm-input,
+  input[type="email"].sm-input,
+  input[type="password"].sm-input,
+  input[type="search"].sm-input {
+    min-height: 48px;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-row-stack-sm {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+  }
+  .auth-row-stack-sm > a,
+  .auth-row-stack-sm > label {
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 1023px) {
+  .scout-ai-grid { grid-template-columns: 1fr !important; }
+  .scout-ai-sidebar-card { display: none !important; }
+  .scout-ai-main-card {
+    min-height: calc(100dvh - 160px) !important;
+    max-height: none !important;
+  }
+}
+.scout-ai-sidebar-trigger { display: none; }
+@media (max-width: 1023px) {
+  .scout-ai-sidebar-trigger { display: inline-flex; }
+}
+
+/* ==========================================================================
+   STRUCTURAL OVERRIDES (target existing inline styles via attribute selectors)
+   These deliver mobile fixes without touching component .tsx files.
+   ========================================================================== */
+
+/* Show the scout-ai mobile header strip on mobile (hidden by default). */
+@media (max-width: 1023px) {
+  .scout-ai-mobile-header { display: flex !important; }
+}
+
+/* ===== Scout AI page — collapse 2-column grid on mobile =====
+   Targets the inline `gridTemplateColumns: 'minmax(260px, 280px) 1fr'`. */
+@media (max-width: 1023px) {
+  .scout-ai-main > div > div[style*="minmax(260px"] {
+    grid-template-columns: 1fr !important;
+    gap: 0 !important;
+  }
+  /* Hide the sidebar column (first child of grid) on mobile.
+     Surface its content under "Tips" link instead. */
+  .scout-ai-main > div > div[style*="minmax(260px"] > div:first-child {
+    display: none !important;
+  }
+  /* Let main chat use full dynamic viewport on mobile — fixes keyboard issues. */
+  .scout-ai-main .glass-card.glass-card-static[style*="maxHeight"] {
+    min-height: calc(100dvh - 140px) !important;
+    max-height: calc(100dvh - 140px) !important;
+  }
+  /* Tighten chat container padding on mobile so messages get more width. */
+  .scout-ai-main > div {
+    padding: 12px 8px !important;
+  }
+  /* Suggested-prompt buttons must wrap on narrow phones, not nowrap. */
+  .scout-ai-main button[style*="whiteSpace: nowrap"][style*="borderRadius"][style*="pill"] {
+    white-space: normal !important;
+    text-align: left !important;
+    min-height: 40px !important;
+  }
+  /* Compose input row on mobile: tighten padding, stack-friendly */
+  .scout-ai-main .glass-card-sm[style*="borderTop"] {
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom)) !important;
+  }
+  /* Reduce massive scout image in empty state on small screens */
+  .scout-ai-main .glass-card-static [class*="scout-thinking-border"][style*="width: 96px"],
+  .scout-ai-main .glass-card-static div[style*="width: 96, height: 96"],
+  .scout-ai-main .glass-card-static div[style*="width: 96px"][style*="height: 96px"] {
+    width: 72px !important;
+    height: 72px !important;
+  }
+}
+
+/* ===== Vision Theater — reduce hero size + perf-friendly orbs on mobile ===== */
+@media (max-width: 768px) {
+  /* Target the linear-gradient hero. Its min-height: 50vh is too tall on phones. */
+  section[style*="linear-gradient(135deg, rgba(188,0,0,0.15)"] {
+    min-height: 38vh !important;
+  }
+  /* Reduce orb count visually — hide every 2nd orb on mobile to ease GPU load */
+  .vt-orb:nth-child(2n) {
+    display: none !important;
+  }
+}
+
+/* ===== Vision Theater — Scout modal close button & sticky-bottom on mobile ===== */
+.vt-orb { will-change: transform; }
+@media (prefers-reduced-motion: reduce) {
+  .vt-orb { animation: none !important; }
+}
+
+/* ===== Owner / Methodology modal — enlarge tap targets on close buttons ===== */
+@media (max-width: 768px) {
+  /* Generic: any small SVG inside an aria-label="Close" button → 44x44 hit area */
+  button[aria-label="Close"],
+  button[aria-label="close"],
+  button[aria-label*="Close menu"],
+  button[aria-label*="Close player"] {
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+}
+
+/* ===== Header tap targets — wrap small icon links in 44x44 zones =====
+   The header search icon and small dropdown caret get a larger touch area on
+   mobile without changing their visible icon size. */
+@media (max-width: 1023px) {
+  .nav-right > a[aria-label="Search"] {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+  }
+  .nav-right > a[aria-label="Search"]:focus-visible {
+    outline: 2px solid #00D4FF;
+    outline-offset: 2px;
+  }
+  /* User menu trigger button — make padding tap-friendly without resizing avatar */
+  .nav-right > div.relative > button {
+    padding: 6px !important;
+    min-height: 44px !important;
+    border-radius: 999px;
+  }
+  .nav-right > div.relative > button:focus-visible {
+    outline: 2px solid #00D4FF;
+    outline-offset: 2px;
+  }
+  /* Login/Signup links — bump tap area on mobile */
+  .nav-right a[href="/login"],
+  .nav-right a[href="/signup"] {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+/* ===== Hamburger focus ring (accessibility) ===== */
+.nav-hamburger:focus-visible {
+  outline: 2px solid #00D4FF;
+  outline-offset: 2px;
+}
+
+/* ===== Drawer link tap-target floor (works with existing .drawer-panel) ===== */
+.drawer-panel a,
+.drawer-panel button {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+/* ===== Login form mobile polish =====
+   The "Remember me" / "Forgot password" row is rendered as flex
+   space-between. Stack it on narrow phones. Targets the surrounding pattern. */
+@media (max-width: 380px) {
+  /* Generic stack helper for any narrow auth row using justify-content: space-between */
+  form > div[style*="justify-content: space-between"][style*="display: flex"] {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+}
+
+/* Bigger tap target on login checkboxes */
+@media (max-width: 640px) {
+  input[type="checkbox"][style*="width: 16, height: 16"],
+  input[type="checkbox"][style*="width: 16px"] {
+    width: 20px !important;
+    height: 20px !important;
+  }
+}
+
+/* ===== TEAM HUB — tighten subnav padding on small phones ===== */
+@media (max-width: 480px) {
+  .team-subnav-mobile a {
+    padding: 12px 12px !important;
+    font-size: 13px !important;
+  }
+  /* Tighten team header padding on narrow phones */
+  .team-hub-main-content {
+    padding: 20px 16px 40px !important;
+  }
+}
+
+/* ===== TEAM HUB — bigger lead story differentiation =====
+   When ArticleCard has isLarge prop, parent gives a class or style.
+   Apply an additive ribbon on mobile so the lead story stands out. */
+@media (max-width: 768px) {
+  .team-hub-main-content article:first-of-type,
+  .team-hub-main-content [data-lead="true"] {
+    box-shadow: 0 0 0 1px rgba(0, 212, 255, 0.20), 0 12px 24px -16px rgba(0, 0, 0, 0.4);
+  }
+}
+
+/* ===== GM TRADE / MOCK DRAFT — sticky mobile action affordance =====
+   Add bottom padding so any sticky action bar isn't masked by MobileBottomNav.
+   Routes can opt-in by adding the .has-mobile-action-bar class to a container. */
+.has-mobile-action-bar {
+  padding-bottom: calc(72px + env(safe-area-inset-bottom)) !important;
+}
+
+/* ===== HOMEPAGE — mobile tweaks =====
+   Quick action chips on hero often have whiteSpace: nowrap which truncates on narrow.
+   Allow wrap on small phones. */
+@media (max-width: 480px) {
+  .hp-hero button[style*="whiteSpace: nowrap"],
+  .hp-hero a[style*="whiteSpace: nowrap"] {
+    white-space: normal !important;
+  }
+}
+
+/* Image-card aspect ratio on TopIntelligenceCard — 16:9 too wide on phones,
+   shift to 4:3 on small mobile so headlines breathe. */
+@media (max-width: 480px) {
+  [class*="TopIntelligence"] [style*="aspectRatio: '16/9'"],
+  [class*="TopIntelligence"] [style*="aspect-ratio: 16/9"] {
+    aspect-ratio: 4 / 3 !important;
+  }
+}
+
+/* ===== UNIVERSAL — small SVG-only buttons inside modals/panels =====
+   Many close buttons render as 16-18px svgs in tight 4-8px padding wrappers,
+   breaking the 44x44 floor. This safety rule ensures any in-modal icon button
+   gets a usable hit area on touch screens. */
+@media (max-width: 768px) {
+  div[role="dialog"] button:has(> svg:only-child),
+  [aria-modal="true"] button:has(> svg:only-child) {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+/* ===== LIVE STRIP — collapse with header on mobile so chrome doesn't dominate ===== */
+@media (max-width: 768px) {
+  .live-strip {
+    min-height: 30px;
+  }
+  .live-strip-inner {
+    padding: 0 12px;
+  }
+}
+
+/* ===== Card press state for mobile — universal touch feedback ===== */
+@media (hover: none) and (pointer: coarse) {
+  .card-interactive:active,
+  article:active,
+  [role="button"]:active {
+    transform: scale(0.985);
+    transition: transform 100ms ease-out;
+  }
+}
+
+.scout-ai-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: fadeIn 180ms ease-out;
+}
+.scout-ai-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1110;
+  max-height: 80dvh;
+  overflow-y: auto;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  background: var(--sm-surface);
+  border-top: 1px solid var(--sm-border);
+  padding: 16px 20px calc(20px + env(safe-area-inset-bottom));
+  animation: scoutSheetUp 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes scoutSheetUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+  .vt-hero-mobile { min-height: 38vh !important; }
+}
+
+.team-subnav-mobile {
+  position: relative;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%);
+          mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%);
+}
+@media (min-width: 768px) {
+  .team-subnav-mobile {
+    -webkit-mask-image: none;
+            mask-image: none;
+  }
+}
+
+@media (max-width: 359px) {
+  h1.hp-hero-title,
+  .hp-hero h1 {
+    font-size: clamp(36px, 9vw, 44px) !important;
+    line-height: 1.05 !important;
   }
 }

@@ -29,6 +29,34 @@ const teamLinks = [
   { name: 'Blackhawks', href: '/chicago-blackhawks' },
 ]
 
+// Hardcoded top-level directories under src/app/. Used to distinguish
+// /[category]/[slug] article URLs from non-article 2-segment routes
+// (e.g. /admin/users, /chicago-bears/roster, /author/jane).
+// Keep in sync when adding a new top-level route. Lowercase, no slash.
+const HARDCODED_TOP_LEVEL = new Set([
+  'about', 'admin', 'api', 'apply', 'ar', 'ar2', 'ar3', 'audio',
+  'author', 'authors', 'bears', 'bears-film-room', 'chat',
+  'chicago-bears', 'chicago-bears-player', 'chicago-bears1',
+  'chicago-blackhawks', 'chicago-bulls', 'chicago-cubs',
+  'chicago-white-sox', 'collectibles', 'contact', 'datahub', 'designs',
+  'edge', 'editorial-standards', 'fan-chat', 'fan-zone', 'feed',
+  'forgot-password', 'game-center', 'gm', 'governance', 'home', 'home1',
+  'home2', 'leaderboard', 'leaderboards', 'live', 'login', 'masters',
+  'metaverse', 'mock-draft', 'my-gm-score', 'newsletter', 'notifications',
+  'owner', 'pinwheels-and-ivy', 'players', 'polls', 'predictions',
+  'pricing', 'privacy', 'profile', 'reset-password', 'river', 'scout-ai',
+  'search', 'signup', 'southside-behavior', 'studio', 'subscription',
+  'tag', 'teams', 'terms', 'testing', 'training',
+  'untold-chicago-stories', 'vision-theater',
+])
+
+function isArticleRoute(pathname: string | null): boolean {
+  if (!pathname) return false
+  const segments = pathname.split('/').filter(Boolean)
+  if (segments.length !== 2) return false
+  return !HARDCODED_TOP_LEVEL.has(segments[0])
+}
+
 export default function Header() {
   const pathname = usePathname()
   const { user, isAuthenticated, signOut } = useAuth()
@@ -102,6 +130,15 @@ export default function Header() {
     return null
   }
 
+  // Don't render header on immersive article routes — the article page
+  // mounts its own ArticleProgressHeader for reader-mode chrome.
+  // Articles live at /[category]/[slug] (exactly 2 path segments where the
+  // first is NOT a hardcoded top-level directory). When you add a new
+  // top-level route to src/app/, add its segment to HARDCODED_TOP_LEVEL.
+  if (isArticleRoute(pathname)) {
+    return null
+  }
+
   const closeDrawer = () => setDrawerOpen(false)
 
   return (
@@ -159,7 +196,7 @@ export default function Header() {
               alignItems: 'center',
             }}
           >
-            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </Link>

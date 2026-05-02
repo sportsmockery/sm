@@ -55,6 +55,7 @@ export default function AskAIPage() {
   const [queryHistory, setQueryHistory] = useState<QueryHistoryEntry[]>([])
   const [historyLoading, setHistoryLoading] = useState(false)
   const [hasUserInteracted, setHasUserInteracted] = useState(false)
+  const [mobileSheetOpen, setMobileSheetOpen] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -517,6 +518,56 @@ export default function AskAIPage() {
 
             {/* Main Chat Area */}
             <div>
+              {/* Mobile-only header strip with tips/history trigger (sidebar is hidden on mobile via CSS) */}
+              <div
+                className="scout-ai-mobile-header"
+                style={{
+                  display: 'none',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: 12,
+                  padding: '4px 4px 12px',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+                  <div style={{
+                    width: 36, height: 36, borderRadius: 'var(--sm-radius-md)',
+                    background: 'var(--sm-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                  }}>
+                    <Image src="/downloads/scout-v2.png" alt="" width={20} height={20} />
+                  </div>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--sm-text)', lineHeight: 1.2 }}>Scout AI</div>
+                    <div style={{ fontSize: 11, color: 'var(--sm-text-muted)' }}>Chicago sports intelligence</div>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setMobileSheetOpen(true)}
+                  aria-label="Show prompt examples and history"
+                  style={{
+                    background: 'var(--sm-card)',
+                    border: '1px solid var(--sm-border)',
+                    borderRadius: 'var(--sm-radius-pill)',
+                    color: 'var(--sm-text)',
+                    fontSize: 12,
+                    fontWeight: 600,
+                    padding: '8px 14px',
+                    minHeight: 40,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    flexShrink: 0,
+                  }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Tips & history
+                </button>
+              </div>
+
               <div className="glass-card glass-card-static" style={{
                 padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column',
                 minHeight: 'calc(100vh - 120px)', maxHeight: 'calc(100vh - 120px)',
@@ -676,6 +727,106 @@ export default function AskAIPage() {
           </div>
         </div>
       </div>
+
+      {/* Mobile-only sheet — surfaces tips + recent history */}
+      {mobileSheetOpen && (
+        <>
+          <div
+            className="scout-ai-sheet-backdrop"
+            onClick={() => setMobileSheetOpen(false)}
+            aria-hidden="true"
+          />
+          <div
+            className="scout-ai-sheet"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Scout tips and history"
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--sm-text)', margin: 0 }}>
+                What you can ask
+              </h2>
+              <button
+                type="button"
+                onClick={() => setMobileSheetOpen(false)}
+                aria-label="Close"
+                style={{
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  color: 'var(--sm-text-muted)', borderRadius: 10,
+                  minWidth: 44, minHeight: 44,
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                }}
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
+              {[
+                'Compare players & stats',
+                'Explain advanced metrics',
+                'Summarize recent news',
+                'Analyze matchups',
+                'Check schedules & scores',
+                'Review team history',
+              ].map((text) => (
+                <div key={text} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, color: 'var(--sm-text)' }}>
+                  <span aria-hidden="true" style={{ color: '#00D4FF', fontSize: 16, lineHeight: 1 }}>✦</span>
+                  <span>{text}</span>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ borderTop: '1px solid var(--sm-border)', paddingTop: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                <h3 style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--sm-text-dim)', margin: 0 }}>
+                  Recent queries
+                </h3>
+                {queryHistory.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleClearHistory}
+                    style={{
+                      background: 'none', border: 'none', color: 'var(--sm-error)',
+                      fontSize: 11, fontWeight: 600, cursor: 'pointer', padding: '6px 8px',
+                      minHeight: 32,
+                    }}
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+              {historyLoading ? (
+                <p style={{ fontSize: 13, color: 'var(--sm-text-muted)', textAlign: 'center', padding: '16px 0' }}>Loading…</p>
+              ) : queryHistory.length === 0 ? (
+                <p style={{ fontSize: 13, color: 'var(--sm-text-muted)', textAlign: 'center', padding: '16px 0' }}>No recent queries</p>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {queryHistory.slice(0, 8).map((entry) => (
+                    <button
+                      key={entry.id}
+                      onClick={() => { loadFromHistory(entry); setMobileSheetOpen(false) }}
+                      style={{
+                        width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        gap: 8, padding: '12px', borderRadius: 'var(--sm-radius-sm)', fontSize: 13,
+                        color: 'var(--sm-text)', background: 'var(--sm-card)', border: '1px solid var(--sm-border)',
+                        cursor: 'pointer', textAlign: 'left', minHeight: 44,
+                      }}
+                    >
+                      <span style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{entry.query}</span>
+                      <span style={{ fontSize: 11, flexShrink: 0, color: 'var(--sm-text-dim)' }}>
+                        {new Date(entry.timestamp).toLocaleDateString()}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
     </>
   )
 }

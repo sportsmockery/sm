@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-red: #bc0000;
+  --color-brand-red-dark: #a00000;
+  --color-brand-dark: #111111;
+  --color-brand-opponent: #1a73e8;
+
+  --color-grade-green: #22c55e;
+  --color-grade-amber: #f59e0b;
+  --color-grade-red: #ef4444;
+
+  --color-team-bears: #c83803;
+  --color-team-cubs: #0e3386;
+  --color-team-bulls: #ce1141;
+  --color-team-blackhawks: #00833e;
+  --color-team-whitesox: #ffffff;
+
+  --shadow-liquid: 0 8px 32px 0 rgb(0 0 0 / 0.37);
+
+  --font-sans: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-big-shoulders), var(--font-montserrat), ui-sans-serif, sans-serif;
+
+  --text-hero: clamp(2rem, 5vw + 1rem, 3.75rem);
+  --text-hero--line-height: 1.05;
+  --text-hero--letter-spacing: -0.02em;
+
+  --text-display: clamp(1.5rem, 3vw + 0.5rem, 2.25rem);
+  --text-display--line-height: 1.1;
+}
+
+@utility liquid-glass-dark {
+  background-color: rgb(0 0 0 / 0.40);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgb(255 255 255 / 0.10);
+  box-shadow: var(--shadow-liquid);
+}
+
+@utility liquid-glass-light {
+  background-color: rgb(255 255 255 / 0.10);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgb(255 255 255 / 0.20);
+  box-shadow: var(--shadow-liquid);
+}
+
+@utility liquid-glass-pill {
+  background-color: rgb(0 0 0 / 0.55);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid rgb(255 255 255 / 0.12);
+  box-shadow: var(--shadow-liquid);
+  border-radius: 9999px;
+}
+
+@supports not (backdrop-filter: blur(0)) {
+  .liquid-glass-dark { background-color: rgb(0 0 0 / 0.85); }
+  .liquid-glass-light { background-color: rgb(255 255 255 / 0.08); }
+  .liquid-glass-pill { background-color: rgb(0 0 0 / 0.85); }
+}
+
+@layer base {
+  html, body {
+    height: 100%;
+    background-color: var(--color-brand-dark);
+    color: #fafafa;
+    font-family: var(--font-sans);
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    min-height: 100dvh;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-brand-red);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  ::selection {
+    background-color: var(--color-brand-red);
+    color: #fafafa;
+  }
+}
+
+@layer utilities {
+  .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+  .safe-top { padding-top: env(safe-area-inset-top); }
+  .safe-x { padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
