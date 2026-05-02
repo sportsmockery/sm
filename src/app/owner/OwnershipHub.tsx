@@ -164,14 +164,15 @@ export default function OwnershipHub({ grades, scoutData }: { grades: OwnershipG
               onClick={() => setShowMethodology(false)}
               style={{
                 position: 'absolute',
-                top: 12,
-                right: 12,
+                top: 8,
+                right: 8,
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
                 color: 'var(--sm-text-muted)',
-                padding: 4,
-                display: 'flex',
+                minWidth: 44,
+                minHeight: 44,
+                display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
               }}

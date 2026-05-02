@@ -252,7 +252,7 @@ function ARModal({
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center text-white hover:text-red-600 transition-colors focus:outline-none focus:ring-2 focus:ring-red-600 z-10"
+          className="absolute top-4 right-4 w-11 h-11 flex items-center justify-center text-white hover:text-red-600 transition-colors focus:outline-none focus:ring-2 focus:ring-red-600 z-10"
           aria-label="Close"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

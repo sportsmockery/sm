@@ -1173,8 +1173,8 @@
   height: 3px; background: var(--hm-gradient); opacity: 0.8;
 }
 .hm-modal-close {
-  position: absolute; top: 20px; right: 20px;
-  width: 36px; height: 36px; border-radius: 50%;
+  position: absolute; top: 16px; right: 16px;
+  width: 44px; height: 44px; border-radius: 50%;
   background: rgba(255,255,255,0.06); border: none;
   color: var(--hm-text-muted); font-size: 22px;
   cursor: pointer; display: flex; align-items: center; justify-content: center;

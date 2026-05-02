@@ -563,7 +563,7 @@ export function BlockPickerModal({ open, onClose, onInsert }: BlockPickerModalPr
           <button
             type="button"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-white/10"
+            className="flex h-11 w-11 items-center justify-center rounded-full transition-colors hover:bg-white/10"
             aria-label="Close"
           >
             <X size={16} className="text-white/70" />

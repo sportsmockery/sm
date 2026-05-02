@@ -238,7 +238,7 @@ export default function ScoutCommentary({ teamSlug, initialData }: ScoutCommenta
               {data?.angle_name && <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 4, backgroundColor: 'rgba(0,212,255,0.12)', color: '#00D4FF', lineHeight: 1 }}>{data.angle_name}</span>}
               {isTalking && <span style={{ fontSize: 11, color: '#00D4FF', fontWeight: 500 }}>speaking...</span>}
             </div>
-            <button onClick={handleClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--sm-text-muted)', padding: 4, display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label="Close">
+            <button onClick={handleClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--sm-text-muted)', minWidth: 44, minHeight: 44, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }} aria-label="Close">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
             </button>
           </div>

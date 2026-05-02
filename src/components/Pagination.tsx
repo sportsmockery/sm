@@ -47,7 +47,7 @@ export default function Pagination({ currentPage, totalPages, basePath }: Pagina
       {currentPage > 1 ? (
         <Link
           href={getPageUrl(currentPage - 1)}
-          className="group flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 shadow-sm hover:shadow"
+          className="group flex items-center gap-2 px-4 py-3 min-h-11 rounded-xl text-sm font-semibold transition-all duration-300 shadow-sm hover:shadow"
           style={{ color: 'var(--sm-text-dim)', backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}
           aria-label="Previous page"
         >
@@ -57,7 +57,7 @@ export default function Pagination({ currentPage, totalPages, basePath }: Pagina
           <span className="hidden sm:inline">Previous</span>
         </Link>
       ) : (
-        <span className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold cursor-not-allowed" style={{ color: 'var(--sm-text-muted)', backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)' }}>
+        <span className="flex items-center gap-2 px-4 py-3 min-h-11 rounded-xl text-sm font-semibold cursor-not-allowed" style={{ color: 'var(--sm-text-muted)', backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)' }}>
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
@@ -79,7 +79,7 @@ export default function Pagination({ currentPage, totalPages, basePath }: Pagina
             <Link
               key={page}
               href={getPageUrl(page)}
-              className={`relative px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 ${
+              className={`relative inline-flex items-center justify-center min-w-11 min-h-11 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 ${
                 page === currentPage
                   ? 'bg-[#BC0000] text-white shadow-lg hover:shadow-xl scale-105'
                   : 'text-[var(--sm-text-dim)] hover:text-[var(--sm-text)] hover:bg-[var(--sm-card-hover)]'
@@ -106,7 +106,7 @@ export default function Pagination({ currentPage, totalPages, basePath }: Pagina
       {currentPage < totalPages ? (
         <Link
           href={getPageUrl(currentPage + 1)}
-          className="group flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 shadow-sm hover:shadow"
+          className="group flex items-center gap-2 px-4 py-3 min-h-11 rounded-xl text-sm font-semibold transition-all duration-300 shadow-sm hover:shadow"
           style={{ color: 'var(--sm-text-dim)', backgroundColor: 'var(--sm-card)', border: '1px solid var(--sm-border)' }}
           aria-label="Next page"
         >
@@ -116,7 +116,7 @@ export default function Pagination({ currentPage, totalPages, basePath }: Pagina
           </svg>
         </Link>
       ) : (
-        <span className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold cursor-not-allowed" style={{ color: 'var(--sm-text-muted)', backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)' }}>
+        <span className="flex items-center gap-2 px-4 py-3 min-h-11 rounded-xl text-sm font-semibold cursor-not-allowed" style={{ color: 'var(--sm-text-muted)', backgroundColor: 'var(--sm-surface)', border: '1px solid var(--sm-border)' }}>
           <span className="hidden sm:inline">Next</span>
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
