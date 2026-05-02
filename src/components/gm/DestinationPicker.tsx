@@ -95,7 +95,7 @@ export function DestinationPicker({
             }}>
               <span style={{ fontSize: 11, color: subText, fontWeight: 600, textTransform: 'uppercase' }}>From:</span>
               {fromTeam.logo && (
-                <Image src={fromTeam.logo} alt="" width={24} height={24} style={{ objectFit: 'contain' }} />
+                <Image src={fromTeam.logo} alt={fromTeam.name} width={24} height={24} style={{ objectFit: 'contain' }} />
               )}
               <span style={{ fontWeight: 600, fontSize: 13, color: fromTeam.color }}>{fromTeam.name}</span>
             </div>
@@ -130,7 +130,7 @@ export function DestinationPicker({
                     }}
                   >
                     {team.logo ? (
-                      <Image src={team.logo} alt="" width={36} height={36} style={{ objectFit: 'contain' }} />
+                      <Image src={team.logo} alt={team.name} width={36} height={36} style={{ objectFit: 'contain' }} />
                     ) : (
                       <div style={{
                         width: 36, height: 36, borderRadius: 18,

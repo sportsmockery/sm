@@ -223,7 +223,7 @@ export function ThreeTeamTradeBoard({
                   }}>
                     <span>To</span>
                     {to.logo && (
-                      <Image src={to.logo} alt="" width={14} height={14} style={{ objectFit: 'contain' }} />
+                      <Image src={to.logo} alt={to.name} width={14} height={14} style={{ objectFit: 'contain' }} />
                     )}
                     <span style={{ fontWeight: 600, color: to.color }}>{to.name}</span>
                   </div>
@@ -307,7 +307,7 @@ export function ThreeTeamTradeBoard({
                   }}>
                     <span>From</span>
                     {from.logo && (
-                      <Image src={from.logo} alt="" width={14} height={14} style={{ objectFit: 'contain' }} />
+                      <Image src={from.logo} alt={from.name} width={14} height={14} style={{ objectFit: 'contain' }} />
                     )}
                     <span style={{ fontWeight: 600, color: from.color }}>{from.name}</span>
                   </div>
@@ -456,14 +456,14 @@ export function ThreeTeamTradeBoard({
                   }}
                 >
                   {from.logo && (
-                    <Image src={from.logo} alt="" width={16} height={16} style={{ objectFit: 'contain' }} />
+                    <Image src={from.logo} alt={from.name} width={16} height={16} style={{ objectFit: 'contain' }} />
                   )}
                   <span style={{ fontWeight: 600, color: from.color }}>{from.name.split(' ').pop()}</span>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={subText} strokeWidth="2">
                     <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                   {to.logo && (
-                    <Image src={to.logo} alt="" width={16} height={16} style={{ objectFit: 'contain' }} />
+                    <Image src={to.logo} alt={to.name} width={16} height={16} style={{ objectFit: 'contain' }} />
                   )}
                   <span style={{ fontWeight: 600, color: to.color }}>{to.name.split(' ').pop()}</span>
                   <span style={{

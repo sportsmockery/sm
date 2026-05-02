@@ -57,7 +57,7 @@ export default function Linescore({ game }: LinescoreProps) {
               <tr style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
                 <td className="px-3 py-1.5">
                   <div className="flex items-center gap-1.5">
-                    <Image src={game.away_team.logo_url} alt="" width={18} height={18} className="object-contain" unoptimized />
+                    <Image src={game.away_team.logo_url} alt={game.away_team.abbr} width={18} height={18} className="object-contain" unoptimized />
                     <span className="font-medium" style={{ color: '#FAFAFB' }}>{game.away_team.abbr}</span>
                   </div>
                 </td>
@@ -70,7 +70,7 @@ export default function Linescore({ game }: LinescoreProps) {
               <tr style={{ borderTop: '1px solid rgba(255,255,255,0.1)' }}>
                 <td className="px-3 py-1.5">
                   <div className="flex items-center gap-1.5">
-                    <Image src={game.home_team.logo_url} alt="" width={18} height={18} className="object-contain" unoptimized />
+                    <Image src={game.home_team.logo_url} alt={game.home_team.abbr} width={18} height={18} className="object-contain" unoptimized />
                     <span className="font-medium" style={{ color: '#FAFAFB' }}>{game.home_team.abbr}</span>
                   </div>
                 </td>
