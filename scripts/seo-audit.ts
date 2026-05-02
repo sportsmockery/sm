@@ -131,6 +131,44 @@ async function auditUrl(url: string): Promise<void> {
   }
 }
 
+/**
+ * CLS guard: every JSX <img in src/ must have width+height (or be inside an
+ * aspect-ratio container — we check for the attributes only).  Regex-only img
+ * references (content-utils, hooks) and eslint-disable lines are skipped.
+ */
+function grepImgMissingDimensions(): void {
+  log(`3.5/4 Scanning JSX <img> tags for missing width/height…`)
+  try {
+    // Find all <img in .tsx/.jsx files, excluding test/regex-only contexts
+    const out = execSync(
+      `grep -rn --include='*.tsx' --include='*.jsx' '<img' src/ || true`,
+      { cwd: repoRoot, encoding: 'utf8' }
+    )
+    const lines = out.split('\n').filter(Boolean)
+    for (const line of lines) {
+      // Skip eslint-disable comments, regex patterns, template literals used for HTML strings
+      if (/eslint-disable|RegExp|\.match\(|\.test\(|\.replace\(|`<img/.test(line)) continue
+      // Only care about JSX img tags (lowercase <img with props)
+      if (!/<img\s/.test(line)) continue
+      // Check for width AND height attributes
+      const hasWidth = /\bwidth[={]/.test(line)
+      const hasHeight = /\bheight[={]/.test(line)
+      if (!hasWidth || !hasHeight) {
+        const fileLine = line.split(':').slice(0, 2).join(':')
+        issues.push({ url: fileLine, problem: '<img> missing explicit width/height (CLS risk)' })
+      }
+    }
+  } catch {
+    // grep returns 1 when no match
+  }
+}
+
+/**
+ * Files allowed to contain the www. origin — centralised WP constant only.
+ * Add paths here (relative to repo root) if a legitimate exception arises.
+ */
+const WWW_DENYLIST_EXCEPTIONS = ['src/lib/wordpress.ts']
+
 function grepHardcodedHosts(): void {
   log(`3/4 Scanning src for hardcoded host leaks…`)
   // www. is the legacy WordPress host — leaking it on apex sends crawlers in a redirect loop.
@@ -139,12 +177,15 @@ function grepHardcodedHosts(): void {
   for (const pattern of patterns) {
     try {
       const out = execSync(
-        `grep -rn --include='*.ts' --include='*.tsx' "${pattern}" src/app src/components || true`,
+        `grep -rn --include='*.ts' --include='*.tsx' "${pattern}" src/ || true`,
         { cwd: repoRoot, encoding: 'utf8' }
       )
       const lines = out.split('\n').filter(Boolean)
-      // Allow legacy redirect-source patterns inside next.config.ts (those are intentional)
-      const real = lines.filter((l) => !l.includes('next.config'))
+      // Allow next.config.ts redirect-source patterns and denylisted files
+      const real = lines.filter((l) => {
+        if (l.includes('next.config')) return false
+        return !WWW_DENYLIST_EXCEPTIONS.some((ex) => l.startsWith(ex))
+      })
       if (real.length > 0) {
         for (const line of real) {
           issues.push({ url: line.split(':').slice(0, 2).join(':'), problem: `hardcoded ${pattern}` })
@@ -167,6 +208,7 @@ async function main() {
   }
 
   grepHardcodedHosts()
+  grepImgMissingDimensions()
 
   log(`4/4 Writing audit/report.md`)
   const auditDir = resolve(repoRoot, 'audit')
@@ -203,9 +245,10 @@ async function main() {
   writeFileSync(resolve(auditDir, 'report.md'), lines.join('\n') + '\n')
   log(`Done. ${issues.length} issue(s). See audit/report.md`)
 
-  // Exit non-zero on hardcoded host leaks (build gate). Other issues are warnings.
+  // Exit non-zero on hardcoded host leaks or CLS violations (build gate).
   const hostLeaks = issues.filter((i) => i.problem.startsWith('hardcoded'))
-  if (hostLeaks.length > 0) process.exit(1)
+  const clsViolations = issues.filter((i) => i.problem.includes('CLS risk'))
+  if (hostLeaks.length > 0 || clsViolations.length > 0) process.exit(1)
 }
 
 main().catch((err) => {

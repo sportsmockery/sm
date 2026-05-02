@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { transformPosts, type PostToTransform } from '@/lib/transform-post'
+import { WP_ORIGIN } from '@/lib/wordpress'
 
 export const maxDuration = 60
 export const dynamic = 'force-dynamic'
 
-const WP_BASE_URL = 'https://www.sportsmockery.com/wp-json/sm-export/v1'
+const WP_BASE_URL = `${WP_ORIGIN}/wp-json/sm-export/v1`
 const MAX_PAGES = 5
 const PER_PAGE = 100
 

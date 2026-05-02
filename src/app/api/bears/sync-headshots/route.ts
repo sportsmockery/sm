@@ -173,7 +173,7 @@ export async function GET(request: NextRequest) {
     method: 'POST to sync headshots',
     rosterCount: BEARS_ROSTER_ESPN_IDS.length,
     headshotUrlPattern: `${ESPN_HEADSHOT_BASE}/{espn_player_id}.png`,
-    source: 'https://www.sportsmockery.com/chicago-bears-roster',
+    source: '/chicago-bears-roster',
     roster: BEARS_ROSTER_ESPN_IDS.map(p => ({
       name: p.name,
       espnId: p.espnId,

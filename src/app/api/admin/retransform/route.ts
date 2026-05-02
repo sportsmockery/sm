@@ -4,10 +4,12 @@ import { transformPostContent } from '@/lib/transform-post'
 import { serializeDocument } from '@/components/admin/BlockEditor/serializer'
 import { revalidatePath } from 'next/cache'
 
+import { WP_ORIGIN } from '@/lib/wordpress'
+
 export const maxDuration = 300
 export const dynamic = 'force-dynamic'
 
-const WP_API = 'https://www.sportsmockery.com/wp-json/wp/v2/posts'
+const WP_API = `${WP_ORIGIN}/wp-json/wp/v2/posts`
 
 /**
  * POST /api/admin/retransform
