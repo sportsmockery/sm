@@ -49,12 +49,16 @@ jobs:
       - name: Lychee broken-link check
         uses: lycheeverse/lychee-action@v2
         with:
+          # NOTE: --output must NOT appear in args; the action also accepts an
+          # `output` input and lychee-action v2 errors out when both are set.
+          # Use the action's `output` input only.
           args: >-
             --no-progress
             --format json
-            --output audit/lychee.json
             --max-concurrency 4
             audit/sitemap-urls.txt
+          output: audit/lychee.json
+          format: json
           fail: false
 
       - uses: actions/upload-artifact@v4
