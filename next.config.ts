@@ -221,4 +221,20 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// SEO Tip #24 — bundle analysis for INP / first-load JS audits.
+// Run `ANALYZE=true npm run build` to inspect route bundle sizes after
+// installing `@next/bundle-analyzer` as a devDependency. The require is
+// wrapped so missing-package builds fail soft instead of crashing CI.
+function withBundleAnalyzer(config: NextConfig): NextConfig {
+  if (process.env.ANALYZE !== 'true') return config;
+  try {
+
+    const bundleAnalyzer = require('@next/bundle-analyzer');
+    return bundleAnalyzer({ enabled: true })(config);
+  } catch {
+    console.warn('[next.config] ANALYZE=true but @next/bundle-analyzer is not installed. Run: npm i -D @next/bundle-analyzer');
+    return config;
+  }
+}
+
+export default withBundleAnalyzer(nextConfig);

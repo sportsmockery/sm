@@ -8,8 +8,20 @@ import Youtube from '@tiptap/extension-youtube'
 import Placeholder from '@tiptap/extension-placeholder'
 import CharacterCount from '@tiptap/extension-character-count'
 import { useCallback, useEffect, useState, forwardRef, useImperativeHandle, useRef } from 'react'
-import ChartBuilderModal, { ChartConfig } from '@/components/admin/ChartBuilder/ChartBuilderModal'
-import PollBuilder, { PollConfig } from '@/components/admin/PollBuilder/PollBuilder'
+import dynamic from 'next/dynamic'
+import type { ChartConfig } from '@/components/admin/ChartBuilder/ChartBuilderModal'
+import type { PollConfig } from '@/components/admin/PollBuilder/PollBuilder'
+
+// SEO Tip #24 — defer heavy editor modals (echarts + framer-motion) until the
+// writer actually opens them. Keeps the editor's first-load JS small.
+const ChartBuilderModal = dynamic(
+  () => import('@/components/admin/ChartBuilder/ChartBuilderModal'),
+  { ssr: false }
+)
+const PollBuilder = dynamic(
+  () => import('@/components/admin/PollBuilder/PollBuilder'),
+  { ssr: false }
+)
 
 interface RichTextEditorProps {
   content: string
@@ -537,19 +549,23 @@ const RichTextEditor = forwardRef<RichTextEditorRef, RichTextEditorProps>(functi
         </div>
       )}
 
-      {/* Chart Builder Modal */}
-      <ChartBuilderModal
-        isOpen={showChartBuilder}
-        onClose={() => setShowChartBuilder(false)}
-        onInsert={handleSaveChart}
-      />
+      {/* Chart Builder Modal — gated render so the dynamic chunk only loads on open */}
+      {showChartBuilder && (
+        <ChartBuilderModal
+          isOpen={showChartBuilder}
+          onClose={() => setShowChartBuilder(false)}
+          onInsert={handleSaveChart}
+        />
+      )}
 
-      {/* Poll Builder Modal */}
-      <PollBuilder
-        isOpen={showPollBuilder}
-        onClose={() => setShowPollBuilder(false)}
-        onSave={handleSavePoll}
-      />
+      {/* Poll Builder Modal — gated render so the dynamic chunk only loads on open */}
+      {showPollBuilder && (
+        <PollBuilder
+          isOpen={showPollBuilder}
+          onClose={() => setShowPollBuilder(false)}
+          onSave={handleSavePoll}
+        />
+      )}
     </div>
   )
 })
