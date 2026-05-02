@@ -128,6 +128,19 @@ const nextConfig: NextConfig = {
 
       // Old uncategorized content → homepage
       { source: '/uncategorized/:path*', destination: '/', permanent: true },
+
+      // Tip #33 — WP legacy archive/index pages → team hub equivalents
+      // (308 permanent via permanent: true, sourced from
+      // audit/redirect-map-{date}.csv → category=wp_legacy_archive)
+      { source: '/bears-news', destination: '/chicago-bears', permanent: true },
+      { source: '/blackhawks-news', destination: '/chicago-blackhawks', permanent: true },
+      { source: '/bulls-news', destination: '/chicago-bulls', permanent: true },
+      { source: '/chicago-bears-history', destination: '/chicago-bears', permanent: true },
+      { source: '/chicago-bears-odds', destination: '/chicago-bears', permanent: true },
+      { source: '/chicago-bears-player', destination: '/chicago-bears', permanent: true },
+      { source: '/chicago-bears-roster', destination: '/chicago-bears', permanent: true },
+      { source: '/chicago-bears-schedule', destination: '/chicago-bears/schedule', permanent: true },
+      { source: '/chicago-bears-scores', destination: '/chicago-bears/scores', permanent: true },
     ]
   },
 
