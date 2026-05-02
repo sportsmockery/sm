@@ -16,7 +16,7 @@ export const RULES: RuleMeta[] = [
   { id: 'h1_unique', label: 'Single H1', mode: 'auto-fix' },
   { id: 'heading_skip', label: 'No skipped heading levels', mode: 'writer-fix' },
   { id: 'heading_quality', label: 'No empty / overlong headings', mode: 'auto-fix' },
-  { id: 'internal_link', label: 'Internal hub link', mode: 'auto-suggest' },
+  { id: 'internal_link', label: 'Internal hub link', mode: 'auto-fix' },
   { id: 'external_link', label: 'External authority link', mode: 'auto-suggest' },
   { id: 'mixed_content', label: 'No mixed content (HTTPS only)', mode: 'auto-fix' },
   { id: 'duplicate_body', label: 'No duplicate of recent post', mode: 'writer-fix' },

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { GoogleIngestionService } from '@/lib/google/google-ingestion-service'
+import { autoLinkPostContent } from '@/lib/postiq/auto-link'
 
 export async function POST(
   request: NextRequest,
@@ -48,11 +49,20 @@ export async function POST(
       )
     }
 
+    // PostIQ auto-linker on publish — see /api/admin/posts route for context.
+    // Skipped for drafts so we only burn one round-trip per actual publish.
+    let resolvedContent = content || ''
+    if (status === 'published' && resolvedContent) {
+      resolvedContent = await autoLinkPostContent(resolvedContent, {
+        userId: author_id ?? null,
+      })
+    }
+
     // Prepare update data
     const updateData: Record<string, unknown> = {
       title,
       slug,
-      content: content || '',
+      content: resolvedContent,
       excerpt: excerpt || null,
       featured_image: featured_image || null,
       status: status || 'draft',
@@ -151,7 +161,7 @@ export async function POST(
     }
 
     // Auto-generate TOC via Scout when publishing (fire-and-forget)
-    if (status === 'published' && content) {
+    if (status === 'published' && resolvedContent) {
       const baseUrl = process.env.NEXT_PUBLIC_APP_URL
         || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
       fetch(`${baseUrl}/api/admin/ai`, {
@@ -160,7 +170,7 @@ export async function POST(
         body: JSON.stringify({
           action: 'generate_toc',
           title: title || post.title,
-          content,
+          content: resolvedContent,
           postId: id,
         }),
       }).catch(err => console.error('[TOC] Auto-generate failed:', err))

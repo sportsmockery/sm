@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase-server'
 import { requireAdmin } from '@/lib/admin-auth'
 import { auditLog, getAuditContext } from '@/lib/audit-log'
 import { GoogleIngestionService } from '@/lib/google/google-ingestion-service'
+import { autoLinkPostContent } from '@/lib/postiq/auto-link'
 
 /**
  * GET /api/admin/posts
@@ -97,12 +98,22 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // PostIQ auto-linker: on publish, walk the body HTML and insert internal
+    // hub/player links the first time each Chicago team or active-roster
+    // player is mentioned by full name. Non-fatal — we publish either way.
+    let resolvedContent = body.content || ''
+    if (body.status === 'published' && resolvedContent) {
+      resolvedContent = await autoLinkPostContent(resolvedContent, {
+        userId: body.author_id ?? auth.user?.id ?? null,
+      })
+    }
+
     // Prepare post data - only include columns that definitely exist in the schema
     const now = new Date().toISOString()
     const postData: Record<string, unknown> = {
       title: body.title,
       slug: body.slug,
-      content: body.content || '',
+      content: resolvedContent,
       excerpt: body.excerpt || null,
       featured_image: body.featured_image || null,
       status: body.status || 'draft',

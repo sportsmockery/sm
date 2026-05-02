@@ -23,12 +23,39 @@ function isExternal(href: string): boolean {
   return !isInternal(href)
 }
 
+// Full-name mentions the PostIQ auto-linker will resolve at publish time.
+// Keeping this list local (instead of fetching the dictionary) is fine — the
+// rule only needs to know whether *something* will be linked, not what.
+const AUTO_LINK_TEAM_NAMES = [
+  'Chicago Bears',
+  'Chicago Bulls',
+  'Chicago Blackhawks',
+  'Chicago Cubs',
+  'Chicago White Sox',
+] as const
+
+function bodyMentionsAutoLinkable(html: string): boolean {
+  if (!html) return false
+  // Strip existing anchors so a `<a>` already wrapping the team name doesn't
+  // count twice — the linker would skip it anyway.
+  const stripped = html.replace(/<a\b[^>]*>[\s\S]*?<\/a>/gi, ' ')
+  return AUTO_LINK_TEAM_NAMES.some((name) => stripped.includes(name))
+}
+
 /**
  * Rule #12 — at least one internal link to a hub or related article.
+ *
+ * Auto-fix path: the PostIQ auto-linker (server-side, on publish) inserts an
+ * internal hub link the first time a Chicago team or active-roster player is
+ * mentioned by full name. We pass the rule when either:
+ *   - the body already has an internal link, OR
+ *   - the body mentions a full Chicago team name (the linker will handle it).
  */
 export function checkInternalLink(input: PreflightInput): CheckResult {
-  const links = extractLinks(getBodyHtml(input))
+  const html = getBodyHtml(input)
+  const links = extractLinks(html)
   if (links.some(isInternal)) return { rule: 'internal_link', passed: true }
+  if (bodyMentionsAutoLinkable(html)) return { rule: 'internal_link', passed: true }
   return {
     rule: 'internal_link',
     passed: false,
@@ -36,8 +63,8 @@ export function checkInternalLink(input: PreflightInput): CheckResult {
     why_it_matters:
       'Internal links pass authority across the site and keep readers on more than one page.',
     how_to_fix: [
-      'Link the team name on first mention to its hub page (e.g. "Bears" → /chicago-bears).',
-      'Cite a previous SM article that gives context.',
+      'Mention a Chicago team by full name (e.g. "Chicago Bears") — PostIQ auto-links the first mention on publish.',
+      'Or link manually to a hub page or previous SM article.',
     ],
     anchor: '#body-end',
   }
