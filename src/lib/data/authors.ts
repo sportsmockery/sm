@@ -11,17 +11,19 @@ export interface AuthorRecord {
   job_title: string | null
   alumni_of: string | null
   knows_about: string[] | null
-  same_as: string[] | null
+  same_as: string[] | null   // social/profile URLs live here as a text[] in sm_authors
   active: boolean | null
-  twitter_url?: string | null
-  facebook_url?: string | null
-  instagram_url?: string | null
   email?: string | null
   created_at?: string | null
 }
 
+// IMPORTANT: only include columns that actually exist on sm_authors. The
+// social URL columns (twitter_url / facebook_url / instagram_url) were
+// referenced previously but don't exist — including them made every SELECT
+// fail with PGRST 42703 and getAuthorBySlug returned null for every author,
+// which made every /author/<slug> page render "Author Not Found".
 const AUTHOR_FIELDS =
-  'id, slug, display_name, bio, avatar_url, job_title, alumni_of, knows_about, same_as, active, twitter_url, facebook_url, instagram_url, email, created_at'
+  'id, slug, display_name, bio, avatar_url, job_title, alumni_of, knows_about, same_as, active, email, created_at'
 
 export async function getAuthorBySlug(slug: string): Promise<AuthorRecord | null> {
   const { data, error } = await supabaseAdmin

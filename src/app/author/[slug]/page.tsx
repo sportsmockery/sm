@@ -65,12 +65,9 @@ export default async function AuthorBySlugPage({ params }: AuthorSlugPageProps) 
 
   const articles = await getArticlesByAuthorId(author.id, 20)
 
-  const sameAs = [
-    ...(author.same_as ?? []),
-    ...(author.twitter_url ? [author.twitter_url] : []),
-    ...(author.facebook_url ? [author.facebook_url] : []),
-    ...(author.instagram_url ? [author.instagram_url] : []),
-  ].filter((u, i, arr) => arr.indexOf(u) === i)
+  // sm_authors stores all social/profile URLs in the `same_as` text[] column;
+  // there are no separate twitter_url / facebook_url / instagram_url columns.
+  const sameAs = (author.same_as ?? []).filter((u, i, arr) => Boolean(u) && arr.indexOf(u) === i)
 
   return (
     <>
