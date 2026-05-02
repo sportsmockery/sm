@@ -102,7 +102,7 @@ export function TradeHistory({ trades, page, totalPages, onPageChange }: TradeHi
                     )}
                     <span style={{ fontSize: '11px', color: subText }}>&#x2194;</span>
                     {t.partner_team_logo && (
-                      <Image src={t.partner_team_logo} alt={t.partner_team || 'Trade partner'} width={24} height={24} style={{ objectFit: 'contain' }}
+                      <Image src={t.partner_team_logo} alt={t.trade_partner || 'Trade partner'} width={24} height={24} style={{ objectFit: 'contain' }}
                         onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }} />
                     )}
                   </div>
