@@ -125,7 +125,8 @@ export function EdgeInsightStrip({ insight, articleId }: { insight: EdgeInsight;
   )
 }
 
-const CACHE_TTL = 60 * 60 * 1000 // 1 hour
+// 5 minutes — short window so removals by the verifier cron (3x daily) propagate quickly
+const CACHE_TTL = 5 * 60 * 1000
 
 /**
  * Fetches EDGE insights for an article and distributes them as inline strips.
