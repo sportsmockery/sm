@@ -9,6 +9,12 @@ import { useAuth } from '@/hooks/useAuth'
 interface LoginShellProps {
   redirectTo?: string
   defaultTab?: 'signup' | 'signin'
+  /** "12,000+" — pre-formatted, "" hides the social-proof line */
+  subscriberLabel?: string
+  /** Latest published brief headline — overrides primary card title when present */
+  latestBriefTitle?: string
+  /** "Today · Bears" — overrides primary card meta when present */
+  latestBriefMeta?: string
 }
 
 // Product preview cards — primary (red brand) > secondary (cyan intel) > tertiary (gold premium).
@@ -48,9 +54,26 @@ const teamChips: Array<{ name: string; dot: string }> = [
 export default function LoginShell({
   redirectTo = '/admin',
   defaultTab = 'signup',
+  subscriberLabel = '',
+  latestBriefTitle = '',
+  latestBriefMeta = '',
 }: LoginShellProps) {
   const router = useRouter()
   const { signUp, signIn } = useAuth()
+
+  // Primary card uses live brief data when available; falls back to the static
+  // copy so the page still feels finished if the queries fail.
+  const liveReel = latestBriefTitle
+    ? [
+        {
+          ...reel[0],
+          title: latestBriefTitle,
+          eyebrowMeta: latestBriefMeta || reel[0].eyebrowMeta,
+        },
+        reel[1],
+        reel[2],
+      ]
+    : reel
 
   const [tab, setTab] = useState<'signup' | 'signin'>(defaultTab)
 
@@ -216,6 +239,26 @@ export default function LoginShell({
               >
                 Chicago sports, sharper.
               </h1>
+
+              {subscriberLabel ? (
+                <p
+                  className="mt-3 inline-flex items-center gap-2 text-[12px] font-medium"
+                  style={{ color: 'var(--sm-text-muted)', letterSpacing: '0.005em' }}
+                >
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      display: 'inline-block',
+                      width: 6,
+                      height: 6,
+                      borderRadius: 999,
+                      background: '#00D4FF',
+                      boxShadow: '0 0 0 4px rgba(0,212,255,0.12)',
+                    }}
+                  />
+                  Join {subscriberLabel} Chicago fans on the daily brief
+                </p>
+              ) : null}
 
               <p
                 className="mt-4 max-w-md text-[15px] leading-7"
@@ -1054,7 +1097,7 @@ export default function LoginShell({
               {/* Product preview reel — Daily brief (red), Scout AI (cyan), GM Trade Sim (gold) */}
               <div className="reel-stage mt-7" aria-hidden="true">
                 <div className="reel-track">
-                  {reel.map((item, index) => (
+                  {liveReel.map((item, index) => (
                     <article
                       key={item.title}
                       className={`reel-card reel-card-${index + 1} reel-accent-${item.accent}`}
