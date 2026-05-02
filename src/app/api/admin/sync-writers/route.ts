@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
 import { revalidateTag } from 'next/cache'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { WP_ORIGIN } from '@/lib/wordpress'
 
-const WP_BASE_URL = 'https://www.sportsmockery.com/wp-json/sm-export/v1'
+const WP_BASE_URL = `${WP_ORIGIN}/wp-json/sm-export/v1`
 
 interface WPAuthor {
   id: number

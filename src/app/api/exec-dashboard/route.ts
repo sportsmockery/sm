@@ -8,9 +8,11 @@ import { datalabAdmin } from '@/lib/supabase-datalab'
 import { aggregateTotals, querySearchAnalytics } from '@/lib/google-search-console'
 import { runGaReport, aggregateGaTotals, rowsByDimension, getGa4PropertyId, type GaReportResult } from '@/lib/google-analytics'
 
-const WP_API = 'https://www.sportsmockery.com/wp-json/wp/v2'
-const WP_EXPORT = 'https://www.sportsmockery.com/wp-json/sm-export/v1'
-const WP_SMED = 'https://www.sportsmockery.com/wp-json/smed/v1'
+import { WP_ORIGIN } from '@/lib/wordpress'
+
+const WP_API = `${WP_ORIGIN}/wp-json/wp/v2`
+const WP_EXPORT = `${WP_ORIGIN}/wp-json/sm-export/v1`
+const WP_SMED = `${WP_ORIGIN}/wp-json/smed/v1`
 const SEMRUSH_API = 'https://api.semrush.com'
 const MAX_PAGES = 10
 const PER_PAGE = 100

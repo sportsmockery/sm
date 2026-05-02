@@ -812,7 +812,7 @@ function PostDrawerContent({ post }: { post: any }) {
         </div>
       )}
       {post.slug && (
-        <a href={`https://www.sportsmockery.com/${post.slug}`} target="_blank" rel="noopener noreferrer"
+        <a href={`/${post.slug}`} target="_blank" rel="noopener noreferrer"
           className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold transition-colors"
           style={{ background: 'var(--sm-red)', color: '#fff' }}>
           Open Article

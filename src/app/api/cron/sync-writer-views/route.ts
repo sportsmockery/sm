@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { calculatePay } from '@/lib/payment-formula'
+import { WP_ORIGIN } from '@/lib/wordpress'
 
 export const maxDuration = 60
 export const dynamic = 'force-dynamic'
 
-const WP_SMED = 'https://www.sportsmockery.com/wp-json/smed/v1'
+const WP_SMED = `${WP_ORIGIN}/wp-json/smed/v1`
 
 export async function GET(request: Request) {
   // Verify cron authorization (required)
