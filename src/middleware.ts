@@ -43,7 +43,6 @@ const publicRoutes = [
 
 // Routes that start with these paths are public
 const publicPaths = [
-  '/bears',
   '/bulls',
   '/cubs',
   '/whitesox',

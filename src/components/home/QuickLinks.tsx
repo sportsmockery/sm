@@ -10,7 +10,7 @@ interface QuickLink {
 const defaultLinks: QuickLink[] = [
   {
     label: 'Bears',
-    href: '/bears',
+    href: '/chicago-bears',
     icon: (
       <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0B162A] text-sm">🐻</span>
     ),

@@ -21,7 +21,7 @@ export default function FloatingARButton() {
   // Determine which team page we're on
   const getTeamFromPath = (): string | null => {
     if (!pathname) return null
-    if (pathname.includes('chicago-bears') || pathname.includes('/bears')) return 'chicago-bears'
+    if (pathname.includes('chicago-bears')) return 'chicago-bears'
     if (pathname.includes('chicago-cubs') || pathname.includes('/cubs')) return 'chicago-cubs'
     if (pathname.includes('chicago-bulls') || pathname.includes('/bulls')) return 'chicago-bulls'
     if (pathname.includes('chicago-white-sox') || pathname.includes('/white-sox')) return 'chicago-white-sox'

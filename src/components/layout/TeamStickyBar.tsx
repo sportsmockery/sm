@@ -73,7 +73,7 @@ const TEAM_CONFIG: Record<TeamKey, {
     abbrev: 'CHI',
     league: 'nfl',
     periodLabel: 'Q',
-    dataHubPath: '/bears',
+    dataHubPath: '/chicago-bears',
     hasSchedulePage: true,
     hasRosterPage: true,
     hasScoresPage: true,

@@ -76,6 +76,10 @@ const nextConfig: NextConfig = {
   // Redirects for legacy WordPress routes
   async redirects() {
     return [
+      // SEO Tip #10 — collapse duplicate /bears hub into canonical /chicago-bears
+      { source: '/bears', destination: '/chicago-bears', permanent: true },
+      { source: '/bears/:path*', destination: '/chicago-bears/:path*', permanent: true },
+
       { source: '/category/chicago-bears/:path*', destination: '/chicago-bears', permanent: true },
       { source: '/category/chicago-bulls/:path*', destination: '/chicago-bulls', permanent: true },
       { source: '/category/chicago-cubs/:path*', destination: '/chicago-cubs', permanent: true },

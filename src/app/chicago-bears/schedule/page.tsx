@@ -494,7 +494,7 @@ function GameRow({
           {/* Recap Link inline */}
           {game.articleSlug && (
             <Link
-              href={`/bears/${game.articleSlug}`}
+              href={`/chicago-bears/${game.articleSlug}`}
               style={{ fontSize: '12px', color: 'var(--sm-red)', marginTop: '4px', display: 'inline-block' }}
               className="hover:underline"
             >

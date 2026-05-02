@@ -265,7 +265,7 @@ export default function DraftTrackerTabs({ hubItems, displayPosts }: DraftTracke
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {displayPosts.map((post) => {
-                const href = post.categorySlug ? `/${post.categorySlug}/${post.slug}` : `/bears/${post.slug}`
+                const href = post.categorySlug ? `/${post.categorySlug}/${post.slug}` : `/chicago-bears/${post.slug}`
                 return (
                   <Link key={post.id} href={href} style={{ textDecoration: 'none', display: 'block' }}>
                     <article className="glass-card glass-card-sm" style={{ display: 'flex', gap: '16px', overflow: 'hidden' }}>
