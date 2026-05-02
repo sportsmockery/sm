@@ -259,14 +259,6 @@ function FailureCard({ check }: { check: CheckResult }) {
           ))}
         </ul>
       )}
-      {check.anchor && (
-        <a
-          href={check.anchor}
-          className="mt-2 inline-block text-[#00D4FF] hover:underline"
-        >
-          Jump to block →
-        </a>
-      )}
     </div>
   )
 }
