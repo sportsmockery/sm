@@ -49,7 +49,7 @@ const readingHistory = [
 ]
 
 export default function ProfilePage() {
-  const { user, loading, isAuthenticated, refreshUser } = useAuth()
+  const { user, loading, isAuthenticated, refreshUser, signOut } = useAuth()
   const { theme, setTheme } = useTheme()
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -150,6 +150,33 @@ export default function ProfilePage() {
       {/* Profile Header */}
       <section style={{ position: 'relative', padding: '32px 0 40px', borderBottom: '1px solid var(--sm-border)' }}>
         <div style={{ position: 'relative', maxWidth: '1200px', margin: '0 auto', padding: '0 16px' }}>
+          {/* Logout — top right */}
+          <button
+            type="button"
+            onClick={async () => {
+              await signOut()
+              router.push('/login')
+            }}
+            style={{
+              position: 'absolute',
+              top: 0,
+              right: 16,
+              backgroundColor: '#bc0000',
+              color: '#FAFAFB',
+              border: 'none',
+              borderRadius: 9999,
+              padding: '8px 18px',
+              fontSize: 14,
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'background-color 0.2s',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#a30000' }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#bc0000' }}
+          >
+            Logout
+          </button>
+
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
             {/* Avatar */}
             <div style={{ position: 'relative' }}>
