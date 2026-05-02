@@ -9,7 +9,7 @@ export const RULES: RuleMeta[] = [
   { id: 'title_format', label: 'Title formatting', mode: 'auto-fix' },
   { id: 'slug_format', label: 'Slug format & uniqueness', mode: 'auto-fix' },
   { id: 'category_present', label: 'Primary category', mode: 'auto-suggest' },
-  { id: 'featured_image', label: 'Featured image (≥1200×630)', mode: 'writer-fix' },
+  { id: 'featured_image', label: 'Featured image (auto-resized to 1200×630)', mode: 'auto-fix' },
   { id: 'featured_alt', label: 'Featured image alt text', mode: 'auto-suggest' },
   { id: 'meta_description', label: 'Meta description (70–160 chars)', mode: 'auto-suggest' },
   { id: 'body_word_count', label: 'Body word count (≥500)', mode: 'writer-fix' },

@@ -374,7 +374,7 @@ export default function StudioPostEditor({
       const formDataUpload = new FormData()
       formDataUpload.append('file', file)
 
-      const response = await fetch('/api/admin/media', {
+      const response = await fetch('/api/admin/media?mode=featured', {
         method: 'POST',
         body: formDataUpload,
       })

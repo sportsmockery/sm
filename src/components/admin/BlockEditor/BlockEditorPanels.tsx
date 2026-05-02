@@ -27,14 +27,15 @@ function BlockShell({
     <div
       className="group rounded-xl relative"
       style={{
-        backgroundColor: '#f8f9fa',
-        border: '1px solid rgba(0,0,0,0.1)',
+        backgroundColor: '#ffffff',
+        border: '1px solid rgba(0,0,0,0.12)',
+        boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
       }}
     >
       {/* Top bar */}
       <div
         className="flex items-center gap-2 px-3 py-2 rounded-t-xl border-b"
-        style={{ borderColor: 'rgba(0,0,0,0.08)', backgroundColor: '#f3f4f6' }}
+        style={{ borderColor: 'rgba(0,0,0,0.06)', backgroundColor: '#f8fafc' }}
       >
         <GripVertical size={14} className="text-slate-600 cursor-grab" />
         <span

@@ -1,8 +1,11 @@
 import type { CheckResult, PreflightInput } from '../types'
 
 /**
- * Rule #5 — featured image must exist. Dimensional check (≥1200×630)
- * happens server-side at publish time once we can HEAD the asset cheaply.
+ * Rule #5 — featured image must exist.
+ *
+ * Dimensions are auto-handled at upload time: the media route resizes any
+ * featured-image upload to exactly 1200×630 (cover-fit, attention-cropped)
+ * and re-encodes as WebP. This validator only flags the no-image case.
  */
 export function checkFeaturedImage(input: PreflightInput): CheckResult {
   const url = (input.featuredImageUrl || '').trim()
@@ -14,8 +17,7 @@ export function checkFeaturedImage(input: PreflightInput): CheckResult {
       why_it_matters:
         'The featured image powers the social card, the homepage feed, and the article header. Without it the post looks broken everywhere it appears.',
       how_to_fix: [
-        'Upload an image (≥1200×630) from the right-hand sidebar.',
-        'Or paste a URL — the system validates dimensions before accepting.',
+        'Upload any image from the right-hand sidebar — the system auto-resizes to 1200×630 and optimizes for size.',
       ],
       anchor: '#featured-image',
     }

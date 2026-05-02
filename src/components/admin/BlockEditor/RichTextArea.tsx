@@ -65,7 +65,7 @@ function ToolbarSep() {
   return <div className="w-px h-5 mx-0.5" style={{ backgroundColor: 'rgba(0,0,0,0.1)' }} />;
 }
 
-export function RichTextArea({ value, onChange, placeholder = 'Write here...', minHeight = 120 }: RichTextAreaProps) {
+export function RichTextArea({ value, onChange, placeholder = 'Write here...', minHeight = 240 }: RichTextAreaProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const isInternalChange = useRef(false);
 
@@ -242,11 +242,14 @@ export function RichTextArea({ value, onChange, placeholder = 'Write here...', m
             document.execCommand('insertHTML', false, html || plain);
           }
         }}
-        className="sm-richtext-editor w-full bg-white text-sm text-[#0B0F14] outline-none"
+        className="sm-richtext-editor w-full text-sm outline-none"
         style={{
           minHeight,
-          padding: '12px',
-          lineHeight: 1.6,
+          padding: '14px 16px',
+          lineHeight: 1.65,
+          backgroundColor: '#ffffff',
+          color: '#0B0F14',
+          borderRadius: 8,
         }}
         data-placeholder={placeholder}
       />
