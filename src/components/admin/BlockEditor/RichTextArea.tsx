@@ -65,7 +65,7 @@ function ToolbarSep() {
   return <div className="w-px h-5 mx-0.5" style={{ backgroundColor: 'rgba(0,0,0,0.1)' }} />;
 }
 
-export function RichTextArea({ value, onChange, placeholder = 'Write here...', minHeight = 240 }: RichTextAreaProps) {
+export function RichTextArea({ value, onChange, placeholder = 'Write here...', minHeight = 500 }: RichTextAreaProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const isInternalChange = useRef(false);
 
