@@ -171,8 +171,17 @@ export function SeoTasksTab({ active }: { active: boolean }) {
     )
   }
 
+  const nowPhase = data.phases.find(p => p.phase === 'NOW') ?? { total: 0, done: 0 }
+  const launchPhase = data.phases.find(p => p.phase === 'AT LAUNCH') ?? { total: 0, done: 0 }
+
   return (
     <div className="flex flex-col gap-4">
+      {/* Phase progress bars */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <PhaseProgressBar label="For Now" done={nowPhase.done} total={nowPhase.total} />
+        <PhaseProgressBar label="Launch Day" done={launchPhase.done} total={launchPhase.total} />
+      </div>
+
       {/* Header / scorecard */}
       <div className="rounded-xl border p-4 flex flex-wrap items-center gap-4 justify-between"
            style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
@@ -277,6 +286,28 @@ function ProgressBar({ pct }: { pct: number }) {
         <div style={{ width: `${pct}%`, height: '100%', background: '#24BF6C', transition: 'width 200ms' }} />
       </div>
       <span className="text-[11px] font-semibold tabular-nums" style={{ color: 'var(--sm-text-muted)' }}>{pct}%</span>
+    </div>
+  )
+}
+
+function PhaseProgressBar({ label, done, total }: { label: string; done: number; total: number }) {
+  const pct = total === 0 ? 0 : Math.round((done / total) * 100)
+  const complete = total > 0 && done >= total
+  const barColor = complete ? '#10b981' : 'var(--sm-red, #BC0000)'
+
+  return (
+    <div className="rounded-xl border p-4" style={{ background: 'var(--sm-card)', borderColor: 'var(--sm-border)' }}>
+      <div className="flex items-baseline justify-between mb-2">
+        <span className="text-sm font-bold" style={{ color: 'var(--sm-text)' }}>
+          {label} {complete && <span style={{ color: '#10b981' }}>&#10003;</span>}
+        </span>
+        <span className="text-xs tabular-nums" style={{ color: 'var(--sm-text-muted)' }}>
+          {done} of {total} tasks complete ({pct}%)
+        </span>
+      </div>
+      <div className="w-full h-[10px] rounded-full overflow-hidden" style={{ background: 'var(--sm-border, rgba(255,255,255,0.08))' }}>
+        <div style={{ width: `${pct}%`, height: '100%', background: barColor, borderRadius: '9999px', transition: 'width 300ms ease' }} />
+      </div>
     </div>
   )
 }
