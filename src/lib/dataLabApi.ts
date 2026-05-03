@@ -12,7 +12,11 @@ import { DataLabQuery } from '@/components/admin/ChartBuilder/DataLabPicker'
 const DATA_LAB_BASE_URL = process.env.NEXT_PUBLIC_DATALAB_URL
   ? `${process.env.NEXT_PUBLIC_DATALAB_URL.replace(/\/$/, '')}/api`
   : 'https://datalab.sportsmockery.com/api'
-const API_KEY = process.env.DATA_LAB_API_KEY
+// Renamed from DATA_LAB_API_KEY → DATALAB_API_KEY to match DataLab's unified
+// auth standard (see docs/Test_SportsMockery_DataLab_API_Migration.md). The
+// DataLab requireDataLabApiKey() helper accepts either env name during the
+// migration window, but SM Edge has standardized on DATALAB_API_KEY.
+const API_KEY = process.env.DATALAB_API_KEY
 
 // Types
 export interface DataLabResponse<T> {

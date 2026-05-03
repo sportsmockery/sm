@@ -141,9 +141,8 @@ export async function POST(request: NextRequest) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(process.env.POSTIQ_INTERNAL_KEY && {
-            'X-PostIQ-Internal-Key': process.env.POSTIQ_INTERNAL_KEY,
-            'Authorization': `Bearer ${process.env.POSTIQ_INTERNAL_KEY}`,
+          ...(process.env.DATALAB_API_KEY && {
+            'Authorization': `Bearer ${process.env.DATALAB_API_KEY}`,
           }),
         },
         body: JSON.stringify({
@@ -169,7 +168,10 @@ export async function POST(request: NextRequest) {
       console.error('[PostIQ Chart] ECharts endpoint failed, falling back to analyze:', error)
     }
 
-    // Fallback to legacy /api/postiq/analyze endpoint
+    // Fallback to legacy /api/postiq/analyze endpoint.
+    // Note: this legacy endpoint is NOT gated by DATALAB_API_KEY per the
+    // migration doc — it still uses the historical POSTIQ_INTERNAL_KEY
+    // header, which DataLab silently ignores today (no auth).
     const datalabResponse = await fetch(`${DATALAB_API}/api/postiq/analyze`, {
       method: 'POST',
       headers: {
