@@ -16,11 +16,13 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 import { WebView } from 'react-native-webview'
 
+import { useQuery } from '@tanstack/react-query'
+
 import { useArticle } from '@/hooks/useFeed'
 import { useTheme } from '@/hooks/useTheme'
 import { useAds } from '@/hooks/useAds'
 import { useAudioPlayer } from '@/hooks/useAudioPlayer'
-import { api } from '@/lib/api'
+import { api, spliceEdgeInsights } from '@/lib/api'
 import { COLORS, API_BASE_URL } from '@/lib/config'
 import AdBanner from '@/components/AdBanner'
 
@@ -98,6 +100,18 @@ export default function ArticleScreen() {
 
   // Fetch article from website by ID
   const { data: article, isLoading, isError } = useArticle(articleId)
+
+  // Fetch EDGE insights and splice into article HTML at paragraph_index
+  const { data: edgeInsights = [] } = useQuery({
+    queryKey: ['edge-insights', articleId],
+    queryFn: () => api.getEdgeInsights(articleId!),
+    enabled: !!articleId,
+    staleTime: 60 * 60 * 1000,
+  })
+
+  const articleHtml = article
+    ? spliceEdgeInsights(article.content_html || '', edgeInsights)
+    : ''
 
   // Track article view and potentially show interstitial
   useEffect(() => {
@@ -398,7 +412,7 @@ export default function ArticleScreen() {
         {/* Article Content */}
         <View style={[styles.contentContainer, { backgroundColor: colors.surface }]}>
           <WebView
-            source={{ html: getContentHtml(article.content_html || '') }}
+            source={{ html: getContentHtml(articleHtml) }}
             style={[styles.contentWebView, { height: webViewHeight }]}
             scrollEnabled={false}
             originWhitelist={['*']}

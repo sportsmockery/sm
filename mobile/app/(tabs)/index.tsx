@@ -118,37 +118,58 @@ export default function HomeScreen() {
         </TouchableOpacity>
       )}
 
-      <FlatList
-        data={riverItems}
-        keyExtractor={(item) => item.id}
-        renderItem={renderRiverItem}
-        contentContainerStyle={styles.riverContent}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefetching}
-            onRefresh={refresh}
-            tintColor={COLORS.primary}
-            colors={[COLORS.primary]}
-          />
-        }
-        ListHeaderComponent={
-          getCustomAdCode('feed_top') ? (
-            <AdBanner code={getCustomAdCode('feed_top')!} placement="feed_top" />
-          ) : null
-        }
-        ListEmptyComponent={
-          <View style={styles.emptyState}>
-            <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-              No stories right now. Pull down to refresh.
-            </Text>
+      <View style={styles.feedWrapper}>
+        <FlatList
+          data={riverItems}
+          keyExtractor={(item) => item.id}
+          renderItem={renderRiverItem}
+          contentContainerStyle={styles.riverContent}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefetching}
+              onRefresh={refresh}
+              tintColor={COLORS.primary}
+              colors={[COLORS.primary]}
+              progressViewOffset={10}
+            />
+          }
+          ListHeaderComponent={
+            getCustomAdCode('feed_top') ? (
+              <AdBanner code={getCustomAdCode('feed_top')!} placement="feed_top" />
+            ) : null
+          }
+          ListEmptyComponent={
+            <View style={styles.emptyState}>
+              <Text style={[styles.emptyText, { color: colors.textMuted }]}>
+                No stories right now. Pull down to refresh.
+              </Text>
+            </View>
+          }
+          ListFooterComponent={<View style={{ height: 24 }} />}
+          initialNumToRender={6}
+          maxToRenderPerBatch={6}
+          windowSize={11}
+        />
+
+        {/* Refresh status pill — clearly visible spinner while pull-to-refresh is in flight */}
+        {isRefetching && (
+          <View pointerEvents="none" style={styles.refreshBadge}>
+            <View
+              style={[
+                styles.refreshBadgeInner,
+                {
+                  backgroundColor: colors.surface,
+                  borderColor: colors.border,
+                },
+              ]}
+            >
+              <ActivityIndicator size="small" color={COLORS.primary} />
+              <Text style={[styles.refreshBadgeText, { color: colors.text }]}>Refreshing</Text>
+            </View>
           </View>
-        }
-        ListFooterComponent={<View style={{ height: 24 }} />}
-        initialNumToRender={6}
-        maxToRenderPerBatch={6}
-        windowSize={11}
-      />
+        )}
+      </View>
     </SafeAreaView>
   )
 }
@@ -156,6 +177,36 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  feedWrapper: {
+    flex: 1,
+    position: 'relative',
+  },
+  refreshBadge: {
+    position: 'absolute',
+    top: 12,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+  },
+  refreshBadgeInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 999,
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
+  },
+  refreshBadgeText: {
+    fontSize: 12,
+    fontFamily: 'Montserrat-SemiBold',
+    letterSpacing: 0.3,
   },
   riverContent: {
     padding: 12,
