@@ -92,11 +92,11 @@ export class TwitterClient {
 
   constructor() {
     this.config = {
-      apiKey: process.env.TWITTER_API_KEY || '',
-      apiSecret: process.env.TWITTER_API_SECRET || '',
-      accessToken: process.env.TWITTER_ACCESS_TOKEN || '',
-      accessTokenSecret: process.env.TWITTER_ACCESS_TOKEN_SECRET || '',
-      bearerToken: process.env.TWITTER_BEARER_TOKEN || '',
+      apiKey: process.env.X_API_KEY || '',
+      apiSecret: process.env.X_API_SECRET || '',
+      accessToken: process.env.X_ACCESS_TOKEN || '',
+      accessTokenSecret: process.env.X_ACCESS_TOKEN_SECRET || '',
+      bearerToken: process.env.X_BEARER_TOKEN || '',
     }
 
     if (!this.config.bearerToken) {

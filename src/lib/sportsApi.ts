@@ -15,7 +15,8 @@ import {
 } from '@/data/mockSportsData';
 
 const DATA_LAB_URL = process.env.NEXT_PUBLIC_DATALAB_URL || 'https://datalab.sportsmockery.com';
-const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_DATA !== 'false';
+// Mock data is OFF by default — opt in with NEXT_PUBLIC_USE_MOCK_DATA=true for local dev only.
+const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'true';
 
 // Fetch team schedule
 export async function getTeamSchedule(teamSlug: string, season?: string): Promise<Game[]> {

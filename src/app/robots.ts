@@ -3,18 +3,18 @@ import { MetadataRoute } from 'next'
 const BASE_URL = 'https://sportsmockery.com'
 
 /**
- * Dynamic robots.txt — env-gated.
+ * Dynamic robots.txt — env-gated by Vercel.
  *
- * Production (SITE_MODE=production):
+ * Production (VERCEL_ENV=production):
  *   - Allow indexing the public site
  *   - Point crawlers at the new sitemap_index.xml stack
  *   - Block admin/api/auth/profile + any betting/casino legacy URLs
  *
- * Anything else (staging, preview, dev):
+ * Anything else (preview, dev):
  *   - Disallow everything to keep test deploys out of search
  */
 export default function robots(): MetadataRoute.Robots {
-  const isProduction = process.env.SITE_MODE === 'production'
+  const isProduction = process.env.VERCEL_ENV === 'production'
 
   if (!isProduction) {
     return {

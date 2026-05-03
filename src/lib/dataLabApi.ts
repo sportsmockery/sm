@@ -9,7 +9,9 @@ import { ChartDataEntry } from '@/components/admin/ChartBuilder/DataEntryForm'
 import { DataLabQuery } from '@/components/admin/ChartBuilder/DataLabPicker'
 
 // API Configuration
-const DATA_LAB_BASE_URL = process.env.NEXT_PUBLIC_DATA_LAB_URL || 'https://datalab.sportsmockery.com/api'
+const DATA_LAB_BASE_URL = process.env.NEXT_PUBLIC_DATALAB_URL
+  ? `${process.env.NEXT_PUBLIC_DATALAB_URL.replace(/\/$/, '')}/api`
+  : 'https://datalab.sportsmockery.com/api'
 const API_KEY = process.env.DATA_LAB_API_KEY
 
 // Types

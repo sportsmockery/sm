@@ -10,7 +10,13 @@ export interface TokenPayload {
   expires_at: number;
 }
 
-const SECRET = process.env.TRACKING_TOKEN_SECRET ?? 'sm-river-secret';
+// In production, refuse to fall back to a public default — tokens signed
+// with a known secret are forgeable. Local dev keeps a clearly-named
+// fallback so contributors don't have to set the var to run the app.
+if (!process.env.TRACKING_TOKEN_SECRET && process.env.VERCEL_ENV === 'production') {
+  throw new Error('TRACKING_TOKEN_SECRET is required in production');
+}
+const SECRET = process.env.TRACKING_TOKEN_SECRET ?? 'sm-river-dev-only-not-secure';
 
 export function generateTrackingToken(
   cardId: string,

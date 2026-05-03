@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const DATALAB_URL = process.env.DATALAB_BASE_URL || 'https://datalab.sportsmockery.com'
+const DATALAB_URL = process.env.DATALAB_API_URL || 'https://datalab.sportsmockery.com'
 
 export async function GET(req: NextRequest) {
   const articleId = req.nextUrl.searchParams.get('article_id')

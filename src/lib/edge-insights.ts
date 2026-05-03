@@ -1,4 +1,4 @@
-const DATALAB_URL = process.env.DATALAB_BASE_URL || 'https://datalab.sportsmockery.com'
+const DATALAB_URL = process.env.DATALAB_API_URL || 'https://datalab.sportsmockery.com'
 
 /**
  * Trigger EDGE insight generation for an article.

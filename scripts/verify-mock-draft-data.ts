@@ -10,10 +10,10 @@ import { createClient } from '@supabase/supabase-js'
 
 // Datalab Supabase credentials
 const DATALAB_URL = process.env.DATALAB_SUPABASE_URL || 'https://siwoqfzzcxmngnseyzpv.supabase.co'
-const DATALAB_KEY = process.env.DATALAB_SUPABASE_SERVICE_KEY || ''
+const DATALAB_KEY = process.env.DATALAB_SUPABASE_SERVICE_ROLE_KEY || ''
 
 if (!DATALAB_KEY) {
-  console.error('Missing DATALAB_SUPABASE_SERVICE_KEY environment variable')
+  console.error('Missing DATALAB_SUPABASE_SERVICE_ROLE_KEY environment variable')
   process.exit(1)
 }
 
