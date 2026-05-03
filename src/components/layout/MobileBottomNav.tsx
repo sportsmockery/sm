@@ -77,6 +77,7 @@ export default function MobileBottomNav() {
         borderTop: '1px solid var(--sm-border)',
         alignItems: 'center',
         justifyContent: 'space-around',
+        gap: 8,
       }}
     >
       {tabs.map((tab) => {
