@@ -15,8 +15,15 @@ import {
 } from '@/data/mockSportsData';
 
 const DATA_LAB_URL = process.env.NEXT_PUBLIC_DATALAB_URL || 'https://datalab.sportsmockery.com';
-// Mock data is OFF by default — opt in with NEXT_PUBLIC_USE_MOCK_DATA=true for local dev only.
-const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'true';
+// TODO: This module is consumed by the legacy /teams/[team]/* route tree
+// (schedule, roster, stats, standings) and /players/*. Those pages have
+// always rendered mock data because the DataLab endpoints below
+// (/api/teams/{slug}/schedule, /api/players/{id}, etc.) do not exist —
+// the canonical team pages live at /chicago-{team} and use the per-team
+// data layers in src/lib/{team}Data.ts instead. Until /teams/* is either
+// migrated to the real data layers or removed, mock-data must stay on by
+// default or prerender breaks.
+const USE_MOCK_DATA = process.env.NEXT_PUBLIC_USE_MOCK_DATA !== 'false';
 
 // Fetch team schedule
 export async function getTeamSchedule(teamSlug: string, season?: string): Promise<Game[]> {
