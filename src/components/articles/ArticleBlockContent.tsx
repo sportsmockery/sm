@@ -5,8 +5,14 @@ import { BlockPreviewRenderer } from '@/components/admin/BlockEditor/BlockPrevie
 import { ReadingProgressBar } from './ReadingProgressBar';
 import type { ArticleDocument } from '@/components/admin/BlockEditor';
 
+interface BlockInlineSlot {
+  afterParagraph: number;
+  node: React.ReactNode;
+}
+
 interface ArticleBlockContentProps {
   document: ArticleDocument;
+  inlineSlots?: BlockInlineSlot[];
 }
 
 /**
@@ -18,7 +24,7 @@ interface ArticleBlockContentProps {
  * SEO is preserved because the article title, meta, featured image,
  * and structured data are all rendered server-side in the parent page.
  */
-export function ArticleBlockContent({ document }: ArticleBlockContentProps) {
+export function ArticleBlockContent({ document, inlineSlots }: ArticleBlockContentProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -30,7 +36,7 @@ export function ArticleBlockContent({ document }: ArticleBlockContentProps) {
       <ReadingProgressBar />
       {mounted ? (
         <div className="article-block-content">
-          <BlockPreviewRenderer blocks={document.blocks} />
+          <BlockPreviewRenderer blocks={document.blocks} inlineSlots={inlineSlots} />
         </div>
       ) : (
         <div className="article-block-content" aria-busy="true">

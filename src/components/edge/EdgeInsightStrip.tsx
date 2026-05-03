@@ -14,6 +14,9 @@ interface EdgeInsight {
   source: string
   metadata: Record<string, unknown>
   created_at: string
+  // 1-based index of the paragraph this insight should appear after.
+  // Null while DataLab's regeneration cron is still backfilling positions.
+  paragraph_index?: number | null
 }
 
 const TYPE_CONFIG: Record<string, { label: string; icon: string }> = {

@@ -37,8 +37,22 @@ import {
 
 /* ─── Block Renderer ─── */
 
+interface BlockInlineSlot {
+  /** 1-based index of the paragraph block to insert after. */
+  afterParagraph: number;
+  node: React.ReactNode;
+}
+
 interface BlockPreviewRendererProps {
   blocks: ContentBlock[];
+  /**
+   * Optional nodes to splice between paragraph blocks.
+   * Only `type: 'paragraph'` blocks count toward the index — headings,
+   * images, embeds, and section blocks are skipped, matching DataLab's
+   * extraction. Slots whose afterParagraph exceeds the rendered paragraph
+   * count are dropped (defensive against post-generation edits).
+   */
+  inlineSlots?: BlockInlineSlot[];
 }
 
 function RenderBlock({ block, priorityImageId }: { block: ContentBlock; priorityImageId?: string }) {
@@ -651,7 +665,7 @@ function rewriteBlocksForRender(blocks: ContentBlock[]): ContentBlock[] {
   })
 }
 
-export function BlockPreviewRenderer({ blocks }: BlockPreviewRendererProps) {
+export function BlockPreviewRenderer({ blocks, inlineSlots }: BlockPreviewRendererProps) {
   const safeBlocks = rewriteBlocksForRender(blocks)
   // Below-the-fold images default to next/image lazy. The first inline
   // image gets priority so LCP candidates inside the article render eagerly
@@ -659,12 +673,41 @@ export function BlockPreviewRenderer({ blocks }: BlockPreviewRendererProps) {
   const firstImageId = safeBlocks.find(
     (b) => b.type === 'image' && (b.data as { src?: string }).src
   )?.id
+
+  // Build a paragraph_index → node map, dropping slots that land at or
+  // past the last paragraph (no following paragraph to anchor to).
+  const totalParagraphs = safeBlocks.reduce(
+    (n, b) => (b.type === 'paragraph' ? n + 1 : n),
+    0,
+  )
+  const slotMap = new Map<number, React.ReactNode>()
+  if (inlineSlots && totalParagraphs > 0) {
+    for (const slot of inlineSlots) {
+      if (slot.afterParagraph >= 1 && slot.afterParagraph < totalParagraphs) {
+        slotMap.set(slot.afterParagraph, slot.node)
+      }
+    }
+  }
+
+  let paraIdx = 0
   return (
     <article>
       <ArticleBody>
-        {safeBlocks.map((block) => (
-          <RenderBlock key={block.id} block={block} priorityImageId={firstImageId} />
-        ))}
+        {safeBlocks.map((block) => {
+          const rendered = (
+            <RenderBlock key={block.id} block={block} priorityImageId={firstImageId} />
+          )
+          if (block.type !== 'paragraph') return rendered
+          paraIdx += 1
+          const slotNode = slotMap.get(paraIdx)
+          if (!slotNode) return rendered
+          return (
+            <React.Fragment key={`${block.id}-with-slot`}>
+              {rendered}
+              <div key={`slot-after-${paraIdx}`}>{slotNode}</div>
+            </React.Fragment>
+          )
+        })}
       </ArticleBody>
     </article>
   );

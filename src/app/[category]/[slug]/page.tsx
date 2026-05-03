@@ -21,7 +21,7 @@ import { ArticleTableOfContents, MoreFromTeam } from '@/components/article'
 import ScoutRecapCard from '@/components/article/ScoutRecapCard'
 import ScoutInsightBox from '@/components/article/ScoutInsightBox'
 import ArticleContentWithInsights from '@/components/article/ArticleContentWithInsights'
-import { EdgeInsightsPanel } from '@/components/edge/ArticleEdgeInsights'
+import ArticleBlockContentWithInsights from '@/components/article/ArticleBlockContentWithInsights'
 import { categorySlugToTeam } from '@/lib/types'
 import { stripDuplicateFeaturedImage, calculateReadTime, getContextLabel, sanitizeWordPressContent } from '@/lib/content-utils'
 import { buildAutoLinkContextForPost, applyAutoLinksToHtml } from '@/lib/autolink'
@@ -29,7 +29,6 @@ import { getArticleAudioInfo } from '@/lib/audioPlayer'
 import { ArticleAudioPlayer } from '@/components/article/ArticleAudioPlayer'
 import ArticleContentWithEmbeds from '@/components/article/ArticleContentWithEmbeds'
 import SocialShareBar from '@/components/SocialShareBar'
-import { ArticleBlockContent } from '@/components/articles/ArticleBlockContent'
 import { isBlockContent, parseDocument } from '@/components/admin/BlockEditor/serializer'
 import { canonicalUrl, JsonLd, breadcrumbJsonLd } from '@/lib/seo'
 
@@ -491,16 +490,15 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
                 team={categorySlugToTeam(categoryData?.slug)?.replace('-', '') || undefined}
               />
               {blockDocument ? (
-                /* Block-based article content */
+                /* Block-based article content with inline EDGE Insights */
                 <>
-                  <ArticleBlockContent document={blockDocument} />
+                  <ArticleBlockContentWithInsights document={blockDocument} articleId={post.id} />
                   <ScoutInsightBox
                     postId={post.id}
                     postTitle={post.title}
                     content={post.content || ''}
                     team={categorySlugToTeam(categoryData?.slug)?.replace('-', '') || undefined}
                   />
-                  <EdgeInsightsPanel articleId={post.id} />
                 </>
               ) : (
                 <>

@@ -9,6 +9,11 @@ import { sanitizeHtml } from '@/lib/sanitize-html'
 interface InlineSlot {
   afterParagraph: number
   node: React.ReactNode
+  // When true, the slot is dropped if afterParagraph lands at or past the
+  // final paragraph (instead of falling back to end-of-article). Used by
+  // Edge Insights so a stale paragraph_index doesn't dump a card at the
+  // bottom — the legacy Scout slot keeps the old fallback behavior.
+  dropIfOutOfBounds?: boolean
 }
 
 interface ArticleContentWithEmbedsProps {
@@ -127,8 +132,18 @@ function splitAtMultiplePositions(
 ): Array<{ type: 'html'; content: string } | { type: 'slot'; node: React.ReactNode }> {
   if (!slots.length) return [{ type: 'html', content: html }]
 
+  // Defensive: drop opt-in slots whose afterParagraph lands at or past the
+  // final paragraph. Legacy slots without dropIfOutOfBounds keep the old
+  // fallback (placed at end of article).
+  const totalParas = (html.match(/<\/p>/gi) || []).length
+  const filtered = slots.filter(s => {
+    if (!s.dropIfOutOfBounds) return true
+    return s.afterParagraph >= 1 && s.afterParagraph < totalParas
+  })
+  if (!filtered.length) return [{ type: 'html', content: html }]
+
   // Sort slots by paragraph position
-  const sorted = [...slots].sort((a, b) => a.afterParagraph - b.afterParagraph)
+  const sorted = [...filtered].sort((a, b) => a.afterParagraph - b.afterParagraph)
 
   const segments: Array<{ type: 'html'; content: string } | { type: 'slot'; node: React.ReactNode }> = []
   let remaining = html
