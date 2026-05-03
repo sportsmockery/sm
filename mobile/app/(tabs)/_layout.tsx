@@ -1,22 +1,27 @@
 import { Tabs } from 'expo-router'
 import { Image, View } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTheme } from '@/hooks/useTheme'
 import { COLORS } from '@/lib/config'
 
 const starIcon = require('@/assets/images/star.png')
 const scoutMobileIcon = require('@/assets/images/scout-mobile.png')
+const featuresIcon = require('@/assets/images/features.png')
 
 export default function TabsLayout() {
   const { isDark } = useTheme()
+  const insets = useSafeAreaInsets()
 
   const tabBarStyle = {
     backgroundColor: isDark ? COLORS.surfaceDark : COLORS.surface,
     borderTopColor: isDark ? COLORS.borderDark : COLORS.border,
     borderTopWidth: 1,
     paddingTop: 8,
-    paddingBottom: 8,
-    height: 60,
+    paddingBottom: Math.max(insets.bottom, 8),
+    paddingLeft: Math.max(insets.left, 12),
+    paddingRight: Math.max(insets.right, 12),
+    height: 60 + Math.max(insets.bottom, 0),
   }
 
   const getTabBarIcon = (name: keyof typeof Ionicons.glyphMap, focused: boolean) => {
@@ -59,8 +64,14 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="teams"
         options={{
-          title: 'Teams',
-          tabBarIcon: getTabBarIcon('american-football', false),
+          title: 'Features',
+          tabBarIcon: ({ color, size }) => (
+            <Image
+              source={featuresIcon}
+              style={{ width: size * 1.1, height: size * 1.1, tintColor: color }}
+              resizeMode="contain"
+            />
+          ),
         }}
       />
       <Tabs.Screen

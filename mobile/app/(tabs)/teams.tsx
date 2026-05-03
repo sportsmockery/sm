@@ -120,23 +120,6 @@ export default function TeamsScreen() {
           </View>
         </TouchableOpacity>
 
-        {/* Predictions Banner */}
-        <TouchableOpacity
-          style={styles.predictionsBanner}
-          activeOpacity={0.85}
-          onPress={() => router.push('/predictions')}
-        >
-          <View style={styles.gmBannerContent}>
-            <View style={styles.gmBannerLeft}>
-              <Text style={styles.gmBannerTitle}>SM Prophecy</Text>
-              <Text style={styles.gmBannerDesc}>AI-powered predictions</Text>
-            </View>
-            <View style={styles.gmBannerArrow}>
-              <Text style={styles.gmBannerArrowText}>{'>'}</Text>
-            </View>
-          </View>
-        </TouchableOpacity>
-
         {/* Team Cards */}
         {teamList.map((team) => (
           <Link key={team.id} href={`/team/${team.id}`} asChild>
@@ -484,17 +467,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     overflow: 'hidden',
     backgroundColor: '#059669',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 4,
-  },
-  predictionsBanner: {
-    borderRadius: 16,
-    marginBottom: 16,
-    overflow: 'hidden',
-    backgroundColor: '#dc2626',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.2,

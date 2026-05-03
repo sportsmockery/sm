@@ -425,8 +425,8 @@ export default function GMResultScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Season Simulation */}
-        {state.sessionId && state.chicagoTeam && (
+        {/* Season Simulation — only on accepted trades */}
+        {result.status === 'accepted' && state.sessionId && state.chicagoTeam && (
           <SimulationTrigger
             tradeCount={tradeCount}
             sport={state.sport || 'nfl'}

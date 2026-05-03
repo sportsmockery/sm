@@ -8,6 +8,7 @@ import {
   Share,
   Dimensions,
   ActivityIndicator,
+  Linking,
 } from 'react-native'
 import { Image } from 'expo-image'
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router'
@@ -22,6 +23,53 @@ import { useAudioPlayer } from '@/hooks/useAudioPlayer'
 import { api } from '@/lib/api'
 import { COLORS, API_BASE_URL } from '@/lib/config'
 import AdBanner from '@/components/AdBanner'
+
+// Map web team URLs (`/chicago-bears/`, `/chicago-white-sox/`) to mobile routes (`/team/bears`).
+const TEAM_PATH_TO_SLUG: Record<string, string> = {
+  'chicago-bears': 'bears',
+  'chicago-cubs': 'cubs',
+  'chicago-bulls': 'bulls',
+  'chicago-blackhawks': 'blackhawks',
+  'chicago-white-sox': 'whitesox',
+  'chicago-whitesox': 'whitesox',
+}
+
+function handleArticleLink(url: string, router: ReturnType<typeof useRouter>) {
+  let parsed: URL
+  try {
+    parsed = new URL(url)
+  } catch {
+    Linking.openURL(url).catch(() => {})
+    return
+  }
+
+  const isInternalHost = /sportsmockery\.com$/i.test(parsed.hostname)
+  const segments = parsed.pathname.replace(/^\/+|\/+$/g, '').split('/').filter(Boolean)
+
+  if (isInternalHost && segments.length > 0) {
+    const teamSlug = TEAM_PATH_TO_SLUG[segments[0]]
+
+    // Team hub: `/chicago-bears/`
+    if (teamSlug && segments.length === 1) {
+      router.push(`/team/${teamSlug}` as any)
+      return
+    }
+
+    // Team sub-page: `/chicago-bears/roster`, `/chicago-bears/schedule`, `/chicago-bears/stats`
+    if (teamSlug && segments.length === 2) {
+      const sub = segments[1]
+      if (sub === 'roster' || sub === 'schedule' || sub === 'stats') {
+        router.push(`/team/${teamSlug}/${sub}` as any)
+        return
+      }
+    }
+
+    // Article: `/article/{id}` or web slug routes — fall through to external open
+    // (no in-app player page exists, so player links also fall through)
+  }
+
+  Linking.openURL(url).catch(() => {})
+}
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window')
 
@@ -362,15 +410,7 @@ export default function ArticleScreen() {
                   // Update WebView height based on content
                   setWebViewHeight(Math.max(300, data.value + 50))
                 } else if (data.type === 'link' && data.url) {
-                  // Handle internal links
-                  if (data.url.includes('sportsmockery.com')) {
-                    // Parse and navigate internally
-                    const path = new URL(data.url).pathname
-                    router.push(path as any)
-                  } else {
-                    // Open external links in browser
-                    // Could use Linking.openURL here
-                  }
+                  handleArticleLink(data.url, router)
                 }
               } catch (e) {
                 // Ignore

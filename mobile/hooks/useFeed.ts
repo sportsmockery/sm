@@ -111,6 +111,7 @@ export function useFeed() {
     latestNews: data?.latestNews ?? [],
     teamSections: data?.teamSections ?? {},
     trending: data?.trending ?? [],
+    riverItems: data?.riverItems ?? [],
     meta: data?.meta,
 
     // Loading states

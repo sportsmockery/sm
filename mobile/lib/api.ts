@@ -8,6 +8,86 @@
 
 import { API_BASE_URL } from './config'
 
+// ─── Block content normalization ───────────────────────────────
+// Articles authored with the block editor are stored as JSON
+// (sometimes wrapped in <!-- SM_BLOCKS -->...<!-- /SM_BLOCKS --> markers).
+// The mobile WebView renders HTML, so we need to convert blocks → HTML
+// before passing to the renderer.
+
+function normalizeArticleContent(raw: string): string {
+  if (!raw) return ''
+  let body = raw.trim()
+  if (body.startsWith('<!-- SM_BLOCKS -->')) {
+    body = body.replace('<!-- SM_BLOCKS -->', '').replace('<!-- /SM_BLOCKS -->', '').trim()
+  }
+  // Detect block JSON: starts with `{` and parses to an object with `blocks`
+  if (body.startsWith('{')) {
+    try {
+      const doc = JSON.parse(body)
+      if (Array.isArray(doc?.blocks)) {
+        return blocksToHtml(doc.blocks)
+      }
+    } catch {
+      // fall through — not JSON, treat as HTML
+    }
+  }
+  return raw
+}
+
+function blocksToHtml(blocks: any[]): string {
+  return blocks
+    .map((block: any) => {
+      const data = block?.data ?? {}
+      switch (block?.type) {
+        case 'paragraph':
+          return data.html ? `<p>${data.html}</p>` : ''
+        case 'heading': {
+          const level = data.level || 2
+          return data.text ? `<h${level}>${escapeHtml(data.text)}</h${level}>` : ''
+        }
+        case 'image': {
+          if (!data.src) return ''
+          const caption = data.caption ? `<figcaption>${escapeHtml(data.caption)}</figcaption>` : ''
+          return `<figure><img src="${data.src}" alt="${escapeHtml(data.alt || '')}" loading="lazy" />${caption}</figure>`
+        }
+        case 'video':
+          return data.url
+            ? `<div class="video-embed"><iframe src="${data.url}" allowfullscreen loading="lazy"></iframe></div>`
+            : ''
+        case 'analysis':
+          return data.html ? `<aside class="sm-analysis">${data.html}</aside>` : ''
+        // Scout Summary / Scout Recap / Scout Insight (Edge Insights) intentionally
+        // omitted — these blocks should not appear in mobile article rendering.
+        case 'scout-insight':
+        case 'scout-summary':
+        case 'scout-recap':
+          return ''
+        case 'hot-take':
+          return data.text
+            ? `<blockquote class="hot-take"><p>${escapeHtml(data.text)}</p></blockquote>`
+            : ''
+        case 'update':
+          return data.text
+            ? `<div class="update-block"><strong>UPDATE${data.timestamp ? ` ${escapeHtml(data.timestamp)}` : ''}:</strong> ${escapeHtml(data.text)}</div>`
+            : ''
+        case 'divider':
+          return '<hr />'
+        default:
+          return ''
+      }
+    })
+    .filter(Boolean)
+    .join('\n')
+}
+
+function escapeHtml(s: string): string {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
 // Types matching the website's API responses
 export interface Author {
   id: number
@@ -34,12 +114,32 @@ export interface Post {
   final_score?: number
 }
 
+export interface RiverItem {
+  id: string
+  type:
+    | 'editorial'
+    | 'poll'
+    | 'chart'
+    | 'hub_update'
+    | 'box_score'
+    | 'trade_proposal'
+    | 'scout_summary'
+    | 'trending_article'
+    | 'debate'
+    | 'video'
+  team: string
+  teamColor: string
+  timestamp: string
+  data: Record<string, unknown>
+}
+
 export interface FeedResponse {
   featured: Post | null
   topHeadlines: Post[]
   latestNews: Post[]
   teamSections: Record<string, Post[]>
   trending: Post[]
+  riverItems?: RiverItem[]
   meta: {
     total: number
     viewedCount: number
@@ -217,7 +317,7 @@ class ApiClient {
       id: post.id,
       title: post.title,
       slug: post.slug,
-      content_html: post.content || '',
+      content_html: normalizeArticleContent(post.content || ''),
       excerpt: post.excerpt,
       featured_image: post.featured_image,
       published_at: post.published_at,

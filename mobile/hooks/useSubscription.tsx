@@ -48,13 +48,14 @@ const proFeatures: SubscriptionFeatures = {
   ask_ai: { enabled: true, limit: null },
 }
 
+// SM+ paywall removed — every user is treated as pro with all features unlocked
 const defaultState: SubscriptionState = {
   tier: 'free',
   status: 'inactive',
-  isPro: false,
+  isPro: true,
   currentPeriodEnd: null,
   cancelAtPeriodEnd: false,
-  features: defaultFeatures,
+  features: proFeatures,
 }
 
 const SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined)
@@ -93,17 +94,14 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
         return
       }
 
-      const isPro =
-        (subscription.tier === 'sm_plus_monthly' || subscription.tier === 'sm_plus_annual') &&
-        subscription.status === 'active'
-
+      // SM+ paywall removed — all features unlocked for every user
       setState({
         tier: subscription.tier as SubscriptionTier,
         status: subscription.status,
-        isPro,
+        isPro: true,
         currentPeriodEnd: subscription.current_period_end,
         cancelAtPeriodEnd: subscription.cancel_at_period_end || false,
-        features: isPro ? proFeatures : defaultFeatures,
+        features: proFeatures,
       })
     } catch (err) {
       console.error('Subscription fetch error:', err)
@@ -145,15 +143,8 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     }
   }, [user?.id, fetchSubscription])
 
-  const canAccess = useCallback(
-    (feature: FeatureKey): boolean => {
-      if (feature === 'ask_ai') {
-        return state.features.ask_ai.enabled
-      }
-      return state.features[feature]
-    },
-    [state.features]
-  )
+  // SM+ paywall removed — every feature is accessible
+  const canAccess = useCallback((_feature: FeatureKey): boolean => true, [])
 
   // Open pricing page in browser (mobile uses web checkout)
   const openPricing = useCallback(async () => {
