@@ -6,7 +6,7 @@ import LoginShell from '@/components/auth/LoginShell'
 import { supabaseAdmin } from '@/lib/supabase-server'
 
 export const metadata: Metadata = {
-  title: 'Create your account | Sports Mockery',
+  title: 'Create your account',
   description:
     'Create your free Sports Mockery account for personalized Chicago sports news, Scout AI, fan polls, and the daily 6 AM email.',
   robots: { index: false, follow: false },
