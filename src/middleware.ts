@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { buildCspHeader, generateNonce } from '@/lib/security/csp'
+import { isWordPressProbe } from '@/lib/security/wp-probe'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SEO redirect rules (priority order — handled at the top of middleware()):
@@ -21,37 +22,9 @@ const LEGACY_GONE_410 =
   /^\/(?:tag\/[^/]+|app-pages(?:\/.*)?|cart-2|checkout|apply|advertise)\/?$/
 
 // Pre-launch security: WP/secret probe paths return real 410 instead of
-// a soft-200 article-not-found page. Audit finding #9 — list deliberately
-// EXACT-MATCH only (or scoped subpath for /wp-admin) so we don't catch
-// legitimate routes. Kept separate from LEGACY_GONE_410 so it doesn't
-// conflict with PR #99 (which extends LEGACY_GONE_410 for toxic author
-// backlink paths).
-const WP_PROBE_GONE_410 = new Set<string>([
-  '/wp-login.php',
-  '/wp-login',
-  '/wp-admin',
-  '/wp-admin/',
-  '/wp-admin.php',
-  '/xmlrpc.php',
-  '/wp-cron.php',
-  '/wp-config.php',
-  '/wp-config.php.bak',
-  '/wp-config-sample.php',
-  '/readme.html',
-  '/license.txt',
-  '/.env',
-  '/.env.local',
-  '/.env.production',
-  '/.git/HEAD',
-  '/.git/config',
-  '/.git/index',
-  '/.htaccess',
-  '/.aws/credentials',
-  '/wp-content/debug.log',
-])
-const WP_ADMIN_SUBPATH = /^\/wp-admin(?:\/|$)/
-const WP_INCLUDES_SUBPATH = /^\/wp-includes(?:\/|$)/
-const GIT_SUBPATH = /^\/\.git(?:\/|$)/
+// a soft-200 article-not-found page. See `lib/security/wp-probe.ts` for the
+// canonical matcher (audit finding #9, expanded after live-probe gaps were
+// discovered for `/wp-content`, `/wordpress`, etc.).
 
 const _supabaseSeoUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const _supabaseSeoKey =
@@ -194,14 +167,9 @@ export async function middleware(request: NextRequest) {
   }
 
   // Pre-launch security: WP / secret-probe paths return real 410 Gone
-  // instead of soft-404 (audit finding #9). Strict membership check or
-  // narrow subpath regex — does NOT prefix-match general routes.
-  if (
-    WP_PROBE_GONE_410.has(pathname) ||
-    WP_ADMIN_SUBPATH.test(pathname) ||
-    WP_INCLUDES_SUBPATH.test(pathname) ||
-    GIT_SUBPATH.test(pathname)
-  ) {
+  // instead of soft-404 (audit finding #9). Runs BEFORE the trailing-slash
+  // 308 below so probes never get a soft-200 redirect-then-render path.
+  if (isWordPressProbe(pathname)) {
     return new NextResponse('Gone', { status: 410 })
   }
 
