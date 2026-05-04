@@ -13,5 +13,10 @@ export const metadata: Metadata = {
 }
 
 export default function GMLayout({ children }: { children: React.ReactNode }) {
-  return children
+  return (
+    <>
+      <h1 className="sr-only">GM Trade Simulator</h1>
+      {children}
+    </>
+  )
 }
