@@ -270,6 +270,17 @@ export default function AdvancedPostEditor({
     }
   }, [sendPushNotification, formData.title, pushTitle])
 
+  // Sync BlockEditor doc → legacy formData.content so PostIQ tools (Add Chart,
+  // Headlines, Add Poll, Grammar Check) and any code that reads formData.content
+  // stay in sync. Without this, the disable conditions on those buttons silently
+  // keep them off because formData.content stays empty — clicks get swallowed
+  // before React's onClick fires and there's no console signal.
+  useEffect(() => {
+    if (!blockDoc) return
+    const plainText = blocksToHtml(blockDoc.blocks).replace(/<[^>]+>/g, '').trim()
+    setFormData(prev => (prev.content === plainText ? prev : { ...prev, content: plainText }))
+  }, [blockDoc])
+
   // Word count calculation
   const wordCount = formData.content.replace(/<[^>]*>/g, ' ').split(/\s+/).filter(w => w).length
 
