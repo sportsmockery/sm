@@ -3,6 +3,7 @@ import { Metadata } from 'next'
 export const metadata: Metadata = {
   title: 'Contact Us - Sports Mockery',
   description: 'Get in touch with Sports Mockery. Send us tips, feedback, or inquiries.',
+  alternates: { canonical: '/contact' },
 }
 
 export default function ContactPage() {
