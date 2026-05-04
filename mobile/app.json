@@ -2,7 +2,7 @@
   "expo": {
     "name": "Sports Mockery",
     "slug": "sports-mockery",
-    "version": "2.6",
+    "version": "2.7",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "sportsmockery",
@@ -18,7 +18,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.sportsmockery.app",
-      "buildNumber": "20260503",
+      "buildNumber": "20260504",
       "infoPlist": {
         "NSCameraUsageDescription": "Used to upload profile photos",
         "NSPhotoLibraryUsageDescription": "Used to select profile photos",
@@ -33,7 +33,7 @@
         "backgroundColor": "#bc0000"
       },
       "package": "com.sportsmockery.app",
-      "versionCode": 26,
+      "versionCode": 27,
       "permissions": [
         "android.permission.INTERNET",
         "android.permission.VIBRATE"
