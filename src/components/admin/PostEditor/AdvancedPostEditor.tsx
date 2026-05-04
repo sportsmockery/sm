@@ -18,7 +18,7 @@ const ChartBuilderModal = dynamic(
 import { PostIQChartGenerator } from '@/components/postiq'
 import StoryUniversePanel from './StoryUniversePanel'
 import { BlockEditor } from '@/components/admin/BlockEditor'
-import type { ArticleDocument } from '@/components/admin/BlockEditor'
+import type { ArticleDocument, BlockEditorHandle } from '@/components/admin/BlockEditor'
 import type { ContentBlock } from '@/components/admin/BlockEditor/types'
 import { isBlockContent, parseDocument, serializeDocument, blocksToHtml } from '@/components/admin/BlockEditor/serializer'
 import { BlockPreviewRenderer } from '@/components/admin/BlockEditor/BlockPreviewRenderer'
@@ -147,6 +147,11 @@ export default function AdvancedPostEditor({
   const [blockDoc, setBlockDoc] = useState<ArticleDocument | null>(
     post?.content && isBlockContent(post.content) ? parseDocument(post.content) : null
   )
+  // Imperative handle for pushing pre-built blocks (e.g. inserted charts)
+  // into BlockEditor's internal state. Mutating only the parent's blockDoc
+  // would get clobbered the next time the user types, since the editor
+  // would push its stale internal blocks back up via onChange.
+  const editorRef = useRef<BlockEditorHandle>(null)
 
   // Push notification states
   const [sendPushNotification, setSendPushNotification] = useState(false)
@@ -779,36 +784,51 @@ export default function AdvancedPostEditor({
       const compatibleType: 'bar' | 'line' = config.type === 'line' ? 'line' : 'bar'
 
       // selectedParagraph is 1-indexed against paragraph blocks only.
-      setBlockDoc((prev) => {
-        if (!prev) return prev
-        const blocks = [...prev.blocks]
-        let paragraphCount = 0
-        let insertIdx = blocks.length
-        for (let i = 0; i < blocks.length; i++) {
-          if (blocks[i].type === 'paragraph') {
-            paragraphCount++
-            if (paragraphCount === selectedParagraph) {
-              insertIdx = i + 1
-              break
-            }
+      // Compute insertIdx against the parent's blockDoc — close enough to
+      // the editor's internal state for paragraph counting (any drift is
+      // bounded by autosave debounce, ~100ms).
+      const sourceBlocks = blockDoc?.blocks ?? []
+      let paragraphCount = 0
+      let insertIdx = sourceBlocks.length
+      for (let i = 0; i < sourceBlocks.length; i++) {
+        if (sourceBlocks[i].type === 'paragraph') {
+          paragraphCount++
+          if (paragraphCount === selectedParagraph) {
+            insertIdx = i + 1
+            break
           }
         }
-        const newBlock: ContentBlock = {
-          id: crypto.randomUUID(),
-          type: 'stats-chart',
-          data: {
-            title: config.title || 'Chart',
-            chartType: compatibleType,
-            color: teamColor,
-            dataPoints: (config.data ?? []).map((d: { label?: string; name?: string; value?: number | string }) => ({
-              label: d.label ?? d.name ?? '',
-              value: typeof d.value === 'number' ? d.value : Number(d.value) || 0,
-            })),
-          },
-        }
-        blocks.splice(insertIdx, 0, newBlock)
-        return { ...prev, blocks }
-      })
+      }
+      const newBlock: ContentBlock = {
+        id: crypto.randomUUID(),
+        type: 'stats-chart',
+        data: {
+          title: config.title || 'Chart',
+          chartType: compatibleType,
+          color: teamColor,
+          dataPoints: (config.data ?? []).map((d: { label?: string; name?: string; value?: number | string }) => ({
+            label: d.label ?? d.name ?? '',
+            value: typeof d.value === 'number' ? d.value : Number(d.value) || 0,
+          })),
+        },
+      }
+
+      // Push the block through the editor's imperative handle (NOT
+      // setBlockDoc) — see BlockEditorHandle docs. The editor's onChange
+      // will then propagate the new blocks up to blockDoc automatically.
+      if (editorRef.current) {
+        editorRef.current.insertBlock(newBlock, insertIdx)
+      } else {
+        // Fallback for the rare case the editor isn't mounted yet (e.g.
+        // legacy editor mode). Direct setBlockDoc is fine here because
+        // BlockEditor isn't currently driving state.
+        setBlockDoc(prev => {
+          if (!prev) return { version: 1, template: '', blocks: [newBlock] }
+          const blocks = [...prev.blocks]
+          blocks.splice(insertIdx, 0, newBlock)
+          return { ...prev, blocks }
+        })
+      }
 
       setShowChartModal(false)
       setInitialChartConfig(null)
@@ -1576,6 +1596,7 @@ export default function AdvancedPostEditor({
             <div className="mb-6">
               {editorMode === 'blocks' && (
                 <BlockEditor
+                  ref={editorRef}
                   initialBlocks={blockDoc?.blocks}
                   initialTemplate={blockDoc?.template}
                   onChange={(doc) => setBlockDoc(doc)}

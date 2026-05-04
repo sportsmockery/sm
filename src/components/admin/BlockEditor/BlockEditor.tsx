@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, useRef, useMemo, useImperativeHandle, forwardRef } from 'react';
 import {
   Eye, PenLine, Undo2, Redo2, Plus, Sparkles, Type, Heading, ImageIcon,
 } from 'lucide-react';
@@ -21,6 +21,22 @@ interface BlockEditorProps {
   previewAuthor?: string;
   previewCategory?: string;
   previewStatus?: string;
+}
+
+/**
+ * Imperative handle exposed via React.forwardRef. Lets the parent push a
+ * pre-built block into the editor without lifting the editor's internal
+ * state up. Without this escape hatch, calling setState on the parent's
+ * doc would silently get clobbered the next time the editor's onChange
+ * fires (parent's value replaced with the editor's stale internal blocks).
+ *
+ * Add new methods sparingly — if a second external-mutation feature
+ * lands (paste-from-template, AI block suggestion, etc.), the editor
+ * should be refactored to be fully controlled instead of growing more
+ * imperative methods.
+ */
+export interface BlockEditorHandle {
+  insertBlock(block: ContentBlock, atIndex: number): void;
 }
 
 // ─── Suggestion logic ───────────────────────────────────────────────────────
@@ -103,7 +119,7 @@ function stripHtml(html: string | undefined): string {
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
-export function BlockEditor({
+export const BlockEditor = forwardRef<BlockEditorHandle, BlockEditorProps>(function BlockEditor({
   initialBlocks,
   initialTemplate,
   onChange,
@@ -111,7 +127,7 @@ export function BlockEditor({
   previewAuthor,
   previewCategory,
   previewStatus,
-}: BlockEditorProps) {
+}, ref) {
   // Auto-seed a paragraph for new posts so writers land on real content.
   // EmptyCanvas only renders if the user explicitly deletes everything.
   const [blocks, setBlocks] = useState<ContentBlock[]>(() => {
@@ -152,6 +168,24 @@ export function BlockEditor({
     },
     [blocks, template, onChange, pushHistory]
   );
+
+  // Insert a pre-built block at a specific index. Routes through
+  // updateBlocks so history + onChange both fire — without that,
+  // the next user keystroke would clobber the inserted block (the
+  // editor's onChange would push its stale internal state up).
+  const insertBlockAt = useCallback(
+    (block: ContentBlock, atIndex: number) => {
+      const next = [...blocks];
+      const idx = Math.max(0, Math.min(atIndex, next.length));
+      next.splice(idx, 0, block);
+      updateBlocks(next);
+    },
+    [blocks, updateBlocks]
+  );
+
+  useImperativeHandle(ref, () => ({
+    insertBlock: insertBlockAt,
+  }), [insertBlockAt]);
 
   const undo = useCallback(() => {
     if (history.length === 0) return;
@@ -468,7 +502,7 @@ export function BlockEditor({
       )}
     </div>
   );
-}
+});
 
 // ─── Empty State ────────────────────────────────────────────────────────────
 

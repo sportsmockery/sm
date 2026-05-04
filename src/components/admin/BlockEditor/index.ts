@@ -1,4 +1,5 @@
 export { BlockEditor } from './BlockEditor';
+export type { BlockEditorHandle } from './BlockEditor';
 export { BlockPreviewRenderer } from './BlockPreviewRenderer';
 export { TemplateSelector } from './TemplatePresets';
 export { TEMPLATE_PRESETS } from './TemplatePresets';
