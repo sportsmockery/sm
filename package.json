@@ -12,6 +12,7 @@
     "deploy": "./scripts/safe-deploy.sh",
     "build-deploy": "./scripts/build-deploy.sh",
     "test:seo": "playwright test --config=playwright.seo.config.ts",
+    "test:security": "npx tsx --test src/lib/security/__tests__/*.test.ts",
     "seo:audit": "tsx scripts/seo-audit.ts",
     "prepare": "git config core.hooksPath .githooks || true",
     "figma:fetch": "npx tsx scripts/figma/fetch-file.ts",

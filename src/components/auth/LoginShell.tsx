@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ArrowRight, Check, Mail, Sparkles } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
+import { sanitizeNextParam } from '@/lib/security/next-param'
 
 interface LoginShellProps {
   redirectTo?: string
@@ -60,6 +61,11 @@ export default function LoginShell({
 }: LoginShellProps) {
   const router = useRouter()
   const { signUp, signIn } = useAuth()
+
+  // Defense-in-depth: even though the server-side login page already
+  // sanitizes ?next=, re-validate here so router.push() can never be
+  // steered cross-origin by a tampered prop.
+  const safeRedirect = sanitizeNextParam(redirectTo, '/admin')
 
   // Primary card uses live brief data when available; falls back to the static
   // copy so the page still feels finished if the queries fail.
@@ -179,7 +185,7 @@ export default function LoginShell({
       setSigninLoading(false)
       return
     }
-    router.push(redirectTo)
+    router.push(safeRedirect)
     router.refresh()
   }
 
