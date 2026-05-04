@@ -11,6 +11,7 @@ import { ArticleBlockContent } from '@/components/articles/ArticleBlockContent'
 import { isBlockContent, parseDocument } from '@/components/admin/BlockEditor/serializer'
 import { JsonLd } from '@/lib/seo/jsonld'
 import { faqPageJsonLd } from '@/lib/seo/schema/faq-page'
+import { buildArticleTitle } from '@/lib/seo'
 
 // SEO Tip #27 — TTFB: published article pages are content-stable for tens of
 // minutes at a time. ISR + per-key unstable_cache wrappers around Supabase
@@ -94,10 +95,11 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
   if (!post) return { title: 'Article Not Found' }
 
   const title = post.seo_title || post.title
+  const seoTitle = buildArticleTitle(title)
   const description = post.seo_description || post.excerpt || ''
 
   return {
-    title,
+    title: { absolute: seoTitle },
     description,
     alternates: { canonical: `/home/article/${slug}` },
     openGraph: {
