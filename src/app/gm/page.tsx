@@ -1297,7 +1297,7 @@ export default function GMPage() {
           {/* Row 1: Title + Icons + GM Score */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
             <div>
-              <h1 style={{ fontSize: 24, fontWeight: 900, color: textColor, margin: 0, letterSpacing: '-0.5px' }}>WAR ROOM</h1>
+              <h1 style={{ fontSize: 24, fontWeight: 900, color: textColor, margin: 0, letterSpacing: '-0.5px' }}>GM Trade Simulator</h1>
               <p style={{ fontSize: 13, color: subText, margin: '2px 0 0', fontWeight: 500 }}>
                 {selectedTeam ? `${teamLabel} Trade Session` : 'Select a team to start trading'}
               </p>
