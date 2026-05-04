@@ -1,8 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/hooks/useAuth'
+import TurnstileWidget, {
+  getTurnstileSiteKey,
+  type TurnstileWidgetHandle,
+} from '@/components/auth/TurnstileWidget'
 
 export default function HomeSignupForm() {
   const { signUp } = useAuth()
@@ -14,6 +18,10 @@ export default function HomeSignupForm() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const turnstileRef = useRef<TurnstileWidgetHandle | null>(null)
+  const turnstileSiteKey = getTurnstileSiteKey()
+  const captchaRequired = Boolean(turnstileSiteKey)
 
   const getPasswordStrength = (pass: string) => {
     let strength = 0
@@ -45,13 +53,24 @@ export default function HomeSignupForm() {
       setError('You must accept the terms and conditions')
       return
     }
+    if (captchaRequired && !captchaToken) {
+      setError('Please complete the verification challenge')
+      return
+    }
 
     setLoading(true)
-    const { error } = await signUp(email, password, { full_name: fullName })
+    const { error } = await signUp(
+      email,
+      password,
+      { full_name: fullName },
+      captchaToken ? { captchaToken } : undefined
+    )
 
     if (error) {
       setError(error)
       setLoading(false)
+      setCaptchaToken(null)
+      turnstileRef.current?.reset()
       return
     }
 
@@ -228,16 +247,30 @@ export default function HomeSignupForm() {
         </span>
       </label>
 
+      {/* Turnstile CAPTCHA (only renders when site key is configured) */}
+      {turnstileSiteKey && (
+        <div data-testid="turnstile-slot">
+          <TurnstileWidget
+            ref={turnstileRef}
+            siteKey={turnstileSiteKey}
+            theme="dark"
+            onVerify={(token) => setCaptchaToken(token)}
+            onExpire={() => setCaptchaToken(null)}
+            onError={() => setCaptchaToken(null)}
+          />
+        </div>
+      )}
+
       {/* Submit button */}
       <button
         type="submit"
-        disabled={loading}
+        disabled={loading || (captchaRequired && !captchaToken)}
         className="hm-btn-primary"
         style={{
           width: '100%', justifyContent: 'center',
           padding: '18px 32px', fontSize: 16,
-          opacity: loading ? 0.6 : 1,
-          cursor: loading ? 'not-allowed' : 'pointer',
+          opacity: loading || (captchaRequired && !captchaToken) ? 0.6 : 1,
+          cursor: loading || (captchaRequired && !captchaToken) ? 'not-allowed' : 'pointer',
         }}
       >
         {loading ? (

@@ -1,11 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { ArrowRight, Check, Mail, Sparkles } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { sanitizeNextParam } from '@/lib/security/next-param'
+import TurnstileWidget, {
+  getTurnstileSiteKey,
+  type TurnstileWidgetHandle,
+} from '@/components/auth/TurnstileWidget'
 
 interface LoginShellProps {
   redirectTo?: string
@@ -106,6 +110,14 @@ export default function LoginShell({
   const [signinError, setSigninError] = useState('')
   const [signinLoading, setSigninLoading] = useState(false)
 
+  // ========== Turnstile state (shared widget per active tab) ==========
+  const turnstileSiteKey = getTurnstileSiteKey()
+  const captchaRequired = Boolean(turnstileSiteKey)
+  const [signupCaptchaToken, setSignupCaptchaToken] = useState<string | null>(null)
+  const [signinCaptchaToken, setSigninCaptchaToken] = useState<string | null>(null)
+  const signupTurnstileRef = useRef<TurnstileWidgetHandle | null>(null)
+  const signinTurnstileRef = useRef<TurnstileWidgetHandle | null>(null)
+
   const passwordStrength = (() => {
     let s = 0
     if (password.length >= 8) s++
@@ -151,12 +163,24 @@ export default function LoginShell({
       return
     }
 
+    if (captchaRequired && !signupCaptchaToken) {
+      setSignupError('Please complete the verification challenge')
+      return
+    }
+
     setSignupLoading(true)
 
-    const { error } = await signUp(email, password, { full_name: fullName })
+    const { error } = await signUp(
+      email,
+      password,
+      { full_name: fullName },
+      signupCaptchaToken ? { captchaToken: signupCaptchaToken } : undefined
+    )
     if (error) {
       setSignupError(error)
       setSignupLoading(false)
+      setSignupCaptchaToken(null)
+      signupTurnstileRef.current?.reset()
       return
     }
 
@@ -178,11 +202,24 @@ export default function LoginShell({
   const handleSignin = async (e: React.FormEvent) => {
     e.preventDefault()
     setSigninError('')
+
+    if (captchaRequired && !signinCaptchaToken) {
+      setSigninError('Please complete the verification challenge')
+      return
+    }
+
     setSigninLoading(true)
-    const { error } = await signIn(signinEmail, signinPassword, rememberMe)
+    const { error } = await signIn(
+      signinEmail,
+      signinPassword,
+      rememberMe,
+      signinCaptchaToken ? { captchaToken: signinCaptchaToken } : undefined
+    )
     if (error) {
       setSigninError(error)
       setSigninLoading(false)
+      setSigninCaptchaToken(null)
+      signinTurnstileRef.current?.reset()
       return
     }
     router.push(safeRedirect)
@@ -845,16 +882,28 @@ export default function LoginShell({
                           </span>
                         </label>
 
+                        {turnstileSiteKey && (
+                          <div data-testid="turnstile-slot-signup">
+                            <TurnstileWidget
+                              ref={signupTurnstileRef}
+                              siteKey={turnstileSiteKey}
+                              onVerify={(token) => setSignupCaptchaToken(token)}
+                              onExpire={() => setSignupCaptchaToken(null)}
+                              onError={() => setSignupCaptchaToken(null)}
+                            />
+                          </div>
+                        )}
+
                         <button
                           type="submit"
-                          disabled={signupLoading}
+                          disabled={signupLoading || (captchaRequired && !signupCaptchaToken)}
                           className="btn-primary btn-full"
                           style={{
                             height: 48,
                             borderRadius: '16px',
                             fontSize: 14,
                             padding: '0 20px',
-                            ...(signupLoading
+                            ...(signupLoading || (captchaRequired && !signupCaptchaToken)
                               ? { opacity: 0.6, cursor: 'not-allowed' }
                               : {}),
                           }}
@@ -1038,16 +1087,30 @@ export default function LoginShell({
                         </span>
                       </label>
 
+                      {turnstileSiteKey && (
+                        <div data-testid="turnstile-slot-signin">
+                          <TurnstileWidget
+                            ref={signinTurnstileRef}
+                            siteKey={turnstileSiteKey}
+                            onVerify={(token) => setSigninCaptchaToken(token)}
+                            onExpire={() => setSigninCaptchaToken(null)}
+                            onError={() => setSigninCaptchaToken(null)}
+                          />
+                        </div>
+                      )}
+
                       <button
                         type="submit"
-                        disabled={signinLoading}
+                        disabled={signinLoading || (captchaRequired && !signinCaptchaToken)}
                         className="btn-primary btn-full"
                         style={{
                           height: 48,
                           borderRadius: '16px',
                           fontSize: 14,
                           padding: '0 20px',
-                          ...(signinLoading ? { opacity: 0.6, cursor: 'not-allowed' } : {}),
+                          ...(signinLoading || (captchaRequired && !signinCaptchaToken)
+                            ? { opacity: 0.6, cursor: 'not-allowed' }
+                            : {}),
                         }}
                       >
                         {signinLoading ? (
