@@ -18,6 +18,10 @@ export interface ChartConfig {
   data: ChartDataEntry[]
   dataSource: DataSource
   dataLabQuery?: DataLabQuery
+  // Polished ECharts spec returned by DataLab's /api/postiq/generate-chart.
+  // When present, <StatsChart /> renders via ReactECharts instead of the
+  // hand-rolled SVG fallback. See docs/Test_SportsMockery_Chart_Insert_Fix.md.
+  echartsOptions?: Record<string, unknown>
 }
 
 export interface AISuggestion {

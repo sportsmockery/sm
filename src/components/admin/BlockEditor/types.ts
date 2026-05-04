@@ -158,6 +158,9 @@ export interface StatsChartBlock extends BlockBase {
     chartType: 'bar' | 'line';
     color: string;
     dataPoints: { label: string; value: number }[];
+    // Polished ECharts spec from DataLab's /api/postiq/generate-chart.
+    // When present, the renderer uses ReactECharts; absent → SVG fallback.
+    echartsOptions?: Record<string, unknown>;
   };
 }
 

@@ -671,41 +671,49 @@ export default function AdvancedPostEditor({
     setShowChartModal(true)
     setChartLoading(true)
 
-    // Fetch AI suggestion to pre-populate
+    // Fetch a polished ECharts-styled chart directly from DataLab via the
+    // server-side proxy at /api/admin/datalab-chart (which adds the
+    // DATALAB_API_KEY auth header). The previous flow called
+    // /api/admin/ai?action=analyze_chart which only returned raw points,
+    // so the modal preview + inserted block both fell back to the basic
+    // SVG <StatsChart />. Now we get the same animated, brand-styled
+    // chart that PostIQChartGenerator already shows in the side panel.
     try {
-      const response = await fetch('/api/admin/ai', {
+      const response = await fetch('/api/admin/datalab-chart', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          action: 'analyze_chart',
-          title: formData.title,
-          content: contentToAnalyze,
-          category: categoryName,
+          content: { title: formData.title, body: contentToAnalyze },
           team,
+          mode: 'dark',
         }),
       })
 
       if (response.ok) {
         const data = await response.json()
-        if (data.shouldCreateChart && data.data?.length >= 2) {
-          // Store AI suggestion for display in modal
+        const firstChart = data.charts?.[0]
+        if (firstChart && firstChart.categories?.length >= 2) {
+          const points = firstChart.categories.map((cat: string, i: number) => ({
+            label: cat,
+            value: firstChart.series?.[0]?.data?.[i] ?? 0,
+          }))
           setChartAiSuggestion({
-            reasoning: data.reasoning || 'Found chartable data in your article',
-            chartTitle: data.chartTitle || '',
-            chartType: (data.chartType || 'bar') as ChartType,
-            data: data.data,
-            paragraphIndex: data.paragraphIndex || 1,
+            reasoning: firstChart.description || 'Found chartable data in your article',
+            chartTitle: firstChart.title || '',
+            chartType: (firstChart.type || 'bar') as ChartType,
+            data: points,
+            paragraphIndex: 1,
           })
-          // Set initial config for the chart
           setInitialChartConfig({
-            type: (data.chartType || 'bar') as 'bar' | 'line' | 'pie' | 'player-comparison' | 'team-stats',
-            title: data.chartTitle || '',
+            type: (firstChart.type || 'bar') as 'bar' | 'line' | 'pie' | 'player-comparison' | 'team-stats',
+            title: firstChart.title || '',
             size: 'medium',
-            colors: { scheme: 'team', team: team as 'bears' | 'bulls' | 'cubs' | 'whitesox' | 'blackhawks' },
-            data: data.data,
+            colors: { scheme: 'team', team: (data.team || team) as 'bears' | 'bulls' | 'cubs' | 'whitesox' | 'blackhawks' },
+            data: points,
             dataSource: 'manual',
+            echartsOptions: firstChart.options,
           })
-          setSelectedParagraph(data.paragraphIndex || 1)
+          setSelectedParagraph(1)
         }
       }
     } catch (err) {
@@ -810,6 +818,10 @@ export default function AdvancedPostEditor({
             label: d.label ?? d.name ?? '',
             value: typeof d.value === 'number' ? d.value : Number(d.value) || 0,
           })),
+          // Polished ECharts spec from DataLab — when present, the renderer
+          // uses ReactECharts; absent (e.g., manually-built chart) → SVG
+          // fallback in <StatsChart />.
+          echartsOptions: config.echartsOptions,
         },
       }
 

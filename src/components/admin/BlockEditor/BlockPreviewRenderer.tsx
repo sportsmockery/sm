@@ -246,7 +246,13 @@ function RenderBlock({ block, priorityImageId }: { block: ContentBlock; priority
       if (block.data.dataPoints.length === 0) return <EmptyState label="Chart — add data points" accent={BRAND.cyan} />;
       return (
         <ChartBlock>
-          <StatsChart title={block.data.title} data={block.data.dataPoints} type={block.data.chartType} color={block.data.color} />
+          <StatsChart
+            title={block.data.title}
+            data={block.data.dataPoints}
+            type={block.data.chartType}
+            color={block.data.color}
+            echartsOptions={block.data.echartsOptions}
+          />
         </ChartBlock>
       );
 

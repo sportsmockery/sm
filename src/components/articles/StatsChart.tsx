@@ -1,6 +1,12 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
+
+// echarts-for-react pulls in the full ECharts runtime (~200KB gzipped).
+// Lazy-load it client-only so articles without polished ECharts options
+// (the SVG fallback path) don't pay the bundle cost.
+const ReactECharts = dynamic(() => import('echarts-for-react'), { ssr: false });
 
 interface DataPoint {
   label: string;
@@ -12,11 +18,25 @@ interface StatsChartProps {
   data: DataPoint[];
   color?: string;
   type?: 'bar' | 'line';
+  // When present, render via ReactECharts (polished, animated, brand
+  // palette). Otherwise fall back to the hand-rolled SVG below. Set by
+  // DataLab's /api/postiq/generate-chart and threaded through the
+  // stats-chart block; manually-built charts leave it undefined.
+  echartsOptions?: Record<string, unknown>;
 }
 
-export function StatsChart({ title, data, color = '#00D4FF', type = 'bar' }: StatsChartProps) {
+export function StatsChart({ title, data, color = '#00D4FF', type = 'bar', echartsOptions }: StatsChartProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
+
+  // Polished ECharts path — DataLab-provided options take priority.
+  if (echartsOptions) {
+    return (
+      <div className="my-6">
+        <ReactECharts option={echartsOptions} style={{ height: 400 }} notMerge />
+      </div>
+    );
+  }
 
   useEffect(() => {
     const el = ref.current;
