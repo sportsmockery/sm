@@ -37,16 +37,15 @@
         "buildType": "app-bundle"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://sportsmockery.com"
+        "EXPO_PUBLIC_API_URL": "https://test.sportsmockery.com"
       }
     }
   },
   "submit": {
     "production": {
       "ios": {
-        "appleId": "your-apple-id@example.com",
-        "ascAppId": "your-app-store-connect-app-id",
-        "appleTeamId": "YOUR_TEAM_ID"
+        "ascAppId": "680797716",
+        "appleTeamId": "BF234ZPBVJ"
       },
       "android": {
         "serviceAccountKeyPath": "./google-service-account.json",

@@ -1,8 +1,8 @@
 {
   "expo": {
     "name": "Sports Mockery",
-    "slug": "sportsmockery",
-    "version": "1.0.0",
+    "slug": "sports-mockery",
+    "version": "2.6",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "sportsmockery",
@@ -18,11 +18,13 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.sportsmockery.app",
-      "buildNumber": "1",
+      "buildNumber": "20260503",
       "infoPlist": {
         "NSCameraUsageDescription": "Used to upload profile photos",
         "NSPhotoLibraryUsageDescription": "Used to select profile photos",
-        "UIBackgroundModes": ["audio"]
+        "UIBackgroundModes": [
+          "audio"
+        ]
       }
     },
     "android": {
@@ -31,7 +33,7 @@
         "backgroundColor": "#bc0000"
       },
       "package": "com.sportsmockery.app",
-      "versionCode": 1,
+      "versionCode": 26,
       "permissions": [
         "android.permission.INTERNET",
         "android.permission.VIBRATE"
@@ -79,8 +81,26 @@
         "origin": false
       },
       "eas": {
-        "projectId": "your-project-id"
+        "projectId": "4b761e98-be10-4d78-a25c-1f488b31b814",
+        "build": {
+          "experimental": {
+            "ios": {
+              "appExtensions": [
+                {
+                  "targetName": "OneSignalNotificationServiceExtension",
+                  "bundleIdentifier": "com.sportsmockery.app.OneSignalNotificationServiceExtension",
+                  "entitlements": {
+                    "com.apple.security.application-groups": [
+                      "group.com.sportsmockery.app.onesignal"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        }
       }
-    }
+    },
+    "owner": "sportsmockery"
   }
 }
