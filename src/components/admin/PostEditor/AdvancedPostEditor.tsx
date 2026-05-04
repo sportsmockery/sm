@@ -19,6 +19,7 @@ import { PostIQChartGenerator } from '@/components/postiq'
 import StoryUniversePanel from './StoryUniversePanel'
 import { BlockEditor } from '@/components/admin/BlockEditor'
 import type { ArticleDocument } from '@/components/admin/BlockEditor'
+import type { ContentBlock } from '@/components/admin/BlockEditor/types'
 import { isBlockContent, parseDocument, serializeDocument, blocksToHtml } from '@/components/admin/BlockEditor/serializer'
 import { BlockPreviewRenderer } from '@/components/admin/BlockEditor/BlockPreviewRenderer'
 import PublishChecklist from '@/components/editor/publish-checklist'
@@ -270,15 +271,16 @@ export default function AdvancedPostEditor({
     }
   }, [sendPushNotification, formData.title, pushTitle])
 
-  // Sync BlockEditor doc → legacy formData.content so PostIQ tools (Add Chart,
-  // Headlines, Add Poll, Grammar Check) and any code that reads formData.content
-  // stay in sync. Without this, the disable conditions on those buttons silently
-  // keep them off because formData.content stays empty — clicks get swallowed
-  // before React's onClick fires and there's no console signal.
+  // Sync BlockEditor doc → legacy formData.content (HTML, not stripped) so
+  // PostIQ tools (Add Chart, Headlines, Add Poll, Grammar Check) and the
+  // legacy paragraph-finder helpers (extractParagraphs,
+  // insertShortcodeAfterParagraph) stay in sync. Storing HTML preserves the
+  // </p> structure those helpers depend on; stripped plain text broke
+  // openChartModal's paragraph picker.
   useEffect(() => {
     if (!blockDoc) return
-    const plainText = blocksToHtml(blockDoc.blocks).replace(/<[^>]+>/g, '').trim()
-    setFormData(prev => (prev.content === plainText ? prev : { ...prev, content: plainText }))
+    const html = blocksToHtml(blockDoc.blocks)
+    setFormData(prev => (prev.content === html ? prev : { ...prev, content: html }))
   }, [blockDoc])
 
   // Word count calculation
@@ -741,6 +743,11 @@ export default function AdvancedPostEditor({
   }
 
   // Handle chart insertion from ChartBuilderModal
+  // Insert a chart from the ChartBuilderModal into blockDoc.blocks at the
+  // selected paragraph position. The legacy implementation wrote a
+  // [chart:ID] shortcode into formData.content, but the BlockEditor renders
+  // from blockDoc.blocks — so the shortcode landed in a dead field and
+  // never appeared. Push a stats-chart block instead.
   const handleChartInsert = async (config: ChartConfig) => {
     try {
       const chartResponse = await fetch('/api/charts', {
@@ -756,44 +763,59 @@ export default function AdvancedPostEditor({
           dataLabQuery: config.dataLabQuery,
         }),
       })
-
-      if (chartResponse.ok) {
-        const chartData = await chartResponse.json()
-        const shortcode = `[chart:${chartData.id}]`
-        const updatedContent = insertShortcodeAfterParagraph(formData.content, shortcode, selectedParagraph)
-        setFormData(prev => ({ ...prev, content: updatedContent }))
-        setShowChartModal(false)
-        setInitialChartConfig(null)
-      } else {
+      if (!chartResponse.ok) {
         alert('Failed to create chart. Please try again.')
+        return
       }
+      await chartResponse.json()
+
+      // StatsChartBlock currently supports 'bar' | 'line' only; downgrade
+      // pie/radar/scatter/heatmap to bar until StatsChart is extended.
+      const teamPrimary: Record<string, string> = {
+        bears: '#0B162A', bulls: '#CE1141', blackhawks: '#CF0A2C',
+        cubs: '#0E3386', whitesox: '#27251F',
+      }
+      const teamColor = teamPrimary[config.colors?.team as string] || '#00D4FF'
+      const compatibleType: 'bar' | 'line' = config.type === 'line' ? 'line' : 'bar'
+
+      // selectedParagraph is 1-indexed against paragraph blocks only.
+      setBlockDoc((prev) => {
+        if (!prev) return prev
+        const blocks = [...prev.blocks]
+        let paragraphCount = 0
+        let insertIdx = blocks.length
+        for (let i = 0; i < blocks.length; i++) {
+          if (blocks[i].type === 'paragraph') {
+            paragraphCount++
+            if (paragraphCount === selectedParagraph) {
+              insertIdx = i + 1
+              break
+            }
+          }
+        }
+        const newBlock: ContentBlock = {
+          id: crypto.randomUUID(),
+          type: 'stats-chart',
+          data: {
+            title: config.title || 'Chart',
+            chartType: compatibleType,
+            color: teamColor,
+            dataPoints: (config.data ?? []).map((d: { label?: string; name?: string; value?: number | string }) => ({
+              label: d.label ?? d.name ?? '',
+              value: typeof d.value === 'number' ? d.value : Number(d.value) || 0,
+            })),
+          },
+        }
+        blocks.splice(insertIdx, 0, newBlock)
+        return { ...prev, blocks }
+      })
+
+      setShowChartModal(false)
+      setInitialChartConfig(null)
     } catch (err) {
       console.error('Chart insertion error:', err)
       alert('Failed to create chart. Please try again.')
     }
-  }
-
-  // Helper to insert shortcode after paragraph
-  const insertShortcodeAfterParagraph = (html: string, shortcode: string, paragraphIndex: number): string => {
-    const closingTagRegex = /<\/p>/gi
-    let match
-    let count = 0
-    let insertPosition = -1
-
-    while ((match = closingTagRegex.exec(html)) !== null) {
-      count++
-      if (count === paragraphIndex) {
-        insertPosition = match.index + match[0].length
-        break
-      }
-    }
-
-    if (insertPosition > 0) {
-      const chartBlock = `\n<div class="chart-embed my-6">${shortcode}</div>\n`
-      return html.slice(0, insertPosition) + chartBlock + html.slice(insertPosition)
-    }
-
-    return html + `\n<div class="chart-embed my-6">${shortcode}</div>`
   }
 
   // Handle image upload
