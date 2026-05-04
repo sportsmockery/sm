@@ -6,7 +6,7 @@
     <string>development</string>
     <key>com.apple.security.application-groups</key>
     <array>
-      <string>group.com.sportsmockery.app.onesignal</string>
+      <string>group.com.mobiloud.SportsMockery.onesignal</string>
     </array>
   </dict>
 </plist>

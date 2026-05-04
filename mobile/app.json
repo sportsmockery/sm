@@ -17,8 +17,8 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.sportsmockery.app",
-      "buildNumber": "20260504",
+      "bundleIdentifier": "com.mobiloud.SportsMockery",
+      "buildNumber": "20260505",
       "infoPlist": {
         "NSCameraUsageDescription": "Used to upload profile photos",
         "NSPhotoLibraryUsageDescription": "Used to select profile photos",
@@ -88,10 +88,10 @@
               "appExtensions": [
                 {
                   "targetName": "OneSignalNotificationServiceExtension",
-                  "bundleIdentifier": "com.sportsmockery.app.OneSignalNotificationServiceExtension",
+                  "bundleIdentifier": "com.mobiloud.SportsMockery.OneSignalNotificationServiceExtension",
                   "entitlements": {
                     "com.apple.security.application-groups": [
-                      "group.com.sportsmockery.app.onesignal"
+                      "group.com.mobiloud.SportsMockery.onesignal"
                     ]
                   }
                 }

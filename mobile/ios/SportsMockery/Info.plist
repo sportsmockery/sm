@@ -28,12 +28,12 @@
         <key>CFBundleURLSchemes</key>
         <array>
           <string>sportsmockery</string>
-          <string>com.sportsmockery.app</string>
+          <string>com.mobiloud.SportsMockery</string>
         </array>
       </dict>
     </array>
     <key>CFBundleVersion</key>
-    <string>20260504</string>
+    <string>20260505</string>
     <key>GADApplicationIdentifier</key>
     <string>ca-app-pub-xxxxxxxx~yyyyyyyy</string>
     <key>GADDelayAppMeasurementInit</key>
