@@ -263,20 +263,27 @@ export default function MainFeed({ activeTab, setActiveTab, selectedTeam, heroAr
     ? [...displayFeed, ...feed.filter(item => !displayFeed.some(d => d.id === item.id)).slice(0, 10 - displayFeed.length)]
     : displayFeed
 
-  // If a hero article is shown above, suppress it from the first feed position
-  // to avoid duplication. It can still appear later in the feed naturally.
+  // If a hero article is shown above, suppress every card derived from it from
+  // the first feed positions to avoid visual echo. The composer tags every card
+  // with its source `postId`, so this drops the article-shaped card AND any
+  // block-derived cards (charts, polls, debates, etc.) from the same article.
+  // The article can still appear later in the feed naturally.
   const heroSuppressedFeed = heroArticleId
     ? finalFeed.filter((item, idx) => {
-        // Only suppress from first 3 positions
         if (idx >= 3) return true
-        const postId = item.data?.postId
-        return postId !== heroArticleId
+        return item.data?.postId !== heroArticleId
       })
     : finalFeed
 
-  // Get featured story from the first item
-  const featuredItem = heroSuppressedFeed[0] || feed[0]
-  const feedItems = selectedTeam === "all" ? heroSuppressedFeed.slice(1) : heroSuppressedFeed
+  // The Top Story slot must be an article-shaped card (editorial). Other card
+  // types — scout_summary, debate, poll, hub_update, chart — don't carry a
+  // headline or featuredImage, so feeding them to TopIntelligenceCard would
+  // render an empty title and missing image. Pick the first editorial item.
+  const featuredIdx = heroSuppressedFeed.findIndex(item => item.type === 'editorial')
+  const featuredItem = featuredIdx >= 0 ? heroSuppressedFeed[featuredIdx] : undefined
+  const feedItems = selectedTeam === "all"
+    ? heroSuppressedFeed.filter((_, i) => i !== featuredIdx)
+    : heroSuppressedFeed
 
   return (
     <main className="min-h-screen w-full max-w-[600px] pt-4" style={{ borderLeft: '1px solid var(--hp-border)', borderRight: '1px solid var(--hp-border)' }}>

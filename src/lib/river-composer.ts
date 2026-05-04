@@ -502,6 +502,15 @@ export function composeRiver(scoredCandidates: RiverCandidate[]): RiverCandidate
 // ─── Step 4: Map to HomepageRiverItem ───
 
 function candidateToRiverItem(candidate: RiverCandidate): HomepageRiverItem {
+  const item = buildRiverItem(candidate)
+  // Every card derived from an article must carry its source articleId so that
+  // hero-suppression (and any future per-article filtering) can drop ALL cards
+  // tied to a given article — not just the article-shaped editorial card.
+  item.data = { ...item.data, postId: candidate.articleId }
+  return item
+}
+
+function buildRiverItem(candidate: RiverCandidate): HomepageRiverItem {
   const timestamp = formatRelativeTime(candidate.publishedAt)
 
   switch (candidate.type) {
@@ -516,7 +525,6 @@ function candidateToRiverItem(candidate: RiverCandidate): HomepageRiverItem {
           ...candidate.payload,
           slug: candidate.slug,
           categorySlug: candidate.categorySlug,
-          postId: candidate.articleId,
           commentsCount: candidate.commentsCount,
         },
       }
