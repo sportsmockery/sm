@@ -122,8 +122,16 @@ function htmlResponse(request: NextRequest, nonce: string): NextResponse {
   return response
 }
 
-function createSupabaseMiddlewareClient(request: NextRequest) {
-  let response = NextResponse.next({ request: { headers: request.headers } })
+function createSupabaseMiddlewareClient(request: NextRequest, nonce: string) {
+  // Forward the per-request CSP nonce to Next.js so it stamps the matching
+  // value on its bootstrap / inline <script> tags. Without this, Next.js
+  // generates its own nonce that won't match the CSP header we set on the
+  // response, and `strict-dynamic` blocks every script — which is what
+  // caused the /admin black-screen regression.
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set('x-csp-nonce', nonce)
+
+  let response = NextResponse.next({ request: { headers: requestHeaders } })
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -137,7 +145,7 @@ function createSupabaseMiddlewareClient(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           )
-          response = NextResponse.next({ request })
+          response = NextResponse.next({ request: { headers: requestHeaders } })
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options)
           )
@@ -254,7 +262,7 @@ export async function middleware(request: NextRequest) {
   // Role enforcement happens in the page itself (admin → requireAdmin,
   // training → requireTrainingAccess) to mirror existing patterns.
   if (pathname.startsWith('/admin') || pathname.startsWith('/training')) {
-    const { supabase, response } = createSupabaseMiddlewareClient(request)
+    const { supabase, response } = createSupabaseMiddlewareClient(request, nonce)
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
