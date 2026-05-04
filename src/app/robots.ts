@@ -1,22 +1,33 @@
 import { MetadataRoute } from 'next'
+import { headers } from 'next/headers'
 
-const BASE_URL = 'https://sportsmockery.com'
+const PROD_BASE_URL = 'https://sportsmockery.com'
 
 /**
- * Dynamic robots.txt — env-gated by Vercel.
+ * Dynamic robots.txt — gated by both Vercel env AND request host.
  *
- * Production (VERCEL_ENV=production):
- *   - Allow indexing the public site
- *   - Point crawlers at the new sitemap_index.xml stack
- *   - Block admin/api/auth/profile + any betting/casino legacy URLs
+ * Audit finding #11: pre-launch we want test.sportsmockery.com (and any
+ * preview deploy) to return `Disallow: /` so they can't be indexed
+ * accidentally before cutover.
  *
- * Anything else (preview, dev):
- *   - Disallow everything to keep test deploys out of search
+ * Decision rules (first match wins):
+ *   1. Host starts with `test.` or `preview-` or any `*.vercel.app`
+ *      → fully disallow.
+ *   2. Vercel env is `preview` or `development` → fully disallow.
+ *   3. Otherwise (production sportsmockery.com) → allow public crawl.
  */
-export default function robots(): MetadataRoute.Robots {
-  const isProduction = process.env.VERCEL_ENV === 'production'
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  const headerList = await headers()
+  const host = (headerList.get('host') || '').toLowerCase()
 
-  if (!isProduction) {
+  const isProductionEnv = process.env.VERCEL_ENV === 'production'
+  const isStagingHost =
+    host.startsWith('test.') ||
+    host.startsWith('preview-') ||
+    host.endsWith('.vercel.app')
+
+  // Pre-launch: dev/staging/preview must NOT be indexable.
+  if (!isProductionEnv || isStagingHost) {
     return {
       rules: [
         {
@@ -53,7 +64,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/admin/', '/api/'],
       },
     ],
-    sitemap: [`${BASE_URL}/sitemap_index.xml`, `${BASE_URL}/news-sitemap.xml`],
-    host: BASE_URL,
+    sitemap: [`${PROD_BASE_URL}/sitemap_index.xml`, `${PROD_BASE_URL}/news-sitemap.xml`],
+    host: PROD_BASE_URL,
   }
 }

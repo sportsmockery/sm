@@ -4,12 +4,14 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
+import { sanitizeNextParam } from '@/lib/security/next-param'
 
 interface LoginFormProps {
   redirectTo?: string
 }
 
 export default function LoginForm({ redirectTo = '/admin' }: LoginFormProps) {
+  const safeRedirect = sanitizeNextParam(redirectTo, '/admin')
   const router = useRouter()
   const { signIn } = useAuth()
   const [email, setEmail] = useState('')
@@ -32,7 +34,7 @@ export default function LoginForm({ redirectTo = '/admin' }: LoginFormProps) {
       return
     }
 
-    router.push(redirectTo)
+    router.push(safeRedirect)
     router.refresh()
   }
 

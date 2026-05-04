@@ -4,6 +4,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import LoginShell from '@/components/auth/LoginShell'
 import { supabaseAdmin } from '@/lib/supabase-server'
+import { sanitizeNextParam } from '@/lib/security/next-param'
 
 export const metadata: Metadata = {
   title: 'Create your account',
@@ -122,7 +123,10 @@ async function fetchLoginIntel(): Promise<{
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams
-  const redirectTo = params.next || '/admin'
+  // Audit finding #10 — `next` is a user-controlled redirect target. Reject
+  // anything that isn't an internal absolute path before passing it to the
+  // client-side router.
+  const redirectTo = sanitizeNextParam(params.next, '/admin')
   const defaultTab = params.tab === 'signin' ? 'signin' : 'signup'
 
   const cookieStore = await cookies()
