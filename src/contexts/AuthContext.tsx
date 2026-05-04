@@ -25,10 +25,23 @@ interface User {
 interface AuthContextType {
   user: User | null
   loading: boolean
-  signIn: (email: string, password: string, rememberMe?: boolean) => Promise<{ error?: string }>
-  signUp: (email: string, password: string, options?: string | { full_name?: string }) => Promise<{ error?: string }>
+  signIn: (
+    email: string,
+    password: string,
+    rememberMe?: boolean,
+    opts?: { captchaToken?: string }
+  ) => Promise<{ error?: string }>
+  signUp: (
+    email: string,
+    password: string,
+    options?: string | { full_name?: string },
+    opts?: { captchaToken?: string }
+  ) => Promise<{ error?: string }>
   signOut: () => Promise<void>
-  resetPassword: (email: string) => Promise<{ error?: string }>
+  resetPassword: (
+    email: string,
+    opts?: { captchaToken?: string }
+  ) => Promise<{ error?: string }>
   refreshUser: () => Promise<void>
   isAuthenticated: boolean
 }
@@ -117,12 +130,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [supabase])
 
   // Sign in with email and password
-  const signIn = async (email: string, password: string, rememberMe: boolean = false): Promise<{ error?: string }> => {
+  const signIn = async (
+    email: string,
+    password: string,
+    rememberMe: boolean = false,
+    opts?: { captchaToken?: string }
+  ): Promise<{ error?: string }> => {
     setLoading(true)
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
+        options: opts?.captchaToken ? { captchaToken: opts.captchaToken } : undefined,
       })
 
       if (error) {
@@ -156,7 +175,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (
     email: string,
     password: string,
-    options?: string | { full_name?: string }
+    options?: string | { full_name?: string },
+    opts?: { captchaToken?: string }
   ): Promise<{ error?: string }> => {
     setLoading(true)
     try {
@@ -169,6 +189,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           data: {
             full_name: fullName || email.split('@')[0],
           },
+          ...(opts?.captchaToken ? { captchaToken: opts.captchaToken } : {}),
         },
       })
 
@@ -214,11 +235,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   // Reset password
-  const resetPassword = async (email: string): Promise<{ error?: string }> => {
+  const resetPassword = async (
+    email: string,
+    opts?: { captchaToken?: string }
+  ): Promise<{ error?: string }> => {
     setLoading(true)
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`,
+        ...(opts?.captchaToken ? { captchaToken: opts.captchaToken } : {}),
       })
 
       if (error) {

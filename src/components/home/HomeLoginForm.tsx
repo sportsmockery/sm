@@ -1,11 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { getIntendedOrFallback } from '@/lib/redirects'
 import dynamic from 'next/dynamic'
+import TurnstileWidget, {
+  getTurnstileSiteKey,
+  type TurnstileWidgetHandle,
+} from '@/components/auth/TurnstileWidget'
 
 // SEO Tip #24 — defer the skip-login modal; it only mounts when the user clicks it.
 const SkipLoginModal = dynamic(() => import('@/components/home/SkipLoginModal'), {
@@ -25,17 +29,34 @@ export default function HomeLoginForm({ redirectTo = '/admin' }: HomeLoginFormPr
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [showSkipModal, setShowSkipModal] = useState(false)
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const turnstileRef = useRef<TurnstileWidgetHandle | null>(null)
+  const turnstileSiteKey = getTurnstileSiteKey()
+  const captchaRequired = Boolean(turnstileSiteKey)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+
+    if (captchaRequired && !captchaToken) {
+      setError('Please complete the verification challenge')
+      return
+    }
+
     setLoading(true)
 
-    const { error } = await signIn(email, password, rememberMe)
+    const { error } = await signIn(
+      email,
+      password,
+      rememberMe,
+      captchaToken ? { captchaToken } : undefined
+    )
 
     if (error) {
       setError(error)
       setLoading(false)
+      setCaptchaToken(null)
+      turnstileRef.current?.reset()
       return
     }
 
@@ -127,16 +148,30 @@ export default function HomeLoginForm({ redirectTo = '/admin' }: HomeLoginFormPr
         </Link>
       </div>
 
+      {/* Turnstile CAPTCHA (only renders when site key is configured) */}
+      {turnstileSiteKey && (
+        <div data-testid="turnstile-slot">
+          <TurnstileWidget
+            ref={turnstileRef}
+            siteKey={turnstileSiteKey}
+            theme="dark"
+            onVerify={(token) => setCaptchaToken(token)}
+            onExpire={() => setCaptchaToken(null)}
+            onError={() => setCaptchaToken(null)}
+          />
+        </div>
+      )}
+
       {/* Submit button */}
       <button
         type="submit"
-        disabled={loading}
+        disabled={loading || (captchaRequired && !captchaToken)}
         className="hm-btn-primary"
         style={{
           width: '100%', justifyContent: 'center',
           padding: '18px 32px', fontSize: 16,
-          opacity: loading ? 0.6 : 1,
-          cursor: loading ? 'not-allowed' : 'pointer',
+          opacity: loading || (captchaRequired && !captchaToken) ? 0.6 : 1,
+          cursor: loading || (captchaRequired && !captchaToken) ? 'not-allowed' : 'pointer',
         }}
       >
         {loading ? (

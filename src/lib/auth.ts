@@ -12,18 +12,39 @@ export interface AuthResult {
   error: AuthError | null
 }
 
-export async function signIn(email: string, password: string): Promise<AuthResult> {
+export interface CaptchaOpts {
+  captchaToken?: string
+}
+
+export async function signIn(
+  email: string,
+  password: string,
+  opts: CaptchaOpts = {}
+): Promise<AuthResult> {
   const supabase = getBrowserClient()
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+    options: opts.captchaToken ? { captchaToken: opts.captchaToken } : undefined,
+  })
   if (error) return { user: null, session: null, error: { message: error.message, status: error.status } }
   return { user: data.user, session: data.session, error: null }
 }
 
-export async function signUp(email: string, password: string, metadata?: { full_name?: string }): Promise<AuthResult> {
+export async function signUp(
+  email: string,
+  password: string,
+  metadata?: { full_name?: string },
+  opts: CaptchaOpts = {}
+): Promise<AuthResult> {
   const supabase = getBrowserClient()
   const { data, error } = await supabase.auth.signUp({
     email, password,
-    options: { data: metadata, emailRedirectTo: `${window.location.origin}/api/auth/callback` },
+    options: {
+      data: metadata,
+      emailRedirectTo: `${window.location.origin}/api/auth/callback`,
+      ...(opts.captchaToken ? { captchaToken: opts.captchaToken } : {}),
+    },
   })
   if (error) return { user: null, session: null, error: { message: error.message, status: error.status } }
   return { user: data.user, session: data.session, error: null }
@@ -36,10 +57,14 @@ export async function signOut(): Promise<{ error: AuthError | null }> {
   return { error: null }
 }
 
-export async function resetPassword(email: string): Promise<{ error: AuthError | null }> {
+export async function resetPassword(
+  email: string,
+  opts: CaptchaOpts = {}
+): Promise<{ error: AuthError | null }> {
   const supabase = getBrowserClient()
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${window.location.origin}/reset-password`,
+    ...(opts.captchaToken ? { captchaToken: opts.captchaToken } : {}),
   })
   if (error) return { error: { message: error.message, status: error.status } }
   return { error: null }

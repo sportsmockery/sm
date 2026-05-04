@@ -20,7 +20,21 @@ const PROD_CONNECT_SOURCES = [
 const PROD_SCRIPT_SOURCES_ALLOWLIST = [
   // Vercel runtime scripts on preview deploys
   'https://*.vercel.app',
+  // Cloudflare Turnstile — loads /turnstile/v0/api.js for the CAPTCHA
+  // widget rendered on signup / login / forgot-password.
+  'https://challenges.cloudflare.com',
   // Anthropic / OpenAI client SDKs are server-only — not listed here.
+].join(' ')
+
+const PROD_FRAME_SOURCES = [
+  "'self'",
+  'https://www.youtube.com',
+  'https://www.youtube-nocookie.com',
+  'https://platform.twitter.com',
+  'https://embed.tiktok.com',
+  // Cloudflare Turnstile injects an <iframe> from this origin to host the
+  // challenge UI. Without it the widget renders blank under CSP.
+  'https://challenges.cloudflare.com',
 ].join(' ')
 
 export function generateNonce(): string {
@@ -50,7 +64,7 @@ export function buildCspHeader(nonce: string, opts?: { reportOnly?: boolean }) {
     'font-src': "'self' data:",
     'connect-src': PROD_CONNECT_SOURCES,
     'media-src': "'self' https: blob:",
-    'frame-src': "'self' https://www.youtube.com https://www.youtube-nocookie.com https://platform.twitter.com https://embed.tiktok.com",
+    'frame-src': PROD_FRAME_SOURCES,
     'frame-ancestors': "'self'",
     'base-uri': "'self'",
     'form-action': "'self'",

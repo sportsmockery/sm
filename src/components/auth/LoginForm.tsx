@@ -1,10 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { sanitizeNextParam } from '@/lib/security/next-param'
+import TurnstileWidget, {
+  getTurnstileSiteKey,
+  type TurnstileWidgetHandle,
+} from '@/components/auth/TurnstileWidget'
 
 interface LoginFormProps {
   redirectTo?: string
@@ -20,17 +24,34 @@ export default function LoginForm({ redirectTo = '/admin' }: LoginFormProps) {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const turnstileRef = useRef<TurnstileWidgetHandle | null>(null)
+  const turnstileSiteKey = getTurnstileSiteKey()
+  const captchaRequired = Boolean(turnstileSiteKey)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+
+    if (captchaRequired && !captchaToken) {
+      setError('Please complete the verification challenge')
+      return
+    }
+
     setLoading(true)
 
-    const { error } = await signIn(email, password, rememberMe)
+    const { error } = await signIn(
+      email,
+      password,
+      rememberMe,
+      captchaToken ? { captchaToken } : undefined
+    )
 
     if (error) {
       setError(error)
       setLoading(false)
+      setCaptchaToken(null)
+      turnstileRef.current?.reset()
       return
     }
 
@@ -149,12 +170,29 @@ export default function LoginForm({ redirectTo = '/admin' }: LoginFormProps) {
         </Link>
       </div>
 
+      {/* Turnstile CAPTCHA (only renders when site key is configured) */}
+      {turnstileSiteKey && (
+        <div data-testid="turnstile-slot">
+          <TurnstileWidget
+            ref={turnstileRef}
+            siteKey={turnstileSiteKey}
+            onVerify={(token) => setCaptchaToken(token)}
+            onExpire={() => setCaptchaToken(null)}
+            onError={() => setCaptchaToken(null)}
+          />
+        </div>
+      )}
+
       {/* Submit button */}
       <button
         type="submit"
-        disabled={loading}
+        disabled={loading || (captchaRequired && !captchaToken)}
         className="btn-primary btn-full"
-        style={loading ? { opacity: 0.6, cursor: 'not-allowed' } : undefined}
+        style={
+          loading || (captchaRequired && !captchaToken)
+            ? { opacity: 0.6, cursor: 'not-allowed' }
+            : undefined
+        }
       >
         {loading ? (
           <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
