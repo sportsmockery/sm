@@ -7,6 +7,8 @@ import TurnstileWidget, {
   getTurnstileSiteKey,
   type TurnstileWidgetHandle,
 } from '@/components/auth/TurnstileWidget'
+import HoneypotField from '@/components/auth/HoneypotField'
+import { isHoneypotTriggered, HONEYPOT_GENERIC_ERROR } from '@/lib/security/honeypot'
 
 export default function SignupForm() {
   const { signUp } = useAuth()
@@ -20,6 +22,7 @@ export default function SignupForm() {
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
   const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const [honeypot, setHoneypot] = useState('')
   const turnstileRef = useRef<TurnstileWidgetHandle | null>(null)
   const turnstileSiteKey = getTurnstileSiteKey()
   const captchaRequired = Boolean(turnstileSiteKey)
@@ -42,6 +45,14 @@ export default function SignupForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+
+    // Honeypot — silent reject before any other validation. Don't tell
+    // the bot why we rejected; show the same generic copy a real auth
+    // failure would produce.
+    if (isHoneypotTriggered(honeypot)) {
+      setError(HONEYPOT_GENERIC_ERROR)
+      return
+    }
 
     if (password !== confirmPassword) {
       setError('Passwords do not match')
@@ -69,7 +80,7 @@ export default function SignupForm() {
       email,
       password,
       { full_name: fullName },
-      captchaToken ? { captchaToken } : undefined
+      { ...(captchaToken ? { captchaToken } : {}), honeypot }
     )
 
     if (error) {
@@ -121,6 +132,7 @@ export default function SignupForm() {
 
   return (
     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <HoneypotField value={honeypot} onChange={setHoneypot} idSuffix="signup" />
       {/* Error message */}
       {error && (
         <div style={{

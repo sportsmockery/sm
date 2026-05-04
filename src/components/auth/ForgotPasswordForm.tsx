@@ -7,6 +7,8 @@ import TurnstileWidget, {
   getTurnstileSiteKey,
   type TurnstileWidgetHandle,
 } from '@/components/auth/TurnstileWidget'
+import HoneypotField from '@/components/auth/HoneypotField'
+import { isHoneypotTriggered, HONEYPOT_GENERIC_ERROR } from '@/lib/security/honeypot'
 
 export default function ForgotPasswordForm() {
   const { resetPassword } = useAuth()
@@ -15,6 +17,7 @@ export default function ForgotPasswordForm() {
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
   const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const [honeypot, setHoneypot] = useState('')
   const turnstileRef = useRef<TurnstileWidgetHandle | null>(null)
   const turnstileSiteKey = getTurnstileSiteKey()
   const captchaRequired = Boolean(turnstileSiteKey)
@@ -22,6 +25,12 @@ export default function ForgotPasswordForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+
+    // Honeypot — silent reject before captcha or any network call.
+    if (isHoneypotTriggered(honeypot)) {
+      setError(HONEYPOT_GENERIC_ERROR)
+      return
+    }
 
     if (captchaRequired && !captchaToken) {
       setError('Please complete the verification challenge')
@@ -74,6 +83,7 @@ export default function ForgotPasswordForm() {
 
   return (
     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      <HoneypotField value={honeypot} onChange={setHoneypot} idSuffix="forgot" />
       {/* Error message */}
       {error && (
         <div style={{

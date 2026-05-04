@@ -85,6 +85,10 @@
     {
       "path": "/api/cron/news-sitemap-rebuild",
       "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/refresh-disposable-domains",
+      "schedule": "0 4 * * *"
     }
   ],
   "headers": [
