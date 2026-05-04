@@ -7,6 +7,8 @@ import TurnstileWidget, {
   getTurnstileSiteKey,
   type TurnstileWidgetHandle,
 } from '@/components/auth/TurnstileWidget'
+import HoneypotField from '@/components/auth/HoneypotField'
+import { isHoneypotTriggered, HONEYPOT_GENERIC_ERROR } from '@/lib/security/honeypot'
 
 export default function HomeSignupForm() {
   const { signUp } = useAuth()
@@ -19,6 +21,7 @@ export default function HomeSignupForm() {
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
   const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const [honeypot, setHoneypot] = useState('')
   const turnstileRef = useRef<TurnstileWidgetHandle | null>(null)
   const turnstileSiteKey = getTurnstileSiteKey()
   const captchaRequired = Boolean(turnstileSiteKey)
@@ -40,6 +43,12 @@ export default function HomeSignupForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+
+    // Honeypot — silent reject before any other validation.
+    if (isHoneypotTriggered(honeypot)) {
+      setError(HONEYPOT_GENERIC_ERROR)
+      return
+    }
 
     if (password !== confirmPassword) {
       setError('Passwords do not match')
@@ -63,7 +72,7 @@ export default function HomeSignupForm() {
       email,
       password,
       { full_name: fullName },
-      captchaToken ? { captchaToken } : undefined
+      { ...(captchaToken ? { captchaToken } : {}), honeypot }
     )
 
     if (error) {
@@ -116,6 +125,7 @@ export default function HomeSignupForm() {
 
   return (
     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <HoneypotField value={honeypot} onChange={setHoneypot} idSuffix="home-signup" />
       {/* Error message */}
       {error && (
         <div style={{

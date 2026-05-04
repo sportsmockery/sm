@@ -10,6 +10,8 @@ import TurnstileWidget, {
   getTurnstileSiteKey,
   type TurnstileWidgetHandle,
 } from '@/components/auth/TurnstileWidget'
+import HoneypotField from '@/components/auth/HoneypotField'
+import { isHoneypotTriggered, HONEYPOT_GENERIC_ERROR } from '@/lib/security/honeypot'
 
 interface LoginShellProps {
   redirectTo?: string
@@ -115,6 +117,8 @@ export default function LoginShell({
   const captchaRequired = Boolean(turnstileSiteKey)
   const [signupCaptchaToken, setSignupCaptchaToken] = useState<string | null>(null)
   const [signinCaptchaToken, setSigninCaptchaToken] = useState<string | null>(null)
+  const [signupHoneypot, setSignupHoneypot] = useState('')
+  const [signinHoneypot, setSigninHoneypot] = useState('')
   const signupTurnstileRef = useRef<TurnstileWidgetHandle | null>(null)
   const signinTurnstileRef = useRef<TurnstileWidgetHandle | null>(null)
 
@@ -137,6 +141,12 @@ export default function LoginShell({
   const handleStep1 = (e: React.FormEvent) => {
     e.preventDefault()
     setSignupError('')
+    // Honeypot check at step 1 catches naive bots before they ever
+    // reach the password field. Silent reject (generic copy).
+    if (isHoneypotTriggered(signupHoneypot)) {
+      setSignupError(HONEYPOT_GENERIC_ERROR)
+      return
+    }
     if (!isValidEmail(email)) {
       setSignupError('Please enter a valid email address')
       return
@@ -149,6 +159,13 @@ export default function LoginShell({
   const handleSignupComplete = async (e: React.FormEvent) => {
     e.preventDefault()
     setSignupError('')
+
+    // Re-check the honeypot at step 2 (the form might be submitted
+    // directly by a bot that skipped step 1).
+    if (isHoneypotTriggered(signupHoneypot)) {
+      setSignupError(HONEYPOT_GENERIC_ERROR)
+      return
+    }
 
     if (password !== confirmPassword) {
       setSignupError('Passwords do not match')
@@ -174,7 +191,10 @@ export default function LoginShell({
       email,
       password,
       { full_name: fullName },
-      signupCaptchaToken ? { captchaToken: signupCaptchaToken } : undefined
+      {
+        ...(signupCaptchaToken ? { captchaToken: signupCaptchaToken } : {}),
+        honeypot: signupHoneypot,
+      }
     )
     if (error) {
       setSignupError(error)
@@ -202,6 +222,12 @@ export default function LoginShell({
   const handleSignin = async (e: React.FormEvent) => {
     e.preventDefault()
     setSigninError('')
+
+    // Honeypot — silent reject before captcha or any network call.
+    if (isHoneypotTriggered(signinHoneypot)) {
+      setSigninError(HONEYPOT_GENERIC_ERROR)
+      return
+    }
 
     if (captchaRequired && !signinCaptchaToken) {
       setSigninError('Please complete the verification challenge')
@@ -427,6 +453,11 @@ export default function LoginShell({
                         onSubmit={handleStep1}
                         style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
                       >
+                        <HoneypotField
+                          value={signupHoneypot}
+                          onChange={setSignupHoneypot}
+                          idSuffix="shell-signup-step1"
+                        />
                         {signupError && (
                           <div
                             style={{
@@ -639,6 +670,11 @@ export default function LoginShell({
                         onSubmit={handleSignupComplete}
                         style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
                       >
+                        <HoneypotField
+                          value={signupHoneypot}
+                          onChange={setSignupHoneypot}
+                          idSuffix="shell-signup-step2"
+                        />
                         <div
                           style={{
                             display: 'flex',
@@ -948,6 +984,11 @@ export default function LoginShell({
                       onSubmit={handleSignin}
                       style={{ display: 'flex', flexDirection: 'column', gap: 16 }}
                     >
+                      <HoneypotField
+                        value={signinHoneypot}
+                        onChange={setSigninHoneypot}
+                        idSuffix="shell-signin"
+                      />
                       {signinError && (
                         <div
                           style={{

@@ -35,7 +35,7 @@ interface AuthContextType {
     email: string,
     password: string,
     options?: string | { full_name?: string },
-    opts?: { captchaToken?: string }
+    opts?: { captchaToken?: string; honeypot?: string }
   ) => Promise<{ error?: string }>
   signOut: () => Promise<void>
   resetPassword: (
@@ -171,40 +171,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  // Sign up with email and password
+  // Sign up with email and password.
+  //
+  // Routed through /api/auth/signup so the honeypot check and the
+  // disposable-email blocklist run server-side. Supabase's per-IP
+  // rate limit, captcha verification, and email confirmation flow are
+  // preserved — the route handler delegates to supabase.auth.signUp()
+  // with the anon key.
   const signUp = async (
     email: string,
     password: string,
     options?: string | { full_name?: string },
-    opts?: { captchaToken?: string }
+    opts?: { captchaToken?: string; honeypot?: string }
   ): Promise<{ error?: string }> => {
     setLoading(true)
     try {
       const fullName = typeof options === 'string' ? options : options?.full_name
 
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: fullName || email.split('@')[0],
-          },
-          ...(opts?.captchaToken ? { captchaToken: opts.captchaToken } : {}),
-        },
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          password,
+          full_name: fullName || email.split('@')[0],
+          captchaToken: opts?.captchaToken,
+          website_url: opts?.honeypot ?? '',
+        }),
       })
 
-      if (error) {
-        console.error('Sign up failed:', error.message)
-        return { error: error.message }
+      let payload: any = {}
+      try {
+        payload = await res.json()
+      } catch {
+        // fall through with empty payload
       }
 
-      // Check if email confirmation is required
-      if (data.user && !data.session) {
+      if (!res.ok || payload?.error) {
+        const message = payload?.error || 'Sign up failed. Please try again.'
+        console.error('Sign up failed:', message)
+        return { error: message }
+      }
+
+      // Surface the same "check your email" message the previous flow
+      // produced when Supabase requires confirmation.
+      if (payload?.requiresEmailConfirmation) {
         return { error: 'Please check your email to confirm your account.' }
-      }
-
-      if (data.user) {
-        setUser(mapSupabaseUser(data.user))
       }
 
       return {}
