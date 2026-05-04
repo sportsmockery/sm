@@ -166,6 +166,34 @@ export interface Post {
   final_score?: number
 }
 
+export interface LiveGame {
+  game_id: string
+  sport: string
+  status: string
+  game_start_time?: string | null
+  game_time_display?: string | null
+  home_team_name: string
+  away_team_name: string
+  home_team_abbr: string
+  away_team_abbr: string
+  home_logo_url?: string | null
+  away_logo_url?: string | null
+  home_score: number
+  away_score: number
+  period?: string | null
+  period_label?: string | null
+  clock?: string | null
+  chicago_team: string
+  is_chicago_home: boolean
+}
+
+export interface LiveGamesResponse {
+  games: LiveGame[]
+  count: number
+  poll_interval_ms?: number
+  timestamp?: string
+}
+
 export interface EdgeInsight {
   id: string
   article_id: string
@@ -393,6 +421,18 @@ class ApiClient {
       seo_title: post.seo_title,
       seo_description: post.seo_description,
       related_posts: [],
+    }
+  }
+
+  /**
+   * Fetch the current set of Chicago live/upcoming games.
+   * Used by the home-feed live pill.
+   */
+  async getLiveGames(): Promise<LiveGamesResponse> {
+    try {
+      return await this.fetch<LiveGamesResponse>('/api/live-games')
+    } catch {
+      return { games: [], count: 0 }
     }
   }
 

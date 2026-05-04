@@ -25,6 +25,7 @@ import ArticleCard from '@/components/ArticleCard'
 import AdBanner from '@/components/AdBanner'
 import MiniPlayer from '@/components/MiniPlayer'
 import RiverItemCard from '@/components/RiverItemCard'
+import LiveGamesPill from '@/components/LiveGamesPill'
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window')
 
@@ -86,7 +87,7 @@ export default function HomeScreen() {
 
         {/* Centered Logo */}
         <Image
-          source={isDark ? require('@/assets/images/light_logo.png') : require('@/assets/images/logo.png')}
+          source={require('@/assets/images/edge-logo.png')}
           style={styles.logo}
           contentFit="contain"
         />
@@ -117,6 +118,9 @@ export default function HomeScreen() {
           <Ionicons name="chevron-forward" size={18} color="#fff" />
         </TouchableOpacity>
       )}
+
+      {/* Live games strip — mirrors the cyan top-bar on test.sportsmockery.com */}
+      <LiveGamesPill />
 
       <View style={styles.feedWrapper}>
         <FlatList
@@ -244,8 +248,8 @@ const styles = StyleSheet.create({
     width: 24,
   },
   logo: {
-    width: 140,
-    height: 32,
+    width: 130,
+    height: 46,
   },
   searchButton: {
     padding: 4,
