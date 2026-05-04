@@ -713,6 +713,16 @@ export default function AdvancedPostEditor({
             dataSource: 'manual',
             echartsOptions: firstChart.options,
           })
+          // Suppress the team chip when DataLab tells us the article isn't
+          // about a Chicago team (e.g. UCLA recruiting story would otherwise
+          // get a "Chicago Bears" chip). Setting colors.team = undefined
+          // hides the chip without changing the chart's color palette.
+          if (data.isChicagoTeam === false) {
+            setInitialChartConfig(prev => {
+              if (!prev || !prev.colors) return prev
+              return { ...prev, colors: { ...prev.colors, team: undefined } }
+            })
+          }
           setSelectedParagraph(1)
         }
       }
