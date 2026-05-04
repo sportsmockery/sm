@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { LEGACY_GONE_410 } from '@/lib/seo-gone-410'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SEO redirect rules (priority order — handled at the top of middleware()):
@@ -10,14 +11,6 @@ import { NextResponse, type NextRequest } from 'next/server'
 //   4. (post-launch) www.* host      → 301 → apex                        (Vercel handles, NOT here)
 // All redirects use NextResponse.redirect(url, 301) — explicit 301, never 308.
 // ─────────────────────────────────────────────────────────────────────────────
-
-// Tip #33 — paths classified gone_410 in audit/redirect-map-{date}.csv.
-//   /tag/<slug>(/...)         WP tag archives — 6k+ entries, mostly noise
-//   /app-pages(/...)          orphan WP container pages
-//   /cart-2, /checkout, /apply, /advertise — WP-era commerce/marketing
-//   /chat-*-rumors            rumor catch-all stubs collapsed into hubs
-const LEGACY_GONE_410 =
-  /^\/(?:tag\/[^/]+|app-pages(?:\/.*)?|cart-2|checkout|apply|advertise)\/?$/
 
 const _supabaseSeoUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const _supabaseSeoKey =
