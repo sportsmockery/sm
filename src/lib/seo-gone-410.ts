@@ -7,4 +7,4 @@
 //     (casino/slot/HHC/betting spam pointed at compromised WP author URLs).
 //     Matched here so the toxicity does not carry over to test.sportsmockery.com.
 export const LEGACY_GONE_410 =
-  /^\/(?:tag\/[^/]+|app-pages(?:\/.*)?|cart-2|checkout|apply|advertise|author\/(?:[^/]*(?:casino|slot|gambling|gambl|poker|sportsbook|lottery|porn|escort|cbd|vape|crypto|betting|hhc|bet-)[^/]*|the-importance-reputable-casino-slot-play[^/]*|safe-place-to-do-betting[^/]*|exploring-the-deliciou-world-of[^/]*)(?:\/.*)?)\/?$/
+  /^\/(?:tag\/[^/]+|app-pages(?:\/.*)?|cart-2|checkout|apply|advertise|author\/(?:[^/]*(?:casino|slot|gambling|gambl|poker|sportsbook|lottery|porn|escort|cbd|vape|crypto|betting|hhc|bet-)[^/]*|the-importance-reputable-casino-slot-play[^/]*|safe-place-to-do-betting[^/]*|exploring-the-deliciou-world-of[^/]*|soccer-event-thats-bridging-continents[^/]*|[Uu]nderstanding-[Tt]he-[Ff]ast-[Ff]ashion[^/]*|a-comprehensive-overview-of-current-research[^/]*|nordik-eyewear-making-waves-in-the-industry[^/]*)(?:\/.*)?)\/?$/

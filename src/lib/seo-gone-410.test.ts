@@ -23,6 +23,32 @@ describe('LEGACY_GONE_410', () => {
       assert.equal(LEGACY_GONE_410.test('/author/exploring-the-deliciou-world-of-hhc/'), true)
     })
 
+    it('returns 410 for /author/soccer-event-thats-bridging-continents/', () => {
+      assert.equal(LEGACY_GONE_410.test('/author/soccer-event-thats-bridging-continents/'), true)
+      assert.equal(LEGACY_GONE_410.test('/author/soccer-event-thats-bridging-continents'), true)
+    })
+
+    it('returns 410 for /author/Understanding-The-Fast-Fashion/ (and lowercase variant)', () => {
+      assert.equal(LEGACY_GONE_410.test('/author/Understanding-The-Fast-Fashion/'), true)
+      assert.equal(LEGACY_GONE_410.test('/author/understanding-the-fast-fashion/'), true)
+      assert.equal(LEGACY_GONE_410.test('/author/Understanding-The-Fast-Fashion'), true)
+    })
+
+    it('returns 410 for /author/a-comprehensive-overview-of-current-research/', () => {
+      assert.equal(LEGACY_GONE_410.test('/author/a-comprehensive-overview-of-current-research/'), true)
+      assert.equal(LEGACY_GONE_410.test('/author/a-comprehensive-overview-of-current-research'), true)
+    })
+
+    it('returns 410 for /author/nordik-eyewear-making-waves-in-the-industry/', () => {
+      assert.equal(LEGACY_GONE_410.test('/author/nordik-eyewear-making-waves-in-the-industry/'), true)
+      assert.equal(LEGACY_GONE_410.test('/author/nordik-eyewear-making-waves-in-the-industry'), true)
+    })
+
+    it('does NOT 410 /author/john-smith (regression for legitimate author)', () => {
+      assert.equal(LEGACY_GONE_410.test('/author/john-smith'), false)
+      assert.equal(LEGACY_GONE_410.test('/author/john-smith/'), false)
+    })
+
     it('returns 410 for various spam-keyword author slugs', () => {
       const toxicSlugs = [
         '/author/best-online-slot-machines',
