@@ -406,7 +406,11 @@ class ApiClient {
     const response = await this.fetch<{ post: any }>(`/api/posts/${articleId}`)
     const post = response.post
 
-    // Transform to ArticleContent format
+    // Supabase joins can return either an object or a single-element array
+    // depending on relationship config — normalize both.
+    const rawAuthor = Array.isArray(post.author) ? post.author[0] : post.author
+    const rawCategory = Array.isArray(post.category) ? post.category[0] : post.category
+
     return {
       id: post.id,
       title: post.title,
@@ -416,8 +420,16 @@ class ApiClient {
       featured_image: post.featured_image,
       published_at: post.published_at,
       views: post.views || 0,
-      author: post.author || { id: 0, display_name: 'Staff' },
-      category: post.category || { slug: 'news', name: 'News' },
+      author: rawAuthor
+        ? {
+            id: rawAuthor.id ?? 0,
+            display_name: rawAuthor.display_name || 'Staff',
+            avatar_url: rawAuthor.avatar_url,
+          }
+        : { id: 0, display_name: 'Staff' },
+      category: rawCategory
+        ? { slug: rawCategory.slug || 'news', name: rawCategory.name || 'News' }
+        : { slug: 'news', name: 'News' },
       seo_title: post.seo_title,
       seo_description: post.seo_description,
       related_posts: [],

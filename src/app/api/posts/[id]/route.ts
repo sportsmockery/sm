@@ -196,7 +196,9 @@ export async function GET(
 
     const { data: post, error } = await supabaseAdmin
       .from('sm_posts')
-      .select('*')
+      .select(
+        '*,author:sm_authors!author_id(id,display_name,avatar_url),category:sm_categories!category_id(slug,name)'
+      )
       .eq('id', id)
       .single()
 

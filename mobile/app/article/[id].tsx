@@ -168,6 +168,39 @@ export default function ArticleScreen() {
     }
   }, [article])
 
+  // Build the canonical web URL for this article so Disqus threads sync
+  // between mobile and the website (same identifier + URL).
+  const articleWebUrl = article
+    ? `${API_BASE_URL}/${article.category?.slug || 'news'}/${article.slug}`
+    : ''
+
+  const escapeJs = (s: string) => String(s ?? '').replace(/\\/g, '\\\\').replace(/"/g, '\\"')
+
+  const disqusEmbedHtml = article
+    ? `
+      <hr style="margin:32px 0 16px;border:none;border-top:1px solid ${isDark ? '#333' : '#e5e5e5'};" />
+      <h3 style="font-size:18px;margin:0 0 12px;">Comments</h3>
+      <div id="disqus_thread" style="min-height:200px;"></div>
+      <noscript>
+        Please enable JavaScript to view the
+        <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+      </noscript>
+      <script>
+        var disqus_config = function () {
+          this.page.url = "${escapeJs(articleWebUrl)}";
+          this.page.identifier = "${escapeJs(String(article.id))}";
+          this.page.title = "${escapeJs(article.title)}";
+        };
+        (function() {
+          var d = document, s = d.createElement('script');
+          s.src = 'https://sportsmockery.disqus.com/embed.js';
+          s.setAttribute('data-timestamp', +new Date());
+          (d.head || d.body).appendChild(s);
+        })();
+      </script>
+    `
+    : ''
+
   // HTML wrapper for article content
   const getContentHtml = (contentHtml: string) => `
     <!DOCTYPE html>
@@ -230,6 +263,7 @@ export default function ArticleScreen() {
     </head>
     <body>
       ${contentHtml}
+      ${disqusEmbedHtml}
       <script>
         // Notify React Native of content height
         function sendHeight() {
@@ -242,6 +276,15 @@ export default function ArticleScreen() {
         setTimeout(sendHeight, 500);
         setTimeout(sendHeight, 1500);
         setTimeout(sendHeight, 3000);
+        // Disqus loads async — keep recalculating for ~30s as the iframe expands
+        setTimeout(sendHeight, 6000);
+        setTimeout(sendHeight, 10000);
+        setTimeout(sendHeight, 15000);
+        setTimeout(sendHeight, 30000);
+        // Watch for late DOM changes (Disqus iframe resize, lazy images)
+        if ('ResizeObserver' in window) {
+          new ResizeObserver(sendHeight).observe(document.body);
+        }
 
         // Handle link clicks
         document.addEventListener('click', function(e) {
