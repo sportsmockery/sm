@@ -30,7 +30,7 @@ import { ArticleAudioPlayer } from '@/components/article/ArticleAudioPlayer'
 import ArticleContentWithEmbeds from '@/components/article/ArticleContentWithEmbeds'
 import SocialShareBar from '@/components/SocialShareBar'
 import { isBlockContent, parseDocument } from '@/components/admin/BlockEditor/serializer'
-import { canonicalUrl, JsonLd, breadcrumbJsonLd } from '@/lib/seo'
+import { canonicalUrl, JsonLd, breadcrumbJsonLd, buildArticleTitle } from '@/lib/seo'
 
 interface ArticlePageProps {
   params: Promise<{
@@ -89,6 +89,7 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
   }
 
   const title = post.seo_title || post.title
+  const seoTitle = buildArticleTitle(title)
   const description = post.seo_description || post.excerpt || ''
   const canonical = canonicalUrl(`/${category}/${slug}`)
 
@@ -106,7 +107,7 @@ export async function generateMetadata({ params }: ArticlePageProps): Promise<Me
   }
 
   return {
-    title,
+    title: { absolute: seoTitle },
     description,
     alternates: { canonical },
     openGraph: {

@@ -18,6 +18,41 @@ export function truncateDescription(text: string, maxLen = 160): string {
   return (lastSpace > 0 ? truncated.slice(0, lastSpace) : truncated) + '...'
 }
 
+/**
+ * Build an article <title> capped at Google's recommended 60-char SEO limit.
+ *
+ * Why: appending "| Sports Mockery" to long article headlines pushes every
+ * article title past 60 chars, which Google truncates in SERPs.
+ *
+ * Strategy:
+ *   1. headline + suffix fits → use it
+ *   2. headline alone fits → drop the suffix
+ *   3. otherwise → truncate headline at the last whole word ≤ max,
+ *      or hard-cut at (max - 3) + "..." if no usable word boundary
+ */
+export function buildArticleTitle(
+  headline: string,
+  suffix: string = '| Sports Mockery',
+  max: number = 60,
+): string {
+  const clean = (headline || '').replace(/\s+/g, ' ').trim()
+  if (!clean) return ''
+
+  const withSuffix = `${clean} ${suffix}`
+  if (withSuffix.length <= max) return withSuffix
+
+  if (clean.length <= max) return clean
+
+  const window = clean.slice(0, max)
+  const lastSpace = window.lastIndexOf(' ')
+  if (lastSpace >= 20) {
+    return clean.slice(0, lastSpace).replace(/[\s,;:.\-–—]+$/, '')
+  }
+
+  const ellipsisRoom = Math.max(1, max - 3)
+  return clean.slice(0, ellipsisRoom).replace(/[\s,;:.\-–—]+$/, '') + '...'
+}
+
 export function generateTeamMetadata(teamSlug: string, subPage?: string): Metadata {
   const team = TEAM_META[teamSlug]
   if (!team) {

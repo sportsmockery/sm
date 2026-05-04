@@ -27,4 +27,5 @@ export {
   truncateDescription,
   generateTeamMetadata,
   generateArticleMetadata,
+  buildArticleTitle,
 } from './legacy'
