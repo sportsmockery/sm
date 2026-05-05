@@ -19,6 +19,7 @@ import { ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useCallback } from 'react'
 import { InteractivePress } from '@/components/motion/InteractivePress'
+import { useActiveArticle } from '@/lib/activeArticle'
 
 export interface ArticleProgressHeaderProps {
   title: string
@@ -36,6 +37,11 @@ export function ArticleProgressHeader({
   const router = useRouter()
   const prefersReducedMotion = useReducedMotion()
   const { scrollY, scrollYProgress } = useScroll()
+  // When the user scrolls into a streamed article below the original, the
+  // progress header retitles to match. Falls back to the prop when no
+  // streamed article is active.
+  const active = useActiveArticle()
+  const displayTitle = active?.title || title
 
   // Background opacity ramps in over 50px — visible header chrome only after
   // the user has begun reading. Light + dark variants below via theme attr.
@@ -79,12 +85,12 @@ export function ArticleProgressHeader({
           >
             <ArrowLeft size={22} color="var(--article-progress-fg, #FAFAFB)" />
           </InteractivePress>
-          {title && (
+          {displayTitle && (
             <span
               className="text-sm font-semibold truncate flex-1"
               style={{ color: 'var(--article-progress-fg, #FAFAFB)' }}
             >
-              {title}
+              {displayTitle}
             </span>
           )}
         </div>
@@ -162,7 +168,7 @@ export function ArticleProgressHeader({
               y: titleY,
             }}
           >
-            {title}
+            {displayTitle}
           </motion.span>
         </div>
 

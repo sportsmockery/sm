@@ -89,6 +89,10 @@
     {
       "path": "/api/cron/refresh-disposable-domains",
       "schedule": "0 4 * * *"
+    },
+    {
+      "path": "/api/cron/backfill-faqs",
+      "schedule": "30 4 * * *"
     }
   ],
   "headers": [

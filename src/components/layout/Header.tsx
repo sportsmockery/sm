@@ -210,10 +210,10 @@ export default function Header() {
           <Link
             href="/search"
             aria-label="Search"
+            className="tap-target focus-ring"
             style={{
               color: 'var(--sm-text-muted)',
-              display: 'flex',
-              alignItems: 'center',
+              borderRadius: '10px',
             }}
           >
             <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -229,6 +229,10 @@ export default function Header() {
             <div className="relative" ref={userMenuRef}>
               <button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
+                aria-label="Account menu"
+                aria-expanded={userMenuOpen}
+                aria-haspopup="menu"
+                className="focus-ring"
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -236,7 +240,9 @@ export default function Header() {
                   background: 'none',
                   border: 'none',
                   cursor: 'pointer',
-                  padding: '4px',
+                  padding: '6px',
+                  minHeight: '44px',
+                  borderRadius: '999px',
                 }}
               >
                 {user.avatar ? (
@@ -267,7 +273,7 @@ export default function Header() {
                     {(user.name || user.email)?.charAt(0).toUpperCase() || 'U'}
                   </div>
                 )}
-                <svg width="12" height="12" fill="none" stroke="var(--sm-text-muted)" viewBox="0 0 24 24">
+                <svg width="14" height="14" fill="none" stroke="var(--sm-text-muted)" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
@@ -451,9 +457,11 @@ export default function Header() {
 
           {/* Hamburger (shown at <=768px by CSS) */}
           <button
-            className="nav-hamburger"
+            className="nav-hamburger focus-ring"
             onClick={() => setDrawerOpen(!drawerOpen)}
-            aria-label="Toggle menu"
+            aria-label={drawerOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={drawerOpen}
+            aria-controls="primary-mobile-drawer"
           >
             <span />
             <span />
@@ -463,25 +471,32 @@ export default function Header() {
       </nav>
 
       {/* ===== MOBILE DRAWER (slides in from right) ===== */}
-      <div className={`mobile-drawer${drawerOpen ? ' open' : ''}`}>
+      <div
+        id="primary-mobile-drawer"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Site navigation"
+        className={`mobile-drawer${drawerOpen ? ' open' : ''}`}
+      >
         <div className="drawer-overlay" onClick={closeDrawer} />
-        <div className="drawer-panel">
+        <div className="drawer-panel safe-right">
           {/* Close button at top of drawer */}
           <button
             onClick={closeDrawer}
             aria-label="Close menu"
+            className="tap-target focus-ring"
             style={{
               position: 'absolute',
-              top: '24px',
-              right: '24px',
+              top: '16px',
+              right: '16px',
               background: 'none',
               border: 'none',
               cursor: 'pointer',
               color: 'var(--sm-text-muted)',
-              padding: '4px',
+              borderRadius: '10px',
             }}
           >
-            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>

@@ -6,8 +6,7 @@ import { supabaseAdmin } from '@/lib/supabase-server'
 import { format } from 'date-fns'
 import ShareButtons from '@/components/ShareButtons'
 import AuthorCard from '@/components/article/AuthorCard'
-import RelatedArticles from '@/components/article/RelatedArticles'
-import NextPrevArticle from '@/components/article/NextPrevArticle'
+import NextArticleStream from '@/components/article/NextArticleStream'
 import ArticleTags from '@/components/article/ArticleTags'
 import ArticleViewTracker from '@/components/ArticleViewTracker'
 import { ViewCounterCompact, CommentCountCompact } from '@/components/ViewCounter'
@@ -22,6 +21,8 @@ import ScoutRecapCard from '@/components/article/ScoutRecapCard'
 import ScoutInsightBox from '@/components/article/ScoutInsightBox'
 import ArticleContentWithInsights from '@/components/article/ArticleContentWithInsights'
 import ArticleBlockContentWithInsights from '@/components/article/ArticleBlockContentWithInsights'
+import ArticleFAQ from '@/components/article/ArticleFAQ'
+import { getArticleFaqsForRender } from '@/lib/articleFaq'
 import { categorySlugToTeam } from '@/lib/types'
 import { stripDuplicateFeaturedImage, calculateReadTime, getContextLabel, sanitizeWordPressContent } from '@/lib/content-utils'
 import { buildAutoLinkContextForPost, applyAutoLinksToHtml } from '@/lib/autolink'
@@ -50,7 +51,7 @@ async function getPost(slug: string) {
   try {
     const { data: post, error } = await supabaseAdmin
       .from('sm_posts')
-      .select('id, title, content, excerpt, featured_image, image_variants, published_at, updated_at, seo_title, seo_description, author_id, category_id, views, comments_count, toc')
+      .select('id, title, content, excerpt, featured_image, image_variants, published_at, updated_at, seo_title, seo_description, author_id, category_id, views, comments_count, toc, faq_json')
       .eq('slug', slug)
       .eq('status', 'published')
       .single()
@@ -153,16 +154,14 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
   const readingTime = calculateReadTime(post.content || '')
   const articleUrl = `https://sportsmockery.com/${category}/${slug}`
 
-  // Fetch all data in parallel - wrapped in try-catch to handle cold start issues
+  // Fetch supplementary data in parallel - wrapped in try-catch to handle cold start issues.
+  // Related/prev/next queries are gone — NextArticleStream handles "what's next" lazily.
   let author = null
-  let relatedPosts: Array<{ id: number; title: string; slug: string; excerpt: string | null; featured_image: string | null; published_at: string }> = []
   let categoryData: { id: number; name: string; slug: string } | null = null
-  let prevPost: { title: string; slug: string; category_id: number; featured_image: string | null | undefined } | null = null
-  let nextPost: { title: string; slug: string; category_id: number; featured_image: string | null | undefined } | null = null
   let tags: string[] = []
 
   try {
-    const [authorResult, relatedPostsResult, categoryResult, prevPostResult, nextPostResult, tagsResult] = await Promise.all([
+    const [authorResult, categoryResult, tagsResult] = await Promise.all([
       post.author_id
         ? supabaseAdmin
             .from('sm_authors')
@@ -171,33 +170,10 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
             .single()
         : Promise.resolve({ data: null, error: null }),
       supabaseAdmin
-        .from('sm_posts')
-        .select('id, title, slug, excerpt, featured_image, published_at')
-        .eq('category_id', post.category_id)
-        .eq('status', 'published')
-        .neq('id', post.id)
-        .order('published_at', { ascending: false })
-        .limit(4),
-      supabaseAdmin
         .from('sm_categories')
         .select('id, name, slug')
         .eq('id', post.category_id)
         .single(),
-      supabaseAdmin
-        .from('sm_posts')
-        .select('title, slug, category_id, featured_image')
-        .eq('status', 'published')
-        .lt('published_at', post.published_at)
-        .order('published_at', { ascending: false })
-        .limit(1),
-      supabaseAdmin
-        .from('sm_posts')
-        .select('title, slug, category_id, featured_image')
-        .eq('status', 'published')
-        .gt('published_at', post.published_at)
-        .order('published_at', { ascending: true })
-        .limit(1),
-      // Try to fetch tags if the junction table exists
       Promise.resolve(
         supabaseAdmin
           .from('sm_post_tags')
@@ -208,8 +184,6 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
 
     author = authorResult.data
     categoryData = categoryResult.data
-    prevPost = prevPostResult.data?.[0] || null
-    nextPost = nextPostResult.data?.[0] || null
     tags = (tagsResult?.data?.map((t: unknown) => {
       const tagData = t as { tag?: { name?: string; slug?: string } | Array<{ name?: string; slug?: string }> }
       if (Array.isArray(tagData.tag)) {
@@ -217,53 +191,6 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
       }
       return tagData.tag?.name
     }).filter((name): name is string => typeof name === 'string') || [])
-
-    // Enhanced related posts: prefer tag-matched articles, then same-category
-    const categoryRelated = relatedPostsResult.data || []
-    const tagIds = (tagsResult?.data || []).map((t: unknown) => {
-      const tagData = t as { tag?: { id?: number } | Array<{ id?: number }> }
-      return Array.isArray(tagData.tag) ? tagData.tag[0]?.id : tagData.tag?.id
-    }).filter((id): id is number => !!id)
-
-    if (tagIds.length > 0) {
-      try {
-        // Find posts sharing the same tags
-        const { data: taggedPostIds } = await supabaseAdmin
-          .from('sm_post_tags')
-          .select('post_id')
-          .in('tag_id', tagIds)
-          .neq('post_id', post.id)
-
-        const uniquePostIds = [...new Set((taggedPostIds || []).map(r => r.post_id))]
-
-        if (uniquePostIds.length > 0) {
-          const { data: tagRelated } = await supabaseAdmin
-            .from('sm_posts')
-            .select('id, title, slug, excerpt, featured_image, published_at')
-            .in('id', uniquePostIds.slice(0, 10))
-            .eq('status', 'published')
-            .order('published_at', { ascending: false })
-            .limit(4)
-
-          // Merge: tag-matched first, then category-matched (deduped)
-          const seenIds = new Set((tagRelated || []).map(p => p.id))
-          const merged = [...(tagRelated || [])]
-          for (const p of categoryRelated) {
-            if (!seenIds.has(p.id) && merged.length < 4) {
-              merged.push(p)
-              seenIds.add(p.id)
-            }
-          }
-          relatedPosts = merged
-        } else {
-          relatedPosts = categoryRelated
-        }
-      } catch {
-        relatedPosts = categoryRelated
-      }
-    } else {
-      relatedPosts = categoryRelated
-    }
   } catch (err) {
     console.error('Error fetching article supplementary data:', err)
     // Continue with defaults - page will still render with just the post content
@@ -313,23 +240,22 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
     // Continue without audio if it fails
   }
 
-  // Fetch category slugs for prev/next posts
-  let allCategories: Array<{ id: number; name: string; slug: string }> = []
-  try {
-    const categoryIds = [prevPost?.category_id, nextPost?.category_id].filter(Boolean)
-    if (categoryIds.length > 0) {
-      const { data } = await supabaseAdmin
-        .from('sm_categories')
-        .select('id, name, slug')
-        .in('id', [...new Set(categoryIds)])
-      allCategories = data || []
-    }
-  } catch (err) {
-    console.error('Error fetching category slugs for prev/next:', err)
-    // Continue without category slugs
-  }
+  // Resolve team slug once for stream filter + insight components.
+  const teamSlug = categorySlugToTeam(categoryData?.slug)?.replace('-', '') || null
 
-  const categoryMap = new Map(allCategories?.map(c => [c.id, c]) || [])
+  // FAQs — cached → block-extracted → AI-generated. Persists back to DB on
+  // first generation so subsequent loads are instant. Never blocks rendering
+  // on a network failure (returns []).
+  let faqItems: Array<{ question: string; answer: string }> = []
+  try {
+    const resolved = await getArticleFaqsForRender(
+      { id: post.id, title: post.title, content: post.content || '' },
+      { cachedFaqJson: post.faq_json }
+    )
+    faqItems = resolved.items
+  } catch (err) {
+    console.error('Error resolving article FAQs:', err)
+  }
 
   return (
     <>
@@ -549,39 +475,8 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
                 </div>
               )}
 
-              {/* Next for Chicago Fans */}
-              {relatedPosts.length > 0 && categoryData && (
-                <div style={{ marginTop: 40, borderTop: '1px solid var(--sm-border)', paddingTop: 32 }}>
-                  <h3 style={{ fontSize: 18, fontWeight: 700, color: 'var(--sm-text)', marginBottom: 16 }}>
-                    Next for Chicago Fans
-                  </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    {relatedPosts.slice(0, 3).map((rp) => (
-                      <Link
-                        key={rp.id}
-                        href={`/${categoryData.slug}/${rp.slug}`}
-                        className="group rounded-xl p-3 transition-colors"
-                        style={{ background: 'var(--sm-surface)', border: '1px solid var(--sm-border)', textDecoration: 'none' }}
-                      >
-                        {rp.featured_image && (
-                          <div className="mb-2 overflow-hidden rounded-lg" style={{ aspectRatio: '16/9' }}>
-                            <Image
-                              src={rp.featured_image}
-                              alt={rp.title}
-                              width={200}
-                              height={112}
-                              className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
-                            />
-                          </div>
-                        )}
-                        <p className="line-clamp-2" style={{ fontSize: 14, fontWeight: 600, lineHeight: 1.3, color: 'var(--sm-text)' }}>
-                          {rp.title}
-                        </p>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
+              {/* FAQ — visible accordion + Google FAQPage JSON-LD */}
+              <ArticleFAQ items={faqItems} pageUrl={`/${categoryData?.slug || category}/${slug}`} />
 
               {/* Comments — isolated so failures do not take down the article */}
               <div id="comments-section">
@@ -605,55 +500,16 @@ export default async function ArticlePage({ params, searchParams }: ArticlePageP
         </div>
       </div>
 
-      {/* Next/Previous Article Navigation */}
-      <NextPrevArticle
-        prevArticle={prevPost ? {
-          title: prevPost.title,
-          slug: prevPost.slug,
-          featured_image: prevPost.featured_image ?? undefined,
-          category: {
-            name: categoryMap.get(prevPost.category_id)?.name || 'Article',
-            slug: categoryMap.get(prevPost.category_id)?.slug || 'article',
-          },
-        } : undefined}
-        nextArticle={nextPost ? {
-          title: nextPost.title,
-          slug: nextPost.slug,
-          featured_image: nextPost.featured_image ?? undefined,
-          category: {
-            name: categoryMap.get(nextPost.category_id)?.name || 'Article',
-            slug: categoryMap.get(nextPost.category_id)?.slug || 'article',
-          },
-        } : undefined}
+      {/* Aggressive next-article stream — appends up to 2 same-team articles
+          inline as the reader nears the end. Each appended article gets its
+          own Scout Recap, Edge Insights, comments, and view tracking. After
+          the cap, surfaces a hard-nav teaser that resets page state. */}
+      <NextArticleStream
+        initialPostId={post.id}
+        initialPostUrl={`/${categoryData?.slug || category}/${slug}`}
+        initialPostTitle={post.title}
+        team={teamSlug}
       />
-
-      {/* Related Articles Section */}
-      {relatedPosts.length > 0 && categoryData && (
-        <section style={{ borderTop: '1px solid var(--sm-border)', padding: '48px 0', backgroundColor: 'var(--sm-surface)' }}>
-          <div className="sm-container">
-            <RelatedArticles
-              articles={relatedPosts.map(p => ({
-                id: p.id,
-                title: p.title,
-                slug: p.slug,
-                excerpt: p.excerpt ?? undefined,
-                featured_image: p.featured_image ?? undefined,
-                published_at: p.published_at,
-                category: {
-                  name: categoryData.name,
-                  slug: categoryData.slug,
-                },
-                author: author ? {
-                  name: author.display_name,
-                  slug: String(author.id),
-                  avatar_url: author.avatar_url ?? undefined,
-                } : { name: 'Staff', slug: 'staff' },
-              }))}
-              categoryName={categoryData.name}
-            />
-          </div>
-        </section>
-      )}
 
       {/* Mobile Floating Action Bar */}
       <ArticleActions
