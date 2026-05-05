@@ -1,3 +1,4 @@
+import Anthropic from '@anthropic-ai/sdk'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { isBlockContent, parseDocument } from '@/components/admin/BlockEditor/serializer'
 import type { FAQItem } from '@/lib/seo/schema/faq-page'
@@ -8,7 +9,8 @@ import type { FAQItem } from '@/lib/seo/schema/faq-page'
  * Priority order:
  *   1. Cached `sm_posts.faq_json` (set by a previous run, or written by editors).
  *   2. FAQ blocks in the BlockEditor document — explicit, writer-authored Q&A.
- *   3. AI-generated via Scout (DataLab) — only when nothing else is available.
+ *   3. AI-generated via Claude Sonnet (PostIQ pattern — same model and SDK
+ *      already used for headlines/seo/toc/poll generation).
  *
  * Result is persisted back to `sm_posts.faq_json` so the model is called at
  * most once per article. `[]` means "we tried and there's nothing eligible";
@@ -16,11 +18,15 @@ import type { FAQItem } from '@/lib/seo/schema/faq-page'
  *
  * Google's FAQPage rich result requires ≥3 Q&A pairs, so we ask the model for
  * 5 and only emit JSON-LD when there are at least 3.
+ *
+ * NB: Scout (DataLab `/api/query`) is a sports stats Q&A model — when fed a
+ * "generate JSON FAQs" prompt it responds conversationally and refuses, which
+ * is why this helper does NOT route through Scout.
  */
 
-const DATALAB_API_URL = process.env.DATALAB_API_URL || 'https://datalab.sportsmockery.com'
-
 const MIN_ITEMS_FOR_RICH_RESULT = 3
+
+const anthropic = new Anthropic()
 
 export interface ArticleFaqInput {
   id: number
@@ -42,6 +48,35 @@ function htmlToPlainText(html: string): string {
     .trim()
 }
 
+/**
+ * Pull readable prose from either WordPress HTML or BlockEditor JSON content.
+ * For block content, we walk paragraph/subheading/list/quote blocks (where
+ * the actual prose lives) and concat their HTML, then strip tags. Anything
+ * that fails to parse falls through to plain HTML stripping.
+ */
+function extractArticleProse(content: string | null | undefined): string {
+  if (!content) return ''
+  if (isBlockContent(content)) {
+    try {
+      const doc = parseDocument(content)
+      if (doc) {
+        const buf: string[] = []
+        for (const block of doc.blocks) {
+          const data = block.data as { html?: string; text?: string; items?: unknown }
+          const text = data?.html || data?.text
+          if (typeof text === 'string' && text.trim()) {
+            buf.push(text)
+          }
+        }
+        if (buf.length > 0) return htmlToPlainText(buf.join(' \n '))
+      }
+    } catch {
+      // fall through to raw stripping
+    }
+  }
+  return htmlToPlainText(content)
+}
+
 /** Pull writer-authored FAQ blocks out of a BlockEditor document. */
 export function extractFaqsFromBlocks(content: string | null | undefined): FAQItem[] {
   if (!content || !isBlockContent(content)) return []
@@ -60,76 +95,84 @@ export function extractFaqsFromBlocks(content: string | null | undefined): FAQIt
   return items
 }
 
-interface ScoutFaqResponse {
-  items: Array<{ question?: string; answer?: string }>
+interface ModelFaqResponse {
+  items?: Array<{ question?: string; answer?: string }>
+}
+
+/** Pull a JSON object out of model output — handles bare JSON, fenced JSON,
+ *  or prose with a JSON object inside. Mirrors the PostIQ extractor. */
+function extractJsonObject(text: string): string | null {
+  if (!text) return null
+  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i)
+  if (fenced) return fenced[1].trim()
+  const start = text.indexOf('{')
+  const end = text.lastIndexOf('}')
+  if (start === -1 || end <= start) return null
+  return text.slice(start, end + 1)
 }
 
 /**
- * Ask Scout (DataLab) to generate 5 FAQ pairs for an article. Per project
- * rule, all AI work routes through Scout — we ask for strict JSON so the
- * response is parseable.
+ * Ask Claude Sonnet to generate 5 FAQ pairs for an article. Mirrors the
+ * existing PostIQ pattern (`generateTOC`, `generateHeadlines`, etc.) — same
+ * SDK, same model, same JSON-extraction style.
  */
-async function generateFaqsViaScout(input: ArticleFaqInput): Promise<FAQItem[]> {
-  const plain = htmlToPlainText(input.content || '').slice(0, 6000)
+async function generateFaqsViaPostIQ(input: ArticleFaqInput): Promise<FAQItem[]> {
+  const plain = extractArticleProse(input.content).slice(0, 6000)
   if (plain.length < 400) return [] // Article too short to support a useful FAQ.
 
-  const prompt = `You are generating an FAQ section for a Chicago sports article. Return STRICT JSON only — no prose, no code fences. Schema: {"items":[{"question":"...","answer":"..."}]}. Provide exactly 5 frequently-asked-questions a reader would search for after reading this article. Questions must be natural-language, complete, and end with a question mark. Answers must be 1–3 sentences, factual, and grounded in the article (no speculation, no marketing fluff). Do NOT include URLs.\n\nArticle title: ${input.title}\n\nArticle:\n${plain}`
+  const prompt = `You are generating an FAQ section for a Chicago sports article on SportsMockery. Return STRICT JSON only — no prose, no code fences.
 
-  let response: Response
+Schema:
+{"items":[{"question":"...","answer":"..."}]}
+
+Generate exactly 5 frequently-asked-questions a reader would Google after reading this article. Rules:
+- Questions are natural-language, complete, end with a question mark
+- Questions are *answered* by content in the article — do not invent facts
+- Answers are 1–3 sentences, factual, grounded in the article, no speculation
+- No URLs, no marketing fluff, no "according to the article"
+- Use fan-friendly Chicago sports voice
+
+Article title: ${input.title}
+
+Article:
+${plain}
+
+Return ONLY the JSON object.`
+
+  let responseText = ''
   try {
-    response = await fetch(`${DATALAB_API_URL}/api/query`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Source': 'sportsmockery.com',
-      },
-      body: JSON.stringify({ query: prompt }),
-      // 20s budget — Scout responses for short prompts typically return in ~5–8s.
-      signal: AbortSignal.timeout(20_000),
+    const message = await anthropic.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1500,
+      messages: [{ role: 'user', content: prompt }],
     })
+    responseText = message.content[0]?.type === 'text' ? message.content[0].text : ''
   } catch (err) {
-    console.error('[articleFaq] Scout fetch failed', err)
+    console.error('[articleFaq] Anthropic call failed', err)
     return []
   }
 
-  if (!response.ok) {
-    console.error('[articleFaq] Scout returned', response.status)
+  const jsonText = extractJsonObject(responseText)
+  if (!jsonText) {
+    console.error('[articleFaq] no JSON in model output', responseText.slice(0, 200))
     return []
   }
 
-  let raw: string
+  let parsed: ModelFaqResponse
   try {
-    const data = (await response.json()) as { response?: string }
-    raw = data.response || ''
-  } catch {
-    return []
-  }
-
-  // Scout sometimes wraps JSON in code fences or adds intro text; carve out
-  // the first balanced {...} block.
-  const jsonStart = raw.indexOf('{')
-  const jsonEnd = raw.lastIndexOf('}')
-  if (jsonStart === -1 || jsonEnd === -1 || jsonEnd <= jsonStart) return []
-  const jsonSlice = raw.slice(jsonStart, jsonEnd + 1)
-
-  let parsed: ScoutFaqResponse
-  try {
-    parsed = JSON.parse(jsonSlice) as ScoutFaqResponse
+    parsed = JSON.parse(jsonText) as ModelFaqResponse
   } catch (err) {
-    console.error('[articleFaq] Scout JSON parse failed', err)
+    console.error('[articleFaq] JSON parse failed', err, jsonText.slice(0, 200))
     return []
   }
 
-  const items = (parsed.items || [])
+  return (parsed.items || [])
     .map((it) => ({
       question: (it.question || '').trim(),
       answer: (it.answer || '').trim(),
     }))
     .filter((it): it is FAQItem => it.question.length > 0 && it.answer.length > 0)
-    // Cap at 5 — keeps both the visible accordion and JSON-LD payload tight.
     .slice(0, 5)
-
-  return items
 }
 
 /** Persist FAQs back to sm_posts.faq_json. Best-effort; never throws. */
@@ -195,7 +238,7 @@ export async function resolveArticleFaqs(
 
   // 3) AI generation (cache the empty result too so we don't spin on every load).
   if (!generateIfMissing) return []
-  const generated = await generateFaqsViaScout(post)
+  const generated = await generateFaqsViaPostIQ(post)
   await cacheFaqs(post.id, generated)
   return generated
 }
