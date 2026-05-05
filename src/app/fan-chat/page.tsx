@@ -300,8 +300,24 @@ export default function FanChatPage() {
           }
 
           setMessages(prev => {
-            // Avoid duplicates
+            // Already have this DB row (POST response landed first) — skip
             if (prev.some(m => m.id === newMsg.id)) return prev
+
+            // For own messages, swap the matching optimistic in place rather
+            // than appending — otherwise a realtime event arriving before the
+            // POST response duplicates the message.
+            if (isOwnMessage) {
+              const optIdx = prev.findIndex(
+                m => m.isOwn && m.id.startsWith('optimistic-') && m.content === newMsg.content
+              )
+              if (optIdx !== -1) {
+                const updated = [...prev]
+                updated[optIdx] = newMsg
+                channelCacheRef.current[activeChannel] = updated
+                return updated
+              }
+            }
+
             const updated = [...prev, newMsg]
             channelCacheRef.current[activeChannel] = updated
             return updated
