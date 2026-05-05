@@ -157,8 +157,28 @@ export async function POST(request: NextRequest) {
 
     // ── Adaptive River composition ──
     const river = composeAdaptiveRiver(scoredArticles.slice(0, 60))
-    const riverItems = river.hero ? [river.hero, ...river.items] : river.items
+    const baseArticleRiverItems = river.hero ? [river.hero, ...river.items] : river.items
     const teamRiverItems = river.teamItems
+
+    // ── YouTube videos (Bears Film Room / Pinwheels & Ivy / etc.) ──
+    // Mirror what the GET handler does so mobile (which always POSTs to this
+    // endpoint with options set) sees the same video cards as the website.
+    let ytRiverItems: HomepageRiverItem[] = []
+    try {
+      const ytVideos = await getYouTubeFeedVideos()
+      ytRiverItems = ytVideos.map(mapYouTubeToRiverItem)
+    } catch { /* YouTube fetch failure should not break the feed */ }
+
+    const articleRiverItems = interleaveVideos(baseArticleRiverItems, ytRiverItems)
+
+    // ── Live engagement cards: polls, box scores, trade proposals ──
+    // These tables already feed /api/river; mirror them into /api/feed so mobile
+    // (which only calls /api/feed) can render them and support inline voting.
+    const extraRiverItems = await fetchEngagementRiverItems()
+
+    // Interleave engagement cards every ~6 article slots so they're discoverable
+    // without crowding the article stream.
+    const riverItems = interleaveRiverItems(articleRiverItems, extraRiverItems, 6)
 
     return NextResponse.json({
       featured,
@@ -387,10 +407,12 @@ export async function GET() {
       ytRiverItems = ytVideos.map(mapYouTubeToRiverItem)
     } catch { /* YouTube fetch failure should not break the feed */ }
 
-    const riverItems = interleaveVideos(
+    const articleRiverItems = interleaveVideos(
       river.hero ? [river.hero, ...river.items] : river.items,
       ytRiverItems
     )
+    const extraRiverItems = await fetchEngagementRiverItems()
+    const riverItems = interleaveRiverItems(articleRiverItems, extraRiverItems, 6)
 
     // Team-specific river items from composer
     const teamRiverItems = river.teamItems
@@ -417,4 +439,169 @@ export async function GET() {
       { status: 500 }
     )
   }
+}
+
+// ─── Live engagement river items (polls, box scores, trade proposals) ───
+
+const ENGAGEMENT_TEAM_DISPLAY: Record<string, string> = {
+  bears: 'Chicago Bears',
+  bulls: 'Chicago Bulls',
+  blackhawks: 'Chicago Blackhawks',
+  cubs: 'Chicago Cubs',
+  whitesox: 'Chicago White Sox',
+}
+
+const ENGAGEMENT_TEAM_COLOR: Record<string, string> = {
+  bears: '#0B162A',
+  bulls: '#CE1141',
+  blackhawks: '#CF0A2C',
+  cubs: '#0E3386',
+  whitesox: '#27251F',
+}
+
+function relativeTimestamp(iso: string | null | undefined): string {
+  if (!iso) return ''
+  const diff = Date.now() - new Date(iso).getTime()
+  const mins = Math.floor(diff / 60000)
+  const hrs = Math.floor(diff / 3600000)
+  const days = Math.floor(diff / 86400000)
+  if (mins < 60) return `${Math.max(1, mins)}m`
+  if (hrs < 24) return `${hrs}h`
+  if (days < 7) return `${days}d`
+  return `${Math.floor(days / 7)}w`
+}
+
+async function fetchEngagementRiverItems(): Promise<HomepageRiverItem[]> {
+  if (!supabaseAdmin) return []
+  const items: HomepageRiverItem[] = []
+
+  // Active polls (with options for inline voting)
+  try {
+    const { data: polls } = await supabaseAdmin
+      .from('sm_polls')
+      .select('id, question, status, total_votes, ends_at, created_at, options:sm_poll_options(id, option_text, vote_count, display_order)')
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .limit(5)
+
+    for (const poll of polls || []) {
+      const sortedOptions = (poll.options || []).slice().sort(
+        (a: any, b: any) => (a.display_order || 0) - (b.display_order || 0)
+      )
+      items.push({
+        id: `river-poll-${poll.id}`,
+        type: 'poll',
+        team: 'Chicago Sports',
+        teamColor: '#00D4FF',
+        timestamp: relativeTimestamp(poll.created_at),
+        data: {
+          pollId: poll.id,
+          question: poll.question,
+          context: '',
+          options: sortedOptions.map((o: any) => o.option_text),
+          optionIds: sortedOptions.map((o: any) => o.id),
+          optionVoteCounts: sortedOptions.map((o: any) => o.vote_count || 0),
+          totalVotes: poll.total_votes || 0,
+          endsAt: poll.ends_at || null,
+          status: 'LIVE',
+        },
+      })
+    }
+  } catch (e) {
+    console.error('[feed] sm_polls query failed:', (e as Error).message)
+  }
+
+  // Live + final box scores
+  try {
+    const { data: boxScores } = await supabaseAdmin
+      .from('sm_box_scores')
+      .select('*')
+      .eq('feed_eligible', true)
+      .in('game_status', ['live', 'final'])
+      .order('updated_at', { ascending: false })
+      .limit(5)
+
+    for (const bs of boxScores || []) {
+      const teamSlug = bs.team_slug || ''
+      items.push({
+        id: bs.card_id || `river-boxscore-${bs.id}`,
+        type: 'box_score',
+        team: ENGAGEMENT_TEAM_DISPLAY[teamSlug] || 'Chicago Sports',
+        teamColor: ENGAGEMENT_TEAM_COLOR[teamSlug] || '#0B0F14',
+        timestamp: relativeTimestamp(bs.updated_at),
+        data: {
+          team_slug: teamSlug,
+          home_team_abbr: bs.home_team_abbr,
+          away_team_abbr: bs.away_team_abbr,
+          home_team_logo_url: bs.home_team_logo_url,
+          away_team_logo_url: bs.away_team_logo_url,
+          home_score: bs.home_score,
+          away_score: bs.away_score,
+          game_status: bs.game_status,
+          quarter_scores: bs.quarter_scores,
+          top_performers: bs.top_performers,
+          game_narrative: bs.game_narrative,
+          game_date: bs.game_date,
+          target_url: bs.target_url,
+        },
+      })
+    }
+  } catch (e) {
+    console.error('[feed] sm_box_scores query failed:', (e as Error).message)
+  }
+
+  // Approved trade proposals
+  try {
+    const { data: trades } = await supabaseAdmin
+      .from('sm_trade_proposals_feed')
+      .select('*')
+      .eq('editor_approved', true)
+      .eq('rejected', false)
+      .order('approved_at', { ascending: false })
+      .limit(5)
+
+    for (const tp of trades || []) {
+      const teamSlug = tp.team_a_slug || ''
+      items.push({
+        id: `river-trade-${tp.id}`,
+        type: 'trade_proposal',
+        team: ENGAGEMENT_TEAM_DISPLAY[teamSlug] || 'Chicago Sports',
+        teamColor: ENGAGEMENT_TEAM_COLOR[teamSlug] || '#BC0000',
+        timestamp: relativeTimestamp(tp.approved_at || tp.created_at),
+        data: {
+          submitted_by_username: tp.submitted_by_username,
+          team_a_slug: tp.team_a_slug,
+          team_b_slug: tp.team_b_slug,
+          team_a_receives: tp.team_a_receives,
+          team_b_receives: tp.team_b_receives,
+          trade_score: tp.trade_score,
+          ai_reasoning: tp.ai_reasoning,
+        },
+      })
+    }
+  } catch (e) {
+    console.error('[feed] sm_trade_proposals_feed query failed:', (e as Error).message)
+  }
+
+  return items
+}
+
+function interleaveRiverItems(
+  articleItems: HomepageRiverItem[],
+  extraItems: HomepageRiverItem[],
+  cadence: number
+): HomepageRiverItem[] {
+  if (extraItems.length === 0) return articleItems
+  const out: HomepageRiverItem[] = []
+  let extraIdx = 0
+  for (let i = 0; i < articleItems.length; i++) {
+    out.push(articleItems[i])
+    if (extraIdx < extraItems.length && (i + 1) % cadence === 0) {
+      out.push(extraItems[extraIdx++])
+    }
+  }
+  while (extraIdx < extraItems.length) {
+    out.push(extraItems[extraIdx++])
+  }
+  return out
 }

@@ -327,6 +327,27 @@ export interface Poll {
   expires_at?: string
 }
 
+export interface PollOptionResultDTO {
+  id: string
+  option_text: string
+  vote_count: number
+  percentage: number
+}
+
+export interface PollResultsDTO {
+  total_votes: number
+  options: PollOptionResultDTO[]
+  user_voted: boolean
+  user_votes: string[]
+}
+
+export interface PollVoteResponse {
+  success: boolean
+  message?: string
+  results: PollResultsDTO
+  error?: string
+}
+
 class ApiClient {
   private baseUrl: string
   private authToken: string | null = null
@@ -449,6 +470,15 @@ class ApiClient {
   }
 
   /**
+   * Fetch full live game detail (scoreboard, plays, players, team stats).
+   * Returns the API payload as-is — keeping it untyped here so we don't
+   * fight the deeply-nested sport-specific shape.
+   */
+  async getLiveGame(gameId: string): Promise<any> {
+    return this.fetch(`/api/live-games/${gameId}`)
+  }
+
+  /**
    * Fetch EDGE Insights for an article. Insights carry a paragraph_index
    * indicating where they should be spliced inline.
    */
@@ -482,6 +512,36 @@ class ApiClient {
    */
   async recordView(postId: number): Promise<void> {
     await this.fetch(`/api/views/${postId}`, { method: 'POST' })
+  }
+
+  // ============================================
+  // POLLS — inline voting from feed cards
+  // ============================================
+
+  /**
+   * Submit a vote for a poll. anonymousId required for unauthenticated users.
+   */
+  async votePoll(
+    pollId: string,
+    optionIds: string[],
+    anonymousId: string
+  ): Promise<PollVoteResponse> {
+    return this.fetch<PollVoteResponse>(`/api/polls/${pollId}/vote`, {
+      method: 'POST',
+      body: JSON.stringify({ option_ids: optionIds, anonymous_id: anonymousId }),
+    })
+  }
+
+  /**
+   * Check whether the current anonymous user has already voted on a poll.
+   */
+  async getPollVoteStatus(
+    pollId: string,
+    anonymousId: string
+  ): Promise<{ has_voted: boolean; voted_options: string[] }> {
+    return this.fetch(
+      `/api/polls/${pollId}/vote?anonymous_id=${encodeURIComponent(anonymousId)}`
+    )
   }
 
   // ============================================
@@ -545,16 +605,6 @@ class ApiClient {
    */
   async getPoll(pollId: string): Promise<Poll> {
     return this.fetch(`/api/polls/${pollId}`)
-  }
-
-  /**
-   * Vote on a poll
-   */
-  async votePoll(pollId: string, optionId: string): Promise<Poll> {
-    return this.fetch(`/api/polls/${pollId}/vote`, {
-      method: 'POST',
-      body: JSON.stringify({ optionId }),
-    })
   }
 
   // ============================================

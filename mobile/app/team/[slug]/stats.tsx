@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import {
   View,
   Text,
@@ -16,42 +16,141 @@ import { Ionicons } from '@expo/vector-icons'
 import { useTheme } from '@/hooks/useTheme'
 import { COLORS, API_BASE_URL, TEAMS, TeamId } from '@/lib/config'
 
-interface TeamStats {
-  record?: { wins: number; losses: number; otLosses?: number }
-  pointsPerGame?: number
-  pointsAllowedPerGame?: number
-  offensiveRank?: number
-  defensiveRank?: number
-  [key: string]: any
+interface LeaderboardEntry {
+  player: {
+    playerId: string
+    fullName: string
+    jerseyNumber: number | null
+    position: string
+    headshotUrl: string | null
+  }
+  primaryStat: number
+  primaryLabel: string
+  secondaryStat: number | null
+  secondaryLabel: string | null
+  tertiaryStat: number | null
+  tertiaryLabel: string | null
+  gamesPlayed?: number
 }
 
-interface StatLeader {
-  player_name: string
-  player_headshot?: string
-  stat_name: string
-  value: number | string
-  rank?: number
+interface TeamStatsPayload {
+  team?: Record<string, any>
+  leaderboards?: Record<string, LeaderboardEntry[]>
+}
+
+// Per-sport order + display labels for the leaderboard sections.
+const LEADERBOARD_LABELS: Record<string, [string, string][]> = {
+  bears: [
+    ['passing', 'Passing'],
+    ['rushing', 'Rushing'],
+    ['receiving', 'Receiving'],
+    ['defense', 'Defense'],
+    ['sacks', 'Sacks'],
+    ['interceptions', 'Interceptions'],
+  ],
+  bulls: [
+    ['scoring', 'Scoring'],
+    ['rebounding', 'Rebounding'],
+    ['assists', 'Assists'],
+    ['steals', 'Steals'],
+    ['blocks', 'Blocks'],
+    ['defense', 'Defense'],
+  ],
+  blackhawks: [
+    ['points', 'Points'],
+    ['goals', 'Goals'],
+    ['assists', 'Assists'],
+    ['goaltending', 'Goaltending'],
+  ],
+  cubs: [
+    ['batting', 'Batting Avg'],
+    ['homeRuns', 'Home Runs'],
+    ['obp', 'On-Base %'],
+    ['rbiLeaders', 'RBI'],
+    ['atBats', 'At Bats'],
+    ['pitching', 'Pitching'],
+    ['saves', 'Saves'],
+  ],
+  whitesox: [
+    ['batting', 'Batting Avg'],
+    ['homeRuns', 'Home Runs'],
+    ['obp', 'On-Base %'],
+    ['rbiLeaders', 'RBI'],
+    ['atBats', 'At Bats'],
+    ['pitching', 'Pitching'],
+    ['saves', 'Saves'],
+  ],
+}
+
+// Per-sport "team metric" tiles to surface. Keys reference team stats fields
+// returned by src/lib/{team}Data.ts.
+const TEAM_METRIC_TILES: Record<string, Array<{ key: string; label: string; format?: (v: any) => string }>> = {
+  bears: [
+    { key: 'ppg', label: 'PPG' },
+    { key: 'papg', label: 'OPP PPG' },
+    { key: 'pointDifferential', label: 'POINT DIFF', format: (v) => (v > 0 ? `+${v}` : String(v ?? 0)) },
+    { key: 'offensiveRank', label: 'OFF RANK', format: (v) => (v ? `#${v}` : '—') },
+  ],
+  bulls: [
+    { key: 'ppg', label: 'PPG' },
+    { key: 'oppg', label: 'OPP PPG' },
+    { key: 'rpg', label: 'RPG' },
+    { key: 'apg', label: 'APG' },
+  ],
+  blackhawks: [
+    { key: 'goalsFor', label: 'GF/GP' },
+    { key: 'goalsAgainst', label: 'GA/GP' },
+    { key: 'ppPct', label: 'PP%' },
+    { key: 'pkPct', label: 'PK%' },
+  ],
+  cubs: [
+    { key: 'battingAverage', label: 'AVG' },
+    { key: 'era', label: 'ERA' },
+    { key: 'runsScored', label: 'RUNS' },
+    { key: 'homeRuns', label: 'HR' },
+  ],
+  whitesox: [
+    { key: 'battingAverage', label: 'AVG' },
+    { key: 'era', label: 'ERA' },
+    { key: 'runsScored', label: 'RUNS' },
+    { key: 'homeRuns', label: 'HR' },
+  ],
+}
+
+function formatStatValue(value: any): string {
+  if (value === null || value === undefined || value === '') return '—'
+  if (typeof value === 'number') {
+    if (Number.isInteger(value)) return String(value)
+    if (value < 1 && value >= 0) return value.toFixed(3).replace(/^0/, '')
+    return value.toFixed(1)
+  }
+  return String(value)
+}
+
+function rankBadgeColor(rank: number): string {
+  if (rank === 0) return '#D6B05E'
+  if (rank === 1) return '#C0C0C0'
+  if (rank === 2) return '#CD7F32'
+  return '#6B7280'
 }
 
 export default function TeamStatsScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>()
   const router = useRouter()
-  const { colors } = useTheme()
+  const { colors, isDark } = useTheme()
   const team = slug ? TEAMS[slug as TeamId] : null
-  const [teamStats, setTeamStats] = useState<TeamStats | null>(null)
-  const [leaders, setLeaders] = useState<StatLeader[]>([])
+
+  const [payload, setPayload] = useState<TeamStatsPayload | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
 
   const fetchStats = async () => {
     if (!slug) return
-
     try {
-      const response = await fetch(`${API_BASE_URL}/api/${slug}/stats`)
+      const response = await fetch(`${API_BASE_URL}/api/team/${slug}/stats`)
       if (response.ok) {
         const result = await response.json()
-        setTeamStats(result.teamStats || null)
-        setLeaders(result.leaders || [])
+        setPayload(result)
       }
     } catch (error) {
       console.error('Error fetching stats:', error)
@@ -70,14 +169,6 @@ export default function TeamStatsScreen() {
     fetchStats()
   }
 
-  const formatRecord = (record?: { wins: number; losses: number; otLosses?: number }) => {
-    if (!record) return '--'
-    if (record.otLosses !== undefined) {
-      return `${record.wins}-${record.losses}-${record.otLosses}`
-    }
-    return `${record.wins}-${record.losses}`
-  }
-
   if (!team) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
@@ -89,8 +180,16 @@ export default function TeamStatsScreen() {
     )
   }
 
+  const teamStats = payload?.team || null
+  const leaderboards = payload?.leaderboards || null
+  const tiles = TEAM_METRIC_TILES[String(slug)] || []
+  const lbOrder = LEADERBOARD_LABELS[String(slug)] || []
+
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background }]}
+      edges={['top']}
+    >
       <Stack.Screen options={{ headerShown: false }} />
 
       {/* Header */}
@@ -103,14 +202,12 @@ export default function TeamStatsScreen() {
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
         <View style={styles.headerContent}>
-          <Image
-            source={{ uri: team.logo }}
-            style={styles.teamLogo}
-            contentFit="contain"
-          />
+          <Image source={{ uri: team.logo }} style={styles.teamLogo} contentFit="contain" />
           <View style={styles.headerText}>
             <Text style={styles.teamName}>{team.shortName} Stats</Text>
-            <Text style={styles.seasonText}>2025-26 Season</Text>
+            {teamStats?.season ? (
+              <Text style={styles.countText}>{teamStats.season} Season</Text>
+            ) : null}
           </View>
         </View>
       </View>
@@ -119,11 +216,7 @@ export default function TeamStatsScreen() {
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         refreshControl={
-          <RefreshControl
-            refreshing={isRefreshing}
-            onRefresh={handleRefresh}
-            tintColor={team.color}
-          />
+          <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor={team.color} />
         }
         showsVerticalScrollIndicator={false}
       >
@@ -131,273 +224,248 @@ export default function TeamStatsScreen() {
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color={team.color} />
           </View>
+        ) : !teamStats && !leaderboards ? (
+          <View style={styles.emptyContainer}>
+            <Ionicons name="bar-chart-outline" size={64} color={colors.textMuted} />
+            <Text style={[styles.emptyText, { color: colors.textMuted }]}>Stats unavailable</Text>
+          </View>
         ) : (
           <>
-            {/* Team Record Card */}
-            {teamStats?.record && (
+            {teamStats?.record ? (
               <View style={[styles.recordCard, { backgroundColor: team.color }]}>
-                <Text style={styles.recordLabel}>Season Record</Text>
-                <Text style={styles.recordValue}>{formatRecord(teamStats.record)}</Text>
+                <Text style={styles.recordLabel}>RECORD</Text>
+                <Text style={styles.recordValue}>{teamStats.record}</Text>
               </View>
-            )}
+            ) : null}
 
-            {/* Team Stats Grid */}
-            <View style={[styles.statsGrid, { backgroundColor: colors.surface }]}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>Team Averages</Text>
-              <View style={styles.statsRow}>
-                {teamStats?.pointsPerGame && (
-                  <View style={styles.statBox}>
-                    <Text style={[styles.statValue, { color: team.color }]}>
-                      {teamStats.pointsPerGame.toFixed(1)}
-                    </Text>
-                    <Text style={[styles.statLabel, { color: colors.textMuted }]}>PPG</Text>
-                  </View>
-                )}
-                {teamStats?.pointsAllowedPerGame && (
-                  <View style={styles.statBox}>
-                    <Text style={[styles.statValue, { color: team.color }]}>
-                      {teamStats.pointsAllowedPerGame.toFixed(1)}
-                    </Text>
-                    <Text style={[styles.statLabel, { color: colors.textMuted }]}>OPP PPG</Text>
-                  </View>
-                )}
-                {teamStats?.offensiveRank && (
-                  <View style={styles.statBox}>
-                    <Text style={[styles.statValue, { color: team.color }]}>
-                      #{teamStats.offensiveRank}
-                    </Text>
-                    <Text style={[styles.statLabel, { color: colors.textMuted }]}>OFF RANK</Text>
-                  </View>
-                )}
-                {teamStats?.defensiveRank && (
-                  <View style={styles.statBox}>
-                    <Text style={[styles.statValue, { color: team.color }]}>
-                      #{teamStats.defensiveRank}
-                    </Text>
-                    <Text style={[styles.statLabel, { color: colors.textMuted }]}>DEF RANK</Text>
-                  </View>
-                )}
+            {tiles.length > 0 && teamStats ? (
+              <View style={styles.tilesGrid}>
+                {tiles.map(({ key, label, format }) => {
+                  const raw = teamStats[key]
+                  const value = format ? format(raw) : formatStatValue(raw)
+                  return (
+                    <View
+                      key={key}
+                      style={[
+                        styles.tile,
+                        {
+                          backgroundColor: colors.surface,
+                          borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(11,15,20,0.08)',
+                        },
+                      ]}
+                    >
+                      <Text style={[styles.tileLabel, { color: colors.textMuted }]}>{label}</Text>
+                      <Text style={[styles.tileValue, { color: colors.text }]}>{value}</Text>
+                    </View>
+                  )
+                })}
               </View>
-            </View>
+            ) : null}
 
-            {/* Stat Leaders */}
-            {leaders.length > 0 && (
-              <View style={[styles.leadersSection, { backgroundColor: colors.surface }]}>
-                <Text style={[styles.sectionTitle, { color: colors.text }]}>Team Leaders</Text>
-                {leaders.map((leader, index) => (
-                  <View
-                    key={index}
-                    style={[styles.leaderCard, { borderBottomColor: colors.border }]}
-                  >
-                    {leader.player_headshot ? (
-                      <Image
-                        source={{ uri: leader.player_headshot }}
-                        style={styles.leaderPhoto}
-                        contentFit="cover"
-                      />
-                    ) : (
-                      <View style={[styles.leaderPhotoPlaceholder, { backgroundColor: colors.border }]}>
-                        <Ionicons name="person" size={20} color={colors.textMuted} />
+            {lbOrder.map(([key, label]) => {
+              const entries = leaderboards?.[key]
+              if (!entries || entries.length === 0) return null
+              return (
+                <View
+                  key={key}
+                  style={[
+                    styles.leaderboardCard,
+                    {
+                      backgroundColor: colors.surface,
+                      borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(11,15,20,0.08)',
+                    },
+                  ]}
+                >
+                  <Text style={[styles.leaderboardTitle, { color: colors.text }]}>{label}</Text>
+                  {entries.slice(0, 5).map((entry, idx) => {
+                    const rankColor = rankBadgeColor(idx)
+                    return (
+                      <View
+                        key={entry.player.playerId}
+                        style={[
+                          styles.leaderRow,
+                          {
+                            borderTopColor: isDark
+                              ? 'rgba(255,255,255,0.06)'
+                              : 'rgba(11,15,20,0.06)',
+                          },
+                        ]}
+                      >
+                        <View style={[styles.rankBadge, { backgroundColor: rankColor }]}>
+                          <Text style={styles.rankBadgeText}>{idx + 1}</Text>
+                        </View>
+                        {entry.player.headshotUrl ? (
+                          <Image
+                            source={{ uri: entry.player.headshotUrl }}
+                            style={styles.leaderPhoto}
+                            contentFit="cover"
+                          />
+                        ) : (
+                          <View
+                            style={[
+                              styles.leaderPhotoPlaceholder,
+                              { backgroundColor: colors.border },
+                            ]}
+                          >
+                            <Ionicons name="person" size={18} color={colors.textMuted} />
+                          </View>
+                        )}
+                        <View style={styles.leaderInfo}>
+                          <Text
+                            style={[styles.leaderName, { color: colors.text }]}
+                            numberOfLines={1}
+                          >
+                            {entry.player.fullName}
+                          </Text>
+                          <Text
+                            style={[styles.leaderMeta, { color: colors.textMuted }]}
+                            numberOfLines={1}
+                          >
+                            {entry.player.position}
+                            {entry.player.jerseyNumber != null
+                              ? ` · #${entry.player.jerseyNumber}`
+                              : ''}
+                            {entry.gamesPlayed != null ? ` · ${entry.gamesPlayed} GP` : ''}
+                          </Text>
+                        </View>
+                        <View style={styles.leaderStat}>
+                          <Text
+                            style={[styles.leaderPrimary, { color: colors.text }]}
+                            numberOfLines={1}
+                          >
+                            {formatStatValue(entry.primaryStat)}
+                          </Text>
+                          <Text
+                            style={[styles.leaderPrimaryLabel, { color: colors.textMuted }]}
+                            numberOfLines={1}
+                          >
+                            {entry.primaryLabel}
+                          </Text>
+                          {entry.secondaryStat != null && entry.secondaryLabel ? (
+                            <Text
+                              style={[styles.leaderSecondary, { color: colors.textMuted }]}
+                              numberOfLines={1}
+                            >
+                              {formatStatValue(entry.secondaryStat)} {entry.secondaryLabel}
+                            </Text>
+                          ) : null}
+                        </View>
                       </View>
-                    )}
-                    <View style={styles.leaderInfo}>
-                      <Text style={[styles.leaderName, { color: colors.text }]}>
-                        {leader.player_name}
-                      </Text>
-                      <Text style={[styles.leaderStat, { color: colors.textMuted }]}>
-                        {leader.stat_name}
-                      </Text>
-                    </View>
-                    <View style={styles.leaderValueContainer}>
-                      <Text style={[styles.leaderValue, { color: team.color }]}>
-                        {leader.value}
-                      </Text>
-                      {leader.rank && (
-                        <Text style={[styles.leaderRank, { color: colors.textMuted }]}>
-                          #{leader.rank} in league
-                        </Text>
-                      )}
-                    </View>
-                  </View>
-                ))}
-              </View>
-            )}
-
-            {/* No stats fallback */}
-            {!teamStats && leaders.length === 0 && (
-              <View style={styles.emptyContainer}>
-                <Ionicons name="stats-chart-outline" size={64} color={colors.textMuted} />
-                <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-                  No stats available yet
-                </Text>
-              </View>
-            )}
+                    )
+                  })}
+                </View>
+              )
+            })}
           </>
         )}
-
-        <View style={{ height: 40 }} />
+        <View style={{ height: 32 }} />
       </ScrollView>
     </SafeAreaView>
   )
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    paddingTop: 8,
-    paddingBottom: 16,
-    paddingHorizontal: 16,
-  },
-  backButton: {
-    padding: 4,
-    marginBottom: 12,
-  },
-  headerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  teamLogo: {
-    width: 48,
-    height: 48,
-  },
-  headerText: {
-    marginLeft: 12,
-  },
-  teamName: {
-    fontSize: 20,
-    fontFamily: 'Montserrat-Bold',
-    color: '#fff',
-  },
-  seasonText: {
-    fontSize: 14,
-    fontFamily: 'Montserrat-Medium',
-    color: 'rgba(255,255,255,0.8)',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 16,
-  },
-  loadingContainer: {
-    padding: 60,
-    alignItems: 'center',
-  },
+  container: { flex: 1 },
+  header: { paddingTop: 8, paddingBottom: 16, paddingHorizontal: 16 },
+  backButton: { padding: 4, marginBottom: 12 },
+  headerContent: { flexDirection: 'row', alignItems: 'center' },
+  teamLogo: { width: 48, height: 48 },
+  headerText: { marginLeft: 12 },
+  teamName: { fontSize: 20, fontFamily: 'Montserrat-Bold', color: '#fff' },
+  countText: { fontSize: 14, fontFamily: 'Montserrat-Medium', color: 'rgba(255,255,255,0.8)' },
+  scrollView: { flex: 1 },
+  scrollContent: { padding: 16 },
+  loadingContainer: { padding: 60, alignItems: 'center' },
+  emptyContainer: { padding: 60, alignItems: 'center' },
+  emptyText: { fontSize: 14, fontFamily: 'Montserrat-Regular', marginTop: 16, textAlign: 'center' },
   recordCard: {
-    padding: 20,
-    borderRadius: 16,
+    borderRadius: 14,
+    padding: 18,
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   recordLabel: {
-    color: 'rgba(255,255,255,0.8)',
-    fontSize: 14,
-    fontFamily: 'Montserrat-Medium',
-    marginBottom: 4,
+    fontSize: 11,
+    fontFamily: 'Montserrat-Bold',
+    letterSpacing: 1,
+    color: 'rgba(255,255,255,0.85)',
   },
   recordValue: {
+    fontSize: 32,
+    fontFamily: 'Montserrat-Bold',
     color: '#fff',
-    fontSize: 36,
-    fontFamily: 'Montserrat-Bold',
+    marginTop: 4,
   },
-  statsGrid: {
-    padding: 16,
-    borderRadius: 16,
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontFamily: 'Montserrat-Bold',
-    marginBottom: 12,
-  },
-  statsRow: {
+  tilesGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
-  },
-  statBox: {
-    flex: 1,
-    minWidth: 80,
-    alignItems: 'center',
-    padding: 12,
-  },
-  statValue: {
-    fontSize: 24,
-    fontFamily: 'Montserrat-Bold',
-  },
-  statLabel: {
-    fontSize: 11,
-    fontFamily: 'Montserrat-Medium',
-    marginTop: 4,
-    textTransform: 'uppercase',
-  },
-  leadersSection: {
-    padding: 16,
-    borderRadius: 16,
+    columnGap: 8,
+    rowGap: 8,
     marginBottom: 16,
   },
-  leaderCard: {
+  tile: {
+    flexBasis: '48%',
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignItems: 'flex-start',
+  },
+  tileLabel: { fontSize: 11, fontFamily: 'Montserrat-Bold', letterSpacing: 0.5 },
+  tileValue: { fontSize: 22, fontFamily: 'Montserrat-Bold', marginTop: 4 },
+  leaderboardCard: {
+    borderRadius: 14,
+    borderWidth: 1,
+    padding: 14,
+    marginBottom: 12,
+  },
+  leaderboardTitle: {
+    fontSize: 14,
+    fontFamily: 'Montserrat-Bold',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+    marginBottom: 8,
+  },
+  leaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
+    paddingVertical: 10,
+    borderTopWidth: StyleSheet.hairlineWidth,
   },
-  leaderPhoto: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-  },
-  leaderPhotoPlaceholder: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
+  rankBadge: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
     alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
   },
-  leaderInfo: {
-    flex: 1,
-    marginLeft: 12,
+  rankBadgeText: { color: '#fff', fontSize: 11, fontFamily: 'Montserrat-Bold' },
+  leaderPhoto: { width: 40, height: 40, borderRadius: 20, marginRight: 10 },
+  leaderPhotoPlaceholder: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  leaderName: {
-    fontSize: 15,
+  leaderInfo: { flex: 1, paddingRight: 10 },
+  leaderName: { fontSize: 14, fontFamily: 'Montserrat-SemiBold' },
+  leaderMeta: { fontSize: 11, fontFamily: 'Montserrat-Regular', marginTop: 2 },
+  leaderStat: { alignItems: 'flex-end', minWidth: 70 },
+  leaderPrimary: { fontSize: 17, fontFamily: 'Montserrat-Bold' },
+  leaderPrimaryLabel: {
+    fontSize: 10,
     fontFamily: 'Montserrat-SemiBold',
+    letterSpacing: 0.4,
+    textTransform: 'uppercase',
   },
-  leaderStat: {
-    fontSize: 13,
-    fontFamily: 'Montserrat-Regular',
-    marginTop: 2,
-  },
-  leaderValueContainer: {
-    alignItems: 'flex-end',
-  },
-  leaderValue: {
-    fontSize: 20,
-    fontFamily: 'Montserrat-Bold',
-  },
-  leaderRank: {
+  leaderSecondary: {
     fontSize: 11,
     fontFamily: 'Montserrat-Regular',
     marginTop: 2,
   },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  errorTitle: {
-    fontSize: 18,
-    fontFamily: 'Montserrat-Bold',
-  },
-  emptyContainer: {
-    padding: 60,
-    alignItems: 'center',
-  },
-  emptyText: {
-    fontSize: 14,
-    fontFamily: 'Montserrat-Regular',
-    marginTop: 16,
-    textAlign: 'center',
-  },
+  errorContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  errorTitle: { fontSize: 18, fontFamily: 'Montserrat-Bold' },
 })

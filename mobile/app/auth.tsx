@@ -19,7 +19,8 @@ import { Ionicons } from '@expo/vector-icons'
 
 import { useTheme } from '@/hooks/useTheme'
 import { useAuth } from '@/hooks/useAuth'
-import { COLORS } from '@/lib/config'
+import { COLORS, TURNSTILE_SITE_KEY } from '@/lib/config'
+import TurnstileWidget from '@/components/TurnstileWidget'
 
 export default function AuthScreen() {
   const router = useRouter()
@@ -33,7 +34,11 @@ export default function AuthScreen() {
   const [error, setError] = useState('')
 
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [captchaToken, setCaptchaToken] = useState<string>('')
+  const [captchaReloadKey, setCaptchaReloadKey] = useState(0)
   const inputAccessoryViewID = 'authKeyboardDone'
+
+  const captchaRequired = !!TURNSTILE_SITE_KEY
 
   const dismissKeyboard = () => Keyboard.dismiss()
 
@@ -42,6 +47,11 @@ export default function AuthScreen() {
 
     if (!email || !password) {
       setError('Please fill in all fields')
+      return
+    }
+
+    if (captchaRequired && !captchaToken) {
+      setError('Please complete the captcha to continue')
       return
     }
 
@@ -54,17 +64,22 @@ export default function AuthScreen() {
           setIsSubmitting(false)
           return
         }
-        const result = await signUp(email, password, username)
+        const result = await signUp(email, password, username, captchaToken || undefined)
         if (result.error) {
           setError(result.error.message || 'Sign up failed')
           setIsSubmitting(false)
+          // Captcha tokens are single-use — force a fresh challenge.
+          setCaptchaToken('')
+          setCaptchaReloadKey((k) => k + 1)
           return
         }
       } else {
-        const result = await signIn(email, password)
+        const result = await signIn(email, password, captchaToken || undefined)
         if (result.error) {
           setError(result.error.message || 'Sign in failed')
           setIsSubmitting(false)
+          setCaptchaToken('')
+          setCaptchaReloadKey((k) => k + 1)
           return
         }
       }
@@ -73,6 +88,8 @@ export default function AuthScreen() {
     } catch (err: any) {
       setError(err.message || 'Authentication failed')
       setIsSubmitting(false)
+      setCaptchaToken('')
+      setCaptchaReloadKey((k) => k + 1)
     }
   }
 
@@ -147,14 +164,29 @@ export default function AuthScreen() {
             inputAccessoryViewID={inputAccessoryViewID}
           />
 
+          {captchaRequired && (
+            <TurnstileWidget
+              theme={isDark ? 'dark' : 'light'}
+              reloadKey={captchaReloadKey}
+              onToken={(t) => setCaptchaToken(t)}
+              onError={() => setCaptchaToken('')}
+            />
+          )}
+
           {error ? (
             <Text style={styles.error}>{error}</Text>
           ) : null}
 
           <TouchableOpacity
-            style={[styles.button, { backgroundColor: COLORS.primary, opacity: isSubmitting ? 0.7 : 1 }]}
+            style={[
+              styles.button,
+              {
+                backgroundColor: COLORS.primary,
+                opacity: isSubmitting || (captchaRequired && !captchaToken) ? 0.7 : 1,
+              },
+            ]}
             onPress={handleSubmit}
-            disabled={isSubmitting}
+            disabled={isSubmitting || (captchaRequired && !captchaToken)}
           >
             {isSubmitting ? (
               <ActivityIndicator color="#fff" />

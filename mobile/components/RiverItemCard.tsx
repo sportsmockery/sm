@@ -1,9 +1,12 @@
-import { memo } from 'react'
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
+import { memo, useEffect, useState } from 'react'
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native'
 import { Image } from 'expo-image'
 import { Ionicons } from '@expo/vector-icons'
+import { WebView } from 'react-native-webview'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useTheme } from '@/hooks/useTheme'
-import type { RiverItem } from '@/lib/api'
+import { api, type RiverItem } from '@/lib/api'
+import { getAnonymousId } from '@/lib/anonymousId'
 
 interface RiverItemCardProps {
   item: RiverItem
@@ -158,6 +161,10 @@ function DefaultBody({
   )
 }
 
+function pollVotedKey(pollId: string): string {
+  return `poll-voted:${pollId}`
+}
+
 function PollBody({
   data,
   colors,
@@ -168,8 +175,87 @@ function PollBody({
   const question = (data.question as string) || (data.headline as string) || ''
   const context = (data.context as string) || ''
   const options = Array.isArray(data.options) ? (data.options as string[]) : []
-  const totalVotes = (data.totalVotes as number) || 0
+  const optionIds = Array.isArray(data.optionIds) ? (data.optionIds as string[]) : []
+  const optionVoteCounts = Array.isArray(data.optionVoteCounts)
+    ? (data.optionVoteCounts as number[])
+    : []
+  const initialTotal = (data.totalVotes as number) || 0
   const status = (data.status as string) || ''
+  const pollId = (data.pollId as string) || ''
+  // Inline voting only works when the feed gave us real option IDs (sm_polls).
+  // Inline article poll blocks ship option text only — those stay read-only.
+  const votable = !!pollId && optionIds.length === options.length && options.length > 0
+
+  const [voteCounts, setVoteCounts] = useState<number[]>(() =>
+    optionVoteCounts.length === options.length ? optionVoteCounts : options.map(() => 0)
+  )
+  const [totalVotes, setTotalVotes] = useState<number>(initialTotal)
+  const [votedOptionId, setVotedOptionId] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  // Hydrate "already voted" state from the per-device cache.
+  useEffect(() => {
+    if (!votable) return
+    let cancelled = false
+    AsyncStorage.getItem(pollVotedKey(pollId))
+      .then((stored) => {
+        if (!cancelled && stored) setVotedOptionId(stored)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [pollId, votable])
+
+  const handleVote = async (index: number) => {
+    if (!votable || submitting || votedOptionId) return
+    const optionId = optionIds[index]
+    if (!optionId) return
+
+    setSubmitting(true)
+    setError(null)
+
+    // Optimistic update
+    const prevCounts = voteCounts
+    const prevTotal = totalVotes
+    setVoteCounts((counts) => counts.map((c, i) => (i === index ? c + 1 : c)))
+    setTotalVotes((t) => t + 1)
+    setVotedOptionId(optionId)
+
+    try {
+      const anonId = await getAnonymousId()
+      const res = await api.votePoll(pollId, [optionId], anonId)
+      if (res?.results) {
+        // Reconcile to server truth.
+        const serverCounts = options.map((label, i) => {
+          const match = res.results.options.find(
+            (o) => o.id === optionIds[i] || o.option_text === label
+          )
+          return match?.vote_count ?? voteCounts[i]
+        })
+        setVoteCounts(serverCounts)
+        setTotalVotes(res.results.total_votes ?? prevTotal + 1)
+      }
+      AsyncStorage.setItem(pollVotedKey(pollId), optionId).catch(() => {})
+    } catch (err) {
+      const message = (err as Error)?.message || 'Vote failed'
+      // "already voted" is expected if the server has a record we lost — keep
+      // the locked state but surface clearer messaging if anything else broke.
+      if (/already voted/i.test(message)) {
+        AsyncStorage.setItem(pollVotedKey(pollId), optionId).catch(() => {})
+      } else {
+        setVoteCounts(prevCounts)
+        setTotalVotes(prevTotal)
+        setVotedOptionId(null)
+        setError('Vote failed — tap to retry')
+      }
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const showResults = !!votedOptionId
 
   return (
     <>
@@ -187,19 +273,62 @@ function PollBody({
         {options.slice(0, 4).map((opt, i) => {
           // Alternate cyan/red so option A is intelligence, B is brand
           const accent = i % 2 === 0 ? '#00D4FF' : '#BC0000'
+          const isVoted = votedOptionId && optionIds[i] === votedOptionId
+          const count = voteCounts[i] ?? 0
+          const pct = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0
           return (
-            <View
+            <TouchableOpacity
               key={`${i}-${opt}`}
+              activeOpacity={votable && !showResults ? 0.7 : 1}
+              disabled={!votable || submitting || showResults}
+              onPress={() => handleVote(i)}
               style={[
                 styles.pollOption,
-                { borderColor: colors.border, backgroundColor: `${accent}10` },
+                {
+                  borderColor: isVoted ? accent : colors.border,
+                  backgroundColor: `${accent}10`,
+                  overflow: 'hidden',
+                },
               ]}
             >
+              {showResults && (
+                <View
+                  pointerEvents="none"
+                  style={{
+                    position: 'absolute',
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    width: `${pct}%`,
+                    backgroundColor: `${accent}33`,
+                  }}
+                />
+              )}
               <View style={[styles.pollDot, { backgroundColor: accent }]} />
-              <Text style={[styles.pollOptionText, { color: colors.text }]} numberOfLines={1}>
+              <Text
+                style={[styles.pollOptionText, { color: colors.text, flex: 1 }]}
+                numberOfLines={1}
+              >
                 {opt}
               </Text>
-            </View>
+              {showResults && (
+                <Text
+                  style={{
+                    color: colors.textMuted,
+                    fontSize: 12,
+                    fontFamily: 'Montserrat-SemiBold',
+                  }}
+                >
+                  {pct}%
+                </Text>
+              )}
+              {isVoted && !submitting && (
+                <Ionicons name="checkmark-circle" size={16} color={accent} />
+              )}
+              {submitting && isVoted && (
+                <ActivityIndicator size="small" color={accent} />
+              )}
+            </TouchableOpacity>
           )
         })}
       </View>
@@ -210,7 +339,13 @@ function PollBody({
           </Text>
         )}
         <Text style={[styles.metaText, { color: colors.textMuted }]}>
-          {totalVotes ? `${totalVotes.toLocaleString()} votes` : 'Tap to vote'}
+          {error
+            ? error
+            : totalVotes
+            ? `${totalVotes.toLocaleString()} votes`
+            : votable
+            ? 'Tap to vote'
+            : 'Open article to vote'}
         </Text>
       </View>
     </>
@@ -269,6 +404,20 @@ function DebateBody({
   )
 }
 
+// Match the web cleanBullets filter (src/components/homepage/RiverCards.tsx).
+// Bullets must never contain URLs, must reference Chicago context, and must
+// have enough substance to be worth showing.
+const NON_CHICAGO_KEYWORDS = /\b(heat|lakers|celtics|warriors|knicks|nets|76ers|sixers|clippers|bucks|cavaliers|cavs|raptors|pistons|pacers|magic|hawks|hornets|wizards|pelicans|grizzlies|timberwolves|thunder|trail blazers|blazers|jazz|kings|spurs|suns|mavericks|mavs|rockets|nuggets|cowboys|patriots|eagles|giants|commanders|49ers|seahawks|rams(?! \d)|cardinals|falcons|panthers|saints|buccaneers|bucs|steelers|ravens|bengals|browns|titans|texans|colts|jaguars|dolphins|jets|bills|chargers|raiders|broncos|chiefs|yankees|mets|red sox|dodgers|braves|astros|padres|phillies|rangers|orioles|twins|guardians|royals|mariners|angels|rays|marlins|rockies|nationals|reds|brewers|diamondbacks|pirates|tigers|athletics|bluejays|blue jays|canadiens|maple leafs|bruins|rangers|penguins|flyers|capitals|hurricanes|lightning|panthers|red wings|senators|sabres|islanders|devils|blue jackets|predators|stars|wild|jets|flames|oilers|canucks|kraken|avalanche|golden knights|ducks|sharks|kings)\b/i
+
+function cleanBullets(rawBullets: string[]): string[] {
+  return rawBullets.filter((b) => {
+    if (/https?:\/\//i.test(b)) return false
+    if (NON_CHICAGO_KEYWORDS.test(b)) return false
+    if (b.trim().length < 10) return false
+    return true
+  })
+}
+
 function ScoutSummaryBody({
   data,
   colors,
@@ -278,7 +427,8 @@ function ScoutSummaryBody({
 }) {
   const topic = (data.topic as string) || (data.headline as string) || ''
   const summary = (data.summary as string) || ''
-  const bullets = Array.isArray(data.bullets) ? (data.bullets as string[]) : []
+  const rawBullets = Array.isArray(data.bullets) ? (data.bullets as string[]) : []
+  const bullets = cleanBullets(rawBullets)
 
   return (
     <>
@@ -495,6 +645,27 @@ function HubUpdateBody({
   )
 }
 
+// Best-effort YouTube ID extraction. The /api/feed payload usually sets
+// data.videoId directly, but fall back to parsing common URL shapes too.
+function extractYouTubeId(data: Record<string, unknown>): string | null {
+  const direct = (data.videoId as string) || (data.youtubeId as string) || ''
+  if (direct) return direct
+  const url =
+    (data.videoUrl as string) ||
+    (data.url as string) ||
+    (data.source as string) ||
+    ''
+  if (!url) return null
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/)
+  return match ? match[1] : null
+}
+
+function buildYouTubeEmbedHtml(videoId: string, isShort: boolean): string {
+  // Autoplay starts as soon as the iframe mounts; we only mount on user tap.
+  const params = 'autoplay=1&playsinline=1&rel=0&modestbranding=1'
+  return `<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><style>html,body{margin:0;padding:0;background:#000;height:100%;width:100%;}iframe{display:block;width:100%;height:100%;border:0;}</style></head><body><iframe src="https://www.youtube.com/embed/${videoId}?${params}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></body></html>`
+}
+
 function VideoBody({
   data,
   colors,
@@ -507,27 +678,52 @@ function VideoBody({
   const source = (data.source as string) || ''
   const teaser = (data.teaser as string) || (data.summary as string) || ''
   const thumbnail = (data.thumbnailUrl as string) || (data.thumbnail as string) || ''
+  const isShort = (data.isShort as boolean) === true
+  const videoId = extractYouTubeId(data)
+
+  const [playing, setPlaying] = useState(false)
+
+  const aspectStyle = isShort ? styles.videoFrameShort : styles.videoFrame
 
   return (
     <>
-      {!!thumbnail && (
-        <View style={styles.videoThumbWrap}>
-          <Image
-            source={{ uri: thumbnail }}
-            style={styles.videoThumb}
-            contentFit="cover"
-            transition={200}
+      <View style={aspectStyle}>
+        {playing && videoId ? (
+          <WebView
+            source={{ html: buildYouTubeEmbedHtml(videoId, isShort) }}
+            style={styles.videoWebView}
+            javaScriptEnabled
+            domStorageEnabled
+            allowsInlineMediaPlayback
+            mediaPlaybackRequiresUserAction={false}
+            allowsFullscreenVideo
+            originWhitelist={['*']}
           />
-          <View style={styles.videoPlayOverlay}>
-            <Ionicons name="play-circle" size={56} color="rgba(255,255,255,0.95)" />
-          </View>
-          {!!duration && (
-            <View style={styles.videoDuration}>
-              <Text style={styles.videoDurationText}>{duration}</Text>
+        ) : (
+          <TouchableOpacity
+            activeOpacity={videoId ? 0.85 : 1}
+            onPress={videoId ? () => setPlaying(true) : undefined}
+            style={styles.videoThumbTouch}
+          >
+            {!!thumbnail && (
+              <Image
+                source={{ uri: thumbnail }}
+                style={styles.videoThumb}
+                contentFit="cover"
+                transition={200}
+              />
+            )}
+            <View style={styles.videoPlayOverlay} pointerEvents="none">
+              <Ionicons name="play-circle" size={56} color="rgba(255,255,255,0.95)" />
             </View>
-          )}
-        </View>
-      )}
+            {!!duration && (
+              <View style={styles.videoDuration} pointerEvents="none">
+                <Text style={styles.videoDurationText}>{duration}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        )}
+      </View>
       {!!title && (
         <Text style={[styles.headline, { color: colors.text }]} numberOfLines={3}>
           {title}
@@ -937,13 +1133,31 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   // Video
-  videoThumbWrap: {
+  videoFrame: {
     width: '100%',
-    height: 180,
+    aspectRatio: 16 / 9,
     borderRadius: 10,
     overflow: 'hidden',
     marginBottom: 10,
-    backgroundColor: '#0B0F1422',
+    backgroundColor: '#000',
+    position: 'relative',
+  },
+  videoFrameShort: {
+    width: '60%',
+    aspectRatio: 9 / 16,
+    alignSelf: 'center',
+    borderRadius: 10,
+    overflow: 'hidden',
+    marginBottom: 10,
+    backgroundColor: '#000',
+    position: 'relative',
+  },
+  videoWebView: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
+  videoThumbTouch: {
+    flex: 1,
     position: 'relative',
   },
   videoThumb: {

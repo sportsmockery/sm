@@ -2,9 +2,10 @@ import { useEffect, useMemo, useState } from 'react'
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { api, type LiveGame } from '@/lib/api'
+import { queryKeys } from '@/lib/queryClient'
 
 const POLL_LIVE_MS = 10_000
 const POLL_IDLE_MS = 60_000
@@ -29,10 +30,11 @@ function periodText(g: LiveGame): string {
 
 export default function LiveGamesPill() {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const [pollMs, setPollMs] = useState(POLL_IDLE_MS)
 
   const { data } = useQuery({
-    queryKey: ['live-games'],
+    queryKey: queryKeys.liveGames,
     queryFn: () => api.getLiveGames(),
     refetchInterval: pollMs,
     staleTime: 5_000,
@@ -49,6 +51,20 @@ export default function LiveGamesPill() {
     const anyLive = games.some(isLive)
     setPollMs(anyLive ? POLL_LIVE_MS : POLL_IDLE_MS)
   }, [games])
+
+  // Pre-warm the live-game detail cache for each pill, so tapping into the
+  // game shows scoreboard + plays + box score immediately instead of flashing
+  // empty states. Refetches inherit React Query's staleTime.
+  useEffect(() => {
+    if (games.length === 0) return
+    for (const g of games) {
+      queryClient.prefetchQuery({
+        queryKey: queryKeys.liveGame(g.game_id),
+        queryFn: () => api.getLiveGame(g.game_id),
+        staleTime: 5_000,
+      })
+    }
+  }, [games, queryClient])
 
   if (games.length === 0) return null
 

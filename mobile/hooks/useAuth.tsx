@@ -21,8 +21,8 @@ interface AuthContextType {
   isAdmin: boolean
   isEditor: boolean
   isStaff: boolean
-  signIn: (email: string, password: string) => Promise<{ error: Error | null }>
-  signUp: (email: string, password: string, username?: string) => Promise<{ error: Error | null }>
+  signIn: (email: string, password: string, captchaToken?: string) => Promise<{ error: Error | null }>
+  signUp: (email: string, password: string, username?: string, captchaToken?: string) => Promise<{ error: Error | null }>
   signInWithGoogle: () => Promise<{ error: Error | null }>
   signInWithApple: () => Promise<{ error: Error | null }>
   signOut: () => Promise<void>
@@ -102,13 +102,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const signIn = async (email: string, password: string) => {
-    const { error } = await signInWithEmail(email, password)
+  const signIn = async (email: string, password: string, captchaToken?: string) => {
+    const { error } = await signInWithEmail(email, password, captchaToken)
     return { error: error ? new Error(error.message) : null }
   }
 
-  const signUp = async (email: string, password: string, username?: string) => {
-    const { error } = await signUpWithEmail(email, password)
+  const signUp = async (email: string, password: string, username?: string, captchaToken?: string) => {
+    const { error } = await signUpWithEmail(email, password, captchaToken)
     // TODO: Update user profile with username after signup
     return { error: error ? new Error(error.message) : null }
   }

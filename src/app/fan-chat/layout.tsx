@@ -1,5 +1,11 @@
 import type { Metadata } from 'next'
 
+// Force dynamic rendering so each request gets a fresh CSP nonce stamped on
+// <link>/<script> tags. Without this, the Vercel CDN serves cached HTML with
+// stale nonces that the new response-header CSP rejects, breaking hydration
+// and leaving the page black. Same fix as #105 for /gm, /scout-ai, etc.
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Fan Chat — Live Discussion',
   description: 'Chat with fellow Chicago sports fans in real time. AI-powered personalities for every team channel.',

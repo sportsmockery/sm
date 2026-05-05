@@ -183,16 +183,13 @@ export default function LiveStrip() {
     router.push(`/${teamSlug}/${path}`);
   }
 
-  // Split into live vs upcoming, driven by live feed only
-  const now = Date.now();
-  const liveGames = games.filter((g) => g.status === 'in_progress');
+  // Split into live vs upcoming. Match mobile pill behavior: show all live games
+  // and all upcoming games returned by the API (DataLab/Supabase already scope
+  // these to today / next-up; no client-side time window).
+  const liveGames = games.filter((g) => g.status === 'in_progress' || g.status === 'live');
   const upcomingGames = games.filter((g) => {
-    if (g.status !== 'upcoming' || !g.game_start_time) return false;
-    const startTime = new Date(g.game_start_time).getTime();
-    const ninetyMinutesFromNow = now + 90 * 60 * 1000;
-    // Only treat as "upcoming" for pills if starting within 90 minutes
-    // and not far in the past (guard small clock drift with 1-minute grace).
-    return startTime <= ninetyMinutesFromNow && startTime >= now - 60 * 1000;
+    const s = (g.status || '').toLowerCase();
+    return s === 'upcoming' || s === 'pre' || s === 'scheduled';
   });
   const hasLive = liveGames.length > 0;
   const hasUpcoming = upcomingGames.length > 0;
@@ -243,7 +240,8 @@ export default function LiveStrip() {
             className="live-strip-chip live-strip-chip--upcoming"
           >
             <span className="live-strip-badge live-strip-badge--upcoming">
-              TODAY
+              <span className="live-strip-pulse live-strip-pulse--soon" />
+              SOON
             </span>
             <span className="live-strip-matchup">
               {getChicagoAbbr(game)} vs {getOpponentAbbr(game)}
@@ -262,7 +260,8 @@ export default function LiveStrip() {
             className="live-strip-chip live-strip-chip--upcoming"
           >
             <span className="live-strip-badge live-strip-badge--upcoming">
-              NEXT
+              <span className="live-strip-pulse live-strip-pulse--soon" />
+              SOON
             </span>
             <span className="live-strip-matchup">
               {getChicagoAbbr(game)} vs {getOpponentAbbr(game)}

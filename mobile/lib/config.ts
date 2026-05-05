@@ -16,6 +16,12 @@ export const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || ''
 // OneSignal App ID
 export const ONESIGNAL_APP_ID = process.env.EXPO_PUBLIC_ONESIGNAL_APP_ID || ''
 
+// Cloudflare Turnstile site key — required when Supabase's "Bot and Abuse
+// Protection" CAPTCHA is enabled (we hit this via the web). When unset the
+// widget renders nothing and the auth call goes out without a captchaToken
+// (Supabase will reject it server-side, surfacing a clear error).
+export const TURNSTILE_SITE_KEY = process.env.EXPO_PUBLIC_TURNSTILE_SITE_KEY || ''
+
 // Cache durations (milliseconds)
 export const CACHE_DURATIONS = {
   feed: 5 * 60 * 1000,           // 5 minutes - news feed

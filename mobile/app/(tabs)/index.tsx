@@ -26,6 +26,7 @@ import AdBanner from '@/components/AdBanner'
 import MiniPlayer from '@/components/MiniPlayer'
 import RiverItemCard from '@/components/RiverItemCard'
 import LiveGamesPill from '@/components/LiveGamesPill'
+import TrendingHero from '@/components/TrendingHero'
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window')
 
@@ -35,6 +36,7 @@ export default function HomeScreen() {
   const { getCustomAdCode } = useAds()
   const { currentArticle: playingArticle } = useAudioPlayer()
   const {
+    featured,
     riverItems,
     isLoading,
     isRefetching,
@@ -64,6 +66,24 @@ export default function HomeScreen() {
     ),
     [handleRiverItemPress]
   )
+
+  // Drop the hero story from the river so it doesn't appear twice on screen,
+  // and dedupe by river-item id to avoid React's "two children with the same
+  // key" warning when the upstream composer accidentally emits the same card
+  // twice (hero + body, YouTube + article, etc.).
+  const heroId = featured?.id
+  const dedupedRiverItems = (() => {
+    const seen = new Set<string>()
+    const out: typeof riverItems = []
+    for (const it of riverItems) {
+      const innerId = Number((it.data as { id?: number | string })?.id)
+      if (heroId && innerId === heroId) continue
+      if (seen.has(it.id)) continue
+      seen.add(it.id)
+      out.push(it)
+    }
+    return out
+  })()
 
   if (isLoading) {
     return (
@@ -119,12 +139,18 @@ export default function HomeScreen() {
         </TouchableOpacity>
       )}
 
-      {/* Live games strip — mirrors the cyan top-bar on test.sportsmockery.com */}
+      {/* Live games strip — mirrors the cyan top-bar on test.sportsmockery.com.
+          Pills always render ABOVE the hero — hero never appears above pills. */}
       <LiveGamesPill />
+
+      {/* Trending hero — mirrors the rotating hero on test.sportsmockery.com */}
+      {featured ? (
+        <TrendingHero post={featured} onPress={handleArticlePress} />
+      ) : null}
 
       <View style={styles.feedWrapper}>
         <FlatList
-          data={riverItems}
+          data={dedupedRiverItems}
           keyExtractor={(item) => item.id}
           renderItem={renderRiverItem}
           contentContainerStyle={styles.riverContent}

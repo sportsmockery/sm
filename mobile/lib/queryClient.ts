@@ -72,6 +72,10 @@ export const queryKeys = {
   polls: ['polls'] as const,
   poll: (id: string) => ['polls', id] as const,
 
+  // Live games
+  liveGames: ['live-games'] as const,
+  liveGame: (id: string) => ['live-game', id] as const,
+
   // Config
   mobileConfig: ['config', 'mobile'] as const,
 

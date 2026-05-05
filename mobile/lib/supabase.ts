@@ -51,18 +51,35 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 // AUTH HELPERS
 // ============================================
 
-export async function signInWithEmail(email: string, password: string) {
+export async function signInWithEmail(
+  email: string,
+  password: string,
+  captchaToken?: string
+) {
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
+    options: captchaToken ? { captchaToken } : undefined,
   })
   return { data, error }
 }
 
-export async function signUpWithEmail(email: string, password: string) {
+export async function signUpWithEmail(
+  email: string,
+  password: string,
+  captchaToken?: string
+) {
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
+    options: captchaToken ? { captchaToken } : undefined,
+  })
+  return { data, error }
+}
+
+export async function resetPasswordWithEmail(email: string, captchaToken?: string) {
+  const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+    ...(captchaToken ? { captchaToken } : {}),
   })
   return { data, error }
 }
