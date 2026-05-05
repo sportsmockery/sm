@@ -1,5 +1,10 @@
 import type { Metadata } from 'next'
 
+// Force dynamic rendering so the per-request CSP nonce reaches inline scripts.
+// Cascades to /gm, /gm/analytics, /gm/share/[code]. Replaces page-level
+// force-dynamic on /gm/page.tsx (kept for redundancy, harmless).
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'GM Trade Simulator',
   description: 'Build trades with our AI-powered trade simulator. Grade deals, analyze salary cap impact, and manage rosters for Bears, Bulls, Cubs, White Sox, and Blackhawks.',
